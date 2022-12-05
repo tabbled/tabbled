@@ -56,6 +56,12 @@ export default defineComponent ( {
 
             socket.on("exception", (err) => {
                 console.error(err);
+                this.$root.$notify({
+                    title: 'Error',
+                    message: err.error,
+                    showClose: true,
+                    type: 'error',
+                })
             });
 
             socket.on("connect_error", (err) => {
@@ -112,24 +118,25 @@ export default defineComponent ( {
          * Send request to log user in
          * @param {string} username Username to log in with
          * @param {string} password Password to log in with
-         * @param {string} token User token
          */
-        async login(username: string, password: string, token: string) {
+        async loginByUsername(username: string, password: string) {
             socket.emit("login", {
                 username,
-                password,
-                token,
+                password
             }, (res: any) => {
                 console.log('callback', res)
                 if (res.tokenRequired) {
                     return res;
                 }
 
+
+
                 if (res.ok) {
                     localStorage.setItem('token', res.token);
                     this.socket.token = res.token;
                     this.loggedIn = true;
                     this.username = this.getJWTPayload()?.username;
+
 
                     // Trigger Chrome Save Password
                     //history.pushState({}, "");
