@@ -15,7 +15,8 @@ socket = io(wsHost,{
     transports: [ 'websocket', 'polling' ],
     auth: (cb) => {
         cb({
-            jwt: localStorage.getItem('token')
+            jwt: localStorage.getItem('token'),
+            account_id: Number(localStorage.getItem('account_id')),
         })
     }
 });
