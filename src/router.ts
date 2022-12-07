@@ -14,6 +14,7 @@ const routes = [
         path: "/login",
         component: Login,
         meta: {
+            isSingle: true,
             authRequired: false
         },
     },
@@ -30,7 +31,8 @@ export default function (store: any) {
     router.beforeEach(async (to, from, next) => {
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
-                store.dispatch('auth/loadUserSettings');
+                await store.dispatch('auth/loadUserSettings');
+                await store.dispatch('config/load');
                 next();
                 return
             }

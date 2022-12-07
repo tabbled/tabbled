@@ -1,5 +1,7 @@
 <template>
-    <div style="padding-top: 24px"></div>
+    <div style="max-width: 300px; margin: auto">
+
+    <div style="padding-top: 24px; "></div>
     <img height="60" class="logo" src="../assets/tabbled_logo.svg" alt=""/>
     <h3 style="text-align: center; width: 300px">{{$t('signIn')}}</h3>
     <el-card shadow="never" class="p-0 m-0">
@@ -28,7 +30,7 @@
             <el-button type="primary" style="width: 100%" @click="login">Login</el-button>
         </el-row>
     </el-card>
-
+    </div>
 
 </template>
 

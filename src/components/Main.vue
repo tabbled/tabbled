@@ -1,6 +1,6 @@
 <template>
-<div style="margin: auto">It's main component</div>
-    <el-button type="primary" style="width: 100%" @click="sendMsg">send</el-button>
+
+    <div>sss</div>
 
 </template>
 
@@ -14,10 +14,7 @@ export default defineComponent({
         }
     },
     methods: {
-        sendMsg() {
 
-            this.$store.dispatch('auth/loadUserSettings')
-        }
     }
 });
 
