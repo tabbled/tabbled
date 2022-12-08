@@ -79,7 +79,7 @@ const mutations = {
         state.user = user
         console.log('user', user)
 
-        let account_id = localStorage.getItem('account_id')
+        let account_id = Number(localStorage.getItem('account_id'))
 
         if (!user.accounts) {
             state.account = null
@@ -99,7 +99,7 @@ const mutations = {
         }
 
         // Need to reconnect for update socket auth
-        if (account_id !== localStorage.getItem('account_id')) {
+        if (account_id !== Number(localStorage.getItem('account_id'))) {
             this.$socket.disconnect()
             this.$socket.connect()
         }

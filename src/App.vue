@@ -1,7 +1,3 @@
-<script setup lang="ts">
-
-</script>
-
 <template>
     <div v-if="$route.meta.isSingle" class="single-page" >
         <router-view />
@@ -23,7 +19,40 @@
 
                 </el-header>
                 <el-divider style="margin: 0"/>
-                Aside
+
+                    <el-menu
+                        :default-active="$route.fullPath"
+                        :router="true"
+                    >
+                        <div v-for="menu in menuItems" :key="menu.label">
+                            <el-sub-menu v-if="menu.items"
+                                         :index="menu.label">
+                                <template #title>
+                                    <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></span>
+                                    <span>{{menu.label}}</span>
+                                </template>
+
+                                <el-menu-item v-for="item in menu.items"
+                                              :key="item.key"
+                                              :index="item.to">
+                                    <template #title>
+                                        <span  style="width: 100%; text-align: left;">{{item.label }}</span>
+                                        <div @click="$event.stopPropagation(); openInNewWindow(item.to);" class="open_new" style="width: 16px; height: 100%;">
+                                            <span class="iconify " data-icon="mdi:open-in-new" style="width: 16px; height: 100%;"/>
+                                        </div>
+                                    </template>
+
+                                </el-menu-item>
+                            </el-sub-menu>
+                            <el-menu-item v-else :index="menu.to" >
+                                <template #title>
+                                    <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></span>
+                                    <span>{{menu.label}}</span>
+                                </template>
+                            </el-menu-item>
+                        </div>
+                    </el-menu>
+
                 <div class="footer " style="box-shadow: #535bf2">
                     Footer
                 </div>
@@ -42,7 +71,94 @@
 <!--    </div>-->
 </template>
 
+<script lang="ts">
+import {defineComponent} from "vue";
+
+export default defineComponent({
+    data() {
+        return {
+            menuItems: [{
+                label: "",
+                key: "",
+                icon: "",
+                items: []
+            }]
+        }
+    },
+    mounted() {
+        console.log("mounted app")
+    },
+    created() {
+        this.$store.subscribe((mutation: any) => {
+            if (mutation.type === 'config/configLoaded') {
+                console.log("configLoaded")
+                this.loadMenu()
+            }
+        });
+    },
+    methods: {
+        async login() {
+
+        },
+        openInNewWindow(to: string) {
+            let route = this.$router.resolve({ path: to });
+            window.open(route.href);
+        },
+        fillMenu(alias: number, items: object[]) {
+            let menu_arr: object[] = [];
+            items.forEach(item => {
+                menu_arr.push({
+                    key: item.code,
+                    label: item.title,
+                    to: `/${alias}/${item.alias}`,
+                })
+            });
+
+            return menu_arr
+        },
+        loadMenu() {
+            this.menuItems = []
+            console.log(this.$store.getters['config/entities'])
+
+            let entities = {
+                label: this.$t('entities'),
+                key: "entities",
+                icon: "text-box-outline",
+                items: this.fillMenu('entities', this.$store.getters['config/entities'])
+            }
+
+            this.menuItems.push(entities)
+
+            if (this.$store.getters['auth/account'].permissions.admin) {
+                this.menuItems.push(
+                    // {
+                    //     label: this.$t('settings'),
+                    //     icon: 'cog-outline',
+                    //     to: `/system-settings`,
+                    // },
+                    {
+                        label: this.$t('configuration'),
+                        icon: 'application-brackets-outline',
+                        items: [
+                            {
+                                label: this.$t('tableModels'),
+                                to: `/configuration/models`,
+                            },
+                            {
+                                label: this.$t('reportTemplates'),
+                                to: `/configuration/report-templates`,
+                            },
+                        ]
+                    })
+            }
+        }
+    }
+})
+</script>
+
 <style lang="scss">
+
+
 
 .single-page {
     margin: auto;
@@ -63,10 +179,15 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    .el-menu {
+        border-right: none;
+    }
 }
 
 .main-router-view {
     box-shadow: 0 1px 6px 1px var(--el-border-color);
+    z-index: 100;
 }
 
 html,

@@ -1,5 +1,10 @@
 {
     "username": "Логин",
     "password": "Пароль",
-    "signIn": "Вход"
+    "signIn": "Вход",
+    "entities": "Справочники и доки",
+    "settings": "Настройки",
+    "configuration": "Конфигурация",
+    "reportTemplates": "Шаблоны печати",
+    "tableModels": "Модели"
 }

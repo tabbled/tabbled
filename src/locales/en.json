@@ -1,5 +1,10 @@
 {
     "username": "Username",
     "password": "Password",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "entities": "Entities",
+    "settings": "Settings",
+    "configuration": "Configuration",
+    "reportTemplates": "Report templates",
+    "tableModels": "Models"
 }
