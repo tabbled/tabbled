@@ -77,7 +77,6 @@ const mutations = {
 
     userLoaded(state: any, user: any) {
         state.user = user
-        console.log('user', user)
 
         let account_id = Number(localStorage.getItem('account_id'))
 

@@ -42,6 +42,7 @@ export default defineComponent ( {
             });
 
             this.$socket.on("disconnect", () => {
+                this.socket.connected = true;
                 this.$root?.$notify({
                     title: 'Disconnected',
                     message: "Lost connection to the server",
@@ -55,7 +56,7 @@ export default defineComponent ( {
                 this.$router.push('/login');
             })
 
-            this.$socket.on("connect", () => {
+            this.$socket.on("connect", async () => {
                 console.log("Connected to the socket server");
                 this.socket.connectCount++;
 
@@ -66,6 +67,9 @@ export default defineComponent ( {
                         showClose: true,
                         type: 'success',
                     })
+
+                await this.store.dispatch('auth/loadUserSettings');
+                await this.store.dispatch('config/load');
 
                 this.socket.connected = true;
             });

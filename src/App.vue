@@ -46,21 +46,45 @@
                             </el-sub-menu>
                             <el-menu-item v-else :index="menu.to" >
                                 <template #title>
-                                    <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></span>
+                                    <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"/>
                                     <span>{{menu.label}}</span>
                                 </template>
                             </el-menu-item>
                         </div>
                     </el-menu>
 
-                <div class="footer " style="box-shadow: #535bf2">
-                    Footer
+                <div class="footer ">
+                    <el-menu @select="showUserMenu">
+
+                        <el-menu-item index="1">
+                            <span class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
+
+                            <span style="width: 100%; text-align: start;">{{username()}}</span>
+                            <div @click="logout" class="open_new" style="width: 16px; height: 100%;">
+                                <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
+                            </div>
+                        </el-menu-item>
+                    </el-menu>
                 </div>
             </el-aside>
-            <el-container >
-                <el-main class="main-router-view">
-                    <router-view/>
-                </el-main>
+            <el-container class="main-router-view">
+                <el-col>
+                    <el-page-header style="margin: 16px" @back="$router.back()">
+                        <template #content>
+                            <span class="text-large font-600 mr-3"> Customers </span>
+                        </template>
+
+                        <template #extra>
+                            <div class="flex items-center">
+                                <el-button>Print</el-button>
+                                <el-button type="primary" class="ml-2">Edit</el-button>
+                            </div>
+                        </template>
+                    </el-page-header>
+                    <el-main>
+                        <router-view/>
+                    </el-main>
+                </el-col>
             </el-container>
         </el-container>
     </el-container>
@@ -87,18 +111,32 @@ export default defineComponent({
     },
     mounted() {
         console.log("mounted app")
+        //this.loadMenu()
     },
     created() {
+        //console.log("created app")
+        if (this.$store.getters['config/isLoaded']) {
+            this.loadMenu()
+        }
+        //console.log(this.$store.getters['auth/user'])
         this.$store.subscribe((mutation: any) => {
             if (mutation.type === 'config/configLoaded') {
-                console.log("configLoaded")
                 this.loadMenu()
             }
         });
     },
     methods: {
-        async login() {
-
+        logout() {
+            this.$store.dispatch('auth/logout')
+                .then(()=>{
+                    this.$router.push('/login')
+                })
+        },
+        showUserMenu(){
+            console.log("showUserMenu")
+        },
+        username(): string {
+            return this.$store.getters['auth/user'] ? this.$store.getters['auth/user'].username : ""
         },
         openInNewWindow(to: string) {
             let route = this.$router.resolve({ path: to });
@@ -118,7 +156,6 @@ export default defineComponent({
         },
         loadMenu() {
             this.menuItems = []
-            console.log(this.$store.getters['config/entities'])
 
             let entities = {
                 label: this.$t('entities'),
@@ -158,7 +195,11 @@ export default defineComponent({
 
 <style lang="scss">
 
-
+.open_new {
+    color: var(--el-border-color);
+    border-radius:unset;
+    align-content: center;
+}
 
 .single-page {
     margin: auto;
@@ -169,7 +210,7 @@ export default defineComponent({
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 200px;
+    width: 250px;
 }
 
 .main {
@@ -186,12 +227,13 @@ export default defineComponent({
 }
 
 .main-router-view {
-    box-shadow: 0 1px 6px 1px var(--el-border-color);
+    box-shadow: var(--el-box-shadow-light);
     z-index: 100;
 }
 
 html,
 body {
+    font-family: Inter, Roboto, Avenir, Helvetica, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

@@ -31,8 +31,8 @@ export default function (store: any) {
     router.beforeEach(async (to, from, next) => {
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
-                await store.dispatch('auth/loadUserSettings');
-                await store.dispatch('config/load');
+                // await store.dispatch('auth/loadUserSettings');
+                // await store.dispatch('config/load');
                 next();
                 return
             }
