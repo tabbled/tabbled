@@ -231,15 +231,29 @@ export default defineComponent({
     z-index: 100;
 }
 
+
+.el-sub-menu__title {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+
+.el-sub-menu .el-menu-item {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+
+
 html,
 body {
-    font-family: Inter, Roboto, Avenir, Helvetica, sans-serif;
+    font-family: "Noto Sans", Inter, Roboto, Avenir, Helvetica, sans-serif;
     min-height: 100vh;
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
+    text-align: start !important;
     padding: 0 !important;
     margin: 0 !important;
 }

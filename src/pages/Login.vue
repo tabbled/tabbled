@@ -1,8 +1,11 @@
 <template>
     <div style="max-width: 300px; margin: auto">
 
-    <div style="padding-top: 24px; "></div>
-    <img height="60" class="logo" src="../assets/tabbled_logo.svg" alt=""/>
+    <div style="padding-top: 24px;"></div>
+        <div style="text-align: center;">
+            <img height="60" class="logo" src="../assets/tabbled_logo.svg" alt=""/>
+        </div>
+
     <h3 style="text-align: center; width: 300px">{{$t('signIn')}}</h3>
     <el-card shadow="never" class="p-0 m-0">
 
