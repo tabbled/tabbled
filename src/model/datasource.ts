@@ -94,6 +94,17 @@ export class DataSource implements DataSourceInterface {
 
     }
 
+    private data: object[] = [{
+        name: "aaaa",
+        color: "red"
+    },{
+        name: "bbbb",
+        color: "black"
+    },{
+        name: "ccc",
+        color: "blue"
+    }]
+
     fields: FieldInterface[];
     isEditable: boolean;
     keyField: string;
@@ -103,16 +114,7 @@ export class DataSource implements DataSourceInterface {
         if (this.onCellChange instanceof Function) {
             this.onCellChange(100, 'ssa', 'asdasd')
         }
-        return [{
-            name: "aaaa",
-            color: "red"
-        },{
-            name: "bbbb",
-            color: "black"
-        },{
-            name: "ccc",
-            color: "blue"
-        }];
+        return this.data;
 
     }
 
@@ -121,7 +123,7 @@ export class DataSource implements DataSourceInterface {
     }
 
     getByRow(row: number): object | null {
-        return null;
+        return this.data[row];
     }
 
     setValueById(id: number | string, field: string, value: any): boolean {

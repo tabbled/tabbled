@@ -6,7 +6,7 @@
 
     <el-container v-else class="main">
         <el-container>
-            <el-aside width="250px">
+            <el-aside width="250px" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
                     <el-col >
                         <el-row align="middle">
@@ -67,9 +67,9 @@
                     </el-menu>
                 </div>
             </el-aside>
-            <el-container class="main-router-view">
-                <el-col>
-                    <el-page-header style="margin: 16px" @back="$router.back()">
+            <el-container>
+                <el-col class="main-router-view" ref="mainContainer">
+                    <el-page-header ref="mainHeader" style="margin: 16px" @back="$router.back()">
                         <template #content>
                             <span class="text-large font-600 mr-3"> Customers </span>
                         </template>
@@ -82,7 +82,12 @@
                         </template>
                     </el-page-header>
                     <el-main>
-                        <router-view/>
+                        <el-scrollbar :height="mainViewHeight">
+                            <router-view/>
+
+                        </el-scrollbar>
+
+
                     </el-main>
                 </el-col>
             </el-container>
@@ -101,6 +106,7 @@ import {defineComponent} from "vue";
 export default defineComponent({
     data() {
         return {
+            mainViewHeight: 0,
             menuItems: [{
                 label: "",
                 key: "",
@@ -110,8 +116,9 @@ export default defineComponent({
         }
     },
     mounted() {
-        console.log("mounted app")
+        this.mainViewHeight = this.$refs.mainContainer.$el.clientHeight - this.$refs.mainHeader.$el.clientHeight
         //this.loadMenu()
+
     },
     created() {
         //console.log("created app")
@@ -229,8 +236,11 @@ export default defineComponent({
 .main-router-view {
     box-shadow: var(--el-box-shadow-light);
     z-index: 100;
+    height: 100%;
+    width: calc(100% - 250px);
+    position: absolute;
+    overflow: hidden
 }
-
 
 .el-sub-menu__title {
     height: 40px !important;
