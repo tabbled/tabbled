@@ -2,7 +2,7 @@
 <!--    <CodeEditor>-->
 <!--    </CodeEditor>-->
 
-        <ViewLayout :layout="layout"></ViewLayout>
+        <ViewLayout :layout="layout" size="large"></ViewLayout>
 
 <!--    <Table style="margin-top: 100px" :data-source="ds" :columns="cols"></Table>-->
 
@@ -33,37 +33,47 @@ let ds = new DataSource({
 })
 
 let layout = {
-
-    desktop: {
-        rows: [{
-            widgets: [{
-                colspan: 5,
-                type: "table",
-                props: {},
-            }]
+    large: [
+        {
+            cFrom: 1,
+            cTo: 13,
+            rFrom: 1,
+            rTo: 1,
+            type: "table",
+            props: {
+                title: "1"
+            },
+        },
+        {
+            cFrom: 1,
+            cTo: 7,
+            rFrom: 2,
+            rTo: 2,
+            type: "table",
+            props: {
+                title: "2"
+            },
         },{
-            widgets: [{
-                rowspan: 2,
-                colspan: 1,
-                type: "table",
-                props: {},
-            },{
-                colspan:4,
-                type: "table",
-                props: {},
-            }]
+            cFrom: 7,
+            cTo: 13,
+            rFrom: 3,
+            rTo: 5,
+            type: "table",
+            props: {
+                title: "3   "
+            },
         },{
-            widgets: [{
-                colspan: 4,
-                type: "table",
-                props: {},
-            }]
-        }]
-    },
-    mobile: {
-        rows:[]
-    },
-
+            cFrom: 1,
+            cTo: 13,
+            rFrom: 6,
+            rTo: 6,
+            type: "table",
+            props: {
+                title: "4"
+            },
+        }
+    ],
+    small: []
 }
 
 let cols = []
