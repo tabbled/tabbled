@@ -2,7 +2,7 @@
 <!--    <CodeEditor>-->
 <!--    </CodeEditor>-->
 
-        <ViewLayout :layout="layout" size="large"></ViewLayout>
+        <ViewLayout :layout="layout" size="large">  </ViewLayout>
 
 <!--    <Table style="margin-top: 100px" :data-source="ds" :columns="cols"></Table>-->
 

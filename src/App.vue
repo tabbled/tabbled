@@ -69,6 +69,7 @@
             </el-aside>
             <el-container>
                 <el-col class="main-router-view" ref="mainContainer">
+
                     <el-page-header ref="mainHeader" style="margin: 16px" @back="$router.back()">
                         <template #content>
                             <span class="text-large font-600 mr-3"> Customers </span>

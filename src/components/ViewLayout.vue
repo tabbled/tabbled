@@ -1,7 +1,7 @@
 <template>
-<!--        <table ref="tablayout" style="width: 100%" @mouseup="endDrag" @mousemove="onDrag">-->
 
-        <div ref="grid" class="grid-wrapper" @mouseup="endDrag" @mousemove="onDrag">
+
+    <div ref="grid" class="grid-wrapper" @mouseup="endDrag" @mousemove="onDrag">
 
 
             <div v-for="(widget, idx) in vlayout.large"
@@ -9,7 +9,7 @@
                  :style="getGridElStyle(widget)"
 
             >
-                <div :class="{'widget-draggable': true, 'widget-selected': selectedIdx == idx}"
+                <div :class="{'widget-draggable': true, 'widget-selected': selectedIdx == idx, 'prevent-select': true}"
                      style="height: inherit"
                      @click="selectWidget"
                      :id="idx"
@@ -28,11 +28,31 @@
                               data-icon="mdi:drag-vertical"
                         />
                     </div>
+
+                    <div @click="removeWidget(idx)">
+                        <span class="iconify delete-icon" :id="idx"
+                              data-icon="mdi:delete"
+                        />
+                    </div>
+
                 </div>
 
             </div>
 
         </div>
+
+    <div class="setting-panel">
+        <el-divider direction="vertical" class="setting-pane-divider"/>
+
+        <div class="widget-draggable"
+             draggable="true"
+             style="height: 40px"
+             @dragstart="startDragNewWidget"
+        >
+
+        </div>
+    </div>
+
 </template>
 
 <script setup lang="ts">
@@ -78,8 +98,11 @@ function initDragBottom(e:MouseEvent) {
 }
 
 function selectWidget(e:MouseEvent) {
-    console.log(e)
     selectedIdx.value = e.target.id
+}
+
+function removeWidget(idx: string) {
+    vlayout[props.size].splice(Number(idx), 1);
 }
 
 function initDrag(e:MouseEvent) {
@@ -117,12 +140,12 @@ function onDrag(e: MouseEvent) {
     if (dragDirection.value == 'move') {
         let colW = ( grid?.value?.offsetWidth / 12 );
         let colspan = Math.round((e.clientX - startX)  / colW)
-        let cTo = initWidget.cTo + colspan + 1
+        let cTo = initWidget.cTo + colspan
         let cFrom = initWidget.cFrom + colspan
 
         if (cTo <= 13 && cFrom >= 1) {
             widget.cFrom =  initWidget.cFrom + colspan;
-            widget.cTo =  initWidget.cTo + colspan + 1;
+            widget.cTo =  initWidget.cTo + colspan;
         }
 
         let rowW = 40
@@ -161,6 +184,11 @@ function getGridElStyle(widget:object) {
     return style;
 }
 
+function startDragNewWidget(e, item) {
+    console.log(e)
+    console.log(item)
+}
+
 </script>
 
 <style lang="scss">
@@ -170,6 +198,27 @@ function getGridElStyle(widget:object) {
     grid-template-columns: repeat(12, 1fr);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
+    width: calc(100% - 250px);
+}
+
+.setting-panel {
+    width: 216px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    padding-left: 16px;
+}
+
+.setting-pane-divider {
+    position: absolute !important;
+    bottom: 0;
+    top:0;
+    left: 0;
+    height: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 
@@ -177,7 +226,8 @@ function getGridElStyle(widget:object) {
 .widget-draggable {
     background: #f9f9f9;
     border-radius: 5px;
-    border-style: dashed;
+    border-style: solid;
+    border-width: thin;
     position: relative;
     //pointer-events: none;
     z-index: 1;
@@ -204,9 +254,17 @@ function getGridElStyle(widget:object) {
     height: 30px;
     padding-right: 4px;
     position: absolute;
-    color: rgba(203, 203, 203, 0.8);
+    color: var(--el-menu-border-color);
     cursor: move;
     z-index: 0;
+}
+
+.delete-icon {
+    color: transparent;
+    position: absolute;
+    top:10px;
+    right: 10px;
+    z-index: 10;
 }
 
 //  For disable clicking on widget
@@ -238,6 +296,14 @@ function getGridElStyle(widget:object) {
     background: var(--el-color-primary-light-9);
 }
 
+.widget-draggable:hover .delete-icon {
+    color: var(--el-color-info);
+}
+
+.delete-icon:hover {
+    color: var(--el-color-danger);
+}
+
 .widget-draggable:active {
     background: var(--el-color-primary-light-8);
 }
@@ -253,5 +319,13 @@ function getGridElStyle(widget:object) {
 .widget-draggable .resizer-activated {
     background: var(--el-color-primary-light-3);
 }
+
+
+.prevent-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
+
 
 </style>
