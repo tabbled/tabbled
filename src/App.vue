@@ -15,12 +15,11 @@
                         </el-row>
                     </el-col>
 
-
-
                 </el-header>
                 <el-divider style="margin: 0"/>
 
                     <el-menu
+                        :collapse="isMenuCollapse"
                         :default-active="$route.fullPath"
                         :router="true"
                     >
@@ -54,7 +53,7 @@
                     </el-menu>
 
                 <div class="footer ">
-                    <el-menu @select="showUserMenu">
+                    <el-menu @select="showUserMenu" :collapse="isMenuCollapse">
 
                         <el-menu-item index="1">
                             <span class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
@@ -64,6 +63,11 @@
                                 <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
                             </div>
                         </el-menu-item>
+
+<!--                        <el-menu-item index="1" @click="isMenuCollapse = !isMenuCollapse">-->
+<!--                            <span style="width: 100%; text-align: start;">{{username()}}</span>-->
+<!--                        </el-menu-item>-->
+
                     </el-menu>
                 </div>
             </el-aside>
@@ -113,7 +117,8 @@ export default defineComponent({
                 key: "",
                 icon: "",
                 items: []
-            }]
+            }],
+            isMenuCollapse: false
         }
     },
     mounted() {

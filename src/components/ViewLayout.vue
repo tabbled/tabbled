@@ -1,7 +1,14 @@
 <template>
 
 
-    <div ref="grid" class="grid-wrapper" @mouseup="endDrag" @mousemove="onDrag">
+    <div ref="grid"
+         class="grid-wrapper"
+         @mouseup="endDrag"
+         @mousemove="onDrag"
+         @dragover.prevent
+         @dragenter.prevent
+         @drop="dropNewWidget($event)"
+    >
 
 
             <div v-for="(widget, idx) in vlayout.large"
@@ -9,12 +16,13 @@
                  :style="getGridElStyle(widget)"
 
             >
-                <div :class="{'widget-draggable': true, 'widget-selected': selectedIdx == idx, 'prevent-select': true}"
+                <div :class="{'widget-draggable': true, 'prevent-select': true}"
                      style="height: inherit"
                      @click="selectWidget"
                      :id="idx"
                 >
-                    {{widget.props.title}}
+                    <WidgetElement title="assa" subtitle="aaaa" icon="table" style="height: inherit;"
+                                   :class="{'widget-selected': selectedIdx == idx}"/>
                     <div :class="{
                         'resizer-right': true,
                         'resizer-activated': (dragDirection === 'right' && dragIdx == idx)}"
@@ -23,11 +31,7 @@
                         'resizer-bottom': true,
                         'resizer-activated': (dragDirection === 'bottom' && dragIdx == idx)}"
                          @mousedown="initDragBottom" :id="idx"></div>
-                    <div class="dragging" @mousedown="initDragMove" :id="idx">
-                        <span class="iconify dragging-icon" :id="idx"
-                              data-icon="mdi:drag-vertical"
-                        />
-                    </div>
+                    <div class="dragging" @mousedown="initDragMove" :id="idx" />
 
                     <div @click="removeWidget(idx)">
                         <span class="iconify delete-icon" :id="idx"
@@ -44,19 +48,25 @@
     <div class="setting-panel">
         <el-divider direction="vertical" class="setting-pane-divider"/>
 
-        <div class="widget-draggable"
-             draggable="true"
-             style="height: 40px"
-             @dragstart="startDragNewWidget"
-        >
+        <el-col>
 
-        </div>
+
+            <div v-for="item in availableWidgets"
+                 class="new-widget-draggable"
+                 draggable="true"
+                 @dragstart="startDragNewWidget($event, item)"
+            >
+                <WidgetElement :title="item.title" :subtitle="item.alias" icon="table"></WidgetElement>
+            </div>
+
+        </el-col>
     </div>
 
 </template>
 
 <script setup lang="ts">
 import {ref, reactive} from "vue";
+import WidgetElement from "./WidgetElement.vue"
 import {LayoutComponentInterface} from "../model/layout";
 import Tabled from './Table.vue'
 
@@ -65,7 +75,12 @@ const props = defineProps<{
     /**
      * Needed for screen size adjustment
      */
-    size: 'small' | 'large'
+    size: 'small' | 'large',
+    availableWidgets: [{
+        title: string,
+        alias: string,
+        datatype: string
+    }]
 }>()
 
 let vlayout = reactive(props.layout)
@@ -148,7 +163,7 @@ function onDrag(e: MouseEvent) {
             widget.cTo =  initWidget.cTo + colspan;
         }
 
-        let rowW = 40
+        let rowW = 50
         let rowspan = Math.round((e.clientY - startY)  / rowW)
 
         if ((initWidget.rFrom + rowspan) >= 1) {
@@ -184,9 +199,54 @@ function getGridElStyle(widget:object) {
     return style;
 }
 
-function startDragNewWidget(e, item) {
-    console.log(e)
+function startDragNewWidget(e:DragEvent, item: any) {
+    console.log('startDragNewWidget', e)
+    let it = Object.assign({
+        layerX: e.layerX,
+        layerY: e.layerY
+    }, item)
+    e.dataTransfer?.setData('item', JSON.stringify(it))
+}
+
+function dropNewWidget(e:DragEvent) {
+    console.log('dropNewWidget', e)
+    console.log(e.target?.clientWidth, e.target?.clientHeight)
+
+    let item = JSON.parse(e.dataTransfer.getData('item'));
     console.log(item)
+
+    let relatedX = e.offsetX
+    let relatedY = e.offsetY
+    let grid = e.target
+    let colWidth = grid?.clientWidth / 12
+
+    let startCol = Math.round((relatedX - item.layerX)  / colWidth)
+    let startRow = Math.round((relatedY - item.layerY)  / 40)
+
+
+    startCol = startCol >= 1 ? startCol : 1
+    let endCol = startCol + item.defaultCols;
+    if (endCol > 13) {
+        endCol = 13
+        startCol = endCol - item.defaultCols
+    }
+    startRow = startRow >= 1 ? startRow : 1
+
+    vlayout[props.size].push({
+        cFrom: startCol,
+        cTo: endCol,
+        rFrom: startRow,
+        rTo: startRow + item.defaultRows,
+        type: item.datatype,
+        props: {
+            title: item.title
+        },
+    })
+
+
+    // const itemID = e.dataTransfer.getData('itemID')
+    // const item = this.items.find((item) => item.id == itemID)
+    // item.list = list
 }
 
 </script>
@@ -196,9 +256,11 @@ function startDragNewWidget(e, item) {
 .grid-wrapper {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(10, 1fr);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
     width: calc(100% - 250px);
+
 }
 
 .setting-panel {
@@ -224,14 +286,14 @@ function startDragNewWidget(e, item) {
 
 
 .widget-draggable {
-    background: #f9f9f9;
-    border-radius: 5px;
-    border-style: solid;
-    border-width: thin;
     position: relative;
-    //pointer-events: none;
     z-index: 1;
-    border-color: #00000012;
+}
+
+.new-widget-draggable {
+    cursor: move;
+    height: auto;
+    margin-bottom: 8px;
 }
 
 .widget-selected {
@@ -240,11 +302,11 @@ function startDragNewWidget(e, item) {
 }
 
 .widget-draggable .dragging {
-    width: 20px;
     position: absolute;
     left: 5px;
     top: 5px;
     bottom: 5px;
+    right: 5px;
     cursor: move;
     z-index: 2;
 }
@@ -322,9 +384,9 @@ function startDragNewWidget(e, item) {
 
 
 .prevent-select {
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10 and IE 11 */
-    user-select: none; /* Standard syntax */
+    -webkit-user-select: none;  /* Safari */
+    -ms-user-select: none;      /* IE 10 and IE 11 */
+    user-select: none;          /* Standard syntax */
 }
 
 

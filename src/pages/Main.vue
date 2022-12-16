@@ -2,7 +2,7 @@
 <!--    <CodeEditor>-->
 <!--    </CodeEditor>-->
 
-        <ViewLayout :layout="layout" size="large">  </ViewLayout>
+        <ViewLayout :layout="layout" size="large" :available-widgets="widgets">  </ViewLayout>
 
 <!--    <Table style="margin-top: 100px" :data-source="ds" :columns="cols"></Table>-->
 
@@ -31,6 +31,23 @@ let ds = new DataSource({
     alias: "",
 
 })
+
+let widgets = [
+    {
+        title: "W 1",
+        alias: "w1",
+        datatype: "string",
+        defaultCols: 6,
+        defaultRows: 1
+    },
+    {
+        title: "W 2",
+        alias: "w2",
+        datatype: "string",
+        defaultCols: 4,
+        defaultRows: 2
+    }
+]
 
 let layout = {
     large: [
