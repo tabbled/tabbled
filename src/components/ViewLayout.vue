@@ -1,5 +1,11 @@
 <template>
 
+    <el-row align="middle" style="padding-bottom: 16px">
+        <div>Screen size: </div>
+        <el-radio-group v-model="selectedSize" style="padding-left: 8px">
+            <el-radio-button v-for="i in getLayoutSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
+        </el-radio-group>
+    </el-row>
 
     <div ref="grid"
          class="grid-wrapper"
@@ -11,7 +17,7 @@
     >
 
 
-            <div v-for="(widget, idx) in vlayout.large"
+            <div v-for="(widget, idx) in vlayout[selectedSize]"
                  :id="idx"
                  :style="getGridElStyle(widget)"
 
@@ -21,7 +27,7 @@
                      @click="selectWidget"
                      :id="idx"
                 >
-                    <WidgetElement title="assa" subtitle="aaaa" icon="table" style="height: inherit;"
+                    <WidgetElement :title="widget.title" :subtitle="widget.alias" :icon="widget.icon" style="height: inherit;"
                                    :class="{'widget-selected': selectedIdx == idx}"/>
                     <div :class="{
                         'resizer-right': true,
@@ -48,18 +54,18 @@
     <div class="setting-panel">
         <el-divider direction="vertical" class="setting-pane-divider"/>
 
-        <el-col>
+        <span >Elements</span>
 
+        <div style="padding-top: 16px">
+        <div v-for="item in availableWidgets"
+             class="new-widget-draggable"
+             draggable="true"
+             @dragstart="startDragNewWidget($event, item)"
+        >
+            <WidgetElement :title="item.title" :subtitle="item.alias" icon="table"></WidgetElement>
+        </div>
+        </div>
 
-            <div v-for="item in availableWidgets"
-                 class="new-widget-draggable"
-                 draggable="true"
-                 @dragstart="startDragNewWidget($event, item)"
-            >
-                <WidgetElement :title="item.title" :subtitle="item.alias" icon="table"></WidgetElement>
-            </div>
-
-        </el-col>
     </div>
 
 </template>
@@ -67,7 +73,7 @@
 <script setup lang="ts">
 import {ref, reactive} from "vue";
 import WidgetElement from "./WidgetElement.vue"
-import {LayoutComponentInterface} from "../model/layout";
+import {getLayoutSizes, LayoutSize} from "../model/layout";
 import Tabled from './Table.vue'
 
 const props = defineProps<{
@@ -75,7 +81,7 @@ const props = defineProps<{
     /**
      * Needed for screen size adjustment
      */
-    size: 'small' | 'large',
+    size: LayoutSize,
     availableWidgets: [{
         title: string,
         alias: string,
@@ -93,6 +99,7 @@ let initWidget: object | null = null
 let dragDirection = ref("");
 let dragIdx = ref("")
 let selectedIdx = ref("")
+let selectedSize = ref(props.size)
 
 const grid = ref(null);
 
@@ -117,7 +124,7 @@ function selectWidget(e:MouseEvent) {
 }
 
 function removeWidget(idx: string) {
-    vlayout[props.size].splice(Number(idx), 1);
+    vlayout[selectedSize.value].splice(Number(idx), 1);
 }
 
 function initDrag(e:MouseEvent) {
@@ -130,7 +137,7 @@ function initDrag(e:MouseEvent) {
     startWidth = widgetElement.offsetWidth;
     startHeight = widgetElement.offsetHeight;
 
-    widget = vlayout[props.size][e.target.id]
+    widget = vlayout[selectedSize.value][e.target.id]
     dragIdx = e.target.id
     initWidget = Object.assign({}, widget)
 }
@@ -221,7 +228,7 @@ function dropNewWidget(e:DragEvent) {
     let colWidth = grid?.clientWidth / 12
 
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)
-    let startRow = Math.round((relatedY - item.layerY)  / 40)
+    let startRow = Math.round((relatedY - item.layerY)  / 35)
 
 
     startCol = startCol >= 1 ? startCol : 1
@@ -232,15 +239,17 @@ function dropNewWidget(e:DragEvent) {
     }
     startRow = startRow >= 1 ? startRow : 1
 
-    vlayout[props.size].push({
+    console.log(selectedSize.value)
+
+    vlayout[selectedSize.value].push({
         cFrom: startCol,
         cTo: endCol,
         rFrom: startRow,
         rTo: startRow + item.defaultRows,
         type: item.datatype,
-        props: {
-            title: item.title
-        },
+        alias: item.alias,
+        title: item.title,
+        icon: 'table',
     })
 
 

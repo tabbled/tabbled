@@ -6,5 +6,9 @@
     "settings": "Settings",
     "configuration": "Configuration",
     "reportTemplates": "Report templates",
-    "tableModels": "Models"
+    "tableModels": "Models",
+    "layout": {
+        "smallSize": "Small",
+        "largeSize": "Large"
+    }
 }

@@ -2,7 +2,7 @@
 <!--    <CodeEditor>-->
 <!--    </CodeEditor>-->
 
-        <ViewLayout :layout="layout" size="large" :available-widgets="widgets">  </ViewLayout>
+        <ViewLayout :layout="layout" :size="LayoutSize.large" :available-widgets="widgets">  </ViewLayout>
 
 <!--    <Table style="margin-top: 100px" :data-source="ds" :columns="cols"></Table>-->
 
@@ -15,7 +15,7 @@ import {DataSource} from "./../model/datasource"
 import { ref } from 'vue'
 import {Column} from "./../model/column";
 import ViewLayout from './../components/ViewLayout.vue'
-import {LayoutComponent} from "../model/layout";
+import {LayoutComponent, LayoutSize} from "../model/layout";
 
 let ds = new DataSource({
     fields: [{
@@ -56,29 +56,29 @@ let layout = {
             cTo: 13,
             rFrom: 1,
             rTo: 1,
-            type: "table",
-            props: {
-                title: "1"
-            },
+            type: "field",
+            title: "1",
+            icon: "table",
+            alias: "aaa"
         },
         {
             cFrom: 1,
             cTo: 7,
             rFrom: 2,
             rTo: 2,
-            type: "table",
-            props: {
-                title: "2"
-            },
+            type: "field",
+            title: "Field 1199922",
+            icon: "filter",
+            alias: "11sd"
         },{
             cFrom: 7,
             cTo: 13,
             rFrom: 3,
             rTo: 5,
-            type: "table",
-            props: {
-                title: "3   "
-            },
+            type: "field",
+            title: "1",
+            icon: "table",
+            alias: "aaa"
         },{
             cFrom: 1,
             cTo: 13,

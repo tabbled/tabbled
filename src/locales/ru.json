@@ -6,5 +6,9 @@
     "settings": "Настройки",
     "configuration": "Конфигурация",
     "reportTemplates": "Шаблоны печати",
-    "tableModels": "Модели"
+    "tableModels": "Модели",
+    "layout": {
+        "smallSize": "Маленький",
+        "largeSize": "Большой"
+    }
 }
