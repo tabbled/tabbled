@@ -3,6 +3,7 @@ const state = () => ({
         entities: [],
         models: [],
         reportTemplates: [],
+        dataSources: []
     },
     isLoaded: false
 })
@@ -38,7 +39,6 @@ const actions = {
     }
 }
 
-// mutations
 const mutations = {
     configLoaded (state: any, config: any) {
         state.config = config

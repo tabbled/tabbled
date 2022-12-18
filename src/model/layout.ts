@@ -8,7 +8,7 @@ export interface LayoutSizeItemInterface {
     title: string
 }
 
-export function getLayoutSizes($t: any):LayoutSizeItemInterface[] {
+export function getAvailableLayoutSizes($t: any):LayoutSizeItemInterface[] {
     return [{
         size: LayoutSize.large,
         title: $t('layout.largeSize')
@@ -18,20 +18,20 @@ export function getLayoutSizes($t: any):LayoutSizeItemInterface[] {
     }]
 }
 
-export interface LayoutComponentInterface {
-    alias: string,
-    path: string,
+export interface ElementInterface {
+    position: {
+        colFrom: number,
+        colTo: number,
+        rowFrom: number,
+        rowTo: number
+    },
+    datasourceAlias?: string,
+    fieldAlias?: string,
+    title?: string
 }
 
-
-
-
-export class LayoutComponent implements LayoutComponentInterface {
-    constructor(alias: string, path: string) {
-        this.alias = alias;
-        this.path = path;
+export interface LayoutInterface {
+    elements: {
+        [key in LayoutSize]: ElementInterface
     }
-
-    alias: string
-    path: string
 }

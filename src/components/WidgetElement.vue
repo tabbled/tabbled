@@ -14,7 +14,6 @@
             </span>
 
         </div>
-
     </div>
 </template>
 
@@ -37,7 +36,7 @@ const props = defineProps<{
     border-radius: 5px;
     border-style: solid;
     border-width: thin;
-    z-index: 1;
+    z-index: 0;
     border-color: #00000012;
     //padding: 8px;
 }

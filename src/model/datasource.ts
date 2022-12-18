@@ -1,5 +1,10 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
 
+export enum StorageType {
+    internal = 'internal',
+    external = 'external'
+}
+
 /**
  * Basic data source interface
  */
@@ -11,7 +16,11 @@ export interface DataSourceInterface {
 
     isTree?: boolean
 
-    fields: FieldInterface[]
+    fields: FieldInterface[],
+
+    storageType: StorageType,
+
+    cached: boolean
 
     /**
      * alias of field that is a primary key of data source
@@ -75,7 +84,8 @@ export interface DataSourceConfigInterface {
     alias: string,
     isEditable?: boolean,
     keyField: string,
-    isTree?: boolean
+    isTree?: boolean,
+    storageType: StorageType,
 }
 
 export class DataSource implements DataSourceInterface {
@@ -84,14 +94,11 @@ export class DataSource implements DataSourceInterface {
         this.keyField = config.keyField;
         this.isTree = config.isTree;
         this.fields = []
+        this.storageType = config.storageType;
 
         config.fields.forEach(conf => {
             this.fields.push(new Field(conf))
         })
-
-        console.log(this.fields)
-
-
     }
 
     private data: object[] = [{
@@ -109,6 +116,8 @@ export class DataSource implements DataSourceInterface {
     isEditable: boolean;
     keyField: string;
     isTree?: boolean;
+    storageType: StorageType;
+    cached: boolean = true;
 
     getAll(): object[] {
         if (this.onCellChange instanceof Function) {

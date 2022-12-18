@@ -3,7 +3,7 @@
     <el-row align="middle" style="padding-bottom: 16px">
         <div>Screen size: </div>
         <el-radio-group v-model="selectedSize" style="padding-left: 8px">
-            <el-radio-button v-for="i in getLayoutSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
+            <el-radio-button v-for="i in getAvailableLayoutSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
         </el-radio-group>
     </el-row>
 
@@ -28,7 +28,7 @@
                      :id="idx"
                 >
                     <WidgetElement :title="widget.title" :subtitle="widget.alias" :icon="widget.icon" style="height: inherit;"
-                                   :class="{'widget-selected': selectedIdx == idx}"/>
+                                   :class="{'widget-selected': selectedIdx === String(idx)}"/>
                     <div :class="{
                         'resizer-right': true,
                         'resizer-activated': (dragDirection === 'right' && dragIdx == idx)}"
@@ -52,7 +52,7 @@
         </div>
 
     <div class="setting-panel">
-        <el-divider direction="vertical" class="setting-pane-divider"/>
+        <el-divider direction="vertical" class="setting-panel-divider"/>
 
         <span >Elements</span>
 
@@ -66,6 +66,12 @@
         </div>
         </div>
 
+        <Transition  name="setting-panel-trans">
+                <ElementSettingPanel class="element-setting-panel"
+                                     v-if="selectedIdx !== ''">
+
+                </ElementSettingPanel>
+        </Transition>
     </div>
 
 </template>
@@ -73,8 +79,8 @@
 <script setup lang="ts">
 import {ref, reactive} from "vue";
 import WidgetElement from "./WidgetElement.vue"
-import {getLayoutSizes, LayoutSize} from "../model/layout";
-import Tabled from './Table.vue'
+import {getAvailableLayoutSizes, LayoutSize} from "../model/layout";
+import ElementSettingPanel from "./ElementSettingPanel.vue"
 
 const props = defineProps<{
     layout: object,
@@ -120,7 +126,7 @@ function initDragBottom(e:MouseEvent) {
 }
 
 function selectWidget(e:MouseEvent) {
-    selectedIdx.value = e.target.id
+    selectedIdx.value = selectedIdx.value == e.target.id ? selectedIdx.value = '' : e.target.id
 }
 
 function removeWidget(idx: string) {
@@ -282,7 +288,33 @@ function dropNewWidget(e:DragEvent) {
     padding-left: 16px;
 }
 
-.setting-pane-divider {
+.element-setting-panel {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    position: absolute;
+    z-index: 10;
+    opacity: 100;
+    padding-left: 16px;
+}
+
+
+.setting-panel-trans-enter-active {
+    transition: all 0.3s
+}
+
+.setting-panel-trans-leave-active {
+    transition: all 0.3s;
+}
+
+.setting-panel-trans-enter-from,
+.setting-panel-trans-leave-to {
+    transform: translateX(250px);
+}
+
+.setting-panel-divider {
     position: absolute !important;
     bottom: 0;
     top:0;
@@ -320,7 +352,8 @@ function dropNewWidget(e:DragEvent) {
     z-index: 2;
 }
 
-.dragging-icon{
+
+.dragging-icon {
     width: 30px;
     height: 30px;
     padding-right: 4px;
@@ -363,9 +396,7 @@ function dropNewWidget(e:DragEvent) {
     z-index: 2;
 }
 
-.widget-draggable:hover {
-    background: var(--el-color-primary-light-9);
-}
+
 
 .widget-draggable:hover .delete-icon {
     color: var(--el-color-info);

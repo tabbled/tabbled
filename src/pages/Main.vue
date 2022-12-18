@@ -2,7 +2,7 @@
 <!--    <CodeEditor>-->
 <!--    </CodeEditor>-->
 
-        <ViewLayout :layout="layout" :size="LayoutSize.large" :available-widgets="widgets">  </ViewLayout>
+        <LayoutBuilder :layout="layout" :size="LayoutSize.large" :available-widgets="widgets">  </LayoutBuilder>
 
 <!--    <Table style="margin-top: 100px" :data-source="ds" :columns="cols"></Table>-->
 
@@ -14,8 +14,13 @@
 import {DataSource} from "./../model/datasource"
 import { ref } from 'vue'
 import {Column} from "./../model/column";
-import ViewLayout from './../components/ViewLayout.vue'
-import {LayoutComponent, LayoutSize} from "../model/layout";
+import LayoutBuilder from '../components/LayoutBuilder.vue'
+import { LayoutSize } from "../model/layout";
+import { useStore } from "vuex"
+
+let store = useStore();
+
+console.log(store.getters["datasource/getByAlias"]('ssss'))
 
 let ds = new DataSource({
     fields: [{
