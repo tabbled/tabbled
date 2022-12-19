@@ -10,17 +10,17 @@
 </template>
 
 <script setup>
-//import {defineComponent} from "vue";
 import {DataSource} from "./../model/datasource"
-import { ref } from 'vue'
 import {Column} from "./../model/column";
 import LayoutBuilder from '../components/LayoutBuilder.vue'
 import { LayoutSize } from "../model/layout";
 import { useStore } from "vuex"
+import { useSocket } from "../services/socketio.service";
 
 let store = useStore();
+let socket = useSocket();
 
-console.log(store.getters["datasource/getByAlias"]('ssss'))
+//console.log(store.getters["datasource/getByAlias"]('ssss'))
 
 let ds = new DataSource({
     fields: [{

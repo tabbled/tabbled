@@ -1,3 +1,7 @@
+import {Commit} from "vuex";
+import {useSocket} from "../../services/socketio.service";
+let socket = useSocket();
+
 const state = () => ({
     user: null,
     loggedIn: false,
@@ -21,9 +25,9 @@ const getters = {
 }
 
 const actions = {
-    login ({ commit }, user: any) {
+    login ({ commit }: { commit: Commit }, user: any) {
         return new Promise((resolve, reject) => {
-            this.$socket.timeout(5000).emit("login", {
+            socket.timeout(5000).emit("login", {
                 username: user.username,
                 password: user.password
             }, (err: any, res: any) => {
@@ -37,9 +41,9 @@ const actions = {
         });
     },
 
-    loadUserSettings({commit}) {
+    loadUserSettings({ commit }: { commit: Commit }) {
         return new Promise((resolve, reject) => {
-            this.$socket.timeout(5000).emit("users/me", {},
+            socket.timeout(5000).emit("users/me", {},
                 (err: any, res: any) => {
                 if (!err && res && res.success === true) {
                     commit('userLoaded', res.user)
@@ -51,7 +55,7 @@ const actions = {
         });
     },
 
-    async logout({ commit }) {
+    async logout({ commit }: { commit: Commit }) {
         localStorage.removeItem("token");
         commit('loggedOut')
     }
@@ -64,8 +68,8 @@ const mutations = {
         localStorage.removeItem('account_id')
         state.loggedIn = true
         state.token = token
-        this.$socket.disconnect()
-        this.$socket.connect()
+        socket.disconnect()
+        socket.connect()
     },
 
     loggedOut (state: any) {
@@ -99,8 +103,8 @@ const mutations = {
 
         // Need to reconnect for update socket auth
         if (account_id !== Number(localStorage.getItem('account_id'))) {
-            this.$socket.disconnect()
-            this.$socket.connect()
+            socket.disconnect()
+            socket.connect()
         }
     }
 }

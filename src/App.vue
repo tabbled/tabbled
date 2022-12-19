@@ -19,47 +19,46 @@
                 <el-divider style="margin: 0"/>
 
                     <el-menu
-                        :collapse="isMenuCollapse"
                         :default-active="$route.fullPath"
                         :router="true"
                     >
-                        <div v-for="menu in menuItems" :key="menu.label">
+                        <div v-for="menu in sidebarMenu" :key="menu.id">
                             <el-sub-menu v-if="menu.items"
-                                         :index="menu.label">
+                                         :index="menu.id">
                                 <template #title>
                                     <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></span>
-                                    <span>{{menu.label}}</span>
+                                    <span>{{menu.title}}</span>
                                 </template>
 
                                 <el-menu-item v-for="item in menu.items"
-                                              :key="item.key"
-                                              :index="item.to">
+                                              :key="item.id"
+                                              :index="item.path">
                                     <template #title>
-                                        <span  style="width: 100%; text-align: left;">{{item.label }}</span>
-                                        <div @click="$event.stopPropagation(); openInNewWindow(item.to);" class="open_new" style="width: 16px; height: 100%;">
+                                        <span  style="width: 100%; text-align: left;">{{item.title }}</span>
+                                        <div @click="$event.stopPropagation(); openInNewWindow(item.path);" class="open_new" style="width: 16px; height: 100%;">
                                             <span class="iconify " data-icon="mdi:open-in-new" style="width: 16px; height: 100%;"/>
                                         </div>
                                     </template>
 
                                 </el-menu-item>
                             </el-sub-menu>
-                            <el-menu-item v-else :index="menu.to" >
+                            <el-menu-item v-else :index="menu.path" >
                                 <template #title>
                                     <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"/>
-                                    <span>{{menu.label}}</span>
+                                    <span>{{menu.title}}</span>
                                 </template>
                             </el-menu-item>
                         </div>
                     </el-menu>
 
                 <div class="footer ">
-                    <el-menu @select="showUserMenu" :collapse="isMenuCollapse">
+                    <el-menu @select="showUserMenu">
 
                         <el-menu-item index="1">
                             <span class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
 
                             <span style="width: 100%; text-align: start;">{{username()}}</span>
-                            <div @click="logout" class="open_new" style="width: 16px; height: 100%;">
+                            <div @click="logout()" class="open_new" style="width: 16px; height: 100%;">
                                 <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
                             </div>
                         </el-menu-item>
@@ -105,105 +104,150 @@
 <!--    </div>-->
 </template>
 
-<script lang="ts">
-import {defineComponent} from "vue";
+<script setup lang="ts">
+import {onMounted, ref} from "vue";
+import {MenuConfigInterface} from "./model/menu";
+import {useStore} from "vuex";
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useSocket } from './services/socketio.service'
+import { ElNotification } from 'element-plus'
 
-export default defineComponent({
-    data() {
-        return {
-            mainViewHeight: 0,
-            menuItems: [{
-                label: "",
-                key: "",
-                icon: "",
-                items: []
-            }],
-            isMenuCollapse: false
-        }
-    },
-    mounted() {
-        this.mainViewHeight = this.$refs.mainContainer.$el.clientHeight - this.$refs.mainHeader.$el.clientHeight
-        //this.loadMenu()
+const props = defineProps<{
 
-    },
-    created() {
-        //console.log("created app")
-        if (this.$store.getters['config/isLoaded']) {
-            this.loadMenu()
-        }
-        //console.log(this.$store.getters['auth/user'])
-        this.$store.subscribe((mutation: any) => {
-            if (mutation.type === 'config/configLoaded') {
-                this.loadMenu()
-            }
-        });
-    },
-    methods: {
-        logout() {
-            this.$store.dispatch('auth/logout')
-                .then(()=>{
-                    this.$router.push('/login')
-                })
-        },
-        showUserMenu(){
-            console.log("showUserMenu")
-        },
-        username(): string {
-            return this.$store.getters['auth/user'] ? this.$store.getters['auth/user'].username : ""
-        },
-        openInNewWindow(to: string) {
-            let route = this.$router.resolve({ path: to });
-            window.open(route.href);
-        },
-        fillMenu(alias: number, items: object[]) {
-            let menu_arr: object[] = [];
-            items.forEach(item => {
-                menu_arr.push({
-                    key: item.code,
-                    label: item.title,
-                    to: `/${alias}/${item.alias}`,
-                })
-            });
+}>()
 
-            return menu_arr
-        },
-        loadMenu() {
-            this.menuItems = []
+const mainContainer = ref(null);
+const mainHeader = ref(null);
 
-            let entities = {
-                label: this.$t('entities'),
-                key: "entities",
-                icon: "text-box-outline",
-                items: this.fillMenu('entities', this.$store.getters['config/entities'])
-            }
+let mainViewHeight = ref(0)
 
-            this.menuItems.push(entities)
+onMounted(() => {
+    mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
 
-            if (this.$store.getters['auth/account'].permissions.admin) {
-                this.menuItems.push(
-                    // {
-                    //     label: this.$t('settings'),
-                    //     icon: 'cog-outline',
-                    //     to: `/system-settings`,
-                    // },
-                    {
-                        label: this.$t('configuration'),
-                        icon: 'application-brackets-outline',
-                        items: [
-                            {
-                                label: this.$t('tableModels'),
-                                to: `/configuration/models`,
-                            },
-                            {
-                                label: this.$t('reportTemplates'),
-                                to: `/configuration/report-templates`,
-                            },
-                        ]
-                    })
-            }
-        }
+    if (store.getters['config/isLoaded']) {
+        loadMenu()
     }
 })
+
+
+const store = useStore();
+const router = useRouter();
+const { t } = useI18n();
+
+let socketio = ref({
+    initiated: false,
+    error_message: "",
+    isConnected: false
+})
+let socket  = useSocket()
+initSocketIO()
+
+let sidebarMenu = ref<Array<MenuConfigInterface>>([])
+
+store.subscribe((mutation: any) => {
+    if (mutation.type === 'config/loaded') {
+        loadMenu()
+    }
+});
+
+
+function username(): string {
+    return store.getters['auth/user'] ? store.getters['auth/user'].username : ""
+}
+
+function openInNewWindow(to: string) {
+    let route = router.resolve({path: to});
+    window.open(route.href);
+}
+
+
+function loadMenu() {
+
+    console.log(t('configuration'))
+
+    sidebarMenu.value = Object.assign([], store.getters['config/sidebarMenu'])
+
+    if (store.getters['auth/account'].permissions.admin) {
+        sidebarMenu.value.push(
+            {
+                id: "config",
+                title: t('configuration'),
+                icon: 'application-brackets-outline',
+                items: [
+                    {
+                        id: "models",
+                        title: t('tableModels'),
+                        path: `/configuration/models`,
+                    },
+                    {
+                        id: "templates",
+                        title: t('reportTemplates'),
+                        path: `/configuration/report-templates`,
+                    },
+                ]
+            })
+    }
+}
+
+function logout() {
+    store.dispatch('auth/logout')
+        .then(() => {
+            router.push('/login')
+        })
+}
+
+function initSocketIO() {
+    //No need to re-subscribe
+    if (socketio.value.initiated) {
+        return;
+    }
+    socketio.value.initiated = true;
+
+
+    socket.on("exception", (err) => {
+        console.error(err);
+    });
+
+    socket.on("connect_error", (err) => {
+        console.error(`!!!Failed to connect to the backend. Socket.io connect_error: ${err.message}`);
+        socketio.value.error_message = `Cannot connect to the socket server. [${err}] Reconnecting...`;
+        socketio.value.isConnected = false;
+    });
+
+    socket.on("disconnect", () => {
+        socket.connected = true;
+        ElNotification.warning({
+            title: 'Disconnected',
+            message: "Lost connection to the server",
+            showClose: true,
+        })
+    });
+
+    //When the server decided that token is not valid or expired
+    socket.on("login_needed", () => {
+        router.push('/login');
+    })
+
+    socket.on("connect", async () => {
+        console.log("Connected to the socket server");
+
+        if (!socketio.value.isConnected)
+            ElNotification.success({
+                title: 'Connected',
+                message: "Connected to the server",
+                showClose: true,
+                type: 'success',
+            })
+
+        await store.dispatch('auth/loadUserSettings');
+        await store.dispatch('config/load');
+
+        socketio.value.isConnected = true;
+    });
+}
+
+
 </script>
 
 <style lang="scss">
@@ -257,6 +301,12 @@ export default defineComponent({
     height: 40px !important;
     line-height: 40px !important;
 }
+
+.el-menu-item {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+
 
 
 html,

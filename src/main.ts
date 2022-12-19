@@ -1,8 +1,6 @@
 import { createApp, h } from 'vue'
 import App from './App.vue'
-import socket from './mixins/socket'
 import router from "./router";
-import socketioService from "./services/socketio.service";
 import store from './store'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -24,21 +22,17 @@ const i18n = createI18n({
     },
     locale: 'en',
     fallbackLocale: 'en',
-    globalInjection: true
+    globalInjection: true,
+    mode: 'composition',
+    legacy: false
 })
 
 const app = createApp({
-    mixins: [
-        socket
-    ],
     render: () => h(App)
 })
 
 app.component('Table', Table);
 app.component('CodeEditor', CodeEditor)
-
-app.config.globalProperties.$socket = socketioService;
-store.$socket = socketioService;
 
 app.use(router(store));
 app.use(store)

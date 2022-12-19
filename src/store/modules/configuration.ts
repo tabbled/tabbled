@@ -1,36 +1,59 @@
-const state = () => ({
-    config: {
-        entities: [],
-        models: [],
-        reportTemplates: [],
-        dataSources: []
-    },
+import { DataSourceConfigInterface } from "../../model/datasource";
+import { PageConfigInterface } from "../../model/page";
+import {MenuConfigInterface} from "../../model/menu";
+import {Commit} from "vuex";
+import { useSocket } from '../../services/socketio.service'
+
+let socket  = useSocket()
+
+
+export interface ConfigInterface {
+    dataSources: DataSourceConfigInterface[],
+    pages: PageConfigInterface[],
+    sidebarMenu: MenuConfigInterface[]
+}
+
+export interface ConfigStateInterface extends ConfigInterface {
+    isLoaded: boolean
+}
+
+export interface ConfigResponseInterface {
+    config: ConfigInterface,
+    success: boolean
+    error_message? : string
+}
+
+
+const state = (): ConfigStateInterface => ({
+    dataSources: Array<DataSourceConfigInterface>(),
+    pages: Array<PageConfigInterface>(),
+    sidebarMenu: Array<MenuConfigInterface>(),
     isLoaded: false
 })
 
 const getters = {
-    entities: (state: any) => {
-        return state.config.entities
+    dataSources: (state: ConfigStateInterface) => {
+        return state.dataSources
     },
-    models: (state: any) => {
-        return state.config.models
+    sidebarMenu: (state: ConfigStateInterface) => {
+        return state.sidebarMenu
     },
-    reportTemplates: (state: any) => {
-        return state.config.reportTemplates
+    pages: (state: ConfigStateInterface) => {
+        return state.pages
     },
-    isLoaded: (state: any) => {
+    isLoaded: (state: ConfigStateInterface) => {
         return state.isLoaded
     },
 }
 
 const actions = {
-    load({commit}) {
-        commit('notLoaded')
+    load( { commit }: { commit: Commit } ) {
+        commit('unloaded')
         return new Promise((resolve, reject) => {
-            this.$socket.timeout(5000).emit("getConfiguration", {},
-                (err: any, res: any) => {
-                if (!err && res && res.success === true) {
-                    commit('configLoaded', res.config)
+            socket.timeout(5000).emit("getConfiguration", {},
+                (err: any, res: ConfigResponseInterface) => {
+                if (!err && res && res.success) {
+                    commit('loaded', res.config)
                     resolve(res)
                 } else
                     reject((err && err.error_message) || 'Error loading configuration')
@@ -40,11 +63,16 @@ const actions = {
 }
 
 const mutations = {
-    configLoaded (state: any, config: any) {
-        state.config = config
+    loaded (state: ConfigStateInterface, config: ConfigInterface) {
+        console.log(config)
+
+        state.dataSources = config.dataSources;
+        state.pages = config.pages;
+        state.sidebarMenu = config.sidebarMenu;
+
         state.isLoaded = true;
     },
-    notLoaded (state: any) {
+    unloaded (state: any) {
         state.config = {}
         state.isLoaded = true;
     }
