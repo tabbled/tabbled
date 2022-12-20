@@ -1,10 +1,12 @@
 import { DataSourceConfigInterface } from "../../model/datasource";
 import { PageConfigInterface } from "../../model/page";
-import {MenuConfigInterface} from "../../model/menu";
-import {Commit} from "vuex";
+import { MenuConfigInterface } from "../../model/menu";
+import { Commit } from "vuex";
 import { useSocket } from '../../services/socketio.service'
+import { useDataSourceService } from '../../services/datasource.service'
 
 let socket  = useSocket()
+let dataSources = useDataSourceService();
 
 
 export interface ConfigInterface {
@@ -67,6 +69,15 @@ const mutations = {
         console.log(config)
 
         state.dataSources = config.dataSources;
+
+        state.dataSources.forEach(ds => {
+            console.log('dsconfig', ds)
+            dataSources.registerDataSource(ds)
+        })
+
+        console.log(dataSources.getDataSourceByAlias('clients'))
+
+
         state.pages = config.pages;
         state.sidebarMenu = config.sidebarMenu;
 

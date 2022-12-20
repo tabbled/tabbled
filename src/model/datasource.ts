@@ -5,6 +5,11 @@ export enum StorageType {
     external = 'external'
 }
 
+export enum DataSourceType {
+    tableField = 'tableField',
+    entity = 'entity'
+}
+
 /**
  * Basic data source interface
  */
@@ -80,6 +85,7 @@ export interface DataSourceInterface {
 
 export interface DataSourceConfigInterface {
     fields: FieldConfigInterface[],
+    type: DataSourceType,
     title?: string,
     alias: string,
     isEditable?: boolean,

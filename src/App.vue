@@ -19,6 +19,7 @@
                 <el-divider style="margin: 0"/>
 
                     <el-menu
+                        :collapse="isCollapsed"
                         :default-active="$route.fullPath"
                         :router="true"
                     >
@@ -52,7 +53,7 @@
                     </el-menu>
 
                 <div class="footer ">
-                    <el-menu @select="showUserMenu">
+                    <el-menu @select="showUserMenu" :collapse="isCollapsed">
 
                         <el-menu-item index="1">
                             <span class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
@@ -105,9 +106,9 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import {MenuConfigInterface} from "./model/menu";
-import {useStore} from "vuex";
+import { onMounted, ref } from "vue";
+import { MenuConfigInterface } from "./model/menu";
+import { useStore } from "vuex";
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSocket } from './services/socketio.service'
@@ -121,6 +122,7 @@ const mainContainer = ref(null);
 const mainHeader = ref(null);
 
 let mainViewHeight = ref(0)
+let isCollapsed = ref(false)
 
 onMounted(() => {
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
