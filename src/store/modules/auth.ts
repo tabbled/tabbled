@@ -68,6 +68,7 @@ const mutations = {
         localStorage.removeItem('account_id')
         state.loggedIn = true
         state.token = token
+        console.log("reconnect loggedIn")
         socket.disconnect()
         socket.connect()
     },
@@ -103,6 +104,7 @@ const mutations = {
 
         // Need to reconnect for update socket auth
         if (account_id !== Number(localStorage.getItem('account_id'))) {
+            console.log("reconnect account changed")
             socket.disconnect()
             socket.connect()
         }

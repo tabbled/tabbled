@@ -55,7 +55,7 @@
                     </el-menu>
 
                 <div class="footer ">
-                    <el-menu @select="showUserMenu"
+                    <el-menu
                              :collapse="isCollapsed"
                              :collapse-transition="false"
                     >
@@ -85,7 +85,7 @@
 
                     <el-page-header ref="mainHeader" style="margin: 16px" @back="$router.back()">
                         <template #content>
-                            <span class="text-large font-600 mr-3"> Customers </span>
+                            <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
                         </template>
 
                         <template #extra>
@@ -97,7 +97,7 @@
                     </el-page-header>
                     <el-main>
                         <el-scrollbar :height="mainViewHeight">
-                            <router-view/>
+                            <router-view />
 
                         </el-scrollbar>
 
@@ -115,13 +115,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import {computed, onMounted, ref, ComputedRef} from "vue";
 import { MenuConfigInterface } from "./model/menu";
 import { useStore } from "vuex";
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSocket } from './services/socketio.service'
 import { ElNotification } from 'element-plus'
+import PageView from './components/PageView.vue'
+import {PageConfigInterface} from "./model/page";
+import PageDesigner from './components/PageDesigner.vue'
 
 const props = defineProps<{
 
@@ -133,6 +136,8 @@ const mainHeader = ref(null);
 let mainViewHeight = ref(0)
 let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
+let pagesByPath = ref<Map<string, PageConfigInterface>>(new Map<string, PageConfigInterface>())
+
 function setCollapsed() {
     isCollapsed.value = !isCollapsed.value;
     localStorage.setItem('is_menu_collapsed', isCollapsed.value ? 'true' : 'false')
@@ -142,7 +147,9 @@ onMounted(() => {
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
 
     if (store.getters['config/isLoaded']) {
+        console.log('mounted')
         loadMenu()
+        registerPages()
     }
 })
 
@@ -154,7 +161,8 @@ const { t } = useI18n();
 let socketio = ref({
     initiated: false,
     error_message: "",
-    isConnected: false
+    isConnected: false,
+    connectionCount: 0
 })
 let socket  = useSocket()
 initSocketIO()
@@ -164,8 +172,49 @@ let sidebarMenu = ref<Array<MenuConfigInterface>>([])
 store.subscribe((mutation: any) => {
     if (mutation.type === 'config/loaded') {
         loadMenu()
+        registerPages()
     }
 });
+
+
+
+function registerPages() {
+    pagesByPath.value.clear();
+    store.getters["config/pages"].forEach((page: PageConfigInterface) => {
+        let path = '/' + page.alias;
+
+        //regular route of page
+        addRoute(path, page, PageView);
+
+        //design route of page
+        addRoute(path + '/designer', page, PageDesigner);
+
+    })
+}
+
+function addRoute(path: string, page: PageConfigInterface, component: any) {
+    router.addRoute({
+        path: path,
+        component: component,
+        props: {
+            layout: page.layout,
+            title: page.title,
+            alias: page.alias,
+            dataSourceAlias: page.dataSourceAlias
+        }
+    })
+    pagesByPath.value.set(path, page);
+    console.info('Route ' + path + ' added')
+
+    if (path === router.currentRoute.value.path) {
+        router.replace(path)
+    }
+}
+
+const currentPageTitle: ComputedRef<string> = computed((): string =>  {
+    const page = pagesByPath.value.get(router.currentRoute.value.path);
+    return page ? page.title : ""
+})
 
 
 function username(): string {
@@ -209,6 +258,7 @@ function loadMenu() {
 function logout() {
     store.dispatch('auth/logout')
         .then(() => {
+            socketio.value.connectionCount = 0
             router.push('/login')
         })
 }
@@ -232,35 +282,42 @@ function initSocketIO() {
     });
 
     socket.on("disconnect", () => {
-        socket.connected = true;
-        ElNotification.warning({
-            title: 'Disconnected',
-            message: "Lost connection to the server",
-            showClose: true,
-        })
+        socketio.value.isConnected = false;
+
+        if (store.getters['auth/isAuthenticated'])
+            ElNotification.warning({
+                title: 'Disconnected',
+                message: "Lost connection to the server",
+                showClose: true,
+            })
+    });
+
+    socket.on("connect", async () => {
+        console.log("Connected to the socket server");
+        socketio.value.connectionCount++
+        socketio.value.isConnected = true;
+
+        if (store.getters['auth/isAuthenticated']) {
+
+
+            if (socketio.value.connectionCount > 1)
+                ElNotification.success({
+                    title: 'Connected',
+                    message: "Connected to the server",
+                    showClose: true,
+                    type: 'success',
+                })
+
+            await store.dispatch('auth/loadUserSettings');
+            await store.dispatch('config/load');
+        }
+
     });
 
     //When the server decided that token is not valid or expired
     socket.on("login_needed", () => {
         router.push('/login');
     })
-
-    socket.on("connect", async () => {
-        console.log("Connected to the socket server");
-
-        if (!socketio.value.isConnected)
-            ElNotification.success({
-                title: 'Connected',
-                message: "Connected to the server",
-                showClose: true,
-                type: 'success',
-            })
-
-        await store.dispatch('auth/loadUserSettings');
-        await store.dispatch('config/load');
-
-        socketio.value.isConnected = true;
-    });
 }
 
 

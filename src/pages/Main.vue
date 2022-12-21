@@ -12,7 +12,7 @@
 <script setup>
 import {DataSource} from "./../model/datasource"
 import {Column} from "./../model/column";
-import LayoutBuilder from '../components/LayoutBuilder.vue'
+import LayoutBuilder from '../components/PageDesigner.vue'
 import { LayoutSize } from "../model/layout";
 import { useStore } from "vuex"
 import { useSocket } from "../services/socketio.service";
