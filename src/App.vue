@@ -71,7 +71,7 @@
 
 
                         <div style="width: 100%;">
-                            <el-button @click="isCollapsed = !isCollapsed" text style="width: 64px; opacity: 40%" size="small">
+                            <el-button @click="setCollapsed" text style="width: 64px; opacity: 40%" size="small">
                                 <span class="iconify " :data-icon="isCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" style="width: 24px; height: 100%;"/>
                             </el-button>
                         </div>
@@ -131,7 +131,12 @@ const mainContainer = ref(null);
 const mainHeader = ref(null);
 
 let mainViewHeight = ref(0)
-let isCollapsed = ref(false)
+let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
+
+function setCollapsed() {
+    isCollapsed.value = !isCollapsed.value;
+    localStorage.setItem('is_menu_collapsed', isCollapsed.value ? 'true' : 'false')
+}
 
 onMounted(() => {
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
