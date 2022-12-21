@@ -71,13 +71,8 @@ const mutations = {
         state.dataSources = config.dataSources;
 
         state.dataSources.forEach(ds => {
-            console.log('dsconfig', ds)
             dataSources.registerDataSource(ds)
         })
-
-        console.log(dataSources.getDataSourceByAlias('clients'))
-
-
         state.pages = config.pages;
         state.sidebarMenu = config.sidebarMenu;
 

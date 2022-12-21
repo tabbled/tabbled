@@ -6,12 +6,12 @@
 
     <el-container v-else class="main">
         <el-container>
-            <el-aside width="250px" ref="aside">
+            <el-aside :width="isCollapsed ? '64px' : '250px'" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
                     <el-col >
                         <el-row align="middle">
                             <img height="30" src="./assets/tabbled_icon.svg" alt=""/>
-                            <div style="margin-left: 8px">Tabbled</div>
+                            <div v-if="!isCollapsed" style="margin-left: 8px">Tabbled</div>
                         </el-row>
                     </el-col>
 
@@ -20,32 +20,34 @@
 
                     <el-menu
                         :collapse="isCollapsed"
+                        :collapse-transition="false"
                         :default-active="$route.fullPath"
                         :router="true"
                     >
                         <div v-for="menu in sidebarMenu" :key="menu.id">
                             <el-sub-menu v-if="menu.items"
-                                         :index="menu.id">
+                                         :index="menu.id"
+                            >
                                 <template #title>
-                                    <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></span>
-                                    <span>{{menu.title}}</span>
+                                    <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></el-icon>
+                                    <span v-if="!isCollapsed">{{menu.title}}</span>
                                 </template>
 
                                 <el-menu-item v-for="item in menu.items"
                                               :key="item.id"
                                               :index="item.path">
                                     <template #title>
-                                        <span  style="width: 100%; text-align: left;">{{item.title }}</span>
+                                        <span  style="width: 100%; text-align: left;">{{ item.title }}</span>
                                         <div @click="$event.stopPropagation(); openInNewWindow(item.path);" class="open_new" style="width: 16px; height: 100%;">
-                                            <span class="iconify " data-icon="mdi:open-in-new" style="width: 16px; height: 100%;"/>
+                                            <el-icon class="iconify " data-icon="mdi:open-in-new" style="width: 16px; height: 100%;"/>
                                         </div>
                                     </template>
 
                                 </el-menu-item>
                             </el-sub-menu>
                             <el-menu-item v-else :index="menu.path" >
+                                <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"/>
                                 <template #title>
-                                    <span class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"/>
                                     <span>{{menu.title}}</span>
                                 </template>
                             </el-menu-item>
@@ -53,26 +55,33 @@
                     </el-menu>
 
                 <div class="footer ">
-                    <el-menu @select="showUserMenu" :collapse="isCollapsed">
+                    <el-menu @select="showUserMenu"
+                             :collapse="isCollapsed"
+                             :collapse-transition="false"
+                    >
 
                         <el-menu-item index="1">
-                            <span class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
+                            <el-icon class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
 
                             <span style="width: 100%; text-align: start;">{{username()}}</span>
-                            <div @click="logout()" class="open_new" style="width: 16px; height: 100%;">
+                            <div v-if="!isCollapsed" @click="logout()" class="open_new" style="width: 16px; height: 100%;">
                                 <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
                             </div>
                         </el-menu-item>
 
-<!--                        <el-menu-item index="1" @click="isMenuCollapse = !isMenuCollapse">-->
-<!--                            <span style="width: 100%; text-align: start;">{{username()}}</span>-->
-<!--                        </el-menu-item>-->
+
+                        <div style="width: 100%;">
+                            <el-button @click="isCollapsed = !isCollapsed" text style="width: 64px; opacity: 40%" size="small">
+                                <span class="iconify " :data-icon="isCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" style="width: 24px; height: 100%;"/>
+                            </el-button>
+                        </div>
+
 
                     </el-menu>
                 </div>
             </el-aside>
-            <el-container>
-                <el-col class="main-router-view" ref="mainContainer">
+            <el-container >
+                <el-col class="main-router-view" ref="mainContainer" :style="{width: isCollapsed ? 'calc(100% - 64px)' :'calc(100% - 250px)' }">
 
                     <el-page-header ref="mainHeader" style="margin: 16px" @back="$router.back()">
                         <template #content>
@@ -289,7 +298,6 @@ function initSocketIO() {
     box-shadow: var(--el-box-shadow-light);
     z-index: 100;
     height: 100%;
-    width: calc(100% - 250px);
     position: absolute;
     overflow: hidden
 }

@@ -14,6 +14,7 @@
          @dragover.prevent
          @dragenter.prevent
          @drop="dropNewWidget($event)"
+         @click="gridClicked"
     >
 
 
@@ -24,7 +25,6 @@
             >
                 <div :class="{'widget-draggable': true, 'prevent-select': true}"
                      style="height: inherit"
-                     @click="selectWidget"
                      :id="idx"
                 >
                     <WidgetElement :title="widget.title" :subtitle="widget.alias" :icon="widget.icon" style="height: inherit;"
@@ -109,6 +109,9 @@ let selectedSize = ref(props.size)
 
 const grid = ref(null);
 
+function gridClicked(e:MouseEvent) {
+    selectWidget(e.target?.id)
+}
 
 function initDragMove(e:MouseEvent) {
     dragDirection.value = 'move'
@@ -125,8 +128,8 @@ function initDragBottom(e:MouseEvent) {
     initDrag(e)
 }
 
-function selectWidget(e:MouseEvent) {
-    selectedIdx.value = selectedIdx.value == e.target.id ? selectedIdx.value = '' : e.target.id
+function selectWidget(id: string) {
+    selectedIdx.value = id
 }
 
 function removeWidget(idx: string) {
@@ -213,7 +216,6 @@ function getGridElStyle(widget:object) {
 }
 
 function startDragNewWidget(e:DragEvent, item: any) {
-    console.log('startDragNewWidget', e)
     let it = Object.assign({
         layerX: e.layerX,
         layerY: e.layerY
@@ -222,11 +224,7 @@ function startDragNewWidget(e:DragEvent, item: any) {
 }
 
 function dropNewWidget(e:DragEvent) {
-    console.log('dropNewWidget', e)
-    console.log(e.target?.clientWidth, e.target?.clientHeight)
-
     let item = JSON.parse(e.dataTransfer.getData('item'));
-    console.log(item)
 
     let relatedX = e.offsetX
     let relatedY = e.offsetY
@@ -244,8 +242,6 @@ function dropNewWidget(e:DragEvent) {
         startCol = endCol - item.defaultCols
     }
     startRow = startRow >= 1 ? startRow : 1
-
-    console.log(selectedSize.value)
 
     vlayout[selectedSize.value].push({
         cFrom: startCol,
