@@ -1,6 +1,10 @@
-import {ref} from 'vue'
-import {DataSourceConfigInterface, DataSourceInterface, DataSourceType} from "../model/datasource";
-import {DataSource} from "../model/datasource";
+import { ref } from 'vue'
+import {
+    DataSourceConfigInterface,
+    DataSourceInterface,
+    DataSourceType,
+    DataSource
+} from "../model/datasource";
 
 export class DataSourceService {
     dataSources: Map<string, DataSourceInterface> = new Map<string, DataSourceInterface>()

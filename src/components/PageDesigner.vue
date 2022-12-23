@@ -54,7 +54,7 @@
     <div class="setting-panel">
         <el-divider direction="vertical" class="setting-panel-divider"/>
 
-        <span >Elements</span>
+        <span>Elements</span>
 
         <div style="padding-top: 16px">
         <div v-for="item in availableWidgets"
@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import {ref, reactive} from "vue";
 import WidgetElement from "./WidgetElement.vue"
-import {getAvailableLayoutSizes, LayoutSize} from "../model/layout";
+import {getAvailableLayoutSizes, LayoutSize} from "../model/page";
 import ElementSettingPanel from "./ElementSettingPanel.vue"
 
 const props = defineProps<{

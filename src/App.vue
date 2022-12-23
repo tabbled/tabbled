@@ -18,7 +18,7 @@
                 </el-header>
                 <el-divider style="margin: 0"/>
 
-                    <el-menu
+                    <el-menu style="height: 400px"
                         :collapse="isCollapsed"
                         :collapse-transition="false"
                         :default-active="$route.fullPath"
@@ -122,9 +122,8 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSocket } from './services/socketio.service'
 import { ElNotification } from 'element-plus'
-import PageView from './components/PageView.vue'
-import {PageConfigInterface} from "./model/page";
-import PageDesigner from './components/PageDesigner.vue'
+import {PageInterface} from "./model/page";
+import {usePageService} from "./services/page.service";
 
 const props = defineProps<{
 
@@ -136,7 +135,7 @@ const mainHeader = ref(null);
 let mainViewHeight = ref(0)
 let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
-let pagesByPath = ref<Map<string, PageConfigInterface>>(new Map<string, PageConfigInterface>())
+let pagesByPath = ref<Map<string, string>>(new Map<string, string>())
 
 function setCollapsed() {
     isCollapsed.value = !isCollapsed.value;
@@ -149,13 +148,14 @@ onMounted(() => {
     if (store.getters['config/isLoaded']) {
         console.log('mounted')
         loadMenu()
-        registerPages()
+        //registerPages()
     }
 })
 
 
 const store = useStore();
 const router = useRouter();
+let pages = usePageService();
 const { t } = useI18n();
 
 let socketio = ref({
@@ -180,30 +180,24 @@ store.subscribe((mutation: any) => {
 
 function registerPages() {
     pagesByPath.value.clear();
-    store.getters["config/pages"].forEach((page: PageConfigInterface) => {
-        let path = '/' + page.alias;
 
-        //regular route of page
-        addRoute(path, page, PageView);
+    pages.getAll().forEach(page => {
 
-        //design route of page
-        addRoute(path + '/designer', page, PageDesigner);
-
+        let path = page.path;
+        addRoute(path, page);
     })
+
 }
 
-function addRoute(path: string, page: PageConfigInterface, component: any) {
+function addRoute(path: string, page: PageInterface) {
     router.addRoute({
         path: path,
-        component: component,
+        component: page.component,
         props: {
-            layout: page.layout,
-            title: page.title,
-            alias: page.alias,
-            dataSourceAlias: page.dataSourceAlias
+            pageConfig: page.config
         }
     })
-    pagesByPath.value.set(path, page);
+    pagesByPath.value.set(path, page.alias);
     console.info('Route ' + path + ' added')
 
     if (path === router.currentRoute.value.path) {
@@ -212,8 +206,8 @@ function addRoute(path: string, page: PageConfigInterface, component: any) {
 }
 
 const currentPageTitle: ComputedRef<string> = computed((): string =>  {
-    const page = pagesByPath.value.get(router.currentRoute.value.path);
-    return page ? page.title : ""
+    const alias = pagesByPath.value.get(router.currentRoute.value.path);
+    return alias ? pages.getPageByAlias(alias).title : ""
 })
 
 
@@ -228,31 +222,7 @@ function openInNewWindow(to: string) {
 
 
 function loadMenu() {
-
-    console.log(t('configuration'))
-
     sidebarMenu.value = Object.assign([], store.getters['config/sidebarMenu'])
-
-    if (store.getters['auth/account'].permissions.admin) {
-        sidebarMenu.value.push(
-            {
-                id: "config",
-                title: t('configuration'),
-                icon: 'application-brackets-outline',
-                items: [
-                    {
-                        id: "models",
-                        title: t('tableModels'),
-                        path: `/configuration/models`,
-                    },
-                    {
-                        id: "templates",
-                        title: t('reportTemplates'),
-                        path: `/configuration/report-templates`,
-                    },
-                ]
-            })
-    }
 }
 
 function logout() {

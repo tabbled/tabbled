@@ -2,7 +2,7 @@
 <!--    <CodeEditor>-->
 <!--    </CodeEditor>-->
 
-        <LayoutBuilder :layout="layout" :size="LayoutSize.large" :available-widgets="widgets">  </LayoutBuilder>
+<!--        <LayoutBuilder :layout="layout" :size="LayoutSize.large" :available-widgets="widgets">  </LayoutBuilder>-->
 
 <!--    <Table style="margin-top: 100px" :data-source="ds" :columns="cols"></Table>-->
 
@@ -12,15 +12,12 @@
 <script setup>
 import {DataSource} from "./../model/datasource"
 import {Column} from "./../model/column";
-import LayoutBuilder from '../components/PageDesigner.vue'
-import { LayoutSize } from "../model/layout";
 import { useStore } from "vuex"
 import { useSocket } from "../services/socketio.service";
 
 let store = useStore();
 let socket = useSocket();
 
-//console.log(store.getters["datasource/getByAlias"]('ssss'))
 
 let ds = new DataSource({
     fields: [{
