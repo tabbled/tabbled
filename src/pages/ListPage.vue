@@ -4,11 +4,13 @@
     <div ref="grid" class="grid-wrap"
     >
 
+
         <div v-for="(element, idx) in pageConfig.layout[layoutSize]"
              :id="idx"
              :style="getGridElementStyle(element.position)"
              class="element"
         >
+            <component is="Table" v-bind="element.component.properties"></component>
         </div>
 
     </div>
@@ -19,6 +21,8 @@ import { useStore } from "vuex"
 import { useSocket } from "../services/socketio.service";
 import {onMounted, ref, defineProps} from "vue";
 import {PageConfigInterface, LayoutSize, PositionElementInterface} from "../model/page";
+
+import Table  from './../components/Table.vue'
 
 let store = useStore();
 let socket = useSocket();
@@ -63,7 +67,6 @@ function getGridElementStyle(element:PositionElementInterface) {
 .grid-wrap {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(10, 1fr);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
     width: 100%

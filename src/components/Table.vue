@@ -1,53 +1,3 @@
-<script setup lang="ts">
-//import { ref } from 'vue'
-import {DataSourceInterface} from "../model/datasource";
-import {ColumnInterface} from "../model/column";
-
-
-interface Props {
-    dataSource: DataSourceInterface,
-    columns: ColumnInterface[],
-    isRowSelectable?: boolean
-}
-const props = withDefaults(defineProps<Props>(), {
-    isRowSelectable: true
-})
-
-const data = props.dataSource.getAll()
-
-
-
-
-
-
-//console.log(props.dataSource.fields[0].alias)
-
-let getHeaderCellClass = (column: any) => {
-    let classes: string = 'custom-table-header';
-    if (column.column.order === '' || !column.column.order)
-        classes += ` hidden-sort-wrapper`
-    return  classes
-}
-
-let getHeaderTitle = (scope: any) => {
-    //console.log(scope)
-    let fieldIndex = props.isRowSelectable ? scope.$index -1 : scope.$index
-    //console.log(scope.$index,props.dataSource.fields)
-    return props.dataSource.fields[fieldIndex].title
-}
-
-let getCellData = (scope: any) => {
-    const entity: object | null = props.dataSource.getByRow(scope.$index);
-
-    if (!entity)
-        return ''
-
-    return entity[scope.column.property] ? entity[scope.column.property] : ''
-}
-
-
-</script>
-
 <template>
     <el-table
             border
@@ -86,6 +36,56 @@ let getCellData = (scope: any) => {
         </el-table-column>
     </el-table>
 </template>
+
+<script setup lang="ts">
+//import { ref } from 'vue'
+import {DataSourceInterface} from "../model/datasource";
+import {ColumnInterface} from "../model/column";
+
+
+interface Props {
+    dataSource: DataSourceInterface,
+    columns: ColumnInterface[],
+    isRowSelectable?: boolean
+}
+const props = withDefaults(defineProps<Props>(), {
+    isRowSelectable: true
+})
+
+//const data = props.dataSource.getAll()
+
+
+
+
+
+
+//console.log(props.dataSource.fields[0].alias)
+
+let getHeaderCellClass = (column: any) => {
+    let classes: string = 'custom-table-header';
+    if (column.column.order === '' || !column.column.order)
+        classes += ` hidden-sort-wrapper`
+    return  classes
+}
+
+let getHeaderTitle = (scope: any) => {
+    //console.log(scope)
+    let fieldIndex = props.isRowSelectable ? scope.$index -1 : scope.$index
+    //console.log(scope.$index,props.dataSource.fields)
+    return props.dataSource.fields[fieldIndex].title
+}
+
+let getCellData = (scope: any) => {
+    const entity: object | null = props.dataSource.getByRow(scope.$index);
+
+    if (!entity)
+        return ''
+
+    return entity[scope.column.property] ? entity[scope.column.property] : ''
+}
+
+
+</script>
 
 <style lang="scss">
 
