@@ -1,7 +1,7 @@
 import {FieldInterface} from "./field";
 
 export interface ColumnConfigInterface {
-    fieldAlias: string,
+    field: string,
     width: number,
     title?: string,
     sortable?: boolean

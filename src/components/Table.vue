@@ -9,10 +9,10 @@
         <el-table-column v-if="isRowSelectable" type="selection" width="38" />
         <el-table-column v-for="element in columns"
                          :sortable="element.sortable ? 'custom' : false"
-                         :key="element.field.alias"
+                         :key="element.fieldAlias"
                          :label="element.title"
                          :width="element.width"
-                         :prop="element.field.alias"
+                         :prop="element.fieldAlias"
 
         >
             <template #default="scope">
@@ -38,23 +38,23 @@
 </template>
 
 <script setup lang="ts">
-//import { ref } from 'vue'
+import { ref } from 'vue'
 import {DataSourceInterface} from "../model/datasource";
-import {ColumnInterface} from "../model/column";
+import {ColumnConfigInterface} from "../model/column";
 
 
 interface Props {
     dataSource: DataSourceInterface,
-    columns: ColumnInterface[],
+    columns: ColumnConfigInterface[],
     isRowSelectable?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     isRowSelectable: true
 })
 
-//const data = props.dataSource.getAll()
+const data = ref([])
 
-
+console.log(props)
 
 
 

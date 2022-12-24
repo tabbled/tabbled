@@ -24,6 +24,10 @@ export class DataSourceService {
             throw 'Unknown data source type ' + config.type;
     }
 
+    clear() {
+        this.dataSources.clear();
+    }
+
     getDataSourceByAlias(alias: string): DataSourceInterface | undefined {
         return this.dataSources.get(alias)
     }

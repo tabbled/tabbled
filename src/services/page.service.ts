@@ -28,6 +28,10 @@ export class PageService {
             console.error(`Unknown page type ${config.type} for page ${config.alias}`);
     }
 
+    clear() {
+        this.pagesByAlias.clear();
+    }
+
     getPageByAlias(alias: string): PageInterface | undefined {
         return this.pagesByAlias.get(alias)
     }

@@ -48,7 +48,7 @@ export interface PageConfigInterface {
     layout?: {
         [key in LayoutSize]: ElementInterface[]
     }
-    templateAlias?: string,
+    template?: string,
 }
 
 
@@ -59,7 +59,7 @@ export interface PageInterface {
     layout?: {
         [key in LayoutSize]: ElementInterface[]
     }
-    templateAlias?: string,
+    template?: string,
     component: any,
     config: PageConfigInterface
 }
@@ -69,7 +69,7 @@ export class EditPage implements PageInterface {
         this.path = config.path;
         this.alias = config.alias;
         this.layout = config.layout;
-        this.templateAlias = config.templateAlias;
+        this.template = config.template;
         this.component = component;
         this.title = config.title;
         this.config = config
@@ -83,5 +83,5 @@ export class EditPage implements PageInterface {
     layout?: {
         [key in LayoutSize]: ElementInterface[]
     }
-    templateAlias?: string
+    template?: string
 }

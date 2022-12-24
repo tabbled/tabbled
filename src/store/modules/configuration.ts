@@ -68,6 +68,9 @@ const actions = {
 
 const mutations = {
     loaded (state: ConfigStateInterface, config: ConfigInterface) {
+        dataSources.clear()
+        pages.clear();
+
         state.dataSources = config.dataSources;
         state.dataSources.forEach(ds => {
             dataSources.registerDataSource(ds)
