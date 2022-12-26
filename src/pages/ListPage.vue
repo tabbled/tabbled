@@ -1,11 +1,11 @@
 <template>
-    <div>Page view {{pageConfig.layout?.large[0].position}}</div>
+    <div>Page view {{layoutSize.value}} {{pageConfig.layout[layoutSize.value]}} </div>
 
     <div ref="grid" class="grid-wrap"
     >
 
 
-        <div v-for="(element, idx) in pageConfig.layout[layoutSize]"
+        <div v-for="(element, idx) in pageConfig.layout[layoutSize.value]"
              :id="idx"
              :style="getGridElementStyle(element.position)"
              class="element"
@@ -17,25 +17,21 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from "vuex"
-import { useSocket } from "../services/socketio.service";
-import {onMounted, ref, defineProps} from "vue";
-import {PageConfigInterface, LayoutSize, PositionElementInterface} from "../model/page";
-
-import Table  from './../components/Table.vue'
+import {useStore} from "vuex"
+import {useSocket} from "../services/socketio.service";
+import {onMounted} from "vue";
+import {LayoutSize, PageConfigInterface, PositionElementInterface} from "../model/page";
 
 let store = useStore();
 let socket = useSocket();
 
-let layoutSize = ref(LayoutSize.large)
-
 const props = defineProps<{
-    pageConfig: PageConfigInterface
+    pageConfig: PageConfigInterface,
+    layoutSize: LayoutSize
 }>()
 
 onMounted(() => {
-    console.log('onMounted page', props.pageConfig.layout?.large[0].position)
-
+    console.log('onMounted page', props.pageConfig.type )
 })
 
 function getGridElementStyle(element:PositionElementInterface) {
@@ -44,8 +40,6 @@ function getGridElementStyle(element:PositionElementInterface) {
         gridRow: "1 / auto",
         height: '40px'
     }
-
-    console.log(element)
 
     if (element.colFrom) {
         let c = String(element.colFrom);

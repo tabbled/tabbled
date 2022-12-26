@@ -115,14 +115,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref, ComputedRef} from "vue";
-import { MenuConfigInterface } from "./model/menu";
-import { useStore } from "vuex";
-import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { useSocket } from './services/socketio.service'
-import { ElNotification } from 'element-plus'
-import {PageInterface} from "./model/page";
+import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
+import {MenuConfigInterface} from "./model/menu";
+import {useStore} from "vuex";
+import {useRouter} from 'vue-router'
+import {useI18n} from 'vue-i18n'
+import {useSocket} from './services/socketio.service'
+import {ElNotification} from 'element-plus'
+import {LayoutSize, PageInterface} from "./model/page";
 import {usePageService} from "./services/page.service";
 
 const props = defineProps<{
@@ -131,6 +131,8 @@ const props = defineProps<{
 
 const mainContainer = ref(null);
 const mainHeader = ref(null);
+
+let layoutSize = ref(LayoutSize.large)
 
 let mainViewHeight = ref(0)
 let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
@@ -143,14 +145,25 @@ function setCollapsed() {
 }
 
 onMounted(() => {
+    console.log('App mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
+    window.addEventListener('resize', handleResize);
+    handleResize();
 
     if (store.getters['config/isLoaded']) {
-        console.log('mounted')
+
         loadMenu()
         //registerPages()
     }
 })
+
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
+})
+
+function handleResize() {
+    layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
+}
 
 
 const store = useStore();
@@ -194,7 +207,13 @@ function addRoute(path: string, page: PageInterface) {
         path: path,
         component: page.component,
         props: {
-            pageConfig: page.config
+            pageConfig: page.config,
+            layoutSize: layoutSize
+        },
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: `Tabbled | ${page.title}`
         }
     })
     pagesByPath.value.set(path, page.alias);

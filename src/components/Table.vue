@@ -9,10 +9,10 @@
         <el-table-column v-if="isRowSelectable" type="selection" width="38" />
         <el-table-column v-for="element in columns"
                          :sortable="element.sortable ? 'custom' : false"
-                         :key="element.fieldAlias"
+                         :key="element.field"
                          :label="element.title"
                          :width="element.width"
-                         :prop="element.fieldAlias"
+                         :prop="element.field"
 
         >
             <template #default="scope">
@@ -56,9 +56,6 @@ const data = ref([])
 
 console.log(props)
 
-
-
-
 //console.log(props.dataSource.fields[0].alias)
 
 let getHeaderCellClass = (column: any) => {
@@ -71,7 +68,7 @@ let getHeaderCellClass = (column: any) => {
 let getHeaderTitle = (scope: any) => {
     //console.log(scope)
     let fieldIndex = props.isRowSelectable ? scope.$index -1 : scope.$index
-    //console.log(scope.$index,props.dataSource.fields)
+    console.log(scope.$index,props.dataSource.fields)
     return props.dataSource.fields[fieldIndex].title
 }
 
