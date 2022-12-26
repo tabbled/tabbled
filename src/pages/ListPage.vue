@@ -10,29 +10,64 @@
              :style="getGridElementStyle(element.position)"
              class="element"
         >
-            <component is="Table" v-bind="element.component.properties"></component>
+            <component :is="elementsProps[idx].component" v-bind="elementsProps[idx].properties"></component>
         </div>
 
     </div>
 </template>
 
 <script setup lang="ts">
-import {useStore} from "vuex"
-import {useSocket} from "../services/socketio.service";
-import {onMounted} from "vue";
-import {LayoutSize, PageConfigInterface, PositionElementInterface} from "../model/page";
+import { useStore } from "vuex"
+import { useSocket } from "../services/socketio.service";
+import { onMounted, watch, ref } from "vue";
+import { LayoutSize, PageConfigInterface, PositionElementInterface } from "../model/page";
+import {useRouter, onBeforeRouteUpdate, useRoute} from 'vue-router';
+import {DataSourceInterface} from "../model/datasource";
+import {useDataSourceService} from "../services/datasource.service";
 
 let store = useStore();
 let socket = useSocket();
+let router = useRouter();
+let route = useRoute()
+let dsService = useDataSourceService()
+
+let dataSource = ref<DataSourceInterface>()
+let elementsProps = ref<Array<Object>>()
+
+onBeforeRouteUpdate(async (to, from) => {
+    // only fetch the user if the id changed as maybe only the query or the hash changed
+    console.log('onBeforeRouteUpdate', to, from)
+})
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
     layoutSize: LayoutSize
 }>()
 
+watch(() => route.path,
+    async () => {
+        initLayoutElements()
+    })
+
 onMounted(() => {
-    console.log('onMounted page', props.pageConfig.type )
+    initLayoutElements()
 })
+
+function initLayoutElements() {
+    console.log('initLayoutElements')
+    console.log(props.pageConfig)
+    dataSource.value = dsService.getDataSourceByAlias(props.pageConfig.dataSource)
+
+    if (!dataSource.value)
+        console.warn(`DataSource ${props.pageConfig.dataSource} does not exist!`)
+
+    props.pageConfig.layout
+
+
+
+console.log(dataSource)
+
+}
 
 function getGridElementStyle(element:PositionElementInterface) {
     let style = {

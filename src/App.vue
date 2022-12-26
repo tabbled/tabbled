@@ -165,7 +165,6 @@ function handleResize() {
     layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
 }
 
-
 const store = useStore();
 const router = useRouter();
 let pages = usePageService();

@@ -1,3 +1,7 @@
+
+import {DataSourceInterface} from "./datasource";
+import {ColumnInterface} from "./column";
+
 export enum PageType {
     list = 'list',
     edit = 'edit',
@@ -36,7 +40,8 @@ export interface ElementInterface {
     position: PositionElementInterface,
     component: {
         name: string,
-        properties?: object
+        dataSource?: DataSourceInterface,
+        columns?: ColumnInterface[]
     }
 }
 
@@ -45,6 +50,7 @@ export interface PageConfigInterface {
     path: string,
     title: string,
     type: PageType,
+    dataSource: string,
     layout?: {
         [key in LayoutSize]: ElementInterface[]
     }
