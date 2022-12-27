@@ -103,15 +103,16 @@ function initLayoutElements() {
         elements.value.push(el)
     })
 
+    //Test page actions that show in the page header
     pagesActions.buttons = [{
         type: 'primary' ,
         title: "Add " + props.pageConfig.title,
         act: () => { console.log('act ADD')}
         },{
         title: "Edit",
+        type: 'text',
         act: () => { console.log('act EDIT')}
     }]
-    console.log('initted', actionButtons.value)
 }
 
 function getGridElementStyle(element:PositionElementInterface) {

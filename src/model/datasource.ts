@@ -2,7 +2,8 @@ import {Field, FieldConfigInterface, FieldInterface} from "./field";
 
 export enum StorageType {
     internal = 'internal',
-    external = 'external'
+    external = 'external',
+    config = 'config'
 }
 
 export enum DataSourceType {
@@ -170,5 +171,104 @@ export class DataSource implements DataSourceInterface {
 
     async removeByRow(row: number): Promise<any> {
         return false;
+    }
+}
+
+export class ConfigDataSource implements DataSourceInterface {
+    constructor(alias: string, keyField: string, fields: FieldConfigInterface[]) {
+        this.fieldByAlias = new Map()
+        this.alias = alias
+        this.keyField = keyField
+
+        fields.forEach(conf => {
+            this.fieldByAlias.set(conf.alias, new Field(conf))
+        })
+        this.fields = [...this.fieldByAlias.values()]
+    }
+
+    private fieldByAlias: Map<string, FieldInterface>
+    private data: Object[] = []
+
+    alias: string;
+    fields: FieldInterface[];
+    isEditable = true;
+    keyField: string;
+    storageType = StorageType.config;
+    cached = true;
+
+    setData(data: Object[]) {
+        this.data = data;
+    }
+
+    getAll(): object[] {
+        console.log('getAll')
+        return this.data
+    }
+
+    getFieldByAlias(alias: string): FieldInterface | undefined {
+        return this.fieldByAlias.get(alias)
+    }
+
+    getById(id: string | number): object | null {
+        return null;
+    }
+
+    getByRow(row: number): object | null {
+        return []
+    }
+
+    setValueById(id: number | string, field: string, value: any): boolean {
+        return false;
+    }
+
+    setValueByRow(row: number, field: string, value: any): boolean {
+        return false;
+    }
+
+    onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
+
+    async removeById(id: number | string): Promise<any> {
+        return false;
+    }
+
+    async removeByRow(row: number): Promise<any> {
+        return false;
+    }
+}
+
+export class PageConfigDataSource extends ConfigDataSource {
+    constructor() {
+        super('pages', 'alias', [
+            {
+                title: 'Title',
+                alias: 'title',
+                type: "string",
+                required: true
+            },
+            {
+                title: 'Path',
+                alias: 'path',
+                type: "string",
+                required: true
+            },
+            {
+                title: 'Component',
+                alias: 'component',
+                type: "string",
+                required: true
+            },
+            {
+                title: 'Alias',
+                alias: 'alias',
+                type: "string",
+                required: true
+            },
+            {
+                title: 'Layout',
+                alias: 'layout',
+                type: "text",
+                required: true
+            }
+        ]);
     }
 }

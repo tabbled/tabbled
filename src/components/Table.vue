@@ -52,19 +52,19 @@ const props = withDefaults(defineProps<Props>(), {
     isRowSelectable: true
 })
 
-const data = ref([])
+const data = ref<Array<Object>>([])
 let columns = ref<Array<Column>>([])
 
 watch(() => props,
     async () => {
-        initColumns();
+        init();
     },
     {
         deep: true
     })
 
 onMounted(() => {
-    initColumns();
+    init();
 });
 
 let getHeaderCellClass = (column: any) => {
@@ -88,8 +88,9 @@ let getCellData = (scope: any) => {
     return entity[scope.column.property] ? entity[scope.column.property] : ''
 }
 
-function initColumns() {
+function init() {
     columns.value = []
+    data.value = []
 
     if (!props.dataSource) {
         console.warn(`DataSource parameter for Table component not set`)
@@ -106,6 +107,9 @@ function initColumns() {
             console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSource.alias}`)
 
     })
+
+    if (props.dataSource)
+        data.value = props.dataSource.getAll()
 }
 
 

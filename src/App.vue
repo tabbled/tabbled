@@ -199,8 +199,6 @@ store.subscribe((mutation: any) => {
     }
 });
 
-
-
 function registerPages() {
     pagesByAlias.value.clear()
 

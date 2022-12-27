@@ -24,6 +24,13 @@ export class DataSourceService {
             throw 'Unknown data source type ' + config.type;
     }
 
+    addDataSource(dataSource: DataSourceInterface) {
+        if (this.dataSources.has(dataSource.alias))
+            throw `Err: error registration datasource, alias ${dataSource.alias} has been taken`
+
+        this.dataSources.set(dataSource.alias, dataSource);
+    }
+
     clear() {
         this.dataSources.clear();
     }
