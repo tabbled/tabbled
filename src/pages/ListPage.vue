@@ -21,6 +21,7 @@ import { LayoutSize, PageConfigInterface, PositionElementInterface } from "../mo
 import { useRouter, useRoute } from 'vue-router';
 import { DataSourceInterface } from "../model/datasource";
 import { useDataSourceService } from "../services/datasource.service";
+import {usePagesActions} from "../services/page.service";
 
 export interface ElementInterface {
     component: string,
@@ -34,6 +35,7 @@ let store = useStore();
 let socket = useSocket();
 let router = useRouter();
 let route = useRoute();
+const pagesActions = usePagesActions()
 let dsService = useDataSourceService();
 
 let dataSource = ref<DataSourceInterface>()
@@ -45,6 +47,12 @@ const props = defineProps<{
     layoutSize: LayoutSize
 }>()
 
+const actionButtons = ref<Array<Object>>( [{title: props.pageConfig.title}])
+
+defineExpose({
+        actionButtons
+})
+
 watch(() => props.layoutSize,
     async () => {
         initLayoutElements()
@@ -52,14 +60,19 @@ watch(() => props.layoutSize,
 
 watch(() => props.pageConfig,
     async () => {
-        //console.log('props.pageConfig')
+        console.log('props.pageConfig')
         initLayoutElements()
+
+
+
     })
 
 onMounted(() => {
     //console.log('onMounted')
     initLayoutElements()
 })
+
+
 
 function initLayoutElements() {
     elements.value = []
@@ -90,7 +103,15 @@ function initLayoutElements() {
         elements.value.push(el)
     })
 
-
+    pagesActions.buttons = [{
+        type: 'primary' ,
+        title: "Add " + props.pageConfig.title,
+        act: () => { console.log('act ADD')}
+        },{
+        title: "Edit",
+        act: () => { console.log('act EDIT')}
+    }]
+    console.log('initted', actionButtons.value)
 }
 
 function getGridElementStyle(element:PositionElementInterface) {

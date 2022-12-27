@@ -82,7 +82,6 @@
             </el-aside>
             <el-container >
                 <el-col class="main-router-view" ref="mainContainer" :style="{width: isCollapsed ? 'calc(100% - 64px)' :'calc(100% - 250px)' }">
-
                     <el-page-header ref="mainHeader" style="margin: 16px" @back="$router.back()">
                         <template #content>
                             <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
@@ -90,14 +89,21 @@
 
                         <template #extra>
                             <div class="flex items-center">
-                                <el-button>Print</el-button>
-                                <el-button type="primary" class="ml-2">Edit</el-button>
+
+                                <el-button v-for="action in pagesActions.buttons"
+                                           :type="action.type ? action.type : 'default'"
+                                           @click="action.act()"
+                                >
+                                    {{action.title}}
+                                </el-button>
                             </div>
                         </template>
                     </el-page-header>
                     <el-main>
                         <el-scrollbar :height="mainViewHeight">
-                            <router-view :layoutSize="layoutSize" />
+                            <router-view :layoutSize="layoutSize" v-slot="{Component}">
+                                <component ref="rView" :is="Component" />
+                            </router-view>
 
                         </el-scrollbar>
 
@@ -126,6 +132,7 @@ import {LayoutSize, PageConfigInterface} from "./model/page";
 import EditPage from "./pages/EditPage.vue";
 import ListPage from "./pages/ListPage.vue";
 import NotFound from "./pages/NotFound.vue"
+import { usePagesActions } from "./services/page.service"
 
 const props = defineProps<{
 
@@ -133,6 +140,7 @@ const props = defineProps<{
 
 const mainContainer = ref(null);
 const mainHeader = ref(null);
+const rView = ref(null)
 
 let layoutSize = ref(LayoutSize.large)
 
@@ -145,6 +153,9 @@ const store = useStore();
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
+const pagesActions = usePagesActions()
+
+
 
 let socketio = ref({
     initiated: false,
