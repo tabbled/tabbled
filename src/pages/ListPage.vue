@@ -1,16 +1,13 @@
 <template>
-    <div>Page view {{layoutSize.value}} {{pageConfig.layout[layoutSize.value]}} </div>
-
-    <div ref="grid" class="grid-wrap"
-    >
+    <div ref="grid" class="grid-wrap">
 
 
-        <div v-for="(element, idx) in pageConfig.layout[layoutSize.value]"
+        <div v-for="(element, idx) in elements"
              :id="idx"
              :style="getGridElementStyle(element.position)"
              class="element"
         >
-            <component :is="elementsProps[idx].component" v-bind="elementsProps[idx].properties"></component>
+            <component :is="element.component" v-bind="element.properties"></component>
         </div>
 
     </div>
@@ -21,51 +18,78 @@ import { useStore } from "vuex"
 import { useSocket } from "../services/socketio.service";
 import { onMounted, watch, ref } from "vue";
 import { LayoutSize, PageConfigInterface, PositionElementInterface } from "../model/page";
-import {useRouter, onBeforeRouteUpdate, useRoute} from 'vue-router';
-import {DataSourceInterface} from "../model/datasource";
-import {useDataSourceService} from "../services/datasource.service";
+import { useRouter, useRoute } from 'vue-router';
+import { DataSourceInterface } from "../model/datasource";
+import { useDataSourceService } from "../services/datasource.service";
+
+export interface ElementInterface {
+    component: string,
+    position: PositionElementInterface,
+    properties: {
+        [name: string]: any
+    }
+}
 
 let store = useStore();
 let socket = useSocket();
 let router = useRouter();
-let route = useRoute()
-let dsService = useDataSourceService()
+let route = useRoute();
+let dsService = useDataSourceService();
 
 let dataSource = ref<DataSourceInterface>()
-let elementsProps = ref<Array<Object>>()
 
-onBeforeRouteUpdate(async (to, from) => {
-    // only fetch the user if the id changed as maybe only the query or the hash changed
-    console.log('onBeforeRouteUpdate', to, from)
-})
+let elements = ref<Array<ElementInterface>>([])
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
     layoutSize: LayoutSize
 }>()
 
-watch(() => route.path,
+watch(() => props.layoutSize,
     async () => {
         initLayoutElements()
     })
 
+watch(() => props.pageConfig,
+    async () => {
+        //console.log('props.pageConfig')
+        initLayoutElements()
+    })
+
 onMounted(() => {
+    //console.log('onMounted')
     initLayoutElements()
 })
 
 function initLayoutElements() {
-    console.log('initLayoutElements')
-    console.log(props.pageConfig)
+    elements.value = []
     dataSource.value = dsService.getDataSourceByAlias(props.pageConfig.dataSource)
 
     if (!dataSource.value)
-        console.warn(`DataSource ${props.pageConfig.dataSource} does not exist!`)
+        console.warn(`DataSource "${props.pageConfig.dataSource}" does not exist!`)
 
-    props.pageConfig.layout
+    if (!props.pageConfig.layout || !props.pageConfig.layout[props.layoutSize]) {
+        console.warn(`Layout for ${props.layoutSize} does not exist!`)
+        return;
+    }
+    let layout = props.pageConfig.layout[props.layoutSize];
+    layout.forEach(element => {
+        let el:ElementInterface = {
+            position: element.position,
+            component: element.component.name,
+            properties: {}
+        }
 
+        if (element.component.name === 'Table') {
+            el.properties.columns = element.component.columns
+            el.properties.dataSource = element.component.dataSource
+                ? dsService.getDataSourceByAlias(element.component.dataSource)
+                : undefined
+        }
 
+        elements.value.push(el)
+    })
 
-console.log(dataSource)
 
 }
 

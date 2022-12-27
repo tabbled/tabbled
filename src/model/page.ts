@@ -1,13 +1,11 @@
+import {ColumnConfigInterface} from "./column";
 
-import {DataSourceInterface} from "./datasource";
-import {ColumnInterface} from "./column";
-
-export enum PageType {
-    list = 'list',
-    edit = 'edit',
-    kanban = 'kanban',
-    dashboard = 'dashboard'
-}
+// export enum PageType {
+//     list = 'list',
+//     edit = 'edit',
+//     kanban = 'kanban',
+//     dashboard = 'dashboard'
+// }
 
 export enum LayoutSize {
     large = 'large',
@@ -36,12 +34,12 @@ export interface PositionElementInterface {
     rowTo: number
 }
 
-export interface ElementInterface {
+export interface ElementConfigInterface {
     position: PositionElementInterface,
     component: {
         name: string,
-        dataSource?: DataSourceInterface,
-        columns?: ColumnInterface[]
+        dataSource?: string,
+        columns?: ColumnConfigInterface[]
     }
 }
 
@@ -49,12 +47,12 @@ export interface PageConfigInterface {
     alias: string,
     path: string,
     title: string,
-    type: PageType,
+    //type: PageType,
+    component: string,
     dataSource: string,
     layout?: {
-        [key in LayoutSize]: ElementInterface[]
+        [key in LayoutSize]: ElementConfigInterface[]
     }
-    template?: string,
 }
 
 
@@ -63,10 +61,8 @@ export interface PageInterface {
     path: string,
     title: string,
     layout?: {
-        [key in LayoutSize]: ElementInterface[]
-    }
-    template?: string,
-    component: any,
+        [key in LayoutSize]: ElementConfigInterface[]
+    },
     config: PageConfigInterface
 }
 
@@ -75,7 +71,6 @@ export class EditPage implements PageInterface {
         this.path = config.path;
         this.alias = config.alias;
         this.layout = config.layout;
-        this.template = config.template;
         this.component = component;
         this.title = config.title;
         this.config = config
@@ -87,7 +82,6 @@ export class EditPage implements PageInterface {
     component: any;
     alias: string;
     layout?: {
-        [key in LayoutSize]: ElementInterface[]
+        [key in LayoutSize]: ElementConfigInterface[]
     }
-    template?: string
 }

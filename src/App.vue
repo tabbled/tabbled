@@ -97,7 +97,7 @@
                     </el-page-header>
                     <el-main>
                         <el-scrollbar :height="mainViewHeight">
-                            <router-view />
+                            <router-view :layoutSize="layoutSize" />
 
                         </el-scrollbar>
 
@@ -118,12 +118,14 @@
 import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
 import {MenuConfigInterface} from "./model/menu";
 import {useStore} from "vuex";
-import {useRouter} from 'vue-router'
+import {useRouter, useRoute} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {useSocket} from './services/socketio.service'
 import {ElNotification} from 'element-plus'
-import {LayoutSize, PageInterface} from "./model/page";
-import {usePageService} from "./services/page.service";
+import {LayoutSize, PageConfigInterface} from "./model/page";
+import EditPage from "./pages/EditPage.vue";
+import ListPage from "./pages/ListPage.vue";
+import NotFound from "./pages/NotFound.vue"
 
 const props = defineProps<{
 
@@ -137,37 +139,11 @@ let layoutSize = ref(LayoutSize.large)
 let mainViewHeight = ref(0)
 let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
-let pagesByPath = ref<Map<string, string>>(new Map<string, string>())
-
-function setCollapsed() {
-    isCollapsed.value = !isCollapsed.value;
-    localStorage.setItem('is_menu_collapsed', isCollapsed.value ? 'true' : 'false')
-}
-
-onMounted(() => {
-    console.log('App mounted')
-    mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    if (store.getters['config/isLoaded']) {
-
-        loadMenu()
-        //registerPages()
-    }
-})
-
-onUnmounted(() => {
-    window.removeEventListener('resize', handleResize);
-})
-
-function handleResize() {
-    layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
-}
+let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
 const store = useStore();
 const router = useRouter();
-let pages = usePageService();
+const route = useRoute();
 const { t } = useI18n();
 
 let socketio = ref({
@@ -181,6 +157,30 @@ initSocketIO()
 
 let sidebarMenu = ref<Array<MenuConfigInterface>>([])
 
+function setCollapsed() {
+    isCollapsed.value = !isCollapsed.value;
+    localStorage.setItem('is_menu_collapsed', isCollapsed.value ? 'true' : 'false')
+}
+
+onMounted(() => {
+    console.log('App mounted')
+    mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    if (store.getters['config/isLoaded']) {
+        loadMenu()
+    }
+})
+
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
+})
+
+function handleResize() {
+    layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
+}
+
 store.subscribe((mutation: any) => {
     if (mutation.type === 'config/loaded') {
         loadMenu()
@@ -191,23 +191,28 @@ store.subscribe((mutation: any) => {
 
 
 function registerPages() {
-    pagesByPath.value.clear();
+    pagesByAlias.value.clear()
 
-    pages.getAll().forEach(page => {
-
-        let path = page.path;
-        addRoute(path, page);
+    store.getters['config/pages'].forEach((config:PageConfigInterface) => {
+        addRoute(config.path, config);
     })
-
 }
 
-function addRoute(path: string, page: PageInterface) {
+function getComponentByName(name: string) {
+    switch (name) {
+        case 'EditPage': return EditPage
+        case 'ListPage': return ListPage
+    }
+    return NotFound
+}
+
+function addRoute(path: string, page: PageConfigInterface) {
     router.addRoute({
         path: path,
-        component: page.component,
+        component: getComponentByName(page.component),
         props: {
-            pageConfig: page.config,
-            layoutSize: layoutSize
+            pageConfig: page,
+            layoutSize: layoutSize.value
         },
         meta: {
             isSingle: false,
@@ -215,7 +220,7 @@ function addRoute(path: string, page: PageInterface) {
             title: `Tabbled | ${page.title}`
         }
     })
-    pagesByPath.value.set(path, page.alias);
+    pagesByAlias.value.set(path, page);
     console.info('Route ' + path + ' added')
 
     if (path === router.currentRoute.value.path) {
@@ -224,8 +229,8 @@ function addRoute(path: string, page: PageInterface) {
 }
 
 const currentPageTitle: ComputedRef<string> = computed((): string =>  {
-    const alias = pagesByPath.value.get(router.currentRoute.value.path);
-    return alias ? pages.getPageByAlias(alias).title : ""
+    const page = pagesByAlias.value.get(router.currentRoute.value.path);
+    return page ? page.title : ""
 })
 
 

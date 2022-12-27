@@ -19,6 +19,8 @@ export interface DataSourceInterface {
      */
     isEditable: boolean,
 
+    alias: string,
+
     isTree?: boolean
 
     fields: FieldInterface[],
@@ -81,6 +83,8 @@ export interface DataSourceInterface {
 
     removeByRow(row: number): Promise<any>
     removeById(id: number | string): Promise<any>
+
+    getFieldByAlias(alias: string): FieldInterface | undefined
 }
 
 export interface DataSourceConfigInterface {
@@ -99,12 +103,14 @@ export class DataSource implements DataSourceInterface {
         this.isEditable = !!config.isEditable
         this.keyField = config.keyField;
         this.isTree = config.isTree;
-        this.fields = []
         this.storageType = config.storageType;
+        this.fieldByAlias = new Map()
+        this.alias = config.alias
 
         config.fields.forEach(conf => {
-            this.fields.push(new Field(conf))
+            this.fieldByAlias.set(conf.alias, new Field(conf))
         })
+        this.fields = [...this.fieldByAlias.values()]
     }
 
     private data: object[] = [{
@@ -118,6 +124,9 @@ export class DataSource implements DataSourceInterface {
         color: "blue"
     }]
 
+    private fieldByAlias: Map<string, FieldInterface>
+
+    alias: string;
     fields: FieldInterface[];
     isEditable: boolean;
     keyField: string;
@@ -131,6 +140,10 @@ export class DataSource implements DataSourceInterface {
         }
         return this.data;
 
+    }
+
+    getFieldByAlias(alias: string): FieldInterface | undefined {
+        return this.fieldByAlias.get(alias)
     }
 
     getById(id: string | number): object | null {

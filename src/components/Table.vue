@@ -9,10 +9,10 @@
         <el-table-column v-if="isRowSelectable" type="selection" width="38" />
         <el-table-column v-for="element in columns"
                          :sortable="element.sortable ? 'custom' : false"
-                         :key="element.field"
+                         :key="element.field.alias"
                          :label="element.title"
                          :width="element.width"
-                         :prop="element.field"
+                         :prop="element.field.alias"
 
         >
             <template #default="scope">
@@ -38,9 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {DataSourceInterface} from "../model/datasource";
-import {ColumnConfigInterface} from "../model/column";
+import {Column, ColumnConfigInterface} from "../model/column";
 
 
 interface Props {
@@ -53,10 +53,19 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const data = ref([])
+let columns = ref<Array<Column>>([])
 
-console.log(props)
+watch(() => props,
+    async () => {
+        initColumns();
+    },
+    {
+        deep: true
+    })
 
-//console.log(props.dataSource.fields[0].alias)
+onMounted(() => {
+    initColumns();
+});
 
 let getHeaderCellClass = (column: any) => {
     let classes: string = 'custom-table-header';
@@ -66,10 +75,8 @@ let getHeaderCellClass = (column: any) => {
 }
 
 let getHeaderTitle = (scope: any) => {
-    //console.log(scope)
-    let fieldIndex = props.isRowSelectable ? scope.$index -1 : scope.$index
-    console.log(scope.$index,props.dataSource.fields)
-    return props.dataSource.fields[fieldIndex].title
+    let idx = props.isRowSelectable ? scope.$index -1 : scope.$index
+    return columns.value[idx].title
 }
 
 let getCellData = (scope: any) => {
@@ -79,6 +86,26 @@ let getCellData = (scope: any) => {
         return ''
 
     return entity[scope.column.property] ? entity[scope.column.property] : ''
+}
+
+function initColumns() {
+    columns.value = []
+
+    if (!props.dataSource) {
+        console.warn(`DataSource parameter for Table component not set`)
+        return;
+    }
+
+    props.columns.forEach(colConfig => {
+        let field = props.dataSource.getFieldByAlias(colConfig.field);
+
+        if (field) {
+            let column = new Column(colConfig, field)
+            columns.value.push(column)
+        } else
+            console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSource.alias}`)
+
+    })
 }
 
 

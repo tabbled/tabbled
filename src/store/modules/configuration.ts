@@ -4,11 +4,9 @@ import { MenuConfigInterface } from "../../model/menu";
 import { Commit } from "vuex";
 import { useSocket } from '../../services/socketio.service'
 import { useDataSourceService } from '../../services/datasource.service'
-import { usePageService } from "../../services/page.service";
 
 let socket  = useSocket()
 let dataSources = useDataSourceService();
-let pages = usePageService();
 
 
 export interface ConfigInterface {
@@ -69,7 +67,6 @@ const actions = {
 const mutations = {
     loaded (state: ConfigStateInterface, config: ConfigInterface) {
         dataSources.clear()
-        pages.clear();
 
         state.dataSources = config.dataSources;
         state.dataSources.forEach(ds => {
@@ -77,10 +74,6 @@ const mutations = {
         })
 
         state.pages = config.pages;
-        state.pages.forEach(page => {
-            pages.registerPage(page)
-        })
-
 
         state.sidebarMenu = config.sidebarMenu;
 
