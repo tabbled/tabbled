@@ -41,13 +41,12 @@
 
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue'
-import {Column, ColumnConfigInterface} from "../model/column";
+import {Column} from "../model/column";
 import {DataSet} from "../model/dataset";
 
 
 interface Props {
     dataSet: DataSet,
-    columns: ColumnConfigInterface[],
     isRowSelectable?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -59,6 +58,7 @@ let columns = ref<Array<Column>>([])
 
 watch(() => props,
     async () => {
+        console.log("props")
         init();
     },
     {
@@ -66,6 +66,7 @@ watch(() => props,
     })
 
 onMounted(() => {
+    console.log("mount table")
     init();
 });
 
@@ -102,28 +103,30 @@ function getHeaderClass() {
 }
 
 function init() {
-    columns.value = []
+    console.log("init", props.dataSet)
     data.value = []
+    columns.value = []
 
-    if (!props.dataSet) {
-        console.warn(`DataSet parameter for Table component not set`)
-        return;
-    }
-
-    props.columns.forEach(colConfig => {
-        let field = props.dataSet.getFieldByAlias(colConfig.field);
-
-        if (field) {
-            let column = new Column(colConfig, field)
-            columns.value.push(column)
-        } else
-            console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSet.dataSource?.alias}`)
-
-    })
 
     if (props.dataSet) {
+        columns.value = props.dataSet.columns
         data.value = props.dataSet.data
-    }
+    } else
+        console.warn(`DataSet parameter for Table component not set`)
+
+
+
+    // props.columns.forEach(colConfig => {
+    //     let field = props.dataSet.getFieldByAlias(colConfig.field);
+    //
+    //     if (field) {
+    //         let column = new Column(colConfig, field)
+    //         columns.value.push(column)
+    //     } else
+    //         console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSet.dataSource?.alias}`)
+    //
+    // })
+
 }
 
 

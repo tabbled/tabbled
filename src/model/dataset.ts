@@ -1,15 +1,52 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldInterface} from "./field";
+import {ColumnConfigInterface, Column} from "./column";
+
+export interface DataSetConfigInterface {
+    alias: string,
+    columns: ColumnConfigInterface[],
+    dataSource: string
+}
 
 export class DataSet {
-    dataSource: DataSourceInterface | undefined
+
+    constructor(alias: string, dataSource: DataSourceInterface, columns: ColumnConfigInterface[] | undefined) {
+        this.dataSource = dataSource;
+        this.alias = alias;
+
+        if (columns)
+            this.setColumns(columns)
+    }
+
+    readonly alias: string;
+    readonly dataSource: DataSourceInterface | undefined
+    readonly columns: Column[] = []
+    data: EntityInterface[] = []
 
     selectedRows: number[] = []
     currentRow: number | null = null
 
-    data: EntityInterface[] = []
+
+
+    setColumns(columns: ColumnConfigInterface[]) {
+        if (!this.dataSource) {
+            console.warn(`DataSource doesn't provide`)
+            return;
+        }
+
+        columns.forEach(colConfig => {
+            let field = this.dataSource?.getFieldByAlias(colConfig.field);
+
+            if (field) {
+                let column = new Column(colConfig, field)
+                this.columns.push(column)
+            } else
+                console.warn(`Field "${colConfig.field}" not found in data source ${this.dataSource?.alias}`)
+        })
+    }
 
     load() {
+        console.log('Load dataSet ', this.alias)
         if (!this.dataSource) {
             console.warn(`Can't load, dataSource doesn't set`)
             return;
@@ -22,7 +59,7 @@ export class DataSet {
         return this.data[row]
     }
 
-    getFieldByAlias(alias: string): FieldInterface | undefined {
+    getColumnByAlias(alias: string): FieldInterface | undefined {
         if (!this.dataSource)
             return undefined;
 
@@ -35,7 +72,7 @@ export class DataSet {
     }
 
     updateRow(row: number, entity: EntityInterface) {
-        this.data[row] = entity;
+        this.data.splice(row, 1, entity);
     }
 
     updateDataRow(row: number, field: string, cellData: any): boolean {

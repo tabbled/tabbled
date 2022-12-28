@@ -38,18 +38,16 @@ let router = useRouter();
 let route = useRoute();
 const pagesActions = usePagesActions()
 let dsService = useDataSourceService();
-let dataset = ref<DataSet>(new DataSet())
-
-let dataSource = ref<DataSourceInterface>()
 
 let elements = ref<Array<ElementInterface>>([])
+let dataSets = ref<Map<string, DataSet>>(new Map())
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
     layoutSize: LayoutSize
 }>()
 
-const actionButtons = ref<Array<Object>>( [{title: props.pageConfig.title}])
+const actionButtons = ref<Array<Object>>( [])
 
 defineExpose({
         actionButtons
@@ -78,16 +76,28 @@ onMounted(() => {
 
 function initLayoutElements() {
     elements.value = []
-    dataSource.value = dsService.getDataSourceByAlias(props.pageConfig.dataSource)
-    dataset.value.dataSource = dataSource.value
 
-    if (!dataSource.value)
-        console.warn(`DataSource "${props.pageConfig.dataSource}" does not exist!`)
+    props.pageConfig.dataSets.forEach(config => {
+        let dataSource:DataSourceInterface | undefined = dsService.getDataSourceByAlias(config.dataSource)
+
+        if (!dataSource) {
+            console.warn(`DataSource "${config.dataSource}" does not exist!`)
+            return;
+        }
+
+        let ds = new DataSet(config.alias, dataSource, config.columns);
+        dataSets.value.set(ds.alias, ds)
+    })
+
+
+
+
 
     if (!props.pageConfig.layout || !props.pageConfig.layout[props.layoutSize]) {
         console.warn(`Layout for ${props.layoutSize} does not exist!`)
         return;
     }
+
     let layout = props.pageConfig.layout[props.layoutSize];
     layout.forEach(element => {
         let el:ElementInterface = {
@@ -97,14 +107,14 @@ function initLayoutElements() {
         }
 
         if (element.component.name === 'Table') {
-            el.properties.columns = element.component.columns
+            if (element.component.dataSet) {
+                let ds = dataSets.value.get(element.component.dataSet)
 
-            if (element.component.dataSource && element.component.dataSource !== props.pageConfig.dataSource) {
-                console.warn(`Different datasource for child component
-                                      "Table" on ListPage doesn't support.`)
+                if (!ds)
+                    console.warn(`DataSet "${element.component.dataSet}" does not exist!`)
+
+                el.properties.dataSet = ds
             }
-
-            el.properties.dataSet = dataset.value
         }
 
         elements.value.push(el)
@@ -112,16 +122,17 @@ function initLayoutElements() {
 
     //Test page actions that show in the page header
     pagesActions.buttons = [{
-        type: 'primary' ,
         title: "Add " + props.pageConfig.title,
         act: () => { console.log('act ADD')}
         },{
         title: "Edit",
-        type: 'text',
+        type: "primary",
         act: () => { console.log('act EDIT')}
     }]
 
-    dataset.value.load()
+    dataSets.value.forEach(ds => {
+        ds.load()
+    })
 }
 
 function getGridElementStyle(element:PositionElementInterface) {
