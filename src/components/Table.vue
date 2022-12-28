@@ -5,8 +5,10 @@
             :fit="true"
             highlight-current-row
             :header-cell-class-name="getHeaderCellClass"
+            :header-row-class-name="getHeaderClass"
+            :row-class-name="getRowClass"
     >
-        <el-table-column v-if="isRowSelectable" type="selection" width="38" />
+        <el-table-column v-if="isRowSelectable" type="selection" width="30" />
         <el-table-column v-for="element in columns"
                          :sortable="element.sortable ? 'custom' : false"
                          :key="element.field.alias"
@@ -39,12 +41,12 @@
 
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue'
-import {DataSourceInterface} from "../model/datasource";
 import {Column, ColumnConfigInterface} from "../model/column";
+import {DataSet} from "../model/dataset";
 
 
 interface Props {
-    dataSource: DataSourceInterface,
+    dataSet: DataSet,
     columns: ColumnConfigInterface[],
     isRowSelectable?: boolean
 }
@@ -68,7 +70,7 @@ onMounted(() => {
 });
 
 let getHeaderCellClass = (column: any) => {
-    let classes: string = 'custom-table-header';
+    let classes: string = 'table-cell-header';
     if (column.column.order === '' || !column.column.order)
         classes += ` hidden-sort-wrapper`
     return  classes
@@ -80,7 +82,10 @@ let getHeaderTitle = (scope: any) => {
 }
 
 let getCellData = (scope: any) => {
-    const entity: object | null = props.dataSource.getByRow(scope.$index);
+    if (!props.dataSet)
+        return;
+
+    const entity: object | undefined = props.dataSet.getByRow(scope.$index);
 
     if (!entity)
         return ''
@@ -88,28 +93,37 @@ let getCellData = (scope: any) => {
     return entity[scope.column.property] ? entity[scope.column.property] : ''
 }
 
+function getRowClass() {
+    return "table-row"
+}
+
+function getHeaderClass() {
+    return "table-header"
+}
+
 function init() {
     columns.value = []
     data.value = []
 
-    if (!props.dataSource) {
-        console.warn(`DataSource parameter for Table component not set`)
+    if (!props.dataSet) {
+        console.warn(`DataSet parameter for Table component not set`)
         return;
     }
 
     props.columns.forEach(colConfig => {
-        let field = props.dataSource.getFieldByAlias(colConfig.field);
+        let field = props.dataSet.getFieldByAlias(colConfig.field);
 
         if (field) {
             let column = new Column(colConfig, field)
             columns.value.push(column)
         } else
-            console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSource.alias}`)
+            console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSet.dataSource?.alias}`)
 
     })
 
-    if (props.dataSource)
-        data.value = props.dataSource.getAll()
+    if (props.dataSet) {
+        data.value = props.dataSet.data
+    }
 }
 
 
@@ -125,20 +139,48 @@ function init() {
     }
 }
 
-.custom-table-header {
+.table-header {
+    .el-table__cell {
+        padding: 4px;
+    }
+
+    .cell {
+        padding-left: 4px;
+        padding-right: 4px;
+
+    }
+}
+
+.table-cell-header {
+
     .cell {
         white-space: nowrap !important;
-        font-weight: normal !important;
+        font-weight: 500 !important;
+    }
+
+    .el-table__cell {
+        padding: 4px;
+
     }
 }
 
 .adv-column {
     .cell {
-        background: #535bf2;
         white-space: nowrap;
         text-overflow: clip;
     }
 
+}
+
+.table-row {
+    .cell {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .el-table__cell {
+        padding: 4px;
+    }
 }
 
 

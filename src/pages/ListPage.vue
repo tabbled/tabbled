@@ -22,6 +22,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { DataSourceInterface } from "../model/datasource";
 import { useDataSourceService } from "../services/datasource.service";
 import {usePagesActions} from "../services/page.service";
+import { DataSet } from "../model/dataset";
 
 export interface ElementInterface {
     component: string,
@@ -37,6 +38,7 @@ let router = useRouter();
 let route = useRoute();
 const pagesActions = usePagesActions()
 let dsService = useDataSourceService();
+let dataset = ref<DataSet>(new DataSet())
 
 let dataSource = ref<DataSourceInterface>()
 
@@ -77,6 +79,7 @@ onMounted(() => {
 function initLayoutElements() {
     elements.value = []
     dataSource.value = dsService.getDataSourceByAlias(props.pageConfig.dataSource)
+    dataset.value.dataSource = dataSource.value
 
     if (!dataSource.value)
         console.warn(`DataSource "${props.pageConfig.dataSource}" does not exist!`)
@@ -95,9 +98,13 @@ function initLayoutElements() {
 
         if (element.component.name === 'Table') {
             el.properties.columns = element.component.columns
-            el.properties.dataSource = element.component.dataSource
-                ? dsService.getDataSourceByAlias(element.component.dataSource)
-                : undefined
+
+            if (element.component.dataSource && element.component.dataSource !== props.pageConfig.dataSource) {
+                console.warn(`Different datasource for child component
+                                      "Table" on ListPage doesn't support.`)
+            }
+
+            el.properties.dataSet = dataset.value
         }
 
         elements.value.push(el)
@@ -113,6 +120,8 @@ function initLayoutElements() {
         type: 'text',
         act: () => { console.log('act EDIT')}
     }]
+
+    dataset.value.load()
 }
 
 function getGridElementStyle(element:PositionElementInterface) {

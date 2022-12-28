@@ -11,78 +11,38 @@ export enum DataSourceType {
     entity = 'entity'
 }
 
-/**
- * Basic data source interface
- */
+export interface EntityInterface {
+    [name: string]: any | never
+}
+
 export interface DataSourceInterface {
-    /**
-     * Editable data source, user can edit editable fields
-     */
-    isEditable: boolean,
-
+    readonly: boolean,
     alias: string,
-
     isTree?: boolean
-
     fields: FieldInterface[],
-
     storageType: StorageType,
-
     cached: boolean
-
-    /**
-     * alias of field that is a primary key of data source
-     */
     keyField: string,
 
     /**
      * Get all data store from the data source
      * @returns {object[]} all data from data source
      */
-    getAll(): object[]
-
-    /**
-     * Return entity data by row
-     * @param row row number of dataset
-     * @returns entity if exists or null if not exists
-     */
-    getByRow(row: number) : object | null
+    getAll(): EntityInterface[]
 
     /**
      * Return entity data by row
      * @param id entity id
      * @returns entity if exists or null if not exists
      */
-    getById(id: string | number) : object | null
+    getById(id: string | number) : EntityInterface | undefined
 
-    /**
-     * Set data in certain field by row number
-     * @param row number
-     * @param field alias
-     * @param value that should be set to the entity
-     * @returns {object[]} the all data from data source
-     */
-    setValueByRow(row: number, field: string, value: any): boolean
 
-    /**
-     * Set data in certain field by row number
-     * @param id unique indetifier of entity
-     * @param field alias of field
-     * @param value that should be set to the entity
-     * @returns {boolean} success of setting value
-     */
-    setValueById(id: number | string, field: string, value: any): boolean
-
-    /**
-     * Invokes when some value in data has been changed
-     * @param alias field that has been changed
-     * @param oldValue old value of entity
-     * @param newValue new value of entity
-     */
-    onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
+    //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
     //onRowChange?: (newValue: any, oldValue?: any) => void;
 
-    removeByRow(row: number): Promise<any>
+    insert(value: any): Promise<any>
+    updateById(id: number | string, value: object): Promise<any>
     removeById(id: number | string): Promise<any>
 
     getFieldByAlias(alias: string): FieldInterface | undefined
@@ -93,7 +53,7 @@ export interface DataSourceConfigInterface {
     type: DataSourceType,
     title?: string,
     alias: string,
-    isEditable?: boolean,
+    readonly?: boolean,
     keyField: string,
     isTree?: boolean,
     storageType: StorageType,
@@ -101,12 +61,12 @@ export interface DataSourceConfigInterface {
 
 export class DataSource implements DataSourceInterface {
     constructor(config: DataSourceConfigInterface) {
-        this.isEditable = !!config.isEditable
         this.keyField = config.keyField;
-        this.isTree = config.isTree;
+        this.isTree = !!config.isTree;
         this.storageType = config.storageType;
         this.fieldByAlias = new Map()
-        this.alias = config.alias
+        this.alias = config.alias;
+        this.readonly = !!config.readonly;
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -114,13 +74,16 @@ export class DataSource implements DataSourceInterface {
         this.fields = [...this.fieldByAlias.values()]
     }
 
-    private data: object[] = [{
+    private data: EntityInterface[] = [{
+        id: 1,
         name: "aaaa",
         color: "red"
     },{
+        id: 2,
         name: "bbbb",
         color: "black"
     },{
+        id: 3,
         name: "ccc",
         color: "blue"
     }]
@@ -129,48 +92,34 @@ export class DataSource implements DataSourceInterface {
 
     alias: string;
     fields: FieldInterface[];
-    isEditable: boolean;
     keyField: string;
     isTree?: boolean;
     storageType: StorageType;
     cached: boolean = true;
+    readonly: boolean = false;
 
-    getAll(): object[] {
-        if (this.onCellChange instanceof Function) {
-            this.onCellChange(100, 'ssa', 'asdasd')
-        }
+    getAll(): EntityInterface[] {
         return this.data;
-
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
         return this.fieldByAlias.get(alias)
     }
 
-    getById(id: string | number): object | null {
-        return null;
+    getById(id: string | number): EntityInterface | undefined {
+        return undefined;
     }
-
-    getByRow(row: number): object | null {
-        return this.data[row];
-    }
-
-    setValueById(id: number | string, field: string, value: any): boolean {
-        return false;
-    }
-
-    setValueByRow(row: number, field: string, value: any): boolean {
-        return false;
-    }
-
-    onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
 
     async removeById(id: number | string): Promise<any> {
         return false;
     }
 
-    async removeByRow(row: number): Promise<any> {
-        return false;
+    insert(value: any): Promise<any> {
+        return Promise.resolve(undefined);
+    }
+
+    updateById(id: number | string, value: object): Promise<any> {
+        return Promise.resolve(undefined);
     }
 }
 
@@ -191,17 +140,16 @@ export class ConfigDataSource implements DataSourceInterface {
 
     alias: string;
     fields: FieldInterface[];
-    isEditable = true;
     keyField: string;
     storageType = StorageType.config;
     cached = true;
+    readonly = false
 
-    setData(data: Object[]) {
+    setData(data: EntityInterface[]) {
         this.data = data;
     }
 
-    getAll(): object[] {
-        console.log('getAll')
+    getAll(): EntityInterface[] {
         return this.data
     }
 
@@ -209,30 +157,20 @@ export class ConfigDataSource implements DataSourceInterface {
         return this.fieldByAlias.get(alias)
     }
 
-    getById(id: string | number): object | null {
-        return null;
+    getById(id: string | number): EntityInterface | undefined {
+        return undefined;
     }
-
-    getByRow(row: number): object | null {
-        return []
-    }
-
-    setValueById(id: number | string, field: string, value: any): boolean {
-        return false;
-    }
-
-    setValueByRow(row: number, field: string, value: any): boolean {
-        return false;
-    }
-
-    onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
 
     async removeById(id: number | string): Promise<any> {
         return false;
     }
 
-    async removeByRow(row: number): Promise<any> {
-        return false;
+    insert(value: any): Promise<any> {
+        return Promise.resolve(undefined);
+    }
+
+    updateById(id: number | string, value: object): Promise<any> {
+        return Promise.resolve(undefined);
     }
 }
 
