@@ -92,7 +92,7 @@
 
                                 <el-button v-for="action in pagesActions.buttons"
                                            :type="action.type ? action.type : 'default'"
-                                           @click="action.act()"
+                                           @click="action.func()"
                                 >
                                     {{action.title}}
                                 </el-button>

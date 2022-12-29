@@ -43,6 +43,7 @@
 import {onMounted, ref, watch} from 'vue'
 import {Column} from "../model/column";
 import {DataSet} from "../model/dataset";
+import {EntityInterface} from "../model/datasource";
 
 
 interface Props {
@@ -53,12 +54,12 @@ const props = withDefaults(defineProps<Props>(), {
     isRowSelectable: true
 })
 
-const data = ref<Array<Object>>([])
+let data = ref<Array<EntityInterface>>([])
 let columns = ref<Array<Column>>([])
 
 watch(() => props,
     async () => {
-        console.log("props")
+        //console.log("props")
         init();
     },
     {
@@ -66,7 +67,7 @@ watch(() => props,
     })
 
 onMounted(() => {
-    console.log("mount table")
+    //console.log("mount table")
     init();
 });
 
@@ -103,7 +104,6 @@ function getHeaderClass() {
 }
 
 function init() {
-    console.log("init", props.dataSet)
     data.value = []
     columns.value = []
 
@@ -113,19 +113,6 @@ function init() {
         data.value = props.dataSet.data
     } else
         console.warn(`DataSet parameter for Table component not set`)
-
-
-
-    // props.columns.forEach(colConfig => {
-    //     let field = props.dataSet.getFieldByAlias(colConfig.field);
-    //
-    //     if (field) {
-    //         let column = new Column(colConfig, field)
-    //         columns.value.push(column)
-    //     } else
-    //         console.warn(`Field "${colConfig.field}" not found in data source ${props.dataSet.dataSource?.alias}`)
-    //
-    // })
 
 }
 

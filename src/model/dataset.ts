@@ -18,10 +18,10 @@ export class DataSet {
             this.setColumns(columns)
     }
 
-    readonly alias: string;
+    private alias: string;
     readonly dataSource: DataSourceInterface | undefined
     readonly columns: Column[] = []
-    data: EntityInterface[] = []
+    data: EntityInterface[] = [{}]
 
     selectedRows: number[] = []
     currentRow: number | null = null
@@ -52,8 +52,9 @@ export class DataSet {
             return;
         }
 
-        this.data = this.dataSource.getAll()
+        this.data =  Array.from( this.dataSource.getAll() )
     }
+
 
     getByRow(row: number) : EntityInterface {
         return this.data[row]
@@ -67,7 +68,10 @@ export class DataSet {
     }
 
     insertRow(row: number): boolean {
-        this.data.splice(row, 0, {id: 0})
+        console.log('dataset.insertRow', row)
+        this.data.push({id: 0})
+        //this.columns.push(new Column({}, {}))
+        this.alias = "ddddd"
         return true
     }
 

@@ -7,9 +7,17 @@ import {DataSetConfigInterface} from "./dataset";
 //     dashboard = 'dashboard'
 // }
 
+export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
+
 export enum LayoutSize {
     large = 'large',
     small = 'small'
+}
+
+export interface PageActionConfigInterface {
+    title: string,
+    type?: PageActionType
+    script: string
 }
 
 export interface LayoutSizeItemInterface {
@@ -48,7 +56,11 @@ export interface PageConfigInterface {
     title: string,
     //type: PageType,
     component: string,
-    dataSets: DataSetConfigInterface[]
+    dataSets: DataSetConfigInterface[],
+    actions?: {
+        buttons?: PageActionConfigInterface[],
+        advanced?: PageActionConfigInterface[]
+    }
     layout?: {
         [key in LayoutSize]: ElementConfigInterface[]
     }

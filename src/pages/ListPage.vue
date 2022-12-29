@@ -23,6 +23,7 @@ import { DataSourceInterface } from "../model/datasource";
 import { useDataSourceService } from "../services/datasource.service";
 import {usePagesActions} from "../services/page.service";
 import { DataSet } from "../model/dataset";
+import { compileScript, CompiledFunc } from "../services/compiler"
 
 export interface ElementInterface {
     component: string,
@@ -62,16 +63,12 @@ watch(() => props.pageConfig,
     async () => {
         console.log('props.pageConfig')
         initLayoutElements()
-
-
-
     })
 
 onMounted(() => {
     //console.log('onMounted')
     initLayoutElements()
 })
-
 
 
 function initLayoutElements() {
@@ -88,10 +85,6 @@ function initLayoutElements() {
         let ds = new DataSet(config.alias, dataSource, config.columns);
         dataSets.value.set(ds.alias, ds)
     })
-
-
-
-
 
     if (!props.pageConfig.layout || !props.pageConfig.layout[props.layoutSize]) {
         console.warn(`Layout for ${props.layoutSize} does not exist!`)
@@ -120,15 +113,31 @@ function initLayoutElements() {
         elements.value.push(el)
     })
 
-    //Test page actions that show in the page header
-    pagesActions.buttons = [{
-        title: "Add " + props.pageConfig.title,
-        act: () => { console.log('act ADD')}
-        },{
-        title: "Edit",
-        type: "primary",
-        act: () => { console.log('act EDIT')}
-    }]
+    pagesActions.buttons = []
+    props.pageConfig.actions?.buttons?.forEach(async (action) => {
+
+        let compiledFunc: CompiledFunc
+        let act = {
+            title: action.title,
+            type: action.type,
+            func: async () => {
+                try {
+                    compiledFunc.exec(dataSets.value)
+                } catch (e) {
+                    console.error(`Execution error in action "${action.title}"`)
+                    console.error(e);
+                }
+            }
+        }
+
+        try {
+            compiledFunc = await compileScript(action.script, 'dataSets')
+            pagesActions.buttons.push(act)
+        } catch (e) {
+            console.error(`Compilation error in script for action "${action.title}"`)
+            console.error(e)
+        }
+    })
 
     dataSets.value.forEach(ds => {
         ds.load()

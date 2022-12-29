@@ -2,8 +2,8 @@ import {ref} from "vue";
 
 export interface PageButtonActionInterface {
     title: string,
-    type?: "default" | "primary" | "success" | "warning" | "info" | "danger" | "text",
-    act: any
+    type?: "default" | "primary" | "success" | "warning" | "info" | "danger",
+    func: Function
 }
 
 export class PageActions {
