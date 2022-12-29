@@ -6,7 +6,7 @@
             highlight-current-row
             :header-cell-class-name="getHeaderCellClass"
             :header-row-class-name="getHeaderClass"
-            :row-class-name="getRowClass"
+            :cell-class-name="getCellClass"
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
         <el-table-column v-for="element in columns"
@@ -18,7 +18,10 @@
 
         >
             <template #default="scope">
-                <div>
+                <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
+                       :model-value="scope.value"
+                       @focusout="(e) => cellFocusedOut(e, scope)"/>
+                <div v-else @click="(e) => handleCellClick(scope, e)">
                     {{getCellData(scope)}}
                 </div>
 
@@ -40,10 +43,12 @@
 </template>
 
 <script setup lang="ts">
+
 import {onMounted, ref, watch} from 'vue'
 import {Column} from "../model/column";
 import {DataSet} from "../model/dataset";
 import {EntityInterface} from "../model/datasource";
+import Input from "./table/Input.vue"
 
 
 interface Props {
@@ -56,6 +61,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 let data = ref<Array<EntityInterface>>([])
 let columns = ref<Array<Column>>([])
+let editingCell = ref<{row: number, col: number} | null>(null)
+let editEl = ref(null)
 
 watch(() => props,
     async () => {
@@ -70,6 +77,31 @@ onMounted(() => {
     //console.log("mount table")
     init();
 });
+
+function handleCellClick(scope:any, e:any) {
+    editingCell.value = {
+        row: scope.$index,
+        col: scope.cellIndex
+    }
+
+    console.log(e, editEl.value)
+}
+
+function cellFocusedOut() {
+    editingCell.value = null
+}
+
+let getCellClass = (scope: any) => {
+    console.log(scope)
+
+    if (editingCell.value &&
+        scope.rowIndex === editingCell.value.row &&
+        scope.columnIndex === editingCell.value.col) {
+        return "table-cell-edit"
+    }
+
+    return "table-cell"
+}
 
 let getHeaderCellClass = (column: any) => {
     let classes: string = 'table-cell-header';
@@ -95,9 +127,9 @@ let getCellData = (scope: any) => {
     return entity[scope.column.property] ? entity[scope.column.property] : ''
 }
 
-function getRowClass() {
-    return "table-row"
-}
+// function getRowClass() {
+//     return "table-row"
+// }
 
 function getHeaderClass() {
     return "table-header"
@@ -135,9 +167,8 @@ function init() {
     }
 
     .cell {
-        padding-left: 4px;
-        padding-right: 4px;
-
+        padding-left: 8px;
+        padding-right: 8px;
     }
 }
 
@@ -148,10 +179,6 @@ function init() {
         font-weight: 500 !important;
     }
 
-    .el-table__cell {
-        padding: 4px;
-
-    }
 }
 
 .adv-column {
@@ -162,17 +189,36 @@ function init() {
 
 }
 
-.table-row {
+.table-cell {
+    //background: red !important;
     .cell {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-
-    .el-table__cell {
-        padding: 4px;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        padding-bottom: 4px;
+        padding-top: 4px;
     }
 }
 
+.el-table .el-table__cell {
+    padding: 0 !important;
+}
+
+.table-cell:hover {
+    box-shadow:0 0 0 1px var(--el-color-primary-light-5) inset;
+}
+
+.table-cell-edit {
+    box-shadow:0 0 0 1px var(--el-color-primary) inset;
+    .cell {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .el-table__cell{
+        padding: 1px;
+        margin: 1px;
+    }
+}
 
 
 </style>

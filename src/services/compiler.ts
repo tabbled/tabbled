@@ -1,8 +1,4 @@
 export class CompiledFunc {
-    constructor() {
-
-    }
-
     private source: string = ""
     private func: Function | undefined = undefined
 
@@ -33,22 +29,3 @@ console.log(script)
         }
     })
 }
-
-// class Compiler {
-//     compileCode(source: string) {
-//         let code = new Code()
-//
-//         if (code.parse(source)) {
-//
-//         }
-//     }
-//
-//
-// }
-
-
-// let compiler = ref<Compiler>(new Compiler())
-//
-// export function useCompiler(): Compiler {
-//     return compiler.value
-// }
