@@ -1,6 +1,6 @@
 ## Tabbled
 
-It is a self-hosted low-code platform for manufacturing and enterprise.
+It is a self-hosted low-code platform for manufacturers and enterprises.
 
 ## ⭐ Features
 
@@ -14,55 +14,35 @@ It is a self-hosted low-code platform for manufacturing and enterprise.
 
 ## Roadmap
 
-- [ ] Sign in and sign on
-- [ ] Types implementation
-- [ ] Table editor
+- [x] Sign in and sign on
+- [x] Types implementation
+- [x] Table editor
 - [ ] Entity settings editor
-- [ ] View editor
+- [x] View editor
 - [ ] Store user data and config in IndexedDB
 - [ ] js models for tables
 
 
 ## Dependencies
 
-* (Tubmle server)[]
-* PostgreSQL
-* [jsreport](https://jsreport.net/)
+* [Tubbled server](https://github.com/tabbled/tabbled-server)
 
-## Installation
+## How to Install
 
+### 🐳 Docker
+
+[To be described]
+
+### 💪🏻 From source code
+
+First: you need to install and start the [Tubbled server](https://github.com/tabbled/tabbled-server)
+
+Second:
 ```bash
+$ git clone https://github.com/tabbled/tabbled
+$ cd tabbled
 $ npm install
-$ npm install -g db-migrate 
-```
-
-## Running the app
-
-```bash
-# after all you need to actualize database schema
-$ db-migrate up
-
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ npm start preview
 ```
 
 ## Support
