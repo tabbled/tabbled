@@ -1,4 +1,5 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
+import _ from 'lodash'
 
 export enum StorageType {
     internal = 'internal',
@@ -146,11 +147,11 @@ export class ConfigDataSource implements DataSourceInterface {
     readonly = false
 
     setData(data: EntityInterface[]) {
-        this.data = data;
+        this.data = _.cloneDeep(data) ;
     }
 
     getAll(): EntityInterface[] {
-        return this.data
+        return _.cloneDeep(this.data)
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {

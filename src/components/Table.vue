@@ -7,6 +7,8 @@
             :header-cell-class-name="getHeaderCellClass"
             :header-row-class-name="getHeaderClass"
             :cell-class-name="getCellClass"
+            :row-class-name="getRowClass"
+
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
         <el-table-column v-for="element in columns"
@@ -19,9 +21,10 @@
         >
             <template #default="scope">
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
-                       :model-value="scope.value"
+                       :model-value="getCellData(scope)"
+                       @update:model-value="(val) => onCellInput(scope, val)"
                        @focusout="(e) => cellFocusedOut(e, scope)"/>
-                <div v-else @click="(e) => handleCellClick(scope, e)">
+                <div v-else @click="(e) => handleCellClick(scope, e)" class="table-cell-text" >
                     {{getCellData(scope)}}
                 </div>
 
@@ -34,10 +37,11 @@
         <el-table-column fixed="right" width="40" :resizable="false" class-name="adv-column">
             <template #header>
                 <el-button text style="border-radius: 0; padding: 0; margin: 0 ">
-                    <span class="iconify " data-icon="mdi:cog" style="width: 18px; height: 18px;"/>
+                    <span class="iconify " data-icon="mdi:cog" style="width: 18px; height: 18px; " />
                 </el-button>
             </template>
-            <template #default></template>
+            <template #default>
+            </template>
         </el-table-column>
     </el-table>
 </template>
@@ -66,7 +70,6 @@ let editEl = ref(null)
 
 watch(() => props,
     async () => {
-        //console.log("props")
         init();
     },
     {
@@ -74,17 +77,27 @@ watch(() => props,
     })
 
 onMounted(() => {
-    //console.log("mount table")
     init();
 });
 
-function handleCellClick(scope:any, e:any) {
+function handleInput(e) {
+    console.log(e)
+}
+
+function toFocus(e) {
+    console.log(e)
+}
+
+function onCellInput(scope: any, value: any) {
+    let fieldAlias = scope.column.property;
+    props.dataSet.updateDataRow(scope.$index, fieldAlias, value)
+}
+
+function handleCellClick(scope:any) {
     editingCell.value = {
         row: scope.$index,
         col: scope.cellIndex
     }
-
-    console.log(e, editEl.value)
 }
 
 function cellFocusedOut() {
@@ -92,8 +105,6 @@ function cellFocusedOut() {
 }
 
 let getCellClass = (scope: any) => {
-    console.log(scope)
-
     if (editingCell.value &&
         scope.rowIndex === editingCell.value.row &&
         scope.columnIndex === editingCell.value.col) {
@@ -127,9 +138,11 @@ let getCellData = (scope: any) => {
     return entity[scope.column.property] ? entity[scope.column.property] : ''
 }
 
-// function getRowClass() {
-//     return "table-row"
-// }
+function getRowClass() {
+    return "table-row"
+}
+
+
 
 function getHeaderClass() {
     return "table-header"
@@ -172,13 +185,16 @@ function init() {
     }
 }
 
-.table-cell-header {
+.table-row {
+    height: 34px;
+    text-overflow: ellipsis !important;
+}
 
+.table-cell-header {
     .cell {
         white-space: nowrap !important;
         font-weight: 500 !important;
     }
-
 }
 
 .adv-column {
@@ -186,21 +202,27 @@ function init() {
         white-space: nowrap;
         text-overflow: clip;
     }
-
 }
 
 .table-cell {
-    //background: red !important;
     .cell {
         padding-left: 8px !important;
         padding-right: 8px !important;
         padding-bottom: 4px;
         padding-top: 4px;
+        white-space: nowrap;
+
     }
+}
+
+.table-cell-text {
+    min-height: 22px;
+    text-overflow: ellipsis;
 }
 
 .el-table .el-table__cell {
     padding: 0 !important;
+
 }
 
 .table-cell:hover {
@@ -220,5 +242,8 @@ function init() {
     }
 }
 
+.adv-column-cell:focus {
+    background: red;
+}
 
 </style>

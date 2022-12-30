@@ -2,10 +2,9 @@
     <el-input
         ref="el"
         class="table-input"
-        clearable
         :model-value="modelValue"
         @mouseenter="handleMouseEnter"
-        @input="$emit('update:title', $event.target.value)"
+        @input="handleInput"
     />
 </template>
 
@@ -14,13 +13,18 @@
 import {ref} from "vue";
 
 defineProps(['modelValue'])
-defineEmits(['update:modelValue'])
+let emit = defineEmits(['update:modelValue'])
 
 let el = ref(null)
 
 function handleMouseEnter() {
     if (el.value)
         el.value.focus()
+}
+
+function handleInput(value: string | number) {
+    emit('update:modelValue', value)
+
 }
 
 </script>
@@ -30,13 +34,18 @@ function handleMouseEnter() {
 .table-input {
     margin: 0;
     padding: 0;
-    height: calc(var(--el-input-height, 32px) - 4px);
-
+    height: calc(32px - 2px);
 
     .el-input__wrapper {
         border-radius: unset;
         box-shadow: unset;
         margin: 1px;
+        padding-left: 7px;
+
+        input {
+            font-family: inherit;
+        }
+
     }
 }
 

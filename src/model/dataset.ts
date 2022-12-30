@@ -68,10 +68,7 @@ export class DataSet {
     }
 
     insertRow(row: number): boolean {
-        console.log('dataset.insertRow', row)
-        this.data.push({id: 0})
-        //this.columns.push(new Column({}, {}))
-        this.alias = "ddddd"
+        this.data.splice(row, 0, { id: 0});
         return true
     }
 
@@ -81,6 +78,8 @@ export class DataSet {
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
         let ent = this.data[row]
+
+        //this.data = []
 
         if (ent) {
             ent[field] = cellData
