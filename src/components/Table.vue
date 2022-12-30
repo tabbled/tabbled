@@ -3,11 +3,13 @@
             border
             :data="data"
             :fit="true"
+            :row-key="dataSet.keyField"
             highlight-current-row
             :header-cell-class-name="getHeaderCellClass"
             :header-row-class-name="getHeaderClass"
             :cell-class-name="getCellClass"
             :row-class-name="getRowClass"
+            @mouseleave="onMouseLeave"
 
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
@@ -80,17 +82,10 @@ onMounted(() => {
     init();
 });
 
-function handleInput(e) {
-    console.log(e)
-}
-
-function toFocus(e) {
-    console.log(e)
-}
-
 function onCellInput(scope: any, value: any) {
     let fieldAlias = scope.column.property;
     props.dataSet.updateDataRow(scope.$index, fieldAlias, value)
+    //console.log(scope, fieldAlias, value)
 }
 
 function handleCellClick(scope:any) {
@@ -98,6 +93,7 @@ function handleCellClick(scope:any) {
         row: scope.$index,
         col: scope.cellIndex
     }
+    props.dataSet.currentRow = scope.$index
 }
 
 function cellFocusedOut() {
@@ -142,7 +138,11 @@ function getRowClass() {
     return "table-row"
 }
 
-
+function onMouseLeave() {
+    if (!editingCell.value && props.dataSet.autoCommit && props.dataSet.isChanged()) {
+        props.dataSet.commit()
+    }
+}
 
 function getHeaderClass() {
     return "table-header"
