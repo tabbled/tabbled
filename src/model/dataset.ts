@@ -2,6 +2,8 @@ import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldInterface} from "./field";
 import {ColumnConfigInterface, Column} from "./column";
 import _ from 'lodash'
+import { FlakeId } from '../flake-id'
+let idgen = new FlakeId()
 
 export interface DataSetConfigInterface {
     alias: string,
@@ -33,25 +35,22 @@ export class DataSet {
     }
 
     selectedIds: number[] = []
+    private _currentId: number | string | null = null
 
-    private _currentRow: number | null = null
-
-    get currentRow(): number | null {
-        return this._currentRow;
-    };
-
-    set currentRow(id: number | null) {
-        console.log(id)
-
-        if (this.autoCommit &&
-            this._isChanged &&
-            this._currentRow !== null &&
-            this._currentRow != id) {
-            this.commit()
-        }
-        this._currentRow = id
+    currentId(): number | string | null {
+        return this._currentId;
     }
 
+    setCurrentId(id: number | string | null) {
+        console.log(id)
+        if (this.autoCommit &&
+            this._isChanged &&
+            this._currentId !== null &&
+            this._currentId != id) {
+            this.commit()
+        }
+        this._currentId = id
+    }
 
     setColumns(columns: ColumnConfigInterface[]) {
         columns.forEach(colConfig => {
@@ -80,8 +79,19 @@ export class DataSet {
         return this.dataSource.getFieldByAlias(alias);
     }
 
-    insertRow(row: number): boolean {
-        this.data.splice(row, 0, { id: 0});
+    async insertRow(row?: number): Promise<boolean> {
+        let r:number | undefined;
+        if (!row && this._currentId) {
+            r = this.getRowById(this._currentId)
+            if (!r) r = 0
+        } else
+            r = row;
+
+        console.log('insert', row, this._currentId, r)
+
+        let id = await idgen.generateId()
+
+        this.data.splice(r ? r : 0, 0, { _id: id.toString()});
         this._isChanged = true;
         return true
     }
@@ -113,9 +123,20 @@ export class DataSet {
     commit() {
         console.log('commit')
         this._isChanged = false;
+
+        console.log(JSON.stringify(this.data))
     }
 
     rollback() {
 
+    }
+
+    private getRowById(id: number | string): number | undefined {
+        for(let i in this.data) {
+            if (this.data[i][this.keyField] === id) {
+                return Number(i)
+            }
+        }
+        return undefined
     }
 }

@@ -73,6 +73,7 @@ onMounted(() => {
 
 function initLayoutElements() {
     elements.value = []
+    dataSets.value.clear();
 
     props.pageConfig.dataSets.forEach(config => {
         let dataSource:DataSourceInterface | undefined = dsService.getDataSourceByAlias(config.dataSource)

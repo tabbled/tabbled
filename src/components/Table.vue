@@ -10,6 +10,7 @@
             :cell-class-name="getCellClass"
             :row-class-name="getRowClass"
             @mouseleave="onMouseLeave"
+            @current-change="currentRowChanged"
 
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
@@ -82,10 +83,19 @@ onMounted(() => {
     init();
 });
 
+function currentRowChanged(row: any) {
+    if (!row) {
+        props.dataSet.setCurrentId(null)
+        return;
+    }
+
+    if (props.dataSet)
+        props.dataSet.setCurrentId(row['_id'])
+}
+
 function onCellInput(scope: any, value: any) {
     let fieldAlias = scope.column.property;
     props.dataSet.updateDataRow(scope.$index, fieldAlias, value)
-    //console.log(scope, fieldAlias, value)
 }
 
 function handleCellClick(scope:any) {
@@ -93,7 +103,6 @@ function handleCellClick(scope:any) {
         row: scope.$index,
         col: scope.cellIndex
     }
-    props.dataSet.currentRow = scope.$index
 }
 
 function cellFocusedOut() {
