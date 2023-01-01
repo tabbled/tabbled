@@ -46,7 +46,7 @@ export class DataSet {
         if (this.autoCommit &&
             this._isChanged &&
             this._currentId !== null &&
-            this._currentId != id) {
+            this._currentId !== id) {
             this.commit()
         }
         this._currentId = id
@@ -118,6 +118,20 @@ export class DataSet {
         this.data.splice(row, 1)
         this._isChanged = true;
         return false
+    }
+
+    removeByCurrentId() : boolean {
+        if (!this._currentId)
+            return false;
+
+        let row = this.getRowById(this._currentId)
+
+        if (!row)
+            return false;
+
+        this.data.splice(row, 1)
+        this._isChanged = true;
+        return true
     }
 
     commit() {
