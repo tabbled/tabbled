@@ -11,6 +11,7 @@
             :row-class-name="getRowClass"
             @mouseleave="onMouseLeave"
             @current-change="currentRowChanged"
+            @selection-change="selectionChange"
 
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
@@ -82,6 +83,14 @@ watch(() => props,
 onMounted(() => {
     init();
 });
+
+function selectionChange(rows: Array<any>) {
+    let ids: string[] = []
+    rows.forEach(row => {
+        ids.push(row._id)
+    })
+    props.dataSet.selectedIds = ids;
+}
 
 function currentRowChanged(row: any) {
     if (!row) {
@@ -167,7 +176,6 @@ function init() {
         data.value = props.dataSet.data
     } else
         console.warn(`DataSet parameter for Table component not set`)
-
 }
 
 

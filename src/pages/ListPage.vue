@@ -24,6 +24,7 @@ import { useDataSourceService } from "../services/datasource.service";
 import {usePagesActions} from "../services/page.service";
 import { DataSet } from "../model/dataset";
 import { compileScript, CompiledFunc } from "../services/compiler"
+import _ from 'lodash'
 
 export interface ElementInterface {
     component: string,
@@ -100,16 +101,21 @@ function initLayoutElements() {
             properties: {}
         }
 
-        if (element.component.name === 'Table') {
-            if (element.component.dataSet) {
-                let ds = dataSets.value.get(element.component.dataSet)
-
-                if (!ds)
-                    console.warn(`DataSet "${element.component.dataSet}" does not exist!`)
-
-                el.properties.dataSet = ds
+        //Need to define a property mapping from config to element props,
+        //like dataSet name -> instance of certain dataSet
+        Object.keys(element.component).forEach(key => {
+            if (key === 'dataSet') {
+                if (element.component.dataSet && element.component.dataSet !== "") {
+                    if (!dataSets.value.has(element.component.dataSet)) {
+                        console.warn(`DataSet "${element.component.dataSet}" does not exist!`)
+                    } else {
+                        el.properties.dataSet = dataSets.value.get(element.component.dataSet)
+                    }
+                }
+            } else {
+                el.properties[key] = _.cloneDeep(element.component[key])
             }
-        }
+        })
 
         elements.value.push(el)
     })
@@ -173,12 +179,11 @@ function getGridElementStyle(element:PositionElementInterface) {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: 10px;
-    grid-auto-rows: minmax(40px, auto);
+    grid-auto-rows: minmax(20px, auto);
     width: 100%
 }
 
 .element {
-   background: #535bf2;
     height: 30px;
     width: 100%;
 }

@@ -9,6 +9,7 @@ import './style.css'
 //components
 import CodeEditor from "./components/CodeEditor.vue"
 import Table from "./components/Table.vue"
+import DataSetActionPanel from './components/DataSetActionPanel.vue'
 
 
 // i18n
@@ -24,7 +25,8 @@ const i18n = createI18n({
     fallbackLocale: 'en',
     globalInjection: true,
     mode: 'composition',
-    legacy: false
+    legacy: false,
+    globals: true
 })
 
 const app = createApp({
@@ -33,6 +35,7 @@ const app = createApp({
 
 app.component('Table', Table);
 app.component('CodeEditor', CodeEditor)
+app.component('DataSetActionPanel', DataSetActionPanel)
 
 app.use(router(store));
 app.use(store)

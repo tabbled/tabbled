@@ -34,15 +34,14 @@ export class DataSet {
         return this._isChanged;
     }
 
-    selectedIds: number[] = []
-    private _currentId: number | string | null = null
+    selectedIds: string[] = []
+    private _currentId: string | null = null
 
     currentId(): number | string | null {
         return this._currentId;
     }
 
-    setCurrentId(id: number | string | null) {
-        console.log(id)
+    setCurrentId(id: string | null) {
         if (this.autoCommit &&
             this._isChanged &&
             this._currentId !== null &&
@@ -86,8 +85,6 @@ export class DataSet {
             if (!r) r = 0
         } else
             r = row;
-
-        console.log('insert', row, this._currentId, r)
 
         let id = await idgen.generateId()
 
@@ -134,6 +131,19 @@ export class DataSet {
         return true
     }
 
+    removeBySelectedId() : boolean {
+        if (!this.selectedIds.length)
+            return false;
+
+        this.selectedIds.forEach((id) => {
+            let row = this.getRowById(id)
+            if (row !== undefined) {
+                this.removeRow(row)
+            }
+        })
+        return true
+    }
+
     commit() {
         console.log('commit')
         this._isChanged = false;
@@ -145,9 +155,9 @@ export class DataSet {
 
     }
 
-    private getRowById(id: number | string): number | undefined {
+    private getRowById(id: string): number | undefined {
         for(let i in this.data) {
-            if (this.data[i][this.keyField] === id) {
+            if (this.data[i]._id === id) {
                 return Number(i)
             }
         }

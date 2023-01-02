@@ -82,7 +82,7 @@
             </el-aside>
             <el-container >
                 <el-col class="main-router-view" ref="mainContainer" :style="{width: isCollapsed ? 'calc(100% - 64px)' :'calc(100% - 250px)' }">
-                    <el-page-header ref="mainHeader" style="margin: 16px" @back="$router.back()">
+                    <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
                         <template #content>
                             <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
                         </template>
@@ -343,6 +343,10 @@ function initSocketIO() {
     bottom: 0;
     left: 0;
     width: 250px;
+}
+
+.page-header {
+    margin: 16px 16px 0 16px;
 }
 
 .main {

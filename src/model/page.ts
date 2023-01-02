@@ -46,7 +46,7 @@ export interface ElementConfigInterface {
     position: PositionElementInterface,
     component: {
         name: string,
-        dataSet?: string,
+        [key: string]: any
     }
 }
 

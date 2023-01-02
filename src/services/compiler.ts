@@ -5,7 +5,6 @@ export class CompiledFunc {
     exec(...args: any[]) {
         if (!this.func)
             return;
-
         return this.func(...args)
     }
 
@@ -18,7 +17,6 @@ export class CompiledFunc {
 }
 
 export async function compileScript(script: string, ...args: string[]) : Promise<CompiledFunc> {
-console.log(script)
     return new Promise(async (resolve, reject) => {
         try {
             let func = new CompiledFunc()
