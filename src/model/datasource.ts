@@ -42,9 +42,9 @@ export interface DataSourceInterface {
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
     //onRowChange?: (newValue: any, oldValue?: any) => void;
 
-    insert(value: any): Promise<any>
-    updateById(id: number | string, value: object): Promise<any>
-    removeById(id: number | string): Promise<any>
+    insert(id: string, value: any): boolean
+    updateById(id: string, value: object): boolean
+    removeById(id: string): boolean
 
     getFieldByAlias(alias: string): FieldInterface | undefined
 }
@@ -84,7 +84,7 @@ export class DataSource implements DataSourceInterface {
         name: "bbbb",
         color: "black"
     },{
-        _id: 3,
+        _id: "3",
         name: "ccc",
         color: "blue"
     }]
@@ -111,16 +111,16 @@ export class DataSource implements DataSourceInterface {
         return undefined;
     }
 
-    async removeById(id: number | string): Promise<any> {
+    removeById(id: string): boolean {
         return false;
     }
 
-    insert(value: any): Promise<any> {
-        return Promise.resolve(undefined);
+    insert(id: string, value: any): boolean {
+        return false
     }
 
-    updateById(id: number | string, value: object): Promise<any> {
-        return Promise.resolve(undefined);
+    updateById(id: number | string, value: object): boolean {
+        return false
     }
 }
 
@@ -162,16 +162,16 @@ export class ConfigDataSource implements DataSourceInterface {
         return undefined;
     }
 
-    async removeById(id: number | string): Promise<any> {
+    removeById(id: string): boolean {
         return false;
     }
 
-    insert(value: any): Promise<any> {
-        return Promise.resolve(undefined);
+    insert(id: string, value: any): boolean {
+        return false
     }
 
-    updateById(id: number | string, value: object): Promise<any> {
-        return Promise.resolve(undefined);
+    updateById(id: string, value: object): boolean {
+        return false
     }
 }
 
