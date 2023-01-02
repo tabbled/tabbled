@@ -99,13 +99,10 @@
                             </div>
                         </template>
                     </el-page-header>
-                    <el-main>
-                        <el-scrollbar :height="mainViewHeight">
+                    <el-main :style="{height: mainViewHeight + 'px'}">
                             <router-view :layoutSize="layoutSize" v-slot="{Component}">
                                 <component ref="rView" :is="Component" />
                             </router-view>
-
-                        </el-scrollbar>
 
 
                     </el-main>
@@ -346,7 +343,7 @@ function initSocketIO() {
 }
 
 .page-header {
-    margin: 16px 16px 0 16px;
+    margin: 16px;
 }
 
 .main {

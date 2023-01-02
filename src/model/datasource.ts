@@ -76,15 +76,15 @@ export class DataSource implements DataSourceInterface {
     }
 
     private data: EntityInterface[] = [{
-        id: 1,
+        _id: "1",
         name: "aaaa",
         color: "red"
     },{
-        id: 2,
+        _id: "2",
         name: "bbbb",
         color: "black"
     },{
-        id: 3,
+        _id: 3,
         name: "ccc",
         color: "blue"
     }]
@@ -147,7 +147,7 @@ export class ConfigDataSource implements DataSourceInterface {
     readonly = false
 
     setData(data: EntityInterface[]) {
-        this.data = _.cloneDeep(data) ;
+        this.data = _.cloneDeep(data);
     }
 
     getAll(): EntityInterface[] {

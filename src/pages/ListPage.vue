@@ -1,14 +1,14 @@
 <template>
-    <div ref="grid" class="grid-wrap">
+
+    <div  class="grid-wrap">
 
 
-        <div v-for="(element, idx) in elements"
+        <component v-for="(element, idx) in elements"
              :id="idx"
              :style="getGridElementStyle(element.position)"
              class="element"
-        >
-            <component :is="element.component" v-bind="element.properties"></component>
-        </div>
+                   :is="element.component" v-bind="element.properties"
+        />
 
     </div>
 </template>
@@ -43,6 +43,7 @@ let dsService = useDataSourceService();
 
 let elements = ref<Array<ElementInterface>>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
+let grid = ref(null)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -146,6 +147,15 @@ function initLayoutElements() {
         }
     })
 
+    pagesActions.buttons.push({
+        title: "draw",
+        type: "info",
+        func: () => {
+            grid.value.height = '100px'
+            console.log(grid.value)
+        }
+    })
+
     dataSets.value.forEach(ds => {
         ds.load()
     })
@@ -155,7 +165,7 @@ function getGridElementStyle(element:PositionElementInterface) {
     let style = {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",
-        height: '40px'
+        height: "fit-content"
     }
 
     if (element.colFrom) {
@@ -180,11 +190,12 @@ function getGridElementStyle(element:PositionElementInterface) {
     grid-template-columns: repeat(12, 1fr);
     gap: 10px;
     grid-auto-rows: minmax(20px, auto);
-    width: 100%
+    width: 100%;
+    grid-auto-flow: dense
 }
 
 .element {
-    height: 30px;
+    height: 20px;
     width: 100%;
 }
 
