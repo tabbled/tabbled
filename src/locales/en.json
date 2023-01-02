@@ -10,5 +10,10 @@
     "layout": {
         "smallSize": "Small",
         "largeSize": "Large"
-    }
+    },
+    "confirmDeleteTitle": "Do you want to delete selected items?",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit",
+    "cancel": "Cancel"
 }
