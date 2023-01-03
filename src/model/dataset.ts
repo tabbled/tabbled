@@ -71,9 +71,9 @@ export class DataSet {
         })
     }
 
-    load() {
+    async load() {
         console.log('Load dataSet ', this.alias)
-        this.data =  this.dataSource.getAll()
+        this.data =  await this.dataSource.getAll()
         this._changesById.clear();
     }
 

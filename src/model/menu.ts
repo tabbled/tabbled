@@ -1,5 +1,5 @@
 export interface MenuConfigInterface {
-    id: string,
+    _id: string,
     title: string,
     path?: string,
     page?: string,

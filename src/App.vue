@@ -24,9 +24,9 @@
                         :default-active="$route.fullPath"
                         :router="true"
                     >
-                        <div v-for="menu in sidebarMenu" :key="menu.id">
+                        <div v-for="menu in sidebarMenu" :key="menu._id">
                             <el-sub-menu v-if="menu.items"
-                                         :index="menu.id"
+                                         :index="menu._id"
                             >
                                 <template #title>
                                     <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></el-icon>
@@ -130,6 +130,7 @@ import EditPage from "./pages/EditPage.vue";
 import ListPage from "./pages/ListPage.vue";
 import NotFound from "./pages/NotFound.vue"
 import { usePagesActions } from "./services/page.service"
+import {useDataSourceService} from "./services/datasource.service";
 
 const props = defineProps<{
 
@@ -151,6 +152,7 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const pagesActions = usePagesActions()
+const dsService = useDataSourceService()
 
 
 
@@ -178,6 +180,8 @@ onMounted(() => {
 
     if (store.getters['config/isLoaded']) {
         loadMenu()
+        dsService.registerAll(store)
+        registerPages()
     }
 })
 
@@ -192,6 +196,7 @@ function handleResize() {
 store.subscribe((mutation: any) => {
     if (mutation.type === 'config/loaded') {
         loadMenu()
+        dsService.registerAll(store)
         registerPages()
     }
 });

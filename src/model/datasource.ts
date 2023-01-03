@@ -1,5 +1,8 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
+import { useConfigDatabase } from '../services/database.service'
+
+const configDatabase = useConfigDatabase()
 
 export enum StorageType {
     internal = 'internal',
@@ -29,22 +32,22 @@ export interface DataSourceInterface {
      * Get all data store from the data source
      * @returns {object[]} all data from data source
      */
-    getAll(): EntityInterface[]
+    getAll(): Promise<EntityInterface[]>
 
     /**
      * Return entity data by row
      * @param id entity id
      * @returns entity if exists or null if not exists
      */
-    getById(id: string | number) : EntityInterface | undefined
+    getById(id: string | number) : Promise<EntityInterface | undefined>
 
 
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
     //onRowChange?: (newValue: any, oldValue?: any) => void;
 
-    insert(id: string, value: any): boolean
-    updateById(id: string, value: object): boolean
-    removeById(id: string): boolean
+    insert(id: string, value: any): Promise<void>
+    updateById(id: string, value: object): Promise<void>
+    removeById(id: string): Promise<void>
 
     getFieldByAlias(alias: string): FieldInterface | undefined
 }
@@ -99,7 +102,7 @@ export class DataSource implements DataSourceInterface {
     cached: boolean = true;
     readonly: boolean = false;
 
-    getAll(): EntityInterface[] {
+    async getAll(): Promise<EntityInterface[]> {
         return this.data;
     }
 
@@ -107,20 +110,20 @@ export class DataSource implements DataSourceInterface {
         return this.fieldByAlias.get(alias)
     }
 
-    getById(id: string | number): EntityInterface | undefined {
+    async getById(id: string | number): Promise<EntityInterface | undefined> {
         return undefined;
     }
 
-    removeById(id: string): boolean {
-        return false;
+    async removeById(id: string): Promise<void> {
+
     }
 
-    insert(id: string, value: any): boolean {
-        return false
+    async insert(id: string, value: any): Promise<void> {
+
     }
 
-    updateById(id: number | string, value: object): boolean {
-        return false
+    async updateById(id: number | string, value: object): Promise<void> {
+
     }
 }
 
@@ -129,6 +132,7 @@ export class ConfigDataSource implements DataSourceInterface {
         this.fieldByAlias = new Map()
         this.alias = alias
         this.keyField = keyField
+        //this.store = store
 
         fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -137,7 +141,7 @@ export class ConfigDataSource implements DataSourceInterface {
     }
 
     private fieldByAlias: Map<string, FieldInterface>
-    private data: Object[] = []
+    //private store: Store<any>
 
     alias: string;
     fields: FieldInterface[];
@@ -146,36 +150,47 @@ export class ConfigDataSource implements DataSourceInterface {
     cached = true;
     readonly = false
 
-    setData(data: EntityInterface[]) {
-        this.data = _.cloneDeep(data);
-    }
+    async getAll(): Promise<EntityInterface[]> {
 
-    getAll(): EntityInterface[] {
-        return _.cloneDeep(this.data)
+        return await configDatabase[this.alias].toArray();
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
         return this.fieldByAlias.get(alias)
     }
 
-    getById(id: string | number): EntityInterface | undefined {
-        return undefined;
+    async getById(id: string): Promise<EntityInterface | undefined> {
+        return await configDatabase[this.alias].get(id)
     }
 
-    removeById(id: string): boolean {
-        return false;
+    async removeById(id: string): Promise<void> {
+        let data = await this.getById(id);
+        if (!data)
+            return;
+        await configDatabase[this.alias].delete(id)
     }
 
-    insert(id: string, value: any): boolean {
-        return false
+    async insert(id: string, value: any): Promise<void> {
+        try {
+            let data = _.cloneDeep(value)
+            await configDatabase[this.alias].add(data);
+        } catch (e) {
+            throw e
+        }
     }
 
-    updateById(id: string, value: object): boolean {
-        return false
+    async updateById(id: string, value: object): Promise<void> {
+        try {
+            let data = _.cloneDeep(value)
+            await configDatabase[this.alias].put(data);
+        } catch (e) {
+            throw e
+        }
     }
 }
 
 export class PageConfigDataSource extends ConfigDataSource {
+
     constructor() {
         super('pages', 'alias', [
             {
@@ -210,4 +225,6 @@ export class PageConfigDataSource extends ConfigDataSource {
             }
         ]);
     }
+
+    //store: Store<any>
 }

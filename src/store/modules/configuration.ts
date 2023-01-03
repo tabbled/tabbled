@@ -1,15 +1,12 @@
-import {DataSourceConfigInterface, PageConfigDataSource} from "../../model/datasource";
+import {DataSourceConfigInterface} from "../../model/datasource";
 import { PageConfigInterface } from "../../model/page";
 import { MenuConfigInterface } from "../../model/menu";
 import { Commit } from "vuex";
-import { ref } from 'vue'
 import { useSocket } from '../../services/socketio.service'
-import { useDataSourceService } from '../../services/datasource.service'
+import { useConfigDatabase } from '../../services/database.service'
 
 let socket  = useSocket()
-let dataSources = useDataSourceService();
-
-let pagesDataSource = ref<PageConfigDataSource>(new PageConfigDataSource())
+let configDatabase = useConfigDatabase()
 
 
 export interface ConfigInterface {
@@ -69,16 +66,14 @@ const actions = {
 
 const mutations = {
     loaded (state: ConfigStateInterface, config: ConfigInterface) {
-        dataSources.clear()
-
         state.dataSources = config.dataSources;
-        state.dataSources.forEach(ds => {
-            dataSources.registerDataSource(ds)
+        state.pages = config.pages;
+
+        config.pages.forEach(page => {
+            configDatabase.pages.put(page)
         })
 
-        state.pages = config.pages;
-        dataSources.addDataSource(pagesDataSource.value)
-        pagesDataSource.value.setData(state.pages)
+
 
         state.sidebarMenu = config.sidebarMenu;
 

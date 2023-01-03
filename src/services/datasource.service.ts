@@ -3,13 +3,18 @@ import {
     DataSourceConfigInterface,
     DataSourceInterface,
     DataSourceType,
-    DataSource
+    DataSource,
+    PageConfigDataSource
 } from "../model/datasource";
+import { Store } from "vuex";
+
+let pagesDataSource = ref<PageConfigDataSource>()
 
 export class DataSourceService {
     dataSources: Map<string, DataSourceInterface> = new Map<string, DataSourceInterface>()
 
-    constructor() { }
+    constructor() {
+    }
 
     registerDataSource(config: DataSourceConfigInterface): DataSourceInterface | undefined {
         if (config.type === DataSourceType.entity) {
@@ -37,6 +42,19 @@ export class DataSourceService {
 
     getDataSourceByAlias(alias: string): DataSourceInterface | undefined {
         return this.dataSources.get(alias)
+    }
+
+
+    registerAll(store: Store<any>) {
+        this.clear();
+        // Register user's dataSources
+        store.getters['config/dataSources'].forEach( (ds: DataSourceConfigInterface) => {
+            this.registerDataSource(ds)
+        })
+
+        // Add system dataSources
+        pagesDataSource.value = new PageConfigDataSource()
+        this.addDataSource(pagesDataSource.value);
     }
 }
 

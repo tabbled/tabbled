@@ -3,7 +3,7 @@
             border
             :data="data"
             :fit="true"
-            :row-key="dataSet.keyField"
+            row-key="_id"
             highlight-current-row
             :header-cell-class-name="getHeaderCellClass"
             :header-row-class-name="getHeaderClass"

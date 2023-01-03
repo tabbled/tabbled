@@ -147,15 +147,6 @@ function initLayoutElements() {
         }
     })
 
-    pagesActions.buttons.push({
-        title: "draw",
-        type: "info",
-        func: () => {
-            grid.value.height = '100px'
-            console.log(grid.value)
-        }
-    })
-
     dataSets.value.forEach(ds => {
         ds.load()
     })

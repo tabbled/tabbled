@@ -51,6 +51,7 @@ export interface ElementConfigInterface {
 }
 
 export interface PageConfigInterface {
+    _id: string,
     alias: string,
     path: string,
     title: string,
