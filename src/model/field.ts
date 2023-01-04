@@ -1,7 +1,7 @@
 import {DataSourceConfigInterface} from "./datasource";
 
 export type FieldDataType =
-    'numeric' |
+    'number' |
     'string' |
     'bool' |
     'text' |

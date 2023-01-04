@@ -1,8 +1,8 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
-import { useConfigDatabase } from '../services/database.service'
+import {useDatabase} from '../services/database.service'
 
-const configDatabase = useConfigDatabase()
+const configDatabase = useDatabase()
 
 export enum StorageType {
     internal = 'internal',
@@ -152,7 +152,14 @@ export class ConfigDataSource implements DataSourceInterface {
 
     async getAll(): Promise<EntityInterface[]> {
 
-        return await configDatabase[this.alias].toArray();
+        return configDatabase.connection.select({
+            from: this.alias,
+            where: {
+                _is_deleted: {
+                    '!=': 1
+                }
+            }
+        })
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
@@ -160,20 +167,37 @@ export class ConfigDataSource implements DataSourceInterface {
     }
 
     async getById(id: string): Promise<EntityInterface | undefined> {
-        return await configDatabase[this.alias].get(id)
-    }
+        try {
+            let data = await configDatabase.connection.select({
+                from: this.alias,
+                where: {
+                    _id: id
+                }
+            })
 
-    async removeById(id: string): Promise<void> {
-        let data = await this.getById(id);
-        if (!data)
-            return;
-        await configDatabase[this.alias].delete(id)
+            if (data && data.length > 0) {
+                return Object.assign({}, data[0])
+            }
+            return undefined
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
+
     }
 
     async insert(id: string, value: any): Promise<void> {
         try {
             let data = _.cloneDeep(value)
-            await configDatabase[this.alias].add(data);
+            data._created_at = new Date();
+            data._updated_at = new Date();
+            data._deleted_at = null;
+            data._is_deleted = 0;
+            data._version = 1;
+            await configDatabase.connection.insert({
+                into: this.alias,
+                values:[data]
+            })
         } catch (e) {
             throw e
         }
@@ -181,11 +205,45 @@ export class ConfigDataSource implements DataSourceInterface {
 
     async updateById(id: string, value: object): Promise<void> {
         try {
-            let data = _.cloneDeep(value)
-            await configDatabase[this.alias].put(data);
+            let old = await this.getById(id);
+
+            if (!old) {
+                console.error(`Item with id ${id} in "${this.alias}" config not found`)
+                return;
+            }
+
+            let data:any = _.cloneDeep(value)
+
+            data._updated_at = new Date();
+            data._version = old._version + 1;
+            let updated = await configDatabase.connection.update({
+                in: this.alias,
+                set: data,
+                where: {
+                    _id: id
+                }
+            })
+            console.log('updated ' + updated + ' rows')
         } catch (e) {
-            throw e
+            console.error(e)
         }
+    }
+
+    async removeById(id: string): Promise<void> {
+        let data = await this.getById(id);
+        if (!data)
+            return;
+        let updated = await configDatabase.connection.update({
+            in: this.alias,
+            set: {
+                _deleted_at: new Date(),
+                _is_deleted: 1
+            },
+            where: {
+                _id: id
+            }
+        })
+        console.log('updated ' + updated + ' rows')
     }
 }
 

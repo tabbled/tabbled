@@ -27,6 +27,7 @@
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
                        :model-value="getCellData(scope)"
                        @update:model-value="(val) => onCellInput(scope, val)"
+                       @keydown="inputKeyDown"
                        @focusout="(e) => cellFocusedOut(e, scope)"/>
                 <div v-else @click="(e) => handleCellClick(scope, e)" class="table-cell-text" >
                     {{getCellData(scope)}}
@@ -114,8 +115,15 @@ function handleCellClick(scope:any) {
     }
 }
 
+function inputKeyDown(e:KeyboardEvent) {
+    if (e.code === 'Enter') {
+        cellFocusedOut()
+    }
+}
+
 function cellFocusedOut() {
     editingCell.value = null
+    props.dataSet.commit();
 }
 
 let getCellClass = (scope: any) => {

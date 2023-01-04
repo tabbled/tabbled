@@ -3,10 +3,8 @@ import { PageConfigInterface } from "../../model/page";
 import { MenuConfigInterface } from "../../model/menu";
 import { Commit } from "vuex";
 import { useSocket } from '../../services/socketio.service'
-import { useConfigDatabase } from '../../services/database.service'
 
 let socket  = useSocket()
-let configDatabase = useConfigDatabase()
 
 
 export interface ConfigInterface {
@@ -68,12 +66,6 @@ const mutations = {
     loaded (state: ConfigStateInterface, config: ConfigInterface) {
         state.dataSources = config.dataSources;
         state.pages = config.pages;
-
-        config.pages.forEach(page => {
-            configDatabase.pages.put(page)
-        })
-
-
 
         state.sidebarMenu = config.sidebarMenu;
 
