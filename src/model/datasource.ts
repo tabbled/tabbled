@@ -1,8 +1,8 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
-import {useDatabase} from '../services/database.service'
+import { useDatabase } from '../services/database.service'
 
-const configDatabase = useDatabase()
+const database = useDatabase()
 
 export enum StorageType {
     internal = 'internal',
@@ -151,15 +151,11 @@ export class ConfigDataSource implements DataSourceInterface {
     readonly = false
 
     async getAll(): Promise<EntityInterface[]> {
-
-        return configDatabase.connection.select({
-            from: this.alias,
-            where: {
-                _is_deleted: {
-                    '!=': 1
-                }
-            }
-        })
+        let snapshot= await database.query(this.alias)
+            .filter('meta', '!has', 'deletedAt')
+            .take(100)
+            .get()
+        return snapshot.getValues()
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
@@ -168,17 +164,8 @@ export class ConfigDataSource implements DataSourceInterface {
 
     async getById(id: string): Promise<EntityInterface | undefined> {
         try {
-            let data = await configDatabase.connection.select({
-                from: this.alias,
-                where: {
-                    _id: id
-                }
-            })
-
-            if (data && data.length > 0) {
-                return Object.assign({}, data[0])
-            }
-            return undefined
+            let snap = await database.ref(`${this.alias}/${id}`).get()
+            return snap.val()
         } catch (e) {
             console.error(e)
             throw e
@@ -189,15 +176,16 @@ export class ConfigDataSource implements DataSourceInterface {
     async insert(id: string, value: any): Promise<void> {
         try {
             let data = _.cloneDeep(value)
-            data._created_at = new Date();
-            data._updated_at = new Date();
-            data._deleted_at = null;
-            data._is_deleted = 0;
-            data._version = 1;
-            await configDatabase.connection.insert({
-                into: this.alias,
-                values:[data]
-            })
+
+            console.log(value)
+            data.meta = {
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1,
+                rev: 0
+            }
+
+            await database.ref(this.alias + '/' + data._id).update(data)
         } catch (e) {
             throw e
         }
@@ -212,18 +200,11 @@ export class ConfigDataSource implements DataSourceInterface {
                 return;
             }
 
-            let data:any = _.cloneDeep(value)
+            let data:any = _.assign(old, value)
 
-            data._updated_at = new Date();
-            data._version = old._version + 1;
-            let updated = await configDatabase.connection.update({
-                in: this.alias,
-                set: data,
-                where: {
-                    _id: id
-                }
-            })
-            console.log('updated ' + updated + ' rows')
+            data.meta.updatedAt = new Date();
+            data.meta.version = old.meta.version + 1;
+            await database.ref(this.alias + '/' + data._id).update(data)
         } catch (e) {
             console.error(e)
         }
@@ -233,17 +214,12 @@ export class ConfigDataSource implements DataSourceInterface {
         let data = await this.getById(id);
         if (!data)
             return;
-        let updated = await configDatabase.connection.update({
-            in: this.alias,
-            set: {
-                _deleted_at: new Date(),
-                _is_deleted: 1
-            },
-            where: {
-                _id: id
-            }
-        })
-        console.log('updated ' + updated + ' rows')
+
+        let meta = data.meta;
+        meta.deletedAt = new Date();
+        meta.rev = null;
+
+        await database.ref(`${this.alias}/${data._id}/meta`).set(meta)
     }
 }
 

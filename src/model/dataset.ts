@@ -193,18 +193,17 @@ export class DataSet {
         return true
     }
 
-    commit() {
+    async commit() {
         console.log('commit')
 
-        this._changesById.forEach(item => {
+        this._changesById.forEach((item) => {
             console.log(item)
             switch (item.type) {
                 case "insert": this.dataSource.insert(item.new._id, item.new); break;
-                case "update":this.dataSource.updateById(item.new._id, item.new); break;
-                case "remove":this.dataSource.removeById(item.old._id); break;
-                default: console.warn("Unknown type of operation in DataSet Commit ")
+                case "update": this.dataSource.updateById(item.new._id, item.new); break;
+                case "remove": this.dataSource.removeById(item.old._id); break;
+                default: console.warn("Unknown type of operation in DataSet Commit")
             }
-
         })
 
         this._changesById.clear()
