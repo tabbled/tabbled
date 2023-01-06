@@ -6,7 +6,6 @@ import {
     DataSource,
     PageConfigDataSource
 } from "../model/datasource";
-import { Store } from "vuex";
 
 let pagesDataSource = ref<PageConfigDataSource>()
 
@@ -45,12 +44,12 @@ export class DataSourceService {
     }
 
 
-    registerAll(store: Store<any>) {
+    registerAll() {
         this.clear();
         // Register user's dataSources
-        store.getters['config/dataSources'].forEach( (ds: DataSourceConfigInterface) => {
-            this.registerDataSource(ds)
-        })
+        // store.getters['config/dataSources'].forEach( (ds: DataSourceConfigInterface) => {
+        //     this.registerDataSource(ds)
+        // })
 
         // Add system dataSources
         pagesDataSource.value = new PageConfigDataSource()

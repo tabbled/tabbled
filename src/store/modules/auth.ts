@@ -1,13 +1,18 @@
 import {Commit} from "vuex";
-import {useSocket} from "../../services/socketio.service";
-let socket = useSocket();
+import {useSocketClient} from "../../services/socketio.service";
+let socketClient = useSocketClient();
 
 const state = () => ({
     user: null,
     loggedIn: false,
     token: localStorage.getItem('token') || '',
-    account: null
+    account: getStoredAccount(),
 })
+
+function getStoredAccount() {
+    let acc = localStorage.getItem('account')
+    return acc ? JSON.parse(acc) : null
+}
 
 const getters = {
     settings: (state: any) => {
@@ -17,7 +22,7 @@ const getters = {
         return state.user
     },
     isAuthenticated: (state: any) => {
-        return !!state.token
+        return !!state.token && state.account
     },
     account: (state: any) => {
         return state.account
@@ -27,7 +32,7 @@ const getters = {
 const actions = {
     login ({ commit }: { commit: Commit }, user: any) {
         return new Promise((resolve, reject) => {
-            socket.timeout(5000).emit("login", {
+            socketClient.socket.timeout(1000).emit("login", {
                 username: user.username,
                 password: user.password
             }, (err: any, res: any) => {
@@ -43,7 +48,7 @@ const actions = {
 
     loadUserSettings({ commit }: { commit: Commit }) {
         return new Promise((resolve, reject) => {
-            socket.timeout(5000).emit("users/me", {},
+            socketClient.socket.timeout(1000).emit("users/me", {},
                 (err: any, res: any) => {
                 if (!err && res && res.success === true) {
                     commit('userLoaded', res.user)
@@ -65,17 +70,14 @@ const actions = {
 const mutations = {
     loggedIn (state: any, token: string) {
         localStorage.setItem('token', token)
-        localStorage.removeItem('account_id')
         state.loggedIn = true
         state.token = token
-        console.log("reconnect loggedIn")
-        socket.disconnect()
-        socket.connect()
+        socketClient.updateAuth()
     },
 
     loggedOut (state: any) {
         localStorage.removeItem('token')
-        localStorage.removeItem('account_id')
+        localStorage.removeItem('account')
         state.loggedIn = false
         state.token = ""
     },
@@ -83,30 +85,19 @@ const mutations = {
     userLoaded(state: any, user: any) {
         state.user = user
 
-        let account_id = Number(localStorage.getItem('account_id'))
+        let account = getStoredAccount()
 
         if (!user.accounts) {
             state.account = null
-            localStorage.removeItem('account_id')
+            localStorage.removeItem('account')
             return;
         }
 
-        if (!account_id) {
+        if (!account) {
             state.account = user.accounts[0];
-            localStorage.setItem('account_id', state.account.id)
-        } else {
-            for(let i in user.accounts) {
-                if (user.accounts[i].id === account_id) {
-                    state.account = user.accounts[i]
-                }
-            }
-        }
-
-        // Need to reconnect for update socket auth
-        if (account_id !== Number(localStorage.getItem('account_id'))) {
-            console.log("reconnect account changed")
-            socket.disconnect()
-            socket.connect()
+            localStorage.setItem('account', JSON.stringify(state.account))
+        } else if (account.id !== state.account.id) {// Need to reconnect socket client if current account was changed
+            socketClient.updateAuth()
         }
     }
 }

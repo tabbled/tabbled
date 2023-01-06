@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { useStore } from "vuex"
-import { useSocket } from "../services/socketio.service";
+import { useSocketClient } from "../services/socketio.service";
 import { onMounted, watch, ref } from "vue";
 import { LayoutSize, PageConfigInterface, PositionElementInterface } from "../model/page";
 import { useRouter, useRoute } from 'vue-router';
@@ -35,7 +35,7 @@ export interface ElementInterface {
 }
 
 let store = useStore();
-let socket = useSocket();
+let socketClient = useSocketClient();
 let router = useRouter();
 let route = useRoute();
 const pagesActions = usePagesActions()

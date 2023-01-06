@@ -37,62 +37,70 @@
 
 </template>
 
-<script>
-import {defineComponent} from "vue";
+<script setup lang="ts">
 
-export default defineComponent({
-    data() {
-        return {
-            user: {
-                username: "",
-                password: "",
-            },
-            rules: {
-                username: [{
-                    required: true,
-                    trigger: 'blur',
-                }],
-                password: [{
-                    required: true,
-                    trigger: 'blur',
-                }]
-            },
-        }
-    },
-    mounted() {
-        console.log("mounted Login")
-    },
-    methods: {
-        async login() {
-            let valid = await this.validate();
-            if (!valid)
-                return;
-            try {
-                await this.$store.dispatch('auth/login', {
-                    username: this.user.username,
-                    password: this.user.password}
-                )
-                console.log("logged in")
-                this.$router.push('/');
-            } catch (e) {
-                this.$notify({
-                    title: 'Error',
-                    message: e,
-                    showClose: true,
-                    type: 'error',
-                })
-            }
+import {onUnmounted, ref} from "vue";
+import {useRouter} from 'vue-router'
+import {useStore} from "vuex";
+import { ElMessage } from 'element-plus'
 
-        },
-        validate() {
-            return new Promise((resolve) => {
-                this.$refs.form.validate(async (b) => {
-                    resolve(b);
-                })
-            })
-        },
-    }
+
+const router = useRouter();
+const store = useStore();
+
+let form = ref(null)
+let user = ref({
+    username: "",
+    password: ""
 })
+let rules = ref({
+    username: [{
+        required: true,
+        trigger: 'blur',
+    }],
+        password: [{
+        required: true,
+        trigger: 'blur',
+    }]
+})
+
+onUnmounted(() => {
+    console.log("mounted Login")
+})
+
+async function login() {
+    let valid = await validate();
+    if (!valid)
+        return;
+    try {
+        await store.dispatch('auth/login', {
+            username: user.value.username,
+            password: user.value.password
+        });
+
+        await store.dispatch('auth/loadUserSettings');
+
+        console.log("logged in")
+        ElMessage.success('Logged in')
+        router.push('/');
+
+    } catch (e: any) {
+        ElMessage.error(e.toString())
+    }
+
+}
+function validate() {
+    return new Promise((resolve, reject) => {
+        if (!form.value) {
+            reject()
+            return;
+        }
+        form.value.validate(async (b) => {
+            resolve(b);
+        })
+    })
+}
+
 </script>
 
 <style scoped>

@@ -2,7 +2,7 @@ import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
 import { useDatabase } from '../services/database.service'
 
-const database = useDatabase()
+const db = useDatabase()
 
 export enum StorageType {
     internal = 'internal',
@@ -151,7 +151,11 @@ export class ConfigDataSource implements DataSourceInterface {
     readonly = false
 
     async getAll(): Promise<EntityInterface[]> {
-        let snapshot= await database.query(this.alias)
+        console.log(db.database)
+        if (!db.database)
+            return []
+
+        let snapshot= await db.database.query(this.alias)
             .filter('meta', '!has', 'deletedAt')
             .take(100)
             .get()
@@ -163,21 +167,24 @@ export class ConfigDataSource implements DataSourceInterface {
     }
 
     async getById(id: string): Promise<EntityInterface | undefined> {
+        if (!db.database)
+            return undefined
+
         try {
-            let snap = await database.ref(`${this.alias}/${id}`).get()
+            let snap = await db.database.ref(`${this.alias}/${id}`).get()
             return snap.val()
         } catch (e) {
             console.error(e)
             throw e
         }
-
     }
 
     async insert(id: string, value: any): Promise<void> {
+        if (!db.database)
+            return
         try {
             let data = _.cloneDeep(value)
 
-            console.log(value)
             data.meta = {
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -185,13 +192,15 @@ export class ConfigDataSource implements DataSourceInterface {
                 rev: 0
             }
 
-            await database.ref(this.alias + '/' + data._id).update(data)
+            await db.database.ref(this.alias + '/' + data._id).update(data)
         } catch (e) {
             throw e
         }
     }
 
     async updateById(id: string, value: object): Promise<void> {
+        if (!db.database)
+            return
         try {
             let old = await this.getById(id);
 
@@ -204,22 +213,25 @@ export class ConfigDataSource implements DataSourceInterface {
 
             data.meta.updatedAt = new Date();
             data.meta.version = old.meta.version + 1;
-            await database.ref(this.alias + '/' + data._id).update(data)
+            await db.database.ref(this.alias + '/' + data._id).update(data)
         } catch (e) {
             console.error(e)
         }
     }
 
     async removeById(id: string): Promise<void> {
+        if (!db.database)
+            return
+
         let data = await this.getById(id);
         if (!data)
             return;
 
         let meta = data.meta;
         meta.deletedAt = new Date();
-        meta.rev = null;
+        meta.rev = 0;
 
-        await database.ref(`${this.alias}/${data._id}/meta`).set(meta)
+        await db.database.ref(`${this.alias}/${data._id}/meta`).set(meta)
     }
 }
 
@@ -259,6 +271,4 @@ export class PageConfigDataSource extends ConfigDataSource {
             }
         ]);
     }
-
-    //store: Store<any>
 }
