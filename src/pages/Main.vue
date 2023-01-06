@@ -209,6 +209,7 @@ async function loadConfig() {
     console.log(store.getters['auth/isAuthenticated'])
 
     await database.open(store.getters["auth/account"]);
+    await database.syncConfig()
     loadMenu()
     dsService.registerAll()
     registerPages()

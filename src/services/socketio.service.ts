@@ -47,6 +47,18 @@ export class SocketIOClient {
         this.socket.disconnect()
         this.socket.connect()
     }
+
+    async emit(topic: string, message?: any) : Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.socket.timeout(5000).emit(topic, message || {},
+                (err: any, res: any) => {
+                    if (!err && res && res.success === true) {
+                        resolve(res.data)
+                    } else
+                        reject((res && res.error_message) || `Unknown error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
+                })
+        });
+    }
 }
 
 
