@@ -19,28 +19,28 @@
 
 
             <div v-for="(widget, idx) in vlayout[selectedSize]"
-                 :id="idx"
+                 :id="String(idx)"
                  :style="getGridElStyle(widget)"
 
             >
                 <div :class="{'widget-draggable': true, 'prevent-select': true}"
                      style="height: inherit"
-                     :id="idx"
+                     :id="String(idx)"
                 >
                     <WidgetElement :title="widget.title" :subtitle="widget.alias" :icon="widget.icon" style="height: inherit;"
                                    :class="{'widget-selected': selectedIdx === String(idx)}"/>
                     <div :class="{
                         'resizer-right': true,
-                        'resizer-activated': (dragDirection === 'right' && dragIdx == idx)}"
-                         @mousedown="initDragRight" :id="idx"></div>
+                        'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
+                         @mousedown="initDragRight" :id="String(idx)"></div>
                     <div :class="{
                         'resizer-bottom': true,
-                        'resizer-activated': (dragDirection === 'bottom' && dragIdx == idx)}"
-                         @mousedown="initDragBottom" :id="idx"></div>
-                    <div class="dragging" @mousedown="initDragMove" :id="idx" />
+                        'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
+                         @mousedown="initDragBottom" :id="String(idx)"></div>
+                    <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
 
-                    <div @click="removeWidget(idx)">
-                        <span class="iconify delete-icon" :id="idx"
+                    <div @click="removeWidget(Number(idx))">
+                        <span class="iconify delete-icon" :id="String(idx)"
                               data-icon="mdi:delete"
                         />
                     </div>
@@ -100,8 +100,8 @@ let startX = 0
 let startY = 0
 let startWidth = 0
 let startHeight = 0
-let widget: object | null = null
-let initWidget: object | null = null
+let widget: any | null = null
+let initWidget: any | null = null
 let dragDirection = ref("");
 let dragIdx = ref("")
 let selectedIdx = ref("")
@@ -110,6 +110,7 @@ let selectedSize = ref(props.size)
 const grid = ref(null);
 
 function gridClicked(e:MouseEvent) {
+    // @ts-ignore
     selectWidget(e.target?.id)
 }
 
@@ -132,8 +133,8 @@ function selectWidget(id: string) {
     selectedIdx.value = id
 }
 
-function removeWidget(idx: string) {
-    vlayout[selectedSize.value].splice(Number(idx), 1);
+function removeWidget(idx: number) {
+    vlayout[selectedSize.value].splice(idx, 1);
 }
 
 function initDrag(e:MouseEvent) {
@@ -141,12 +142,15 @@ function initDrag(e:MouseEvent) {
     startX = e.clientX;
     startY = e.clientY;
 
+    // @ts-ignore
     let widgetElement = e.target.parentNode
 
     startWidth = widgetElement.offsetWidth;
     startHeight = widgetElement.offsetHeight;
 
+    // @ts-ignore
     widget = vlayout[selectedSize.value][e.target.id]
+    // @ts-ignore
     dragIdx = e.target.id
     initWidget = Object.assign({}, widget)
 }
@@ -195,7 +199,7 @@ function endDrag() {
     dragDirection.value = ""
 }
 
-function getGridElStyle(widget:object) {
+function getGridElStyle(widget:any) {
     let style = {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",
@@ -215,7 +219,7 @@ function getGridElStyle(widget:object) {
     return style;
 }
 
-function startDragNewWidget(e:DragEvent, item: any) {
+function startDragNewWidget(e:any, item: any) {
     let it = Object.assign({
         layerX: e.layerX,
         layerY: e.layerY
@@ -229,6 +233,7 @@ function dropNewWidget(e:DragEvent) {
     let relatedX = e.offsetX
     let relatedY = e.offsetY
     let grid = e.target
+    // @ts-ignore
     let colWidth = grid?.clientWidth / 12
 
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)

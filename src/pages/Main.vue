@@ -19,9 +19,9 @@
                          :default-active="$route.fullPath"
                          :router="true"
                 >
-                    <div v-for="menu in sidebarMenu" :key="menu._id">
+                    <div v-for="menu in sidebarMenu" :key="menu.id">
                         <el-sub-menu v-if="menu.items"
-                                     :index="menu._id"
+                                     :index="menu.id"
                         >
                             <template #title>
                                 <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></el-icon>
@@ -58,7 +58,7 @@
                         <el-menu-item index="1">
                             <el-icon class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
 
-                            <span style="width: 100%; text-align: start;">{{username()}}</span>
+                            <span style="width: 100%; text-align: start;">{{username}}</span>
                             <div v-if="!isCollapsed" @click="logout()" class="open_new" style="width: 16px; height: 100%;">
                                 <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
                             </div>
@@ -176,11 +176,9 @@ onMounted(() => {
     window.addEventListener('resize', handleResize);
     handleResize();
 
-    loadConfig();
-
-    // if (store.getters['config/isLoaded']) {
-    //     loadConfig();
-    // }
+    store.dispatch('auth/loadUserSettings').then(() =>{
+        loadConfig();
+    })
 })
 
 onUnmounted(() => {
@@ -209,7 +207,7 @@ async function loadConfig() {
     console.log(store.getters['auth/isAuthenticated'])
 
     await database.open(store.getters["auth/account"]);
-    await database.syncConfig()
+    await database.sync('config', true)
     loadMenu()
     dsService.registerAll()
     registerPages()
@@ -258,10 +256,10 @@ const currentPageTitle: ComputedRef<string> = computed((): string =>  {
     return page ? page.title : ""
 })
 
-
-function username(): string {
+const username: ComputedRef<string> = computed((): string =>  {
+    //console.log(store.getters['auth/user'])
     return store.getters['auth/user'] ? store.getters['auth/user'].username : ""
-}
+})
 
 function openInNewWindow(to: string) {
     let route = router.resolve({path: to});

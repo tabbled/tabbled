@@ -4,6 +4,10 @@ import {useSocketClient} from "./socketio.service";
 
 const socketClient = useSocketClient();
 
+// TODO need to move into plugins
+const configAliases = ['page', 'datasource', 'menu']
+export type ItemType = 'config' | 'data'
+
 export interface DataItemInterface {
     id: number
     rev: number
@@ -33,7 +37,7 @@ export class Database {
 
         this.database = AceBase.WithIndexedDB(`tabbled-${account.id}`,{
             multipleTabs: true,
-            logLevel: process.env.NODE_ENV === 'development' ? "verbose" : "error" });
+            logLevel: process.env.NODE_ENV === 'development' ? "error" : "error" });
 
         await this.database.ready()
         console.log("Database is reade to use");
@@ -47,22 +51,62 @@ export class Database {
         }
     }
 
-    async syncConfig() {
-        console.log("sync database")
-
+    /**
+     * Sync config or user data with the server
+     * @param type  - config or data will be synced with server
+     * @param force - if true the all data will be pushed to the server,
+     *                if false only changed data will be pushed to the server
+     */
+    async sync(type: ItemType, force: boolean = false) {
         if (!this.database) {
+            console.error("sync database, database is not opened");
             return;
         }
+        console.log("sync database, forced = ", force);
 
-        let data:DataItemInterface[] = await socketClient.emit('data/getMany', {type: 'config', filter: ""})
+        let syncData: object[] = await this.getData(type, !force)
+
+        let data:DataItemInterface[] = await socketClient.emit('data/sync', {
+            type: type,
+            data: syncData
+        })
 
         for (let i in data) {
             let item = data[i]
             console.log(item)
-            await this.database.ref( `config/${item.alias}/${item.id}`).update(item)
+            await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
         }
     }
 
+    async getData(type: ItemType, onlyChanges: boolean = true) : Promise<object[]> {
+        if (!this.database) {
+            console.error("getConfigData, database is not opened");
+            return [];
+        }
+
+        let aliases = this.getAliasesByType(type)
+        let items: Array<DataItemInterface> = []
+        for(let i in aliases) {
+            let alias = aliases[i]
+            console.log(alias, onlyChanges)
+            let itter = this.database.query(`${type}/${alias}`);
+
+            if (onlyChanges) {
+                itter = itter.filter('rev', '==', '')
+            }
+
+            await itter.forEach(item => {
+                items.push(item.val())
+            })
+        }
+
+        return items;
+    }
+
+    getAliasesByType(type: ItemType) {
+        if (type === 'config') return configAliases
+        else return []
+    }
 }
 
 const db = ref<Database>(new Database())

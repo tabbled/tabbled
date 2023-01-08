@@ -5,10 +5,8 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: "ElementSettingPanel"
-}
+<script setup lang="ts">
+
 </script>
 
 <style lang="scss">

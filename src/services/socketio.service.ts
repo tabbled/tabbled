@@ -35,7 +35,7 @@ export class SocketIOClient {
         const env = process.env.NODE_ENV || "production";
 
         if (env === "development" || localStorage.dev === "dev") {
-            url = protocol + location.hostname + ":3001";
+            url = protocol + location.hostname + ":3000";
         } else {
             url = protocol + location.host;
         }
