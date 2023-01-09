@@ -1,6 +1,10 @@
 ## Tabbled
 
-It is a self-hosted low-code platform for manufacturers and enterprises.
+It is a self-hosted low-code platform for manufacturers and enterprises. 
+
+Offline first. wherever you go data are available!
+
+Progressive Web App(PWA). It is intended to work on any platform with a standards-compliant browser, including desktop and mobile devices.
 
 ## ⭐ Features
 
@@ -17,6 +21,8 @@ It is a self-hosted low-code platform for manufacturers and enterprises.
 - [x] Sign in and sign on
 - [x] Types implementation
 - [x] Table editor
+- [x] Offline data first
+- [x] Progressive Web App
 - [ ] Entity settings editor
 - [x] View editor
 - [ ] Store user data and config in IndexedDB

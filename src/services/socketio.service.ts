@@ -2,6 +2,11 @@ import { io } from "socket.io-client";
 import {Socket} from "socket.io-client/build/esm/socket";
 import { ref } from 'vue'
 
+function getAccountId(): number {
+    let acc = localStorage.getItem('account')
+    return acc ? JSON.parse(acc).id : -1
+}
+
 export class SocketIOClient {
     constructor() {
         this.socket = io(this.url(),{
@@ -9,7 +14,7 @@ export class SocketIOClient {
             auth: (cb) => {
                 cb({
                     jwt: localStorage.getItem('token'),
-                    account_id: Number(localStorage.getItem('account_id')),
+                    accountId: getAccountId(),
                 })
             }
         })
