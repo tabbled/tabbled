@@ -12,9 +12,6 @@ export default defineConfig({
             includeAssets: ["/favicon.png"],
             srcDir: "src",
             base: '/',
-            devOptions: {
-                enabled: true
-            },
             workbox: {
                 cleanupOutdatedCaches: true,
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}']
