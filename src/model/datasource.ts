@@ -183,16 +183,15 @@ export class ConfigDataSource implements DataSourceInterface {
         if (!db.database)
             return
         try {
-            let data = _.cloneDeep(value)
+            let data:any = { }
 
-            data.meta = {
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                version: 1,
-                rev: 0
-            }
+            data.createdAt = new Date()
+            data.updatedAt = new Date()
+            data.version = 1
+            data.rev = ''
+            data.data =  _.cloneDeep(value)
 
-            await db.database.ref(this.alias + '/' + data._id).update(data)
+            await db.database.ref(this.alias + '/' + data.id).update(data)
         } catch (e) {
             throw e
         }
@@ -211,9 +210,10 @@ export class ConfigDataSource implements DataSourceInterface {
 
             let data:any = _.assign(old, value)
 
-            data.meta.updatedAt = new Date();
-            data.meta.version = old.meta.version + 1;
-            await db.database.ref(this.alias + '/' + data._id).update(data)
+            data.updatedAt = new Date();
+            data.version = old.version + 1;
+            data.rev = ''
+            await db.database.ref(this.alias + '/' + data.id).update(data)
         } catch (e) {
             console.error(e)
         }
@@ -227,11 +227,11 @@ export class ConfigDataSource implements DataSourceInterface {
         if (!data)
             return;
 
-        let meta = data.meta;
-        meta.deletedAt = new Date();
-        meta.rev = 0;
 
-        await db.database.ref(`${this.alias}/${data._id}/meta`).set(meta)
+        data.deletedAt = new Date();
+        data.rev = '';
+
+        await db.database.ref(`${this.alias}/${data.id}`).set(data)
     }
 }
 

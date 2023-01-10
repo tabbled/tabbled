@@ -126,6 +126,7 @@ import { usePagesActions } from "../services/page.service"
 import { useDataSourceService } from "../services/datasource.service";
 import { useDatabase } from "../services/database.service";
 
+
 const props = defineProps<{
 
 }>()
@@ -147,7 +148,7 @@ const route = useRoute();
 const { t } = useI18n();
 const pagesActions = usePagesActions();
 const dsService = useDataSourceService();
-const database = useDatabase();
+const db = useDatabase();
 
 
 
@@ -163,7 +164,7 @@ socketClient.socket.on("login_needed", () => {
     logout();
 })
 
-let sidebarMenu = ref<Array<MenuConfigInterface>>([])
+let sidebarMenu = ref<Array<MenuConfigInterface>>(null)
 
 function setCollapsed() {
     isCollapsed.value = !isCollapsed.value;
@@ -202,13 +203,9 @@ function handleResize() {
 // });
 
 async function loadConfig() {
-
-    console.log(store.getters["auth/account"])
-    console.log(store.getters['auth/isAuthenticated'])
-
-    await database.open(store.getters["auth/account"]);
-    await database.sync('config', true)
-    loadMenu()
+    await db.open(store.getters["auth/account"]);
+    await db.sync('config')
+    await loadMenu()
     dsService.registerAll()
     registerPages()
 }
@@ -216,9 +213,10 @@ async function loadConfig() {
 function registerPages() {
     pagesByAlias.value.clear()
 
-    // store.getters['config/pages'].forEach((config:PageConfigInterface) => {
-    //     addRoute(config.path, config);
-    // })
+    db.database.ref('config/page').forEach(data => {
+        let config = data.val().data
+        addRoute(config.path, config);
+    })
 }
 
 function getComponentByName(name: string) {
@@ -240,7 +238,7 @@ function addRoute(path: string, page: PageConfigInterface) {
         meta: {
             isSingle: false,
             authRequired: true,
-            title: `Tabbled | ${page.title}`
+            title: `${page.title} | Tabbled`
         }
     })
     pagesByAlias.value.set(path, page);
@@ -267,8 +265,13 @@ function openInNewWindow(to: string) {
 }
 
 
-function loadMenu() {
-    sidebarMenu.value = Object.assign([], store.getters['config/sidebarMenu'])
+async function loadMenu() {
+    await db.database.ref('config/menu').forEach(config => {
+        console.log('Sidebar menu populated')
+        if (!sidebarMenu.value)
+            sidebarMenu.value = config.val().data
+    })
+    console.log(sidebarMenu.value)
 }
 
 function logout() {

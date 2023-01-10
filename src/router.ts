@@ -1,12 +1,12 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 import Login from "./pages/Login.vue";
-import Main from "./pages/Main.vue"
+import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
 
 const routes: RouteRecordRaw[] = [
     {
         path: "/",
-        component: Main,
+        component: Dashboard,
         meta: {
             authRequired: true,
             title: "Tabbled"
@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
             isSingle: true,
             authRequired: false,
-            title: "Tabbled | Login"
+            title: "Login | Tabbled"
         },
     },
     {

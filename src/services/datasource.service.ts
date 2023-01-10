@@ -6,8 +6,10 @@ import {
     DataSource,
     PageConfigDataSource
 } from "../model/datasource";
+import { useDatabase } from "./database.service";
 
 let pagesDataSource = ref<PageConfigDataSource>()
+let db = useDatabase()
 
 export class DataSourceService {
     dataSources: Map<string, DataSourceInterface> = new Map<string, DataSourceInterface>()
@@ -22,7 +24,7 @@ export class DataSourceService {
             if (this.dataSources.has(config.alias))
                 throw `Err: error registration datasource, alias ${config.alias} has been taken`
 
-            this.dataSources.set(config.alias, ds);
+            this.addDataSource(ds);
             return ds;
         } else
             throw 'Unknown data source type ' + config.type;
@@ -32,6 +34,7 @@ export class DataSourceService {
         if (this.dataSources.has(dataSource.alias))
             throw `Err: error registration datasource, alias ${dataSource.alias} has been taken`
 
+        console.log(`DataSource "${dataSource.alias}" registered`)
         this.dataSources.set(dataSource.alias, dataSource);
     }
 
@@ -46,10 +49,10 @@ export class DataSourceService {
 
     registerAll() {
         this.clear();
-        // Register user's dataSources
-        // store.getters['config/dataSources'].forEach( (ds: DataSourceConfigInterface) => {
-        //     this.registerDataSource(ds)
-        // })
+
+        db.database.ref('config/datasource').forEach(config => {
+            this.registerDataSource(config.val().data)
+        })
 
         // Add system dataSources
         pagesDataSource.value = new PageConfigDataSource()

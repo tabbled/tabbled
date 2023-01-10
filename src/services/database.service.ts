@@ -37,6 +37,7 @@ export class Database {
 
         this.database = AceBase.WithIndexedDB(`tabbled-${account.id}`,{
             multipleTabs: true,
+            sponsor: true,
             logLevel: process.env.NODE_ENV === 'development' ? "error" : "error" });
 
         await this.database.ready()
@@ -65,17 +66,21 @@ export class Database {
         console.log("sync database, forced = ", force);
 
         let syncData: object[] = await this.getData(type, !force)
+        let rev = await this.getLastRevision();
 
         let data:DataItemInterface[] = await socketClient.emit('data/sync', {
             type: type,
-            data: syncData
+            data: syncData,
+            lastRevision: rev.toString()
         })
 
         for (let i in data) {
             let item = data[i]
             console.log(item)
+            if (BigInt(item.rev) > rev) rev = BigInt(item.rev);
             await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
         }
+        await this.setLastRevision(rev)
     }
 
     async getData(type: ItemType, onlyChanges: boolean = true) : Promise<object[]> {
@@ -106,6 +111,21 @@ export class Database {
     getAliasesByType(type: ItemType) {
         if (type === 'config') return configAliases
         else return []
+    }
+
+    async getLastRevision():Promise<BigInt> {
+        let snapshot = await this.database.ref('/lastRevision')
+            .get()
+
+        let rev = snapshot.val()
+
+        return rev ? BigInt(rev) : BigInt(0)
+    }
+
+    async setLastRevision(val:BigInt):Promise<void> {
+        await this.database.ref('/').update({
+            lastRevision: val.toString()
+        })
     }
 }
 

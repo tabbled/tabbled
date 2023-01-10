@@ -1,10 +1,15 @@
 <template>
-    <div style="width: 100vw">
+    <div v-if="route.meta.isSingle" style="width: 100vw" >
         <router-view />
     </div>
+    <Main v-else />
 </template>
 
 <script setup lang="ts">
+import {useRoute} from "vue-router";
+import Main from "./pages/Main.vue"
+
+const route = useRoute();
 </script>
 
 
