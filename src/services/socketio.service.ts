@@ -24,11 +24,15 @@ export class SocketIOClient {
         });
 
         this.socket.on("connect_error", (err) => {
-            console.error(`!!!Failed to connect to the backend. Socket.io connect_error: ${err.message}`);
+            console.error(`Failed to connect to the backend. Socket.io connect_error: ${err.message}`);
         });
 
         this.socket.on("connect", async () => {
             console.log("Connected to the socket server");
+        })
+
+        this.socket.on("disconnect", async () => {
+            console.log("Disconnected from the socket server");
         })
     }
 

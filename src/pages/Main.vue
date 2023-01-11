@@ -3,13 +3,15 @@
         <el-container>
             <el-aside :width="isCollapsed ? '64px' : '250px'" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
-                    <el-col >
-                        <el-row align="middle">
-                            <img height="30" src="./../assets/tabbled_icon.svg" alt=""/>
-                            <div v-if="!isCollapsed" style="margin-left: 8px">Tabbled</div>
-                        </el-row>
-                    </el-col>
-
+                    <div class="menu-header">
+                        <div>
+                            <el-row align="middle">
+                                <img height="30" src="./../assets/tabbled_icon.svg" alt=""/>
+                                <div style="margin-left: 8px">Tabbled</div>
+                            </el-row>
+                        </div>
+                        <el-tag v-if="!isConnected" effect="light" size="small" type="danger">Offline</el-tag>
+                    </div>
                 </el-header>
                 <el-divider style="margin: 0"/>
 
@@ -142,6 +144,7 @@ let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
+
 const store = useStore();
 const router = useRouter();
 const route = useRoute();
@@ -152,13 +155,16 @@ const db = useDatabase();
 
 
 
-let socketio = ref({
-    initiated: false,
-    error_message: "",
-    isConnected: false,
-    connectionCount: 0
-})
 let socketClient = useSocketClient()
+let isConnected = ref(socketClient.socket.connected)
+
+socketClient.socket.on("connect", () => {
+    isConnected.value = true;
+})
+
+socketClient.socket.on("disconnect", () => {
+    isConnected.value = false;
+})
 
 socketClient.socket.on("login_needed", () => {
     logout();
@@ -177,9 +183,7 @@ onMounted(() => {
     window.addEventListener('resize', handleResize);
     handleResize();
 
-    store.dispatch('auth/loadUserSettings').then(() =>{
-        loadConfig();
-    })
+    loadConfig();
 })
 
 onUnmounted(() => {
@@ -204,7 +208,12 @@ function handleResize() {
 
 async function loadConfig() {
     await db.open(store.getters["auth/account"]);
-    await db.sync('config')
+    try {
+        await db.sync('config')
+    } catch (e) {
+        console.error(e)
+    }
+
     await loadMenu()
     dsService.registerAll()
     registerPages()
@@ -271,13 +280,11 @@ async function loadMenu() {
         if (!sidebarMenu.value)
             sidebarMenu.value = config.val().data
     })
-    console.log(sidebarMenu.value)
 }
 
 function logout() {
     store.dispatch('auth/logout')
         .then(() => {
-            socketio.value.connectionCount = 0
             router.push('/login')
         })
 }
@@ -337,6 +344,12 @@ function logout() {
 .el-menu-item {
     height: 40px !important;
     line-height: 40px !important;
+}
+
+.menu-header {
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
 }
 
 </style>

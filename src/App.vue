@@ -8,8 +8,16 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
 import Main from "./pages/Main.vue"
+import {onMounted} from "vue";
+import {useStore} from "vuex";
 
+const store = useStore();
 const route = useRoute();
+
+onMounted(() => {
+    store.dispatch('auth/loadUserSettings')
+})
+
 </script>
 
 

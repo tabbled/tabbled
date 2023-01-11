@@ -32,7 +32,7 @@ const getters = {
 const actions = {
     login ({ commit }: { commit: Commit }, user: any) {
         return new Promise((resolve, reject) => {
-            socketClient.socket.timeout(1000).emit("login", {
+            socketClient.socket.timeout(300).emit("login", {
                 username: user.username,
                 password: user.password
             }, (err: any, res: any) => {
@@ -41,14 +41,14 @@ const actions = {
                     resolve(res)
 
                 } else
-                    reject(res.error_message || 'Login error')
+                    reject(res && res.error_message || 'Login error')
             })
         });
     },
 
     loadUserSettings({ commit }: { commit: Commit }) {
         return new Promise((resolve, reject) => {
-            socketClient.socket.timeout(1000).emit("users/me", {},
+            socketClient.socket.timeout(300).emit("users/me", {},
                 (err: any, res: any) => {
                 if (!err && res && res.success === true) {
                     commit('userLoaded', res.user)

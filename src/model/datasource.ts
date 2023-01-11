@@ -151,28 +151,27 @@ export class ConfigDataSource implements DataSourceInterface {
     readonly = false
 
     async getAll(): Promise<EntityInterface[]> {
-        console.log(db.database)
         if (!db.database)
             return []
 
-        let snapshot= await db.database.query(this.alias)
-            .filter('meta', '!has', 'deletedAt')
+        let snapshot= await db.database.query(`/config/${this.alias}`)
+            .filter('deletedAt', '==', null)
             .take(100)
             .get()
-        return snapshot.getValues()
+        return snapshot.getValues().map(i => i.data)
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
         return this.fieldByAlias.get(alias)
     }
 
-    async getById(id: string): Promise<EntityInterface | undefined> {
+    async getById(id: string, onlyData:boolean = true): Promise<EntityInterface | undefined> {
         if (!db.database)
             return undefined
 
         try {
-            let snap = await db.database.ref(`${this.alias}/${id}`).get()
-            return snap.val()
+            let snap = await db.database.ref(`/config/${this.alias}/${id}`).get()
+            return onlyData ? snap.val().data : snap.val()
         } catch (e) {
             console.error(e)
             throw e
@@ -183,15 +182,19 @@ export class ConfigDataSource implements DataSourceInterface {
         if (!db.database)
             return
         try {
-            let data:any = { }
+            let data:any = {
+                id: id,
+                accountId: db.accountId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                version: 1,
+                alias: this.alias,
+                rev: '',
+                data:  _.cloneDeep(value)
+            }
 
-            data.createdAt = new Date()
-            data.updatedAt = new Date()
-            data.version = 1
-            data.rev = ''
-            data.data =  _.cloneDeep(value)
-
-            await db.database.ref(this.alias + '/' + data.id).update(data)
+            await db.database.ref(`/config/${this.alias}/${id}`).update(data)
+            db.sync('config');
         } catch (e) {
             throw e
         }
@@ -200,20 +203,23 @@ export class ConfigDataSource implements DataSourceInterface {
     async updateById(id: string, value: object): Promise<void> {
         if (!db.database)
             return
+
         try {
-            let old = await this.getById(id);
+            let old = await this.getById(id, false);
 
             if (!old) {
                 console.error(`Item with id ${id} in "${this.alias}" config not found`)
                 return;
             }
 
-            let data:any = _.assign(old, value)
+            let item:any = _.cloneDeep(old)
 
-            data.updatedAt = new Date();
-            data.version = old.version + 1;
-            data.rev = ''
-            await db.database.ref(this.alias + '/' + data.id).update(data)
+            item.updatedAt = new Date();
+            item.version = old.version + 1;
+            item.rev = ''
+            item.data =  _.cloneDeep(value)
+            await db.database.ref(`/config/${this.alias}/${id}`).update(item)
+            db.sync('config');
         } catch (e) {
             console.error(e)
         }
@@ -223,22 +229,28 @@ export class ConfigDataSource implements DataSourceInterface {
         if (!db.database)
             return
 
-        let data = await this.getById(id);
-        if (!data)
+        let data = await this.getById(id, false);
+
+        if (!data) {
+            console.error(`Item with id ${id} in "${this.alias}" config not found`)
             return;
+        }
 
 
         data.deletedAt = new Date();
         data.rev = '';
 
-        await db.database.ref(`${this.alias}/${data.id}`).set(data)
+        console.log('remove')
+
+        await db.database.ref(`/config/${this.alias}/${data.id}`).set(data)
+        db.sync('config');
     }
 }
 
 export class PageConfigDataSource extends ConfigDataSource {
 
     constructor() {
-        super('pages', 'alias', [
+        super('page', 'alias', [
             {
                 title: 'Title',
                 alias: 'title',

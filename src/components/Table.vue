@@ -3,7 +3,7 @@
             border
             :data="data"
             :fit="true"
-            row-key="_id"
+            row-key="id"
             highlight-current-row
             :header-cell-class-name="getHeaderCellClass"
             :header-row-class-name="getHeaderClass"
@@ -88,7 +88,7 @@ onMounted(() => {
 function selectionChange(rows: Array<any>) {
     let ids: string[] = []
     rows.forEach(row => {
-        ids.push(row._id)
+        ids.push(row.id)
     })
     props.dataSet.selectedIds = ids;
 }
@@ -100,7 +100,7 @@ function currentRowChanged(row: any) {
     }
 
     if (props.dataSet)
-        props.dataSet.setCurrentId(row['_id'])
+        props.dataSet.setCurrentId(row['id'])
 }
 
 function onCellInput(scope: any, value: any) {

@@ -26,11 +26,16 @@ export interface DataItemInterface {
 
 export class Database {
     database: AceBase | undefined
+    private _account_id = null;
+    get accountId() {
+        return this._account_id;
+    }
 
     async open(account: any) {
         if (!account || !account.id) {
             throw Error('Account does not provided')
         }
+        this._account_id = account.id
 
         if (this.database)
             await this.close()
@@ -38,7 +43,7 @@ export class Database {
         this.database = AceBase.WithIndexedDB(`tabbled-${account.id}`,{
             multipleTabs: true,
             sponsor: true,
-            logLevel: process.env.NODE_ENV === 'development' ? "error" : "error" });
+            logLevel: process.env.NODE_ENV === 'development' ? "warn" : "error" });
 
         await this.database.ready()
         console.log("Database is reade to use");
@@ -63,7 +68,14 @@ export class Database {
             console.error("sync database, database is not opened");
             return;
         }
-        console.log("sync database, forced = ", force);
+
+
+        if (!socketClient.socket.connected) {
+            console.warn('Sync database, connection to server is not active')
+            return;
+        }
+        console.log("Sync database, forced = ", force);
+
 
         let syncData: object[] = await this.getData(type, !force)
         let rev = await this.getLastRevision();
@@ -76,7 +88,6 @@ export class Database {
 
         for (let i in data) {
             let item = data[i]
-            console.log(item)
             if (BigInt(item.rev) > rev) rev = BigInt(item.rev);
             await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
         }
@@ -93,7 +104,6 @@ export class Database {
         let items: Array<DataItemInterface> = []
         for(let i in aliases) {
             let alias = aliases[i]
-            console.log(alias, onlyChanges)
             let itter = this.database.query(`${type}/${alias}`);
 
             if (onlyChanges) {

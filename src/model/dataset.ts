@@ -49,12 +49,12 @@ export class DataSet {
         return this._currentId;
     }
 
-    setCurrentId(id: string | null) {
+    async setCurrentId(id: string | null) {
         if (this.autoCommit &&
             this.isChanged() &&
             this._currentId !== null &&
             this._currentId !== id) {
-            this.commit()
+            await this.commit()
         }
         this._currentId = id
     }
@@ -96,7 +96,7 @@ export class DataSet {
 
         let id = (await flakeId.generateId()).toString()
         let item = {
-            _id: id.toString()
+            id: id.toString()
         }
 
         this.data.splice(r ? r : 0, 0, item);
@@ -117,7 +117,7 @@ export class DataSet {
             return false;
 
         let oldEnt = _.cloneDeep(ent)
-        let change = this._changesById.get(ent._id);
+        let change = this._changesById.get(ent.id);
 
         ent[field] = cellData
 
@@ -134,14 +134,14 @@ export class DataSet {
         }
 
         this.data.splice(row, 1, ent)
-        this._changesById.set(ent._id, change)
+        this._changesById.set(ent.id, change)
 
         return true;
     }
 
     removeRow(row: number) : boolean {
 
-        let id = this.data[row]._id;
+        let id = this.data[row].id;
         let change = this._changesById.get(id);
 
         if (change) {
@@ -181,6 +181,7 @@ export class DataSet {
     }
 
     removeBySelectedId() : boolean {
+
         if (!this.selectedIds.length)
             return false;
 
@@ -195,17 +196,16 @@ export class DataSet {
 
     async commit() {
         console.log('commit')
-
-        this._changesById.forEach((item) => {
-            console.log(item)
+        let changes = [...this._changesById.values()]
+        for (let i in changes) {
+            let item:any = changes[i]
             switch (item.type) {
-                case "insert": this.dataSource.insert(item.new._id, item.new); break;
-                case "update": this.dataSource.updateById(item.new._id, item.new); break;
-                case "remove": this.dataSource.removeById(item.old._id); break;
+                case "insert": await this.dataSource.insert(item.new.id, item.new); break;
+                case "update": await this.dataSource.updateById(item.new.id, item.new); break;
+                case "remove": await this.dataSource.removeById(item.old.id); break;
                 default: console.warn("Unknown type of operation in DataSet Commit")
             }
-        })
-
+        }
         this._changesById.clear()
     }
 
@@ -215,7 +215,7 @@ export class DataSet {
 
     private getRowById(id: string): number | undefined {
         for(let i in this.data) {
-            if (this.data[i]._id === id) {
+            if (this.data[i].id === id) {
                 return Number(i)
             }
         }
