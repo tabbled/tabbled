@@ -195,8 +195,12 @@ export class DataSet {
     }
 
     async commit() {
+        if (!this._changesById.size)
+            return;
+
         console.log('commit')
         let changes = [...this._changesById.values()]
+        this._changesById.clear()
         for (let i in changes) {
             let item:any = changes[i]
             switch (item.type) {
@@ -206,7 +210,6 @@ export class DataSet {
                 default: console.warn("Unknown type of operation in DataSet Commit")
             }
         }
-        this._changesById.clear()
     }
 
     rollback() {

@@ -27,6 +27,7 @@ export interface DataItemInterface {
 export class Database {
     database: AceBase | undefined
     private _account_id = null;
+
     get accountId() {
         return this._account_id;
     }
@@ -35,6 +36,11 @@ export class Database {
         if (!account || !account.id) {
             throw Error('Account does not provided')
         }
+
+        if (this.accountId) {
+            socketClient.socket.off(`${this.accountId}/data/changed`)
+        }
+
         this._account_id = account.id
 
         if (this.database)
@@ -47,6 +53,10 @@ export class Database {
 
         await this.database.ready()
         console.log("Database is reade to use");
+
+        socketClient.socket.on(`${this.accountId}/data/changed`, (data => {
+            this.getChangesFromServer(data.type)
+        }))
     }
 
     async close() {
@@ -74,27 +84,40 @@ export class Database {
             console.warn('Sync database, connection to server is not active')
             return;
         }
-        console.log("Sync database, forced = ", force);
+        console.log("Sync database, forced =", force);
 
 
-        let syncData: object[] = await this.getData(type, !force)
-        let rev = await this.getLastRevision();
-
-        let data:DataItemInterface[] = await socketClient.emit('data/sync', {
+        let syncData: object[] = await this.getNotSyncedData(type, !force)
+        await socketClient.emit('data/sync', {
             type: type,
-            data: syncData,
-            lastRevision: rev.toString()
+            data: syncData
         })
-
-        for (let i in data) {
-            let item = data[i]
-            if (BigInt(item.rev) > rev) rev = BigInt(item.rev);
-            await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
-        }
-        await this.setLastRevision(rev)
     }
 
-    async getData(type: ItemType, onlyChanges: boolean = true) : Promise<object[]> {
+    async getChangesFromServer(type: ItemType) {
+        console.log('getChangesFromServer, type =', type)
+        let rev = await this.getLastRevision();
+        console.log(type, rev.toString())
+        try {
+            let data:Array<DataItemInterface> = await socketClient.emit('data/changes', {
+                type: type,
+                lastRevision: rev.toString()
+            })
+
+            console.log(`Got changes from server, ${data.length} items`)
+
+            for (let i in data) {
+                let item = data[i]
+                if (BigInt(item.rev) > rev) rev = BigInt(item.rev);
+                await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
+            }
+            await this.setLastRevision(rev)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async getNotSyncedData(type: ItemType, onlyChanges: boolean = true) : Promise<object[]> {
         if (!this.database) {
             console.error("getConfigData, database is not opened");
             return [];
@@ -104,13 +127,13 @@ export class Database {
         let items: Array<DataItemInterface> = []
         for(let i in aliases) {
             let alias = aliases[i]
-            let itter = this.database.query(`${type}/${alias}`);
+            let iter = this.database.query(`${type}/${alias}`);
 
             if (onlyChanges) {
-                itter = itter.filter('rev', '==', '')
+                iter = iter.filter('rev', '==', '')
             }
 
-            await itter.forEach(item => {
+            await iter.forEach(item => {
                 items.push(item.val())
             })
         }
