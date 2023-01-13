@@ -47,10 +47,10 @@ export class DataSourceService {
     }
 
 
-    registerAll() {
+    async registerAll() {
         this.clear();
 
-        db.database.ref('config/datasource').forEach(config => {
+        await db.database.ref('config/datasource').forEach(config => {
             this.registerDataSource(config.val().data)
         })
 

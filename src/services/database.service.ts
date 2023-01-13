@@ -1,6 +1,7 @@
 import { AceBase } from 'acebase';
 import {ref, UnwrapRef} from "vue";
 import {useSocketClient} from "./socketio.service";
+import {EventEmitter} from "events";
 
 const socketClient = useSocketClient();
 
@@ -24,7 +25,10 @@ export interface DataItemInterface {
     deletedBy?: number | null | undefined
 }
 
-export class Database {
+export class Database extends EventEmitter {
+    constructor() {
+        super();
+    }
     database: AceBase | undefined
     private _account_id = null;
 
@@ -92,12 +96,13 @@ export class Database {
             type: type,
             data: syncData
         })
+        await this.getChangesFromServer(type);
     }
 
     async getChangesFromServer(type: ItemType) {
         console.log('getChangesFromServer, type =', type)
         let rev = await this.getLastRevision();
-        console.log(type, rev.toString())
+
         try {
             let data:Array<DataItemInterface> = await socketClient.emit('data/changes', {
                 type: type,
@@ -105,12 +110,24 @@ export class Database {
             })
 
             console.log(`Got changes from server, ${data.length} items`)
-
+            let ids = []
             for (let i in data) {
                 let item = data[i]
-                if (BigInt(item.rev) > rev) rev = BigInt(item.rev);
+                ids.push(item.id)
+
+                if (BigInt(item.rev) > rev)
+                    rev = BigInt(item.rev);
+
                 await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
+
+                this.emit(`/${type}/${item.alias}/changed`, [item.id])
             }
+
+            if (data.length > 0) {
+                this.emit(`/${type}/changed`, ids)
+            }
+
+
             await this.setLastRevision(rev)
         } catch (e) {
             console.error(e)

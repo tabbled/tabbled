@@ -96,7 +96,7 @@
                             </div>
                         </template>
                     </el-page-header>
-                    <el-main :style="{height: mainViewHeight + 'px'}">
+                    <el-main v-if="isConfigLoaded" :style="{height: mainViewHeight + 'px'}">
                         <router-view :layoutSize="layoutSize" v-slot="{Component}">
                             <component ref="rView" :is="Component" />
                         </router-view>
@@ -144,6 +144,7 @@ let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
+let isConfigLoaded = ref(false)
 
 const store = useStore();
 const router = useRouter();
@@ -152,6 +153,7 @@ const { t } = useI18n();
 const pagesActions = usePagesActions();
 const dsService = useDataSourceService();
 const db = useDatabase();
+
 
 
 
@@ -183,12 +185,14 @@ onMounted(() => {
     window.addEventListener('resize', handleResize);
     handleResize();
 
+    isConfigLoaded.value = false;
     loadConfig();
 })
 
 onUnmounted(() => {
     console.log('Main unmounted')
     window.removeEventListener('resize', handleResize);
+    isConfigLoaded.value = false;
 })
 
 
@@ -214,17 +218,26 @@ async function loadConfig() {
         console.error(e)
     }
 
-    await loadMenu()
-    dsService.registerAll()
-    registerPages()
+    // Preparing interface and modules by config
+    Promise.all([
+        loadMenu(),
+        dsService.registerAll(),
+        registerPages()
+    ]).then(() => {
+        isConfigLoaded.value = true;
+    }).catch(e => {
+        console.error(e)
+    })
 }
 
-function registerPages() {
+async function registerPages() {
     pagesByAlias.value.clear()
 
-    db.database.ref('config/page').forEach(data => {
-        let config = data.val().data
-        addRoute(config.path, config);
+    await db.database.ref('config/page').forEach(data => {
+        if (!data.val().deletedAt) {
+            let config = data.val().data
+            addRoute(config.path, config);
+        }
     })
 }
 

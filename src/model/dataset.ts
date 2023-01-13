@@ -1,6 +1,7 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldInterface} from "./field";
 import {ColumnConfigInterface, Column} from "./column";
+import {ref, UnwrapRef} from "vue";
 import _ from 'lodash'
 import { FlakeId } from '../flake-id'
 let flakeId = new FlakeId()
@@ -27,6 +28,19 @@ export class DataSet {
 
         if (columns)
             this.setColumns(columns)
+
+
+        this.dataSource.on('changed', async (value) => {
+            // @ts-ignore
+            // I don't know, but we access the ref<> in emit callback then ref need to get with .value
+            let data = this.data.value
+            for(let i in data) {
+                let item = data[i]
+                if (item.id === value.id) {
+                    data[i] = value
+                }
+            }
+        })
     }
 
     readonly alias: string;
@@ -34,12 +48,22 @@ export class DataSet {
     readonly columns: Column[] = [];
     readonly keyField: string;
     autoCommit: boolean = true;
-    data: EntityInterface[] = [];
+    private _data = ref<Array<EntityInterface>>([]);
+
+
 
     private _changesById: Map<string, RowChange> = new Map<string, RowChange>()
 
     isChanged():boolean {
         return this._changesById.size > 0
+    }
+
+    get data(): UnwrapRef<Array<EntityInterface>> {
+        return this._data.value
+    }
+
+    set data(value) {
+        this._data.value = value
     }
 
     selectedIds: string[] = []
@@ -72,8 +96,7 @@ export class DataSet {
     }
 
     async load() {
-        console.log('Load dataSet ', this.alias)
-        this.data =  await this.dataSource.getAll()
+        this.data =  await this.dataSource.getAll();
         this._changesById.clear();
     }
 
@@ -112,6 +135,7 @@ export class DataSet {
     }
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
+
         let ent = this.data[row]
         if (!ent)
             return false;
@@ -119,7 +143,7 @@ export class DataSet {
         let oldEnt = _.cloneDeep(ent)
         let change = this._changesById.get(ent.id);
 
-        ent[field] = cellData
+         ent[field] = cellData
 
         if (change) {
             change.new = _.cloneDeep(ent)
@@ -217,7 +241,7 @@ export class DataSet {
     }
 
     private getRowById(id: string): number | undefined {
-        for(let i in this.data) {
+        for (let i in this.data) {
             if (this.data[i].id === id) {
                 return Number(i)
             }

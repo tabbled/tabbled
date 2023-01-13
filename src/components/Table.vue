@@ -1,7 +1,7 @@
 <template>
     <el-table
             border
-            :data="data"
+            :data="props.dataSet.data"
             :fit="true"
             row-key="id"
             highlight-current-row
@@ -56,7 +56,6 @@
 import {onMounted, ref, watch} from 'vue'
 import {Column} from "../model/column";
 import {DataSet} from "../model/dataset";
-import {EntityInterface} from "../model/datasource";
 import Input from "./table/Input.vue"
 
 
@@ -68,7 +67,7 @@ const props = withDefaults(defineProps<Props>(), {
     isRowSelectable: true
 })
 
-let data = ref<Array<EntityInterface>>([])
+//let data = ref<Array<EntityInterface>>([])
 let columns = ref<Array<Column>>([])
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)
@@ -175,13 +174,13 @@ function getHeaderClass() {
 }
 
 function init() {
-    data.value = []
+    //data.value = []
     columns.value = []
 
 
     if (props.dataSet) {
         columns.value = props.dataSet.columns
-        data.value = props.dataSet.data
+        //data.value = props.dataSet.data
     } else
         console.warn(`DataSet parameter for Table component not set`)
 }

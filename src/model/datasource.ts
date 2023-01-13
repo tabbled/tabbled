@@ -1,6 +1,7 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
 import { useDatabase } from '../services/database.service'
+import {EventEmitter} from "events";
 
 const db = useDatabase()
 
@@ -19,7 +20,7 @@ export interface EntityInterface {
     [name: string]: any | never
 }
 
-export interface DataSourceInterface {
+export interface DataSourceInterface extends EventEmitter{
     readonly: boolean,
     alias: string,
     isTree?: boolean
@@ -43,7 +44,7 @@ export interface DataSourceInterface {
 
 
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
-    //onRowChange?: (newValue: any, oldValue?: any) => void;
+    onChange?: (id: string, newValue: any) => void;
 
     insert(id: string, value: any): Promise<void>
     updateById(id: string, value: object): Promise<void>
@@ -63,8 +64,9 @@ export interface DataSourceConfigInterface {
     storageType: StorageType,
 }
 
-export class DataSource implements DataSourceInterface {
+export class DataSource extends EventEmitter implements DataSourceInterface {
     constructor(config: DataSourceConfigInterface) {
+        super()
         this.keyField = config.keyField;
         this.isTree = !!config.isTree;
         this.storageType = config.storageType;
@@ -127,21 +129,29 @@ export class DataSource implements DataSourceInterface {
     }
 }
 
-export class ConfigDataSource implements DataSourceInterface {
+export class ConfigDataSource extends EventEmitter implements DataSourceInterface {
     constructor(alias: string, keyField: string, fields: FieldConfigInterface[]) {
+        super()
         this.fieldByAlias = new Map()
         this.alias = alias
         this.keyField = keyField
-        //this.store = store
 
         fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
         })
         this.fields = [...this.fieldByAlias.values()]
+
+        db.removeAllListeners(`/config/${this.alias}/changed`)
+        db.on(`/config/${this.alias}/changed`, async (ids) => {
+
+            for(const i in ids) {
+                let id = ids[i]
+                this.emit('changed', await this.getById(id))
+            }
+        })
     }
 
     private fieldByAlias: Map<string, FieldInterface>
-    //private store: Store<any>
 
     alias: string;
     fields: FieldInterface[];
@@ -149,6 +159,7 @@ export class ConfigDataSource implements DataSourceInterface {
     storageType = StorageType.config;
     cached = true;
     readonly = false
+    onChange?: (id: string, newValue: any) => void;
 
     async getAll(): Promise<EntityInterface[]> {
         if (!db.database)
@@ -158,7 +169,14 @@ export class ConfigDataSource implements DataSourceInterface {
             .filter('deletedAt', '==', null)
             .take(100)
             .get()
-        return snapshot.getValues().map(i => i.data)
+
+        let arr = []
+        let vals = snapshot.getValues();
+        for (const i in vals) {
+            arr.push( _.cloneDeep(vals[i].data))
+        }
+
+        return arr//snapshot.getValues().map(i => Object.assign({}, i.data))
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
@@ -194,7 +212,7 @@ export class ConfigDataSource implements DataSourceInterface {
             }
 
             await db.database.ref(`/config/${this.alias}/${id}`).update(data)
-            db.sync('config');
+            await db.sync('config');
         } catch (e) {
             throw e
         }
@@ -219,7 +237,7 @@ export class ConfigDataSource implements DataSourceInterface {
             item.rev = ''
             item.data =  _.cloneDeep(value)
             await db.database.ref(`/config/${this.alias}/${id}`).update(item)
-            db.sync('config');
+            await db.sync('config');
         } catch (e) {
             console.error(e)
         }
@@ -235,15 +253,11 @@ export class ConfigDataSource implements DataSourceInterface {
             console.error(`Item with id ${id} in "${this.alias}" config not found`)
             return;
         }
-
-
         data.deletedAt = new Date();
         data.rev = '';
 
-        console.log('remove')
-
         await db.database.ref(`/config/${this.alias}/${data.id}`).set(data)
-        db.sync('config');
+        await db.sync('config');
     }
 }
 
