@@ -15,7 +15,8 @@ const store = useStore();
 const route = useRoute();
 
 onMounted(() => {
-    store.dispatch('auth/loadUserSettings')
+    if (store.getters["auth/isAuthenticated"])
+        store.dispatch('auth/loadUserSettings')
 })
 
 </script>

@@ -2,6 +2,7 @@ import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
 import { useDatabase } from '../services/database.service'
 import {EventEmitter} from "events";
+import {ref} from 'vue'
 
 const db = useDatabase()
 
@@ -142,11 +143,18 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
         this.fields = [...this.fieldByAlias.values()]
 
         db.removeAllListeners(`/config/${this.alias}/changed`)
+        db.removeAllListeners(`/config/${this.alias}/inserted`)
         db.on(`/config/${this.alias}/changed`, async (ids) => {
-
             for(const i in ids) {
                 let id = ids[i]
                 this.emit('changed', await this.getById(id))
+            }
+        })
+        db.on(`/config/${this.alias}/inserted`, async (ids) => {
+            console.log('inserted' , ids)
+            for(const i in ids) {
+                let id = ids[i]
+                this.emit('inserted', await this.getById(id))
             }
         })
     }
@@ -160,6 +168,8 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
     cached = true;
     readonly = false
     onChange?: (id: string, newValue: any) => void;
+
+    testRef = ref<Array<any>>([])
 
     async getAll(): Promise<EntityInterface[]> {
         if (!db.database)

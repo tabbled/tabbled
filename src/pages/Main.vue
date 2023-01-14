@@ -180,6 +180,9 @@ function setCollapsed() {
 }
 
 onMounted(() => {
+    if (!store.getters["auth/isAuthenticated"])
+        return
+
     console.log('Main mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
     window.addEventListener('resize', handleResize);
@@ -212,11 +215,6 @@ function handleResize() {
 
 async function loadConfig() {
     await db.open(store.getters["auth/account"]);
-    try {
-        await db.sync('config')
-    } catch (e) {
-        console.error(e)
-    }
 
     // Preparing interface and modules by config
     Promise.all([
@@ -250,6 +248,9 @@ function getComponentByName(name: string) {
 }
 
 function addRoute(path: string, page: PageConfigInterface) {
+    if (!path || !page)
+        return;
+
     router.addRoute({
         path: path,
         component: getComponentByName(page.component),

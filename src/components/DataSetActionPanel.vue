@@ -40,7 +40,7 @@ let canEdit = ref(props.allowEdit)
 let canRemove = ref(props.allowRemove)
 
 onMounted(() => {
-    console.log('onMounted', props.dataSet)
+    //console.log('onMounted', props.dataSet)
     if (props.dataSet) {
         watch(() => props.dataSet.currentId(),
             async () => {
@@ -64,6 +64,7 @@ onMounted(() => {
 
 
 function add() {
+    console.log(props.dataSet)
    props.dataSet.insertRow()
 }
 
@@ -72,9 +73,6 @@ function edit() {
 }
 
 function remove() {
-
-
-
     ElMessageBox.confirm(
         t('confirmDeleteTitle'),
         t('delete'),

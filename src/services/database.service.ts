@@ -58,6 +58,9 @@ export class Database extends EventEmitter {
         await this.database.ready()
         console.log("Database is reade to use");
 
+        await this.sync('config')
+        await this.getChangesFromServer('config')
+
         socketClient.socket.on(`${this.accountId}/data/changed`, (data => {
             this.getChangesFromServer(data.type)
         }))
@@ -96,6 +99,7 @@ export class Database extends EventEmitter {
             type: type,
             data: syncData
         })
+
         await this.getChangesFromServer(type);
     }
 
@@ -118,9 +122,17 @@ export class Database extends EventEmitter {
                 if (BigInt(item.rev) > rev)
                     rev = BigInt(item.rev);
 
-                await this.database.ref( `${type}/${item.alias}/${item.id}`).update(item)
+                let ref = this.database.ref( `${type}/${item.alias}/${item.id}`)
+                let exists = await ref.get()
+                console.log('exists', exists.val())
+                await ref.update(item)
+                if (exists.exists()) {
+                    this.emit(`/${type}/${item.alias}/changed`, [item.id])
+                } else {
+                    this.emit(`/${type}/${item.alias}/inserted`, [item.id])
+                }
 
-                this.emit(`/${type}/${item.alias}/changed`, [item.id])
+                //this.emit(`/${type}/${item.alias}/changed`, [item.id])
             }
 
             if (data.length > 0) {

@@ -4,7 +4,10 @@ import {ColumnConfigInterface, Column} from "./column";
 import {ref, UnwrapRef} from "vue";
 import _ from 'lodash'
 import { FlakeId } from '../flake-id'
+import {useDataSourceService} from "../services/datasource.service";
 let flakeId = new FlakeId()
+
+let dsService = useDataSourceService()
 
 export interface DataSetConfigInterface {
     alias: string,
@@ -17,6 +20,10 @@ interface RowChange {
     new: any,
     type: 'insert' | 'update' | 'remove',
     at: Date
+}
+
+export function useDataSet(config: DataSetConfigInterface) {
+    return new DataSet(config.alias, dsService.getDataSourceByAlias(config.dataSource), config.columns)
 }
 
 export class DataSet {
@@ -33,13 +40,20 @@ export class DataSet {
         this.dataSource.on('changed', async (value) => {
             // @ts-ignore
             // I don't know, but we access the ref<> in emit callback then ref need to get with .value
-            let data = this.data.value
+            let data = this.dataRef().value
+            //console.log(data)
             for(let i in data) {
                 let item = data[i]
                 if (item.id === value.id) {
                     data[i] = value
                 }
             }
+        })
+
+        this.dataSource.on('inserted', async () => {
+            // @ts-ignore
+            this._data.value.value = await this.dataSource.getAll();
+            this._changesById.clear();
         })
     }
 
@@ -58,13 +72,10 @@ export class DataSet {
         return this._changesById.size > 0
     }
 
-    get data(): UnwrapRef<Array<EntityInterface>> {
+    dataRef(): UnwrapRef<Array<EntityInterface>>{
         return this._data.value
     }
 
-    set data(value) {
-        this._data.value = value
-    }
 
     selectedIds: string[] = []
     private _currentId: string | null = null
@@ -96,13 +107,13 @@ export class DataSet {
     }
 
     async load() {
-        this.data =  await this.dataSource.getAll();
+        this._data.value = await this.dataSource.getAll();
         this._changesById.clear();
     }
 
 
     getByRow(row: number) : EntityInterface {
-        return this.data[row]
+        return this._data.value[row]
     }
 
     getColumnByAlias(alias: string): FieldInterface | undefined {
@@ -122,7 +133,7 @@ export class DataSet {
             id: id.toString()
         }
 
-        this.data.splice(r ? r : 0, 0, item);
+        this._data.value.splice(r ? r : 0, 0, item);
 
         this._changesById.set(id, {
             new: item,
@@ -136,7 +147,7 @@ export class DataSet {
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
 
-        let ent = this.data[row]
+        let ent = this._data.value[row]
         if (!ent)
             return false;
 
@@ -157,7 +168,7 @@ export class DataSet {
             }
         }
 
-        this.data.splice(row, 1, ent)
+        this._data.value.splice(row, 1, ent)
         this._changesById.set(ent.id, change)
 
         return true;
@@ -165,7 +176,7 @@ export class DataSet {
 
     removeRow(row: number) : boolean {
 
-        let id = this.data[row].id;
+        let id = this._data.value[row].id;
         let change = this._changesById.get(id);
 
         if (change) {
@@ -178,7 +189,7 @@ export class DataSet {
         } else {
             change = {
                 new: null,
-                old: _.cloneDeep(this.data[row]),
+                old: _.cloneDeep(this._data.value[row]),
                 type: "remove",
                 at: new Date()
             }
@@ -186,7 +197,7 @@ export class DataSet {
 
         this._changesById.set(id, change)
 
-        this.data.splice(row, 1)
+        this._data.value.splice(row, 1)
 
         return false
     }
@@ -200,7 +211,7 @@ export class DataSet {
         if (!row)
             return false;
 
-        this.data.splice(row, 1)
+        this._data.value.splice(row, 1)
         return true
     }
 
@@ -241,8 +252,8 @@ export class DataSet {
     }
 
     private getRowById(id: string): number | undefined {
-        for (let i in this.data) {
-            if (this.data[i].id === id) {
+        for (let i in this._data.value) {
+            if (this._data.value[i].id === id) {
                 return Number(i)
             }
         }

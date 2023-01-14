@@ -16,13 +16,12 @@
 <script setup lang="ts">
 import { useStore } from "vuex"
 import { useSocketClient } from "../services/socketio.service";
-import { onMounted, watch, ref } from "vue";
+import {onMounted, watch, ref} from "vue";
 import { LayoutSize, PageConfigInterface, PositionElementInterface } from "../model/page";
 import { useRouter, useRoute } from 'vue-router';
-import { DataSourceInterface } from "../model/datasource";
 import { useDataSourceService } from "../services/datasource.service";
 import {usePagesActions} from "../services/page.service";
-import { DataSet } from "../model/dataset";
+import {DataSet, useDataSet} from "../model/dataset";
 import { compileScript, CompiledFunc } from "../services/compiler"
 import _ from 'lodash'
 
@@ -72,20 +71,12 @@ onMounted(() => {
     initLayoutElements()
 })
 
-
 function initLayoutElements() {
     elements.value = []
     dataSets.value.clear();
 
     props.pageConfig.dataSets.forEach(config => {
-        let dataSource:DataSourceInterface | undefined = dsService.getDataSourceByAlias(config.dataSource)
-
-        if (!dataSource) {
-            console.warn(`DataSource "${config.dataSource}" does not exist!`)
-            return;
-        }
-
-        let ds = new DataSet(config.alias, dataSource, config.columns);
+        let ds = useDataSet(config)
         dataSets.value.set(ds.alias, ds)
     })
 
@@ -102,8 +93,8 @@ function initLayoutElements() {
             properties: {}
         }
 
-        //Need to define a property mapping from config to element props,
-        //like dataSet name -> instance of certain dataSet
+        //Defining a property mapping from config to element props,
+        //like dataSet name in config --> dataset instance
         Object.keys(element.component).forEach(key => {
             if (key === 'dataSet') {
                 if (element.component.dataSet && element.component.dataSet !== "") {
@@ -130,7 +121,7 @@ function initLayoutElements() {
             type: action.type,
             func: async () => {
                 try {
-                    compiledFunc.exec(dataSets.value)
+                    compiledFunc.exec(dataSets)
                 } catch (e) {
                     console.error(`Execution error in action "${action.title}"`)
                     console.error(e);

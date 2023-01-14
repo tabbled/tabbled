@@ -1,7 +1,7 @@
 <template>
     <el-table
             border
-            :data="props.dataSet.data"
+            :data="props.dataSet.dataRef()"
             :fit="true"
             row-key="id"
             highlight-current-row
@@ -71,6 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
 let columns = ref<Array<Column>>([])
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)
+//let data = ref<Array<EntityInterface>>([])
 
 watch(() => props,
     async () => {
@@ -181,6 +182,7 @@ function init() {
     if (props.dataSet) {
         columns.value = props.dataSet.columns
         //data.value = props.dataSet.data
+
     } else
         console.warn(`DataSet parameter for Table component not set`)
 }

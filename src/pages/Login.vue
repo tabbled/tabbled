@@ -85,6 +85,7 @@ async function login() {
         router.push('/');
 
     } catch (e: any) {
+        console.error(e)
         ElMessage.error(e.toString())
     }
 
