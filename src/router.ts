@@ -26,6 +26,7 @@ const routes: RouteRecordRaw[] = [
         component: NotFound,
         meta: {
             isSingle: true,
+            authRequired: true,
         }
     }
 ]

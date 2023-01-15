@@ -39,14 +39,15 @@
 
 <script setup lang="ts">
 
-import {onUnmounted, ref} from "vue";
-import {useRouter} from 'vue-router'
+import {ref} from "vue";
+import {useRoute, useRouter} from 'vue-router'
 import {useStore} from "vuex";
 import { ElMessage } from 'element-plus'
 
 
 const router = useRouter();
 const store = useStore();
+const route = useRoute()
 
 let form = ref(null)
 let user = ref({
@@ -64,9 +65,6 @@ let rules = ref({
     }]
 })
 
-onUnmounted(() => {
-    console.log("mounted Login")
-})
 
 async function login() {
     let valid = await validate();
@@ -80,9 +78,12 @@ async function login() {
 
         await store.dispatch('auth/loadUserSettings');
 
-        console.log("logged in")
+        console.log(route.redirectedFrom)
+
         ElMessage.success('Logged in')
-        router.push('/');
+        await router.push(route.redirectedFrom ? route.redirectedFrom : '/');
+
+
 
     } catch (e: any) {
         console.error(e)

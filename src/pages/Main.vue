@@ -87,16 +87,16 @@
                         <template #extra>
                             <div class="flex items-center">
 
-                                <el-button v-for="action in pagesActions.buttons"
-                                           :type="action.type ? action.type : 'default'"
-                                           @click="action.func()"
-                                >
-                                    {{action.title}}
-                                </el-button>
+<!--                                <el-button v-for="action in pagesActions.buttons"-->
+<!--                                           :type="action.type ? action.type : 'default'"-->
+<!--                                           @click="action.func()"-->
+<!--                                >-->
+<!--                                    {{action.title}}-->
+<!--                                </el-button>-->
                             </div>
                         </template>
                     </el-page-header>
-                    <el-main v-if="isConfigLoaded" :style="{height: mainViewHeight + 'px'}">
+                    <el-main :style="{height: mainViewHeight + 'px'}">
                         <router-view :layoutSize="layoutSize" v-slot="{Component}">
                             <component ref="rView" :is="Component" />
                         </router-view>
@@ -118,47 +118,28 @@
 import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
 import {MenuConfigInterface} from "../model/menu";
 import {useStore} from "vuex";
-import {useRoute, useRouter} from 'vue-router'
+import {useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
-import {LayoutSize, PageConfigInterface} from "../model/page";
-import ListPage from "./ListPage.vue";
-import NotFound from "./NotFound.vue"
-import {usePagesActions} from "../services/page.service"
+import {LayoutSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
-import {useDatabase} from "../services/database.service";
-import {DataSourceType} from "../model/datasource";
-import {useSyncService} from "../services/sync.service";
 
 
 const props = defineProps<{
-
+    layoutSize: LayoutSize
 }>()
 
 const mainContainer = ref(null);
 const mainHeader = ref(null);
 const rView = ref(null)
 
-let layoutSize = ref(LayoutSize.large)
-
 let mainViewHeight = ref(0)
 let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
-let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
-
-let isConfigLoaded = ref(false)
-
 const store = useStore();
 const router = useRouter();
-const route = useRoute();
-const { t } = useI18n();
-const pagesActions = usePagesActions();
 const dsService = useDataSourceService();
-const db = useDatabase();
-const syncService = useSyncService()
-
-
-
+const { t } = useI18n();
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)
@@ -182,108 +163,21 @@ function setCollapsed() {
     localStorage.setItem('is_menu_collapsed', isCollapsed.value ? 'true' : 'false')
 }
 
-onMounted(() => {
-    if (!store.getters["auth/isAuthenticated"])
-        return
+const currentPageTitle: ComputedRef<string> = computed((): string =>  {
+    //const page = pagesByAlias.value.get(router.currentRoute.value.path);
+    return ""//page ? page.title : ""
+})
 
+onMounted(() => {
     console.log('Main mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
-    window.addEventListener('resize', handleResize);
-    handleResize();
 
-    isConfigLoaded.value = false;
-    loadConfig();
+
+    loadMenu();
 })
 
 onUnmounted(() => {
     console.log('Main unmounted')
-    window.removeEventListener('resize', handleResize);
-    isConfigLoaded.value = false;
-})
-
-
-function handleResize() {
-    layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
-}
-
-// store.subscribe((mutation: any) => {
-//     if (mutation.type === 'config/loaded') {
-//         loadConfig();
-//     }
-//
-//     if (mutation.type === 'auth/loggedOut') {
-//         database.close();
-//     }
-// });
-
-async function loadConfig() {
-    try {
-        await db.open(store.getters["auth/account"], store.getters["auth/user"]);
-        await dsService.registerConfig();
-        await syncService.sync(DataSourceType.config)
-    } catch (e) {
-        console.error(e)
-    }
-
-
-    // Preparing interface and modules by config
-    Promise.all([
-        loadMenu(),
-        dsService.registerAll(),
-        registerPages()
-    ]).then(() => {
-        isConfigLoaded.value = true;
-    }).catch(e => {
-        console.error(e)
-    })
-}
-
-async function registerPages() {
-    pagesByAlias.value.clear()
-
-    let pages = await dsService.dataSources.get('page').getAll()
-
-    pages.forEach((item: PageConfigInterface) => {
-        addRoute(item.path, item);
-    })
-}
-
-function getComponentByName(name: string) {
-    switch (name) {
-        //case 'EditPage': return EditPage
-        case 'ListPage': return ListPage
-    }
-    return NotFound
-}
-
-function addRoute(path: string, page: PageConfigInterface) {
-    if (!path || !page)
-        return;
-
-    router.addRoute({
-        path: path,
-        component: getComponentByName(page.component),
-        props: {
-            pageConfig: page,
-            layoutSize: layoutSize.value
-        },
-        meta: {
-            isSingle: false,
-            authRequired: true,
-            title: `${page.title} | Tabbled`
-        }
-    })
-    pagesByAlias.value.set(path, page);
-    console.info('Route ' + path + ' added')
-
-    if (path === router.currentRoute.value.path) {
-        router.replace(path)
-    }
-}
-
-const currentPageTitle: ComputedRef<string> = computed((): string =>  {
-    const page = pagesByAlias.value.get(router.currentRoute.value.path);
-    return page ? page.title : ""
 })
 
 const username: ComputedRef<string> = computed((): string =>  {

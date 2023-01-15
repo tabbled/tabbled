@@ -35,7 +35,6 @@ export class SyncService extends EventEmitter {
 
         socketClient.socket.off(`${db.accountId}/data/changed`)
         socketClient.socket.on(`${db.accountId}/data/changed`, async(data) => {
-            console.log('data/changed')
             await this.pull(data.type)
         })
     }

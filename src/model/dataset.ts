@@ -243,7 +243,7 @@ export class DataSet {
         if (!this._changesById.size)
             return;
 
-        console.log('commit')
+        console.log('Commit changes')
         let changes = [...this._changesById.values()]
         this._changesById.clear()
         for (let i in changes) {
