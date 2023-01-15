@@ -4,35 +4,34 @@ import {
     DataSourceInterface,
     DataSourceType,
     DataSource,
-    PageConfigDataSource
+    PageConfigDataSource, MenuConfigDataSource, DataSourceConfigDataSource
 } from "../model/datasource";
-import { useDatabase } from "./database.service";
 
-let pagesDataSource = ref<PageConfigDataSource>()
-let db = useDatabase()
+import {useSyncService} from "./sync.service";
+
+let pagesDataSource = new PageConfigDataSource()
+let dsDataSource = new DataSourceConfigDataSource()
+let menuDataSource = new MenuConfigDataSource()
+
+let syncService = useSyncService()
 
 export class DataSourceService {
-    dataSources: Map<string, DataSourceInterface> = new Map<string, DataSourceInterface>()
+    constructor() { }
 
-    constructor() {
-    }
+    dataSources: Map<string, DataSourceInterface> = new Map()
 
     registerDataSource(config: DataSourceConfigInterface): DataSourceInterface | undefined {
-        if (config.type === DataSourceType.entity) {
+        if (config.type !== DataSourceType.tableField) {
             let ds = new DataSource(config)
-
-            if (this.dataSources.has(config.alias))
-                throw `Err: error registration datasource, alias ${config.alias} has been taken`
-
             this.addDataSource(ds);
             return ds;
         } else
-            throw 'Unknown data source type ' + config.type;
+            throw 'TableField dataSource cant be registered'
     }
 
     addDataSource(dataSource: DataSourceInterface) {
         if (this.dataSources.has(dataSource.alias))
-            throw `Err: error registration datasource, alias ${dataSource.alias} has been taken`
+            console.warn(`Err: error registration datasource, alias ${dataSource.alias} has been taken`)
 
         console.log(`DataSource "${dataSource.alias}" registered`)
         this.dataSources.set(dataSource.alias, dataSource);
@@ -48,15 +47,22 @@ export class DataSourceService {
 
 
     async registerAll() {
-        this.clear();
 
-        await db.database.ref('config/datasource').forEach(config => {
-            this.registerDataSource(config.val().data)
+        let items = await dsDataSource.getAll()
+
+        items.forEach(ds => {
+            this.registerDataSource(<DataSourceConfigInterface>ds)
         })
 
-        // Add system dataSources
-        pagesDataSource.value = new PageConfigDataSource()
-        this.addDataSource(pagesDataSource.value);
+        syncService.setDataSources(this.dataSources)
+    }
+
+    async registerConfig() {
+        this.addDataSource(dsDataSource);
+        this.addDataSource(pagesDataSource);
+        this.addDataSource(menuDataSource);
+
+        syncService.setDataSources(this.dataSources)
     }
 }
 

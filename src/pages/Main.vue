@@ -118,15 +118,17 @@
 import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
 import {MenuConfigInterface} from "../model/menu";
 import {useStore} from "vuex";
-import {useRouter, useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {LayoutSize, PageConfigInterface} from "../model/page";
 import ListPage from "./ListPage.vue";
 import NotFound from "./NotFound.vue"
-import { usePagesActions } from "../services/page.service"
-import { useDataSourceService } from "../services/datasource.service";
-import { useDatabase } from "../services/database.service";
+import {usePagesActions} from "../services/page.service"
+import {useDataSourceService} from "../services/datasource.service";
+import {useDatabase} from "../services/database.service";
+import {DataSourceType} from "../model/datasource";
+import {useSyncService} from "../services/sync.service";
 
 
 const props = defineProps<{
@@ -153,6 +155,7 @@ const { t } = useI18n();
 const pagesActions = usePagesActions();
 const dsService = useDataSourceService();
 const db = useDatabase();
+const syncService = useSyncService()
 
 
 
@@ -214,7 +217,14 @@ function handleResize() {
 // });
 
 async function loadConfig() {
-    await db.open(store.getters["auth/account"]);
+    try {
+        await db.open(store.getters["auth/account"], store.getters["auth/user"]);
+        await dsService.registerConfig();
+        await syncService.sync(DataSourceType.config)
+    } catch (e) {
+        console.error(e)
+    }
+
 
     // Preparing interface and modules by config
     Promise.all([
@@ -231,11 +241,10 @@ async function loadConfig() {
 async function registerPages() {
     pagesByAlias.value.clear()
 
-    await db.database.ref('config/page').forEach(data => {
-        if (!data.val().deletedAt) {
-            let config = data.val().data
-            addRoute(config.path, config);
-        }
+    let pages = await dsService.dataSources.get('page').getAll()
+
+    pages.forEach((item: PageConfigInterface) => {
+        addRoute(item.path, item);
     })
 }
 
@@ -289,11 +298,17 @@ function openInNewWindow(to: string) {
 
 
 async function loadMenu() {
-    await db.database.ref('config/menu').forEach(config => {
-        console.log('Sidebar menu populated')
-        if (!sidebarMenu.value)
-            sidebarMenu.value = config.val().data
-    })
+    let menus = await dsService.dataSources.get('menu').getAll()
+
+    if (!menus.length) {
+        console.warn('No menu for sideBar in config')
+        return;
+    }
+
+    sidebarMenu.value = (menus[0] as MenuConfigInterface[])
+
+    if (menus.length > 1)
+        console.warn('Number of menu over the 1, for sideBar menu has taken first item')
 }
 
 function logout() {

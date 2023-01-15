@@ -3,7 +3,7 @@ import {useSocketClient} from "../../services/socketio.service";
 let socketClient = useSocketClient();
 
 const state = () => ({
-    user: null,
+    user: getStoredUser(),
     loggedIn: false,
     token: localStorage.getItem('token') || '',
     account: getStoredAccount(),
@@ -12,6 +12,11 @@ const state = () => ({
 function getStoredAccount() {
     let acc = localStorage.getItem('account')
     return acc ? JSON.parse(acc) : null
+}
+
+function getStoredUser() {
+    let user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
 }
 
 const getters = {
@@ -87,6 +92,7 @@ const mutations = {
 
     userLoaded(state: any, user: any) {
         state.user = user
+        localStorage.setItem('user', JSON.stringify(state.user))
 
         let account = getStoredAccount()
 

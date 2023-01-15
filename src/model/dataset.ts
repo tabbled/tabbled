@@ -37,15 +37,17 @@ export class DataSet {
             this.setColumns(columns)
 
 
-        this.dataSource.on('changed', async (value) => {
+        this.dataSource.on('updated', async (value) => {
             // @ts-ignore
             // I don't know, but we access the ref<> in emit callback then ref need to get with .value
             let data = this.dataRef().value
-            //console.log(data)
+            console.log(value)
             for(let i in data) {
+                console.log(value.id, 'updated')
                 let item = data[i]
                 if (item.id === value.id) {
                     data[i] = value
+
                 }
             }
         })
@@ -54,6 +56,14 @@ export class DataSet {
             // @ts-ignore
             this._data.value.value = await this.dataSource.getAll();
             this._changesById.clear();
+            console.log("inserted")
+        })
+
+        this.dataSource.on('removed', async () => {
+            // @ts-ignore
+            this._data.value.value = await this.dataSource.getAll();
+            this._changesById.clear();
+            console.log("removed")
         })
     }
 
