@@ -1,32 +1,34 @@
 ## Tabbled
 
-It is a self-hosted low-code platform for manufacturers and enterprises. 
-
-Offline first. wherever you go data are available!
+It is a self-hosted low-code platform for building ERP/CRM/WMS/etc. system, to manage processes of manufacturing.
 
 Progressive Web App(PWA). It is intended to work on any platform with a standards-compliant browser, including desktop and mobile devices.
 
 ## ⭐ Features
 
-* Stores account data and configuration:
-    * Entity configuration
-    * Entity data
-    * Js models
-    * report templates
-* Renders jsreport templates
-* Communicates with web app through WebSecket
+* User interface configuration through drag-and-drop
+* Scripting - JavaScript works anywhere
+* Multiple users can work on one certain entity at the same time
+* Permission - you can limit access to any data for users and groups
+* Live data - all devices that connected receive changes at the moment
+* Offline working - the data you chose as offline will be available offline wherever you go
 
 ## Roadmap
 
 - [x] Sign in and sign on
 - [x] Types implementation
 - [x] Table editor
+- [ ] Page designer
+- [ ] DataSource setting page
+- [ ] Menu setting page
+- [ ] Table cell editor widgets
 - [x] Offline data first
 - [x] Progressive Web App
 - [ ] Entity settings editor
 - [x] View editor
 - [ ] Store user data and config in IndexedDB
 - [ ] js models for tables
+- [ ] Dockerize entire project in the one image 
 
 
 ## Dependencies
