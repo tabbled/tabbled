@@ -118,7 +118,7 @@
 import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
 import {MenuConfigInterface} from "../model/menu";
 import {useStore} from "vuex";
-import {useRouter} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {LayoutSize} from "../model/page";
@@ -138,6 +138,7 @@ let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
 const store = useStore();
 const router = useRouter();
+const route = useRoute()
 const dsService = useDataSourceService();
 const { t } = useI18n();
 
@@ -164,15 +165,12 @@ function setCollapsed() {
 }
 
 const currentPageTitle: ComputedRef<string> = computed((): string =>  {
-    //const page = pagesByAlias.value.get(router.currentRoute.value.path);
-    return ""//page ? page.title : ""
+    return  route.meta.title.toString()
 })
 
 onMounted(() => {
     console.log('Main mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
-
-
     loadMenu();
 })
 

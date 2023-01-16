@@ -111,7 +111,7 @@ function addRoute(path: string, page: PageConfigInterface) {
         meta: {
             isSingle: false,
             authRequired: true,
-            title: `${page.title} | Tabbled`
+            title: page.title
         }
     })
     pagesByAlias.value.set(path, page);
