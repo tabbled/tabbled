@@ -78,8 +78,6 @@ async function login() {
 
         await store.dispatch('auth/loadUserSettings');
 
-        console.log(route.redirectedFrom)
-
         ElMessage.success('Logged in')
         await router.push(route.redirectedFrom ? route.redirectedFrom : '/');
 

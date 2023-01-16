@@ -30,28 +30,49 @@ export class SyncService extends EventEmitter {
     }
 
     dataSources: Map<string, DataSourceInterface>
+    configDataSources: Map<string, DataSourceInterface>
+
     setDataSources(ds: Map<string, DataSourceInterface>) {
         this.dataSources = ds;
 
         socketClient.socket.off(`${db.accountId}/data/changed`)
-        socketClient.socket.on(`${db.accountId}/data/changed`, async(data) => {
-            await this.pull(data.type)
+        socketClient.socket.on(`${db.accountId}/data/changed`, async() => {
+            await this.pull(DataSourceType.data)
+        })
+    }
+
+    setConfigDataSources(ds: Map<string, DataSourceInterface>) {
+        this.configDataSources = ds;
+
+        socketClient.socket.off(`config/changed`)
+        socketClient.socket.on(`config/changed`, async() => {
+            await this.pull(DataSourceType.config)
         })
     }
 
     // Gather the all persisted data in dataSources and push into sync.service
     // Need to implement a persistent storage for sync.service,
     // and this method will be removed
-    async sync(type?: DataSourceType) {
+    async sync(type: DataSourceType) {
         let data = []
 
+        let targetDs;
+        switch (type) {
+            case DataSourceType.config:
+                targetDs = this.configDataSources;
+                break;
+            case DataSourceType.data:
+                targetDs = this.dataSources
+                break;
+            default:
+                throw Error('Impossible type DataSource for sync ' + type)
+        }
+
         //Gathering not pushed data to the server
-        for(const ds of this.dataSources.values()) {
-            if (!type || (type && ds.type === type)) {
-                data.push(...await ds.getManyRaw([
-                    { key: 'rev', op: '==', compare: '' }
-                ]))
-            }
+        for(const ds of targetDs.values()) {
+            data.push(...await ds.getManyRaw([
+                { key: 'rev', op: '==', compare: '' }
+            ]))
         }
 
         if (data.length) {
@@ -66,8 +87,7 @@ export class SyncService extends EventEmitter {
             return;
         }
         try {
-            await socketClient.emit('data/sync', {
-                type: type,
+            await socketClient.emit(`${type}/update`, {
                 data: data
             })
         } catch (e) {
@@ -76,11 +96,22 @@ export class SyncService extends EventEmitter {
     }
 
     async pull(type: DataSourceType) {
-        let rev = await this.getLastRevision();
+        let rev = await this.getLastRevision(type);
+
+        let targetDs;
+        switch (type) {
+            case DataSourceType.config:
+                targetDs = this.configDataSources;
+                break;
+            case DataSourceType.data:
+                targetDs = this.dataSources
+                break;
+            default:
+                throw Error('Impossible type DataSource for sync ' + type)
+        }
 
         try {
-            let data: Array<DataItemInterface> = await socketClient.emit('data/changes', {
-                type: type,
+            let data: Array<DataItemInterface> = await socketClient.emit(`${type}/getChanges`, {
                 lastRevision: rev.toString()
             })
 
@@ -92,10 +123,10 @@ export class SyncService extends EventEmitter {
             for (let i in data) {
                 let item = data[i]
 
-                let ds = this.dataSources.get(item.alias)
+                let ds = targetDs.get(item.alias)
 
                 if (!ds) {
-                    console.log(`DataSource "${item.alias}" doesn't exist`)
+                    console.warn(`DataSource "${item.alias}" doesn't exist`)
                     continue
                 }
 
@@ -107,14 +138,14 @@ export class SyncService extends EventEmitter {
                 if (BigInt(item.rev) > rev)
                     rev = BigInt(item.rev);
             }
-            await this.setLastRevision(rev)
+            await this.setLastRevision(type, rev)
         } catch (e) {
             throw e
         }
     }
 
-    async getLastRevision():Promise<BigInt> {
-        let snapshot = await db.database.ref('/lastRevision')
+    async getLastRevision(type: DataSourceType):Promise<BigInt> {
+        let snapshot = await db.database.ref(`/${type}/lastRevision`)
             .get()
 
         let rev = snapshot.val()
@@ -122,8 +153,8 @@ export class SyncService extends EventEmitter {
         return rev ? BigInt(rev) : BigInt(0)
     }
 
-    async setLastRevision(val:BigInt):Promise<void> {
-        await db.database.ref('/').update({
+    async setLastRevision(type: DataSourceType, val:BigInt):Promise<void> {
+        await db.database.ref(`/${type}`).update({
             lastRevision: val.toString()
         })
     }

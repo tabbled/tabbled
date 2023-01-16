@@ -90,7 +90,7 @@ async function loadConfig() {
 async function registerPages() {
     pagesByAlias.value.clear()
 
-    let pages = await dsService.dataSources.get('page').getAll()
+    let pages = await dsService.getDataSourceByAlias('page').getAll()
 
     pages.forEach((item: PageConfigInterface) => {
         addRoute(item.path, item);

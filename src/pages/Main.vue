@@ -192,7 +192,7 @@ function openInNewWindow(to: string) {
 
 
 async function loadMenu() {
-    let menus = await dsService.dataSources.get('menu').getAll()
+    let menus = await dsService.getDataSourceByAlias('menu').getAll()
 
     if (!menus.length) {
         console.warn('No menu for sideBar in config')

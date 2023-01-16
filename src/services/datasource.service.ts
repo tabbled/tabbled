@@ -1,10 +1,12 @@
-import { ref } from 'vue'
+import {ref, UnwrapRef} from 'vue'
 import {
+    DataSource,
+    DataSourceConfigDataSource,
     DataSourceConfigInterface,
     DataSourceInterface,
     DataSourceType,
-    DataSource,
-    PageConfigDataSource, MenuConfigDataSource, DataSourceConfigDataSource
+    MenuConfigDataSource,
+    PageConfigDataSource
 } from "../model/datasource";
 
 import {useSyncService} from "./sync.service";
@@ -18,7 +20,8 @@ let syncService = useSyncService()
 export class DataSourceService {
     constructor() { }
 
-    dataSources: Map<string, DataSourceInterface> = new Map()
+    private dataSources: Map<string, DataSourceInterface> = new Map()
+    private configDataSources: Map<string, DataSourceInterface> = new Map()
 
     registerDataSource(config: DataSourceConfigInterface): DataSourceInterface | undefined {
         if (config.type !== DataSourceType.tableField) {
@@ -30,19 +33,37 @@ export class DataSourceService {
     }
 
     addDataSource(dataSource: DataSourceInterface) {
-        if (this.dataSources.has(dataSource.alias))
-            console.warn(`Err: error registration datasource, alias ${dataSource.alias} has been taken`)
+        let target;
+        switch (dataSource.type) {
+            case DataSourceType.config:
+                target = this.configDataSources;
+                break;
+            case DataSourceType.data:
+                target = this.dataSources
+                break;
+        }
 
+        if (target.has(dataSource.alias)) {
+            console.warn(`Err: error registration datasource, alias ${dataSource.alias} has been taken`)
+        }
         console.log(`DataSource "${dataSource.alias}" registered`)
-        this.dataSources.set(dataSource.alias, dataSource);
+        target.set(dataSource.alias, dataSource);
+
     }
 
-    clear() {
-        this.dataSources.clear();
+    clear(type: DataSourceType) {
+        switch (type) {
+            case DataSourceType.config:
+                this.configDataSources.clear();
+                break;
+            case DataSourceType.data:
+                this.dataSources.clear();
+                break;
+        }
     }
 
     getDataSourceByAlias(alias: string): DataSourceInterface | undefined {
-        return this.dataSources.get(alias)
+        return this.dataSources.get(alias) || this.configDataSources.get(alias)
     }
 
 
@@ -62,12 +83,12 @@ export class DataSourceService {
         this.addDataSource(pagesDataSource);
         this.addDataSource(menuDataSource);
 
-        syncService.setDataSources(this.dataSources)
+        syncService.setConfigDataSources(this.configDataSources)
     }
 }
 
 let dsService = ref<DataSourceService>(new DataSourceService())
 
-export function useDataSourceService(): DataSourceService {
+export function useDataSourceService(): UnwrapRef<DataSourceService> {
     return dsService.value
 }
