@@ -34,6 +34,7 @@ export class DataSourceService {
 
     addDataSource(dataSource: DataSourceInterface) {
         let target;
+        console.log(dataSource)
         switch (dataSource.type) {
             case DataSourceType.config:
                 target = this.configDataSources;

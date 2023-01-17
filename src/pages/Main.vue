@@ -172,6 +172,7 @@ onMounted(() => {
     console.log('Main mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
     loadMenu();
+
 })
 
 onUnmounted(() => {

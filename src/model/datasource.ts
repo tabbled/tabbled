@@ -80,12 +80,11 @@ export interface DataSourceConfigInterface {
 export class DataSource extends EventEmitter implements DataSourceInterface {
     constructor(config: DataSourceConfigInterface) {
         super()
-        this.keyField = config.keyField;
-        this.isTree = !!config.isTree;
         this.fieldByAlias = new Map()
-        this.alias = config.alias;
-        this.readonly = !!config.readonly;
-
+        this.alias = config.alias
+        this.keyField = config.keyField
+        this.type = config.type
+        this.config = config
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -93,93 +92,23 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.fields = [...this.fieldByAlias.values()]
     }
 
-    private data: EntityInterface[] = [{
-        _id: "1",
-        name: "aaaa",
-        color: "red"
-    },{
-        _id: "2",
-        name: "bbbb",
-        color: "black"
-    },{
-        _id: "3",
-        name: "ccc",
-        color: "blue"
-    }]
-
     private fieldByAlias: Map<string, FieldInterface>
-
-    alias: string;
-    fields: FieldInterface[];
-    keyField: string;
-    isTree?: boolean;
-    cached: boolean = true;
-    readonly: boolean = false;
-    type: DataSourceType = DataSourceType.data
-
-    async getAll(): Promise<EntityInterface[]> {
-        return this.data;
-    }
-
-    async getMany(filter: FilterItemInterface[], take: number = 100, skip: number = 0): Promise<EntityInterface[]> {
-        return []
-    }
-
-    async getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
-        return []
-    }
-
-    getFieldByAlias(alias: string): FieldInterface | undefined {
-        return this.fieldByAlias.get(alias)
-    }
-
-    async getById(id: string | number): Promise<EntityInterface | undefined> {
-        return undefined;
-    }
-
-    async removeById(id: string): Promise<void> {
-
-    }
-
-    async insert(id: string, value: any): Promise<void> {
-
-    }
-
-    async updateById(id: number | string, value: object): Promise<void> {
-
-    }
-}
-
-export class ConfigDataSource extends EventEmitter implements DataSourceInterface {
-    constructor(alias: string, keyField: string, fields: FieldConfigInterface[]) {
-        super()
-        this.fieldByAlias = new Map()
-        this.alias = alias
-        this.keyField = keyField
-
-        fields.forEach(conf => {
-            this.fieldByAlias.set(conf.alias, new Field(conf))
-        })
-        this.fields = [...this.fieldByAlias.values()]
-    }
-
-    private fieldByAlias: Map<string, FieldInterface>
+    private config: DataSourceConfigInterface
 
     alias: string;
     fields: FieldInterface[];
     keyField: string;
     cached = true;
     readonly = false
-    type: DataSourceType = DataSourceType.config
-    onChange?: (id: string, newValue: any) => void;
+    type: DataSourceType
 
     async getAll(): Promise<EntityInterface[]> {
         if (!db.database)
             return []
 
-        let snapshot= await db.database.query(`/config/${this.alias}`)
+        let snapshot= await db.database.query(`/${this.type}/${this.alias}`)
             .filter('deletedAt', '==', null)
-            .take(100)
+            .take(1000)
             .get()
 
         let arr = []
@@ -200,7 +129,7 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
         if (!db.database)
             return []
 
-        let ref = await db.database.query(`/config/${this.alias}`)
+        let ref = await db.database.query(`/${this.type}/${this.alias}`)
 
         for(const i in filter) {
             let item = filter[i]
@@ -236,7 +165,7 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
             return undefined
 
         try {
-            let snap = await db.database.ref(`/config/${this.alias}/${id}`).get()
+            let snap = await db.database.ref(`/${this.type}/${this.alias}/${id}`).get()
             return snap.val()
         } catch (e) {
             throw e
@@ -260,8 +189,8 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
                 data:  _.cloneDeep(value)
             }
 
-            await db.database.ref(`/config/${this.alias}/${id}`).update(item)
-            await syncService.push(DataSourceType.config, [item]);
+            await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
+            await syncService.push(this.type, [item]);
         } catch (e) {
             throw e
         }
@@ -275,7 +204,7 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
             let old = await this.getByIdRaw(id);
 
             if (!old) {
-                console.error(`Item with id ${id} in "${this.alias}" config not found`)
+                console.error(`Item with id ${id} in "${this.alias}" not found`)
                 return;
             }
 
@@ -286,8 +215,8 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
             item.version = old.version + 1;
             item.rev = ''
             item.data =  _.cloneDeep(value)
-            await db.database.ref(`/config/${this.alias}/${id}`).update(item)
-            await syncService.push(DataSourceType.config, [item]);
+            await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
+            await syncService.push(this.type, [item]);
         } catch (e) {
             console.error(e)
         }
@@ -300,7 +229,7 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
         let item = await this.getByIdRaw(id);
 
         if (!item) {
-            console.error(`Item with id ${id} in "${this.alias}" config not found`)
+            console.error(`Item with id ${id} in "${this.alias}" not found`)
             return;
         }
 
@@ -308,8 +237,8 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
         item.deletedBy = db.userId
         item.rev = '';
 
-        await db.database.ref(`/config/${this.alias}/${item.id}`).set(item)
-        await syncService.push(DataSourceType.config, [item]);
+        await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
+        await syncService.push(this.type, [item]);
     }
 
     async setRemoteChanges(data: DataItemInterface[]):Promise<boolean> {
@@ -320,7 +249,7 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
             let item = data[i]
 
             let current_item = await this.getByIdRaw(item.id)
-            await db.database.ref(`/config/${this.alias}/${item.id}`).update(item)
+            await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
 
             if (!current_item) {
                 this.emit('inserted', item.data)
@@ -341,10 +270,13 @@ export class ConfigDataSource extends EventEmitter implements DataSourceInterfac
     }
 }
 
-export class PageConfigDataSource extends ConfigDataSource {
-
+export class PageConfigDataSource extends DataSource {
     constructor() {
-        super('page', 'alias', [
+        super({
+            type: DataSourceType.config,
+            alias: 'page',
+            keyField: 'alias',
+            fields: [
             {
                 title: 'Title',
                 alias: 'title',
@@ -375,13 +307,17 @@ export class PageConfigDataSource extends ConfigDataSource {
                 type: "text",
                 required: true
             }
-        ]);
+        ]});
     }
 }
 
-export class MenuConfigDataSource extends ConfigDataSource {
+export class MenuConfigDataSource extends DataSource {
     constructor() {
-        super('menu', 'alias', [
+        super({
+            type: DataSourceType.config,
+            alias: 'menu',
+            keyField: 'alias',
+            fields: [
             {
                 title: 'Title',
                 alias: 'title',
@@ -406,13 +342,17 @@ export class MenuConfigDataSource extends ConfigDataSource {
                 type: "list",
                 required: false
             }
-        ]);
+        ]});
     }
 }
 
-export class DataSourceConfigDataSource extends ConfigDataSource {
+export class DataSourceConfigDataSource extends DataSource {
     constructor() {
-        super('datasource', 'alias', [
+        super({
+            type: DataSourceType.config,
+            alias: 'datasource',
+            keyField: 'alias',
+            fields: [
             {
                 title: 'Title',
                 alias: 'title',
@@ -437,6 +377,6 @@ export class DataSourceConfigDataSource extends ConfigDataSource {
                 type: "list",
                 required: true
             }
-        ]);
+        ]});
     }
 }

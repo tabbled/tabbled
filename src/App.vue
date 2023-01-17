@@ -53,6 +53,7 @@ onMounted(() => {
         isConfigLoaded.value = false;
         store.dispatch('auth/loadUserSettings')
         loadConfig();
+        loadData()
     }
 
 
@@ -66,6 +67,10 @@ onUnmounted(() => {
 
 function handleResize() {
     layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
+}
+
+async function loadData() {
+    await syncService.sync(DataSourceType.data)
 }
 
 async function loadConfig() {
