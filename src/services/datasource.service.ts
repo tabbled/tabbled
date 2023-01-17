@@ -34,7 +34,6 @@ export class DataSourceService {
 
     addDataSource(dataSource: DataSourceInterface) {
         let target;
-        console.log(dataSource)
         switch (dataSource.type) {
             case DataSourceType.config:
                 target = this.configDataSources;
@@ -49,7 +48,6 @@ export class DataSourceService {
         }
         console.log(`DataSource "${dataSource.alias}" registered`)
         target.set(dataSource.alias, dataSource);
-
     }
 
     clear(type: DataSourceType) {
@@ -69,13 +67,11 @@ export class DataSourceService {
 
 
     async registerAll() {
-
         let items = await dsDataSource.getAll()
 
         items.forEach(ds => {
             this.registerDataSource(<DataSourceConfigInterface>ds)
         })
-
         syncService.setDataSources(this.dataSources)
     }
 

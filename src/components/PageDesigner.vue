@@ -3,7 +3,7 @@
     <el-row align="middle" style="padding-bottom: 16px">
         <div>Screen size: </div>
         <el-radio-group v-model="selectedSize" style="padding-left: 8px">
-            <el-radio-button v-for="i in getAvailableLayoutSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
+            <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
         </el-radio-group>
     </el-row>
 
@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import {ref, reactive} from "vue";
 import WidgetElement from "./WidgetElement.vue"
-import {getAvailableLayoutSizes, LayoutSize} from "../model/page";
+import {getAvailableScreenSizes, ScreenSize} from "../model/page";
 import ElementSettingPanel from "./ElementSettingPanel.vue"
 
 const props = defineProps<{
@@ -87,7 +87,7 @@ const props = defineProps<{
     /**
      * Needed for screen size adjustment
      */
-    size: LayoutSize,
+    size: ScreenSize,
     availableWidgets: [{
         title: string,
         alias: string,

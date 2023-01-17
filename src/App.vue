@@ -11,7 +11,7 @@
         />
         <div>Loading...</div>
     </div>
-    <Main v-else :layout-size="layoutSize" />
+    <Main v-else :screen-size="screenSize" />
 </template>
 
 <script setup lang="ts">
@@ -20,14 +20,11 @@ import Main from "./pages/Main.vue"
 import {onMounted, onUnmounted, ref} from "vue";
 import {useStore} from "vuex";
 import {DataSourceType} from "./model/datasource";
-import {PageConfigInterface, LayoutSize} from "./model/page";
-import {usePagesActions} from "./services/page.service";
+import {PageConfigInterface, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
 import {useDatabase} from "./services/database.service";
 import {useSyncService} from "./services/sync.service";
-import {useSocketClient} from './services/socketio.service'
-import ListPage from "./pages/ListPage.vue";
-import NotFound from "./pages/NotFound.vue";
+import PageView from "./pages/PageView.vue";
 
 
 const store = useStore();
@@ -35,13 +32,11 @@ const route = useRoute();
 const router = useRouter();
 
 let isConfigLoaded = ref(false)
-let layoutSize = ref(LayoutSize.large)
+let screenSize = ref(ScreenSize.desktop)
 
-const pagesActions = usePagesActions();
 const dsService = useDataSourceService();
 const db = useDatabase();
 const syncService = useSyncService()
-let socketClient = useSocketClient()
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
@@ -51,12 +46,14 @@ onMounted(() => {
 
     if (store.getters["auth/isAuthenticated"]) {
         isConfigLoaded.value = false;
-        store.dispatch('auth/loadUserSettings')
-        loadConfig();
-        loadData()
+        store.dispatch('auth/loadUserSettings').finally(()=>{
+            loadConfig().then(() => {
+                loadData()
+            })
+        })
+
+
     }
-
-
 })
 
 onUnmounted(() => {
@@ -66,7 +63,7 @@ onUnmounted(() => {
 })
 
 function handleResize() {
-    layoutSize.value = window.innerWidth > 800 ? LayoutSize.large : LayoutSize.small
+    screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
 }
 
 async function loadData() {
@@ -82,7 +79,7 @@ async function loadConfig() {
         console.error(e)
     }
 
-    Promise.all([
+    await Promise.all([
         dsService.registerAll(),
         registerPages()
     ]).then(() => {
@@ -108,10 +105,10 @@ function addRoute(path: string, page: PageConfigInterface) {
 
     router.addRoute({
         path: path,
-        component: getComponentByName(page.component),
+        component: PageView,
         props: {
             pageConfig: page,
-            layoutSize: layoutSize.value
+            screenSize: screenSize.value
         },
         meta: {
             isSingle: false,
@@ -125,14 +122,6 @@ function addRoute(path: string, page: PageConfigInterface) {
     if (path === router.currentRoute.value.path) {
         router.replace(path)
     }
-}
-
-function getComponentByName(name: string) {
-    switch (name) {
-        //case 'EditPage': return EditPage
-        case 'ListPage': return ListPage
-    }
-    return NotFound
 }
 
 </script>

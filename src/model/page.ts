@@ -1,17 +1,10 @@
 import {DataSetConfigInterface} from "./dataset";
 
-// export enum PageType {
-//     list = 'list',
-//     edit = 'edit',
-//     kanban = 'kanban',
-//     dashboard = 'dashboard'
-// }
-
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
 
-export enum LayoutSize {
-    large = 'large',
-    small = 'small'
+export enum ScreenSize {
+    desktop = 'desktop',
+    mobile = 'mobile'
 }
 
 export interface PageActionConfigInterface {
@@ -20,17 +13,17 @@ export interface PageActionConfigInterface {
     script: string
 }
 
-export interface LayoutSizeItemInterface {
-    size: LayoutSize,
+export interface ScreenSizeItemInterface {
+    size: ScreenSize,
     title: string
 }
 
-export function getAvailableLayoutSizes($t: any):LayoutSizeItemInterface[] {
+export function getAvailableScreenSizes($t: any):ScreenSizeItemInterface[] {
     return [{
-        size: LayoutSize.large,
+        size: ScreenSize.desktop,
         title: $t('layout.largeSize')
     },{
-        size: LayoutSize.small,
+        size: ScreenSize.mobile,
         title: $t('layout.smallSize')
     }]
 }
@@ -39,14 +32,17 @@ export interface PositionElementInterface {
     colFrom: number,
     colTo: number,
     rowFrom: number,
-    rowTo: number
+    rowTo: number,
+    visible?: boolean
 }
 
-export interface ElementConfigInterface {
-    position: PositionElementInterface,
-    component: {
-        name: string,
-        [key: string]: any
+export interface ElementInterface {
+    layout: {
+        [key in ScreenSize]: PositionElementInterface
+    },
+    name: string,
+    properties: {
+        [name: string]: any
     }
 }
 
@@ -55,14 +51,7 @@ export interface PageConfigInterface {
     alias: string,
     path: string,
     title: string,
-    //type: PageType,
     component: string,
     dataSets: DataSetConfigInterface[],
-    actions?: {
-        buttons?: PageActionConfigInterface[],
-        advanced?: PageActionConfigInterface[]
-    }
-    layout?: {
-        [key in LayoutSize]: ElementConfigInterface[]
-    }
+    elements: ElementInterface[]
 }

@@ -3,7 +3,7 @@
         <el-button v-if="dataSet && canAdd" type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
-        <el-button v-if="dataSet && canEdit" @click="edit" size="small">
+        <el-button v-if="dataSet && canEdit && props.dataSet.currentId()" @click="edit" size="small">
             {{t('edit')}}
         </el-button>
         <el-button v-if="dataSet && canRemove && props.dataSet.selectedIds.length > 0" @click="remove" size="small">
@@ -40,10 +40,10 @@ let canEdit = ref(props.allowEdit)
 let canRemove = ref(props.allowRemove)
 
 onMounted(() => {
-    //console.log('onMounted', props.dataSet)
     if (props.dataSet) {
         watch(() => props.dataSet.currentId(),
             async () => {
+
                 //console.log('changed')
             },
             {

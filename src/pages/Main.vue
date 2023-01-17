@@ -97,7 +97,7 @@
                         </template>
                     </el-page-header>
                     <el-main :style="{height: mainViewHeight + 'px'}">
-                        <router-view :layoutSize="layoutSize" v-slot="{Component}">
+                        <router-view :screenSize="screenSize" v-slot="{Component}">
                             <component ref="rView" :is="Component" />
                         </router-view>
 
@@ -121,12 +121,12 @@ import {useStore} from "vuex";
 import {useRoute, useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
-import {LayoutSize} from "../model/page";
+import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 
 
 const props = defineProps<{
-    layoutSize: LayoutSize
+    screenSize: ScreenSize
 }>()
 
 const mainContainer = ref(null);

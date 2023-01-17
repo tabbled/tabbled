@@ -43,7 +43,7 @@ export class Database extends EventEmitter {
         this.database = AceBase.WithIndexedDB(`tabbled-${account.id}`,{
             multipleTabs: true,
             sponsor: true,
-            logLevel: process.env.NODE_ENV === 'development' ? "warn" : "error" });
+            logLevel: process.env.NODE_ENV === 'development' ? "log" : "error" });
 
         await this.database.ready()
         console.log("Database is reade to use");
