@@ -18,8 +18,6 @@ import {useStore} from "vuex"
 import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
 import {useRouter, useRoute} from 'vue-router';
-import {useDataSourceService} from "../services/datasource.service";
-import {usePagesActions} from "../services/page.service";
 import {DataSet, useDataSet} from "../model/dataset";
 //import { compileScript, CompiledFunc } from "../services/compiler"
 import _ from 'lodash'
@@ -30,8 +28,8 @@ let store = useStore();
 //let socketClient = useSocketClient();
 let router = useRouter();
 let route = useRoute();
-const pagesActions = usePagesActions()
-let dsService = useDataSourceService();
+// const pagesActions = usePagesActions()
+// let dsService = useDataSourceService();
 
 let elements = ref<Array<ElementInterface>>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
@@ -48,14 +46,8 @@ defineExpose({
     actionButtons
 })
 
-// watch(() => props.layoutSize,
-//     async () => {
-//         initLayoutElements()
-//     })
-
 watch(() => props.pageConfig,
     async () => {
-        console.log('props.pageConfig')
         initLayoutElements()
     })
 
@@ -101,33 +93,6 @@ function initLayoutElements() {
         elements.value.push(el)
     })
 
-    //let layout = props.pageConfig.layout[props.layoutSize];
-    // layout.forEach(element => {
-    //     let el:ElementInterface = {
-    //         position: element.position,
-    //         component: element.component.name,
-    //         properties: {}
-    //     }
-    //
-    //     //Defining a property mapping from config to element props,
-    //     //like dataSet name in config --> dataset instance
-    //     Object.keys(element.component).forEach(key => {
-    //         if (key === 'dataSet') {
-    //             if (element.component.dataSet && element.component.dataSet !== "") {
-    //                 if (!dataSets.value.has(element.component.dataSet)) {
-    //                     console.warn(`DataSet "${element.component.dataSet}" does not exist!`)
-    //                 } else {
-    //                     el.properties.dataSet = dataSets.value.get(element.component.dataSet)
-    //                 }
-    //             }
-    //         } else {
-    //             el.properties[key] = _.cloneDeep(element.component[key])
-    //         }
-    //     })
-    //
-    //     elements.value.push(el)
-    // })
-
     // pagesActions.buttons = []
     // props.pageConfig.actions?.buttons?.forEach(async (action) => {
     //
@@ -170,8 +135,6 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
     if (!position) {
         position = layout[ScreenSize.desktop] || layout[ScreenSize.mobile]
     }
-
-    console.log(position)
 
     if (position.colFrom) {
         let c = String(position.colFrom);
