@@ -90,8 +90,12 @@ export class DataSet {
     selectedIds: string[] = []
     private _currentId: string | null = null
 
-    currentId(): number | string | null {
+    get currentId(): string | null {
         return this._currentId;
+    }
+
+    set currentId(val) {
+        this._currentId = val
     }
 
     async setCurrentId(id: string | null) {

@@ -3,7 +3,7 @@
         <el-button v-if="dataSet && canAdd" type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
-        <el-button v-if="dataSet && canEdit && props.dataSet.currentId()" @click="edit" size="small">
+        <el-button v-if="dataSet && canEdit && props.dataSet.currentId" @click="edit" size="small">
             {{t('edit')}}
         </el-button>
         <el-button v-if="dataSet && canRemove && props.dataSet.selectedIds.length > 0" @click="remove" size="small">
@@ -17,7 +17,7 @@ import {DataSet} from "../model/dataset";
 import { ElMessageBox } from 'element-plus'
 import {onMounted, ref} from "vue"
 import {useI18n} from "vue-i18n";
-import { compileScript } from "../services/compiler"
+import {CompiledFunc, compileScript} from "../services/compiler"
 
 const { t } = useI18n();
 
@@ -28,7 +28,8 @@ export interface ActionConfig {
 }
 
 interface Props {
-    dataSet: DataSet
+    dataSet: DataSet,
+    context: any,
     allowAdd?: boolean
     allowEdit?: boolean
     allowRemove?: boolean
@@ -67,33 +68,32 @@ async function compileAction(action) {
         return null
 
     try {
-        return await compileScript(action.script, 'dataSet')
+        return await compileScript(action.script, 'ctx')
     } catch (e) {
         console.error(e)
         return null
     }
 }
 
+async function execAction(action: CompiledFunc) {
+    try {
+        action.exec(props.context)
+    } catch (e) {
+        console.error(`Execution error in action`)
+        console.error(e);
+    }
+}
+
 function add() {
     if (actions.value.onAdd) {
-        try {
-            actions.value.onAdd.exec(props.dataSet)
-        } catch (e) {
-            console.error(`Execution error in action`)
-            console.error(e);
-        }
+        execAction(actions.value.onAdd)
     } else
         props.dataSet.insertRow()
 }
 
 function edit() {
     if (actions.value.onEdit) {
-        try {
-            actions.value.onEdit.exec(props.dataSet)
-        } catch (e) {
-            console.error(`Execution error in action`)
-            console.error(e);
-        }
+        execAction(actions.value.onEdit)
     } else {
         console.log("No action for edit button")
     }
@@ -110,14 +110,8 @@ function remove() {
         }
     )
         .then(() => {
-
             if (actions.value.onRemove) {
-                try {
-                    actions.value.onRemove.exec(props.dataSet)
-                } catch (e) {
-                    console.error(`Execution error in action`)
-                    console.error(e);
-                }
+                execAction(actions.value.onRemove)
             } else {
                 props.dataSet.removeBySelectedId()
                 props.dataSet.selectedIds = []

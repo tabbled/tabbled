@@ -14,20 +14,25 @@
 </template>
 
 <script setup lang="ts">
+
+import _ from 'lodash'
 import {useStore} from "vuex"
 import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
 import {useRouter, useRoute} from 'vue-router';
 import {DataSet, useDataSet} from "../model/dataset";
-//import { compileScript, CompiledFunc } from "../services/compiler"
-import _ from 'lodash'
+import {usePageScriptHelper} from "../services/page.service";
 
 
 
 let store = useStore();
-//let socketClient = useSocketClient();
 let router = useRouter();
 let route = useRoute();
+const pageService = usePageScriptHelper(router)
+const scriptContext = {
+    pages: pageService,
+    dataSets: {}
+}
 // const pagesActions = usePagesActions()
 // let dsService = useDataSourceService();
 
@@ -52,7 +57,6 @@ watch(() => props.pageConfig,
     })
 
 onMounted(() => {
-    //console.log('onMounted')
     initLayoutElements()
 })
 
@@ -63,12 +67,8 @@ function initLayoutElements() {
     props.pageConfig.dataSets.forEach(config => {
         let ds = useDataSet(config)
         dataSets.value.set(ds.alias, ds)
+        scriptContext.dataSets[ds.alias] = ds
     })
-
-    // if (!props.pageConfig.layout || !props.pageConfig.layout[props.layoutSize]) {
-    //     console.warn(`Layout for ${props.layoutSize} does not exist!`)
-    //     return;
-    // }
 
     props.pageConfig.elements.forEach(element => {
         let el:ElementInterface = {
@@ -90,6 +90,7 @@ function initLayoutElements() {
                 el.properties[key] = _.cloneDeep(element.properties[key])
             }
         })
+        el.properties['context'] = scriptContext
         elements.value.push(el)
     })
 
