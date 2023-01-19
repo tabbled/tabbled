@@ -2,6 +2,7 @@ import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 import Login from "./pages/Login.vue";
 import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
+import PageDesigner from "./components/PageDesigner.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -9,7 +10,7 @@ const routes: RouteRecordRaw[] = [
         component: Dashboard,
         meta: {
             authRequired: true,
-            title: "Tabbled"
+            title: ""
         },
     },
     {
@@ -18,7 +19,16 @@ const routes: RouteRecordRaw[] = [
         meta: {
             isSingle: true,
             authRequired: false,
-            title: "Login | Tabbled"
+            title: "Login"
+        },
+    },
+    {
+        path: "/designer/:id",
+        component: PageDesigner,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "Designer"
         },
     },
     {

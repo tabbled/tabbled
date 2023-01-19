@@ -52,7 +52,7 @@ export interface DataSourceInterface extends EventEmitter{
      * @returns entity if exists or null if not exists
      */
     getById(id: string | number) : Promise<EntityInterface | undefined>
-
+    getByKey(key: string | number) : Promise<EntityInterface | undefined>
 
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
     onChange?: (id: string, newValue: any) => void;
@@ -155,6 +155,24 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         try {
             let item = await this.getByIdRaw(id)
             return item.data;
+        } catch (e) {
+            throw e
+        }
+    }
+
+    async getByKey(key: string | number) : Promise<EntityInterface | undefined> {
+        if (!db.database)
+            return undefined
+
+        try {
+            let snap = await db.database.query(`/${this.type}/${this.alias}`)
+                .filter(`data/${this.keyField}`, '==', key)
+                .take(1)
+                .get()
+
+            let vals = snap.getValues()
+
+            return vals.length > 0 ? vals[0].data : undefined
         } catch (e) {
             throw e
         }

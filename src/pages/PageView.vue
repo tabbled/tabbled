@@ -23,8 +23,6 @@ import {useRouter, useRoute} from 'vue-router';
 import {DataSet, useDataSet} from "../model/dataset";
 import {usePageScriptHelper} from "../services/page.service";
 
-
-
 let store = useStore();
 let router = useRouter();
 let route = useRoute();
