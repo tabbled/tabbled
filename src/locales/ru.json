@@ -8,8 +8,8 @@
     "reportTemplates": "Шаблоны печати",
     "tableModels": "Модели",
     "layout": {
-        "smallSize": "Маленький",
-        "largeSize": "Большой"
+        "desktop": "Desktop",
+        "mobile": "Mobile"
     },
     "confirmDeleteTitle": "Вы хотите удалить выделенные элементы?",
     "delete": "Удалить",

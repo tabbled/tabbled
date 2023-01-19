@@ -5,26 +5,25 @@ import {PageConfigInterface} from "../model/page";
 
 let dsService = useDataSourceService()
 
-export interface PageButtonActionInterface {
+export interface PageActionsInterface {
     title: string,
     type?: "default" | "primary" | "success" | "warning" | "info" | "danger",
     func: Function
 }
 
 export class PageActions {
-    constructor() {
-        this.buttons = []
-    }
-    buttons: PageButtonActionInterface[]
+    actions: PageActionsInterface[] = []
 }
 
 class PageScriptHelper {
-    private _router:Router = null
-    private _pageDataSource = null
     constructor(router: Router) {
         this._router = router
         this._pageDataSource = dsService.getDataSourceByAlias('page')
     }
+
+    private _router:Router = null
+    private _pageDataSource = null
+
     async open(alias: string) {
         let page = await <PageConfigInterface>this._pageDataSource.getByKey(alias)
 

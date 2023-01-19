@@ -21,10 +21,10 @@ export interface ScreenSizeItemInterface {
 export function getAvailableScreenSizes($t: any):ScreenSizeItemInterface[] {
     return [{
         size: ScreenSize.desktop,
-        title: $t('layout.largeSize')
+        title: $t('layout.desktop')
     },{
         size: ScreenSize.mobile,
-        title: $t('layout.smallSize')
+        title: $t('layout.mobile')
     }]
 }
 
@@ -42,7 +42,7 @@ export interface ElementInterface {
     },
     name: string,
     properties: {
-        [name: string]: any
+        [name: string]: any | undefined
     }
 }
 
@@ -51,7 +51,6 @@ export interface PageConfigInterface {
     alias: string,
     path: string,
     title: string,
-    component: string,
     dataSets: DataSetConfigInterface[],
     elements: ElementInterface[]
 }

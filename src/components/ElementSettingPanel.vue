@@ -1,11 +1,26 @@
 <template>
     <div class="panel">
-        <div class="border"/>
         Settings
+        {{element}}
     </div>
 </template>
 
 <script setup lang="ts">
+
+import {ElementInterface, PageConfigInterface} from "../model/page";
+
+const props = defineProps<{
+    element: ElementInterface,
+    page: PageConfigInterface
+}>()
+
+// watch(() => props.element,
+//     async () => {
+//         console.log(props.element)
+//     },
+//     {
+//         deep: true
+//     })
 
 </script>
 

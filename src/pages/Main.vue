@@ -86,13 +86,12 @@
 
                         <template #extra>
                             <div class="flex items-center">
-
-<!--                                <el-button v-for="action in pagesActions.buttons"-->
-<!--                                           :type="action.type ? action.type : 'default'"-->
-<!--                                           @click="action.func()"-->
-<!--                                >-->
-<!--                                    {{action.title}}-->
-<!--                                </el-button>-->
+                                <el-button v-for="action in pagesActions.actions"
+                                           :type="action.type ? action.type : 'default'"
+                                           @click="action.func()"
+                                >
+                                    {{action.title}}
+                                </el-button>
                             </div>
                         </template>
                     </el-page-header>
@@ -123,6 +122,7 @@ import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
+import {usePagesActions} from "../services/page.service";
 
 
 const props = defineProps<{
@@ -141,6 +141,7 @@ const router = useRouter();
 const route = useRoute()
 const dsService = useDataSourceService();
 const { t } = useI18n();
+const pagesActions = usePagesActions()
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)
@@ -180,7 +181,6 @@ onUnmounted(() => {
 })
 
 const username: ComputedRef<string> = computed((): string =>  {
-    //console.log(store.getters['auth/user'])
     return store.getters['auth/user'] ? store.getters['auth/user'].username : ""
 })
 

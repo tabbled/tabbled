@@ -1,8 +1,8 @@
 <template>
     <div class="wrapper">
-        <div >
-            <span class="icon iconify" :data-icon="'mdi:' + props.icon"/>
-        </div>
+<!--        <div >-->
+<!--            <span class="icon iconify" :data-icon="'mdi:' + props.icon"/>-->
+<!--        </div>-->
         <div class="description">
 
             <span class="title">
@@ -22,7 +22,7 @@
 const props = defineProps<{
     title: string,
     subtitle: string,
-    icon: string
+    icon?: string
 }>()
 
 </script>

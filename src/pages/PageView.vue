@@ -51,16 +51,31 @@ defineExpose({
 
 watch(() => props.pageConfig,
     async () => {
-        initLayoutElements()
+        init()
     })
 
 onMounted(() => {
-    initLayoutElements()
+    init()
 })
 
-function initLayoutElements() {
+function init() {
+    // if (!route.params.id) {
+    //     console.error("Id not provided in url params")
+    //     return;
+    // }
+    // pageConfig.value = await getPageConfig(route.params.id.toString())
+    //
+    // if (!pageConfig.value) {
+    //     router.back()
+    //     console.error(`Page with id ${route.params.id} not found`)
+    //     return;
+    // }
+
+
     elements.value = []
     dataSets.value.clear();
+
+
 
     props.pageConfig.dataSets.forEach(config => {
         let ds = useDataSet(config)
@@ -91,7 +106,7 @@ function initLayoutElements() {
         el.properties['context'] = scriptContext
         elements.value.push(el)
     })
-
+    console.log(elements.value)
     // pagesActions.buttons = []
     // props.pageConfig.actions?.buttons?.forEach(async (action) => {
     //
