@@ -54,6 +54,7 @@ watch(() => props.pageConfig,
         init()
     })
 
+
 onMounted(() => {
     init()
 })
@@ -106,7 +107,6 @@ function init() {
         el.properties['context'] = scriptContext
         elements.value.push(el)
     })
-    console.log(elements.value)
     // pagesActions.buttons = []
     // props.pageConfig.actions?.buttons?.forEach(async (action) => {
     //

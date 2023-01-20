@@ -27,8 +27,11 @@
                          style="height: inherit"
                          :id="String(idx)"
                     >
-                        <WidgetElement :title="element.name" :subtitle="element.name" style="height: inherit;"
-                                       :class="{'widget-selected': selectedIdx === String(idx)}"/>
+                        <WidgetElement :properties="element.properties"
+                                       style="height: inherit;"
+                                       :component="element.name"
+                                       :class="{'widget-selected': selectedIdx === String(idx)}"
+                        />
                         <div :class="{
                         'resizer-right': true,
                         'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
@@ -54,8 +57,8 @@
         </el-col>
         <el-col :span="8">
             <ElementSettingPanel
-                :page="pageConfig"
-                :element="selectedIdx ? elements[Number(selectedIdx)] : undefined"
+                :fields="pageFields"
+                :properties="selectedIdx ? elements[Number(selectedIdx)].properties : pageConfig"
                 class="element-setting-panel"/>
         </el-col>
 
@@ -78,6 +81,29 @@ import {useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePagesActions} from "../services/page.service";
 import _ from 'lodash'
+import {DataSet, useDataSet} from "../model/dataset";
+import {FieldConfigInterface} from "../model/field";
+
+let pageFields:FieldConfigInterface[]  = [
+    {
+        title: 'Title',
+        alias: 'title',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Path',
+        alias: 'path',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Alias',
+        alias: 'alias',
+        type: "string",
+        required: true
+    }
+]
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -88,6 +114,7 @@ let router = useRouter()
 let dsService = useDataSourceService()
 
 let elements = ref<ElementInterface[]>([])
+let dataSets = ref<Map<string, DataSet>>(new Map())
 let pageConfig = ref<PageConfigInterface>(null)
 
 let startX = 0
@@ -126,7 +153,7 @@ async function init() {
         return;
     }
 
-    elements.value = pageConfig.value.elements
+    //elements.value = pageConfig.value.elements
 
     pageAction.actions = []
     pageAction.actions.push({
@@ -138,6 +165,43 @@ async function init() {
         title: 'Save',
         type: 'primary',
         func: save
+    })
+
+
+
+    elements.value = []
+    dataSets.value.clear();
+
+
+
+    pageConfig.value.dataSets.forEach(config => {
+        let ds = useDataSet(config)
+        dataSets.value.set(ds.alias, ds)
+        //scriptContext.dataSets[ds.alias] = ds
+    })
+
+    pageConfig.value.elements.forEach(element => {
+        let el:ElementInterface = {
+            layout: element.layout,
+            name: element.name,
+            properties: {}
+        }
+
+        Object.keys(element.properties).forEach(key => {
+            if (key === 'dataSet') {
+                if (element.properties.dataSet && element.properties.dataSet !== "") {
+                    if (!dataSets.value.has(element.properties.dataSet)) {
+                        console.warn(`DataSet "${element.properties.dataSet}" does not exist!`)
+                    } else {
+                        el.properties.dataSet = dataSets.value.get(element.properties.dataSet)
+                    }
+                }
+            } else {
+                el.properties[key] = _.cloneDeep(element.properties[key])
+            }
+        })
+        el.properties['context'] = {}
+        elements.value.push(el)
     })
 }
 
@@ -340,10 +404,9 @@ function dropNewWidget(e:DragEvent) {
 .grid-wrapper {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 40px) min(40px);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
-
 }
 
 .setting-panel {

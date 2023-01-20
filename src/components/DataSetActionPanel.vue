@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import {DataSet} from "../model/dataset";
 import { ElMessageBox } from 'element-plus'
-import {onMounted, ref} from "vue"
+import {onMounted, ref, watch} from "vue"
 import {useI18n} from "vue-i18n";
 import {CompiledFunc, compileScript} from "../services/compiler"
 
@@ -54,14 +54,24 @@ let actions = ref({
 })
 
 onMounted(() => {
-    init();
+
 })
 
-async function init() {
-    actions.value.onAdd = await compileAction(props.onAdd)
-    actions.value.onEdit = await compileAction(props.onEdit)
-    actions.value.onRemove = await compileAction(props.onRemove)
-}
+
+watch(() => props,
+    async () => {
+        canAdd.value = props.allowAdd
+        canEdit.value = props.allowEdit
+        canRemove.value = props.allowRemove
+
+        actions.value.onAdd = await compileAction(props.onAdd)
+        actions.value.onEdit = await compileAction(props.onEdit)
+        actions.value.onRemove = await compileAction(props.onRemove)
+    },
+    {
+        deep: true
+    })
+
 
 async function compileAction(action) {
     if (!action)

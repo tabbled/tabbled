@@ -1,17 +1,29 @@
 <template>
-    <div class="panel">
+    <div v-if="properties && fields" class="panel">
         Settings
-        {{element}}
+        <el-form label-position="top" ref="pageForm" :model="properties" size="small">
+            <el-form-item v-for="(field, idx)  in fields"
+                          :tabindex="idx"
+                          :show-message="false"
+                          :label="field.title"
+                          :required="field.required || false"
+                          :prop="field.alias">
+                <el-input  :model-value="properties[field.alias]"/>
+            </el-form-item>
+        </el-form>
     </div>
 </template>
 
 <script setup lang="ts">
 
-import {ElementInterface, PageConfigInterface} from "../model/page";
+import {ref} from "vue";
+import {FieldConfigInterface} from "../model/field";
+
+let pageForm = ref(null)
 
 const props = defineProps<{
-    element: ElementInterface,
-    page: PageConfigInterface
+    properties: any,
+    fields: FieldConfigInterface[]
 }>()
 
 // watch(() => props.element,

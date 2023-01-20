@@ -308,12 +308,6 @@ export class PageConfigDataSource extends DataSource {
                 required: true
             },
             {
-                title: 'Component',
-                alias: 'component',
-                type: "string",
-                required: true
-            },
-            {
                 title: 'Alias',
                 alias: 'alias',
                 type: "string",

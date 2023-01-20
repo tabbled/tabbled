@@ -1,28 +1,14 @@
 <template>
     <div class="wrapper">
-<!--        <div >-->
-<!--            <span class="icon iconify" :data-icon="'mdi:' + props.icon"/>-->
-<!--        </div>-->
-        <div class="description">
-
-            <span class="title">
-                {{props.title}}
-            </span>
-
-            <span class="subtitle">
-                {{props.subtitle}}
-            </span>
-
-        </div>
+        <component :is="component" v-bind="properties" style="height: inherit"/>
     </div>
 </template>
 
 <script setup lang="ts">
 
 const props = defineProps<{
-    title: string,
-    subtitle: string,
-    icon?: string
+    component: string
+    properties: object
 }>()
 
 </script>
@@ -33,12 +19,12 @@ const props = defineProps<{
     display: flex;
     flex-direction: row;
     background: #f9f9f9;
-    border-radius: 5px;
+    border-radius: 2px;
     border-style: solid;
     border-width: thin;
     z-index: 0;
     border-color: #00000012;
-    //padding: 8px;
+    overflow: hidden;
 }
 
 .description {

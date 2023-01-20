@@ -1,7 +1,7 @@
 <template>
     <el-table
             border
-            :data="props.dataSet.dataRef()"
+            :data="props.dataSet ? props.dataSet.dataRef() : []"
             :fit="true"
             row-key="id"
             highlight-current-row

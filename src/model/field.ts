@@ -18,7 +18,7 @@ export interface FieldConfigInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations
     type: FieldDataType,
-    required: boolean,
+    required?: boolean,
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,
@@ -34,7 +34,7 @@ export interface FieldInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations
     type: FieldDataType,
-    required: boolean,
+    required?: boolean,
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,
