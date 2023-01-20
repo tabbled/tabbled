@@ -77,6 +77,7 @@ import ElementSettingPanel from "./ElementSettingPanel.vue"
 import {useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePagesActions} from "../services/page.service";
+import _ from 'lodash'
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -129,14 +130,14 @@ async function init() {
 
     pageAction.actions = []
     pageAction.actions.push({
-        title: 'Save',
-        type: 'primary',
-        func: save
-    })
-    pageAction.actions.push({
         title: 'Cancel',
         type: 'default',
         func: cancel
+    })
+    pageAction.actions.push({
+        title: 'Save',
+        type: 'primary',
+        func: save
     })
 }
 
@@ -196,22 +197,29 @@ function initDrag(e:MouseEvent) {
 
     // @ts-ignore
     let widgetElement = e.target.parentNode
+    // @ts-ignore
+    dragIdx.value = Number(e.target.id)
 
     startWidth = widgetElement.offsetWidth;
     startHeight = widgetElement.offsetHeight;
 
-    // @ts-ignore
-    widget = elements.value[e.target.id].layout[selectedSize.value]
-    // @ts-ignore
-    dragIdx = e.target.id
 
-    initWidget = Object.assign({}, widget)
+    widget = elements.value[dragIdx.value].layout[selectedSize.value]
+
+    // If position for that size not found then copy from any existed
+    if (!widget) {
+        let layout = elements.value[dragIdx.value].layout
+        layout[selectedSize.value] = _.cloneDeep(layout[ScreenSize.desktop] || layout[ScreenSize.mobile])
+        widget = layout[selectedSize.value]
+    }
+
+    initWidget = _.cloneDeep(widget)
 }
 
 function onDrag(e: MouseEvent) {
-
-    if (!widget)
+    if (!widget) {
         return;
+    }
 
     if (dragDirection.value == 'right') {
         let colW = ( grid?.value?.offsetWidth / 12 );
