@@ -1,30 +1,20 @@
 import {DataSourceConfigInterface} from "./datasource";
 
-export type FieldDataType =
-    'number' |
-    'string' |
-    'bool' |
-    'text' |
-    'list' |
-    'status' |
-    'image' |
-    'datetime' |
-    'date' |
-    'time' |
-    'link' |
-    'table'
+export type FieldComponentType = 'handler' | 'dataset' | 'datasource'
+export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
+export type FieldType = FieldComponentType | FieldDataType
 
 export interface FieldConfigInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations
-    type: FieldDataType,
+    type: FieldType,
+    tooltip?: string,
     required?: boolean,
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,
     decimals?: number,                  // Only for type numeric
-    default?: string | number |
-        object | object[] | null,
+    default?: any,
     datasource?: DataSourceConfigInterface  // Only for type Table, that can be passed a DataSourceConfig
     getValueScript?: string                    // Evaluate when entity changed, result of eval sets to field value
     onValueChangeScript?: string             // Evaluate when value changed manually by user or by another script
@@ -33,7 +23,7 @@ export interface FieldConfigInterface {
 export interface FieldInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations
-    type: FieldDataType,
+    type: FieldType,
     required?: boolean,
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
@@ -60,7 +50,7 @@ export class Field implements FieldInterface {
 
     }
     alias: string;
-    type: FieldDataType;
+    type: FieldType;
     decimals?: number;
     default?: string | number | object | object[] | null;
     isMultiple?: boolean;

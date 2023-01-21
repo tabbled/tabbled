@@ -11,8 +11,9 @@ export interface PageActionsInterface {
     func: Function
 }
 
-export class PageActions {
+export class PageHeader {
     actions: PageActionsInterface[] = []
+    title: string
 }
 
 class PageScriptHelper {
@@ -50,9 +51,9 @@ class PageScriptHelper {
     }
 }
 
-let pageActions = ref<PageActions>(new PageActions())
+let pageActions = ref<PageHeader>(new PageHeader())
 
-export function usePagesActions(): UnwrapRef<PageActions> {
+export function usePageHeader(): UnwrapRef<PageHeader> {
     return pageActions.value
 }
 

@@ -28,6 +28,12 @@
 </template>
 
 <script setup lang="ts">
+
+
+defineExpose({
+
+})
+
 //import {defineComponent, ref, shallowRef} from "vue";
 //import { Codemirror } from 'vue-codemirror'
 //import { javascript } from '@codemirror/lang-javascript'

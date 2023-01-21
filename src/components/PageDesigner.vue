@@ -27,7 +27,7 @@
                          style="height: inherit"
                          :id="String(idx)"
                     >
-                        <WidgetElement :properties="element.properties"
+                        <WidgetElement :properties="getElementProperties(element)"
                                        style="height: inherit;"
                                        :component="element.name"
                                        :class="{'widget-selected': selectedIdx === String(idx)}"
@@ -56,10 +56,12 @@
 
         </el-col>
         <el-col :span="8">
+
             <ElementSettingPanel
-                :fields="pageFields"
-                :properties="selectedIdx ? elements[Number(selectedIdx)].properties : pageConfig"
-                class="element-setting-panel"/>
+                class="element-setting-panel"
+                :properties="activeComponentProperties"
+                :model="selectedIdx ? elements[Number(selectedIdx)].properties : pageConfig"
+                @update="onUpdateProperty" />
         </el-col>
 
     </el-row>
@@ -67,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted} from "vue";
+import {ref, onMounted, onUnmounted, ComputedRef, computed} from "vue";
 import WidgetElement from "./WidgetElement.vue"
 import {
     ElementInterface,
@@ -79,12 +81,13 @@ import {
 import ElementSettingPanel from "./ElementSettingPanel.vue"
 import {useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../services/datasource.service";
-import {usePagesActions} from "../services/page.service";
+import {usePageHeader} from "../services/page.service";
 import _ from 'lodash'
 import {DataSet, useDataSet} from "../model/dataset";
 import {FieldConfigInterface} from "../model/field";
+import {useComponentService} from "../services/component.service";
 
-let pageFields:FieldConfigInterface[]  = [
+let pageProperties:FieldConfigInterface[]  = [
     {
         title: 'Title',
         alias: 'title',
@@ -112,6 +115,7 @@ const props = defineProps<{
 let route = useRoute()
 let router = useRouter()
 let dsService = useDataSourceService()
+let componentService = useComponentService()
 
 let elements = ref<ElementInterface[]>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
@@ -130,15 +134,61 @@ let selectedSize = ref(ScreenSize.desktop)
 
 const grid = ref(null);
 
-let pageAction = usePagesActions()
+let pageHeader = usePageHeader()
 
 onMounted(() => {
     init()
 })
 
 onUnmounted(() => {
-    pageAction.actions = []
+    pageHeader.actions = []
+    pageHeader.title = ""
 })
+
+function getElementProperties(element: ElementInterface) {
+    console.log('getElementProperties', element)
+    let component = componentService.getByName(element.name)
+    if (!component)
+        return undefined
+
+    let props:any = {}
+    props.context = {}
+
+    //Replace properties with type dataset/datasource/etc to ref
+    component.properties.forEach(prop => {
+        props[prop.alias] = _.cloneDeep(element.properties[prop.alias])
+
+        if(props[prop.alias] === undefined) {
+            console.log(prop)
+            props[prop.alias] = _.cloneDeep(prop.default)
+        }
+
+        if (prop.type === 'dataset') {
+            props[prop.alias] = dataSets.value.get(element.properties[prop.alias])
+        }
+    })
+    console.log(props)
+    return props;
+
+}
+
+const activeComponentProperties: ComputedRef<FieldConfigInterface[]> = computed((): FieldConfigInterface[] =>  {
+    if (!selectedIdx.value)
+        return pageProperties;
+
+    let el = elements.value[Number(selectedIdx.value)]
+
+    //console.log(componentService.getList())
+
+    let component = componentService.getByName(el.name)
+    if (!component) {
+        console.warn(`Component "${el.name}" not registered`)
+        return []
+    }
+    return component.properties
+})
+
+
 
 async function init() {
     if (!route.params.id) {
@@ -153,26 +203,24 @@ async function init() {
         return;
     }
 
+    pageHeader.title = `Page designer #` + pageConfig.value.alias
+
     //elements.value = pageConfig.value.elements
 
-    pageAction.actions = []
-    pageAction.actions.push({
+    pageHeader.actions = []
+    pageHeader.actions.push({
         title: 'Cancel',
         type: 'default',
         func: cancel
     })
-    pageAction.actions.push({
+    pageHeader.actions.push({
         title: 'Save',
         type: 'primary',
         func: save
     })
 
-
-
     elements.value = []
     dataSets.value.clear();
-
-
 
     pageConfig.value.dataSets.forEach(config => {
         let ds = useDataSet(config)
@@ -180,34 +228,53 @@ async function init() {
         //scriptContext.dataSets[ds.alias] = ds
     })
 
-    pageConfig.value.elements.forEach(element => {
-        let el:ElementInterface = {
-            layout: element.layout,
-            name: element.name,
-            properties: {}
-        }
+    elements.value = pageConfig.value.elements
 
-        Object.keys(element.properties).forEach(key => {
-            if (key === 'dataSet') {
-                if (element.properties.dataSet && element.properties.dataSet !== "") {
-                    if (!dataSets.value.has(element.properties.dataSet)) {
-                        console.warn(`DataSet "${element.properties.dataSet}" does not exist!`)
-                    } else {
-                        el.properties.dataSet = dataSets.value.get(element.properties.dataSet)
-                    }
-                }
-            } else {
-                el.properties[key] = _.cloneDeep(element.properties[key])
-            }
-        })
-        el.properties['context'] = {}
-        elements.value.push(el)
-    })
+    // pageConfig.value.elements.forEach(element => {
+    //     let el:ElementInterface = {
+    //         layout: element.layout,
+    //         name: element.name,
+    //         properties: {}
+    //     }
+    //
+    //     Object.keys(element.properties).forEach(key => {
+    //         if (key === 'dataSet') {
+    //             if (element.properties.dataSet && element.properties.dataSet !== "") {
+    //                 if (!dataSets.value.has(element.properties.dataSet)) {
+    //                     console.warn(`DataSet "${element.properties.dataSet}" does not exist!`)
+    //                 } else {
+    //                     el.properties.dataSet = dataSets.value.get(element.properties.dataSet)
+    //                 }
+    //             }
+    //         } else {
+    //             el.properties[key] = _.cloneDeep(element.properties[key])
+    //         }
+    //     })
+    //     el.properties['context'] = {}
+    //     elements.value.push(el)
+    // })
+}
+
+async function onUpdateProperty(alias: string, value: any) {
+    //console.log(alias, value)
+    if (!selectedIdx.value) {
+        pageConfig.value[alias] = value
+    } else {
+        console.log(value)
+        elements.value[selectedIdx.value].properties[alias] = value
+        console.log(elements.value[selectedIdx.value])
+    }
+
 }
 
 async function save() {
     dsService.getDataSourceByAlias('page')
     let ds = dsService.getDataSourceByAlias('page')
+
+    //gather changes from elements to config after saving
+    pageConfig.value.elements = elements.value
+
+    console.log(pageConfig.value.elements)
 
     try {
         await ds.updateById(pageConfig.value.id, pageConfig.value)

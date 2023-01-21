@@ -1,14 +1,29 @@
 <template>
-    <div v-if="properties && fields" class="panel">
+    <div v-if="properties && model" class="panel">
         Settings
-        <el-form label-position="top" ref="pageForm" :model="properties" size="small">
-            <el-form-item v-for="(field, idx)  in fields"
+        <el-form label-position="top" ref="pageForm" :model="model" size="small">
+            <el-form-item v-for="(prop, idx)  in properties"
+                          style="margin-bottom: 8px;"
                           :tabindex="idx"
                           :show-message="false"
-                          :label="field.title"
-                          :required="field.required || false"
-                          :prop="field.alias">
-                <el-input  :model-value="properties[field.alias]"/>
+                          :label="prop.type === 'bool' ? '' : prop.title"
+                          :required="prop.required || false"
+                          :prop="prop.alias">
+                <el-input v-if="prop.type === 'string'" :model-value="model[prop.alias]"
+                            @input="(val) => onInput(prop.alias, val)"
+                />
+                <el-input v-else-if="prop.type === 'text'"
+                          type="textarea"
+                          :autosize="{ minRows: 2, maxRows: 4 }"
+                          :model-value="model[prop.alias]"
+                          @input="(val) => onInput(prop.alias, val)"
+                />
+                <el-checkbox v-else-if="prop.type === 'bool'"
+                             :label="prop.title"
+                             :model-value="model[prop.alias]"
+                             @change="(val) => onInput(prop.alias, val)"
+                />
+                <div v-else style="color: #c45656">Don't have an element for type "{{prop.type}}"</div>
             </el-form-item>
         </el-form>
     </div>
@@ -21,9 +36,11 @@ import {FieldConfigInterface} from "../model/field";
 
 let pageForm = ref(null)
 
+
+const emit = defineEmits(['update'])
 const props = defineProps<{
-    properties: any,
-    fields: FieldConfigInterface[]
+    model: any,
+    properties: FieldConfigInterface[]
 }>()
 
 // watch(() => props.element,
@@ -33,6 +50,11 @@ const props = defineProps<{
 //     {
 //         deep: true
 //     })
+
+function onInput(alias: string, value: any) {
+    //console.log(alias, value)
+    emit('update', alias, value)
+}
 
 </script>
 

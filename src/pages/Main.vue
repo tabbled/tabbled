@@ -86,7 +86,7 @@
 
                         <template #extra>
                             <div class="flex items-center">
-                                <el-button v-for="action in pagesActions.actions"
+                                <el-button v-for="action in pageHeader.actions"
                                            :type="action.type ? action.type : 'default'"
                                            @click="action.func()"
                                 >
@@ -122,7 +122,7 @@ import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
-import {usePagesActions} from "../services/page.service";
+import {usePageHeader} from "../services/page.service";
 
 
 const props = defineProps<{
@@ -141,7 +141,7 @@ const router = useRouter();
 const route = useRoute()
 const dsService = useDataSourceService();
 const { t } = useI18n();
-const pagesActions = usePagesActions()
+const pageHeader = usePageHeader()
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)
@@ -166,14 +166,13 @@ function setCollapsed() {
 }
 
 const currentPageTitle: ComputedRef<string> = computed((): string =>  {
-    return  route.meta.title.toString()
+    return !pageHeader.title || pageHeader.title === '' ? route.meta.title.toString() : pageHeader.title
 })
 
 onMounted(() => {
     console.log('Main mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
     loadMenu();
-
 })
 
 onUnmounted(() => {

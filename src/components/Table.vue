@@ -61,10 +61,12 @@ import Input from "./table/Input.vue"
 
 interface Props {
     dataSet: DataSet,
-    isRowSelectable?: boolean
+    isRowSelectable?: boolean,
+    isInlineEditing?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
-    isRowSelectable: true
+    isRowSelectable: true,
+    isInlineEditing: true
 })
 
 //let data = ref<Array<EntityInterface>>([])
@@ -109,10 +111,11 @@ function onCellInput(scope: any, value: any) {
 }
 
 function handleCellClick(scope:any) {
-    editingCell.value = {
-        row: scope.$index,
-        col: scope.cellIndex
-    }
+    if (props.isInlineEditing)
+        editingCell.value = {
+            row: scope.$index,
+            col: scope.cellIndex
+        }
 }
 
 function inputKeyDown(e:KeyboardEvent) {
@@ -123,7 +126,9 @@ function inputKeyDown(e:KeyboardEvent) {
 
 function cellFocusedOut() {
     editingCell.value = null
-    props.dataSet.commit();
+
+    if (props.dataSet)
+        props.dataSet.commit();
 }
 
 let getCellClass = (scope: any) => {
@@ -145,7 +150,11 @@ let getHeaderCellClass = (column: any) => {
 
 let getHeaderTitle = (scope: any) => {
     let idx = props.isRowSelectable ? scope.$index -1 : scope.$index
-    return columns.value[idx].title
+    let col = columns.value[idx];
+    if (!col)
+        return "error"
+
+    return col.title
 }
 
 let getCellData = (scope: any) => {
@@ -165,7 +174,7 @@ function getRowClass() {
 }
 
 function onMouseLeave() {
-    if (!editingCell.value && props.dataSet.autoCommit && props.dataSet.isChanged()) {
+    if (props.dataSet && !editingCell.value && props.dataSet.autoCommit && props.dataSet.isChanged()) {
         props.dataSet.commit()
     }
 }

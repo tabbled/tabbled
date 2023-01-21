@@ -1,4 +1,5 @@
 import {DataSetConfigInterface} from "./dataset";
+import {FieldConfigInterface} from "./field";
 
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
 
@@ -44,6 +45,12 @@ export interface ElementInterface {
     properties: {
         [name: string]: any | undefined
     }
+}
+
+export interface ComponentInterface {
+    name: string,
+    title: string,
+    properties: FieldConfigInterface[]
 }
 
 export interface PageConfigInterface {

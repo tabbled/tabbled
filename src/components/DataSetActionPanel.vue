@@ -21,7 +21,7 @@ import {CompiledFunc, compileScript} from "../services/compiler"
 
 const { t } = useI18n();
 
-export interface ActionConfig {
+interface ActionConfig {
     type: "script" | "func",
     script?: string,
     func?: string

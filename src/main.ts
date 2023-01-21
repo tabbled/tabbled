@@ -6,16 +6,11 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import './style.css'
 
-//components
-import CodeEditor from "./components/CodeEditor.vue"
-import Table from "./components/Table.vue"
-import DataSetActionPanel from './components/DataSetActionPanel.vue'
-
-
 // i18n
 import ru from './locales/ru.json'
 import en from './locales/en.json'
 import { createI18n } from 'vue-i18n'
+import {useComponentService} from "./services/component.service";
 const i18n = createI18n({
     messages: {
         ru: ru,
@@ -33,9 +28,28 @@ const app = createApp({
     render: () => h(App)
 })
 
+//components
+import CodeEditor from "./components/CodeEditor.vue"
+import Table from "./components/Table.vue"
+import DataSetActionPanel from './components/DataSetActionPanel.vue'
+import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
+import {properties as tableProps} from './components/configuration/table.config'
+
 app.component('Table', Table);
 app.component('CodeEditor', CodeEditor)
 app.component('DataSetActionPanel', DataSetActionPanel)
+
+let componentService = useComponentService()
+componentService.registerComponent({
+    name: 'DataSetActionPanel',
+    title: "Action panel",
+    properties: actionPanelProps()
+})
+componentService.registerComponent({
+    name: 'Table',
+    title: "Table",
+    properties: tableProps()
+})
 
 app.use(router(store));
 app.use(store)
