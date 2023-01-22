@@ -1,13 +1,13 @@
 <template>
     <el-container class="main">
         <el-container>
-            <el-aside :width="isCollapsed ? '64px' : '250px'" ref="aside">
+            <el-aside :width="isSideBarCollapsed ? '64px' : mainSideBarWidth + 'px'" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
                     <div class="menu-header">
                         <div>
                             <el-row align="middle">
                                 <img height="30" src="./../assets/tabbled_icon.svg" alt=""/>
-                                <div style="margin-left: 8px">Tabbled</div>
+                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">Tabbled</div>
                             </el-row>
                         </div>
                         <el-tag v-if="!isConnected" effect="light" size="small" type="danger">Offline</el-tag>
@@ -16,7 +16,7 @@
                 <el-divider style="margin: 0"/>
 
                 <el-menu style="height: 400px"
-                         :collapse="isCollapsed"
+                         :collapse="isSideBarCollapsed"
                          :collapse-transition="false"
                          :default-active="$route.fullPath"
                          :router="true"
@@ -27,7 +27,7 @@
                         >
                             <template #title>
                                 <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></el-icon>
-                                <span v-if="!isCollapsed">{{menu.title}}</span>
+                                <span v-if="!isSideBarCollapsed">{{menu.title}}</span>
                             </template>
 
                             <el-menu-item v-for="item in menu.items"
@@ -53,7 +53,7 @@
 
                 <div class="footer ">
                     <el-menu
-                        :collapse="isCollapsed"
+                        :collapse="isSideBarCollapsed"
                         :collapse-transition="false"
                     >
 
@@ -61,7 +61,7 @@
                             <el-icon class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
 
                             <span style="width: 100%; text-align: start;">{{username}}</span>
-                            <div v-if="!isCollapsed" @click="logout()" class="open_new" style="width: 16px; height: 100%;">
+                            <div v-if="!isSideBarCollapsed" @click="logout()" class="open_new" style="width: 16px; height: 100%;">
                                 <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
                             </div>
                         </el-menu-item>
@@ -69,7 +69,7 @@
 
                         <div style="width: 100%;">
                             <el-button @click="setCollapsed" text style="width: 64px; opacity: 40%" size="small">
-                                <span class="iconify " :data-icon="isCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" style="width: 24px; height: 100%;"/>
+                                <span class="iconify " :data-icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" style="width: 24px; height: 100%;"/>
                             </el-button>
                         </div>
 
@@ -77,8 +77,8 @@
                     </el-menu>
                 </div>
             </el-aside>
-            <el-container >
-                <el-col class="main-router-view" ref="mainContainer" :style="{width: isCollapsed ? 'calc(100% - 64px)' :'calc(100% - 250px)' }">
+            <el-container :style="{width: mainViewWidth + 'px'}">
+                <el-col class="main-router-view" ref="mainContainer" >
                     <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
                         <template #content>
                             <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
@@ -104,6 +104,16 @@
                     </el-main>
                 </el-col>
             </el-container>
+            <el-aside v-if="advancedPanel.visible"
+                      class="advancedPanel"
+                      :width="String(settingPanelWidth) + 'px'">
+
+                <ElementSettingPanel
+                    :properties="advancedPanel.parameters"
+                    :element="advancedPanel.element"
+                    @update="advancedPanel.onUpdate" />
+
+            </el-aside>
         </el-container>
     </el-container>
     <!--    <div class="locale-changer">-->
@@ -114,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
+import {computed, ComputedRef, onMounted, onUnmounted, ref, watch} from "vue";
 import {MenuConfigInterface} from "../model/menu";
 import {useStore} from "vuex";
 import {useRoute, useRouter} from 'vue-router'
@@ -122,7 +132,8 @@ import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
-import {usePageHeader} from "../services/page.service";
+import {useAdvancedPanel, usePageHeader} from "../services/page.service";
+import ElementSettingPanel from '../components/ElementSettingPanel.vue'
 
 
 const props = defineProps<{
@@ -132,9 +143,14 @@ const props = defineProps<{
 const mainContainer = ref(null);
 const mainHeader = ref(null);
 const rView = ref(null)
+const advancedPanel = useAdvancedPanel()
 
 let mainViewHeight = ref(0)
-let isCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
+let mainViewWidth = ref(0)
+let mainSideBarWidth = ref(250)
+let settingPanelWidth = ref(300)
+
+let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
 const store = useStore();
 const router = useRouter();
@@ -160,9 +176,17 @@ socketClient.socket.on("login_needed", () => {
 
 let sidebarMenu = ref<Array<MenuConfigInterface>>(null)
 
+function getMainViewWidth(): number {
+    let width = window.innerWidth;
+    width = isSideBarCollapsed.value ? width - 64 : width - mainSideBarWidth.value
+    width = advancedPanel.value.visible ? width - settingPanelWidth.value : width
+    return width
+}
+
 function setCollapsed() {
-    isCollapsed.value = !isCollapsed.value;
-    localStorage.setItem('is_menu_collapsed', isCollapsed.value ? 'true' : 'false')
+    isSideBarCollapsed.value = !isSideBarCollapsed.value;
+    handleResize()
+    localStorage.setItem('is_menu_collapsed', isSideBarCollapsed.value ? 'true' : 'false')
 }
 
 const currentPageTitle: ComputedRef<string> = computed((): string =>  {
@@ -172,12 +196,27 @@ const currentPageTitle: ComputedRef<string> = computed((): string =>  {
 onMounted(() => {
     console.log('Main mounted')
     mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
+    handleResize();
+    window.addEventListener('resize', handleResize);
     loadMenu();
 })
 
 onUnmounted(() => {
     console.log('Main unmounted')
+    window.removeEventListener('resize', handleResize);
 })
+
+watch(() => advancedPanel.value.visible,
+    async () => {
+        handleResize()
+    },
+    {
+        deep: true
+    })
+
+function handleResize() {
+    mainViewWidth.value = getMainViewWidth();
+}
 
 const username: ComputedRef<string> = computed((): string =>  {
     return store.getters['auth/user'] ? store.getters['auth/user'].username : ""
@@ -248,6 +287,7 @@ function logout() {
     box-shadow: var(--el-box-shadow-light);
     z-index: 100;
     height: 100%;
+    width: inherit;
     position: absolute;
     overflow: hidden
 }

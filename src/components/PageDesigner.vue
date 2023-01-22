@@ -1,6 +1,6 @@
 <template>
     <el-row>
-        <el-col :span="16">
+        <el-col :span="24">
             <el-row align="middle" style="padding-bottom: 16px">
                 <div></div>
                 <el-radio-group v-model="selectedSize" size="small">
@@ -55,14 +55,7 @@
             </div>
 
         </el-col>
-        <el-col :span="8">
 
-            <ElementSettingPanel
-                class="element-setting-panel"
-                :properties="activeComponentProperties"
-                :model="selectedIdx ? elements[Number(selectedIdx)].properties : pageConfig"
-                @update="onUpdateProperty" />
-        </el-col>
 
     </el-row>
 
@@ -78,10 +71,9 @@ import {
     PositionElementInterface,
     ScreenSize
 } from "../model/page";
-import ElementSettingPanel from "./ElementSettingPanel.vue"
 import {useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../services/datasource.service";
-import {usePageHeader} from "../services/page.service";
+import {useAdvancedPanel, usePageHeader} from "../services/page.service";
 import _ from 'lodash'
 import {DataSet, useDataSet} from "../model/dataset";
 import {FieldConfigInterface} from "../model/field";
@@ -116,10 +108,16 @@ let route = useRoute()
 let router = useRouter()
 let dsService = useDataSourceService()
 let componentService = useComponentService()
+const advancedPanel = useAdvancedPanel()
 
 let elements = ref<ElementInterface[]>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
 let pageConfig = ref<PageConfigInterface>(null)
+let pageElement = ref<ElementInterface>({
+    layout: null,
+    name: "Page",
+    properties: pageConfig
+})
 
 let startX = 0
 let startY = 0
@@ -136,17 +134,24 @@ const grid = ref(null);
 
 let pageHeader = usePageHeader()
 
-onMounted(() => {
-    init()
+onMounted(async () => {
+    try {
+        await init()
+        advancedPanel.value.visible = true
+        advancedPanel.value.onUpdate = onUpdateProperty
+    } catch (e) {
+        console.error(e)
+    }
 })
 
 onUnmounted(() => {
     pageHeader.actions = []
     pageHeader.title = ""
+    advancedPanel.value.visible = false
+    advancedPanel.value.onUpdate = null
 })
 
 function getElementProperties(element: ElementInterface) {
-    console.log('getElementProperties', element)
     let component = componentService.getByName(element.name)
     if (!component)
         return undefined
@@ -159,7 +164,6 @@ function getElementProperties(element: ElementInterface) {
         props[prop.alias] = _.cloneDeep(element.properties[prop.alias])
 
         if(props[prop.alias] === undefined) {
-            console.log(prop)
             props[prop.alias] = _.cloneDeep(prop.default)
         }
 
@@ -167,7 +171,6 @@ function getElementProperties(element: ElementInterface) {
             props[prop.alias] = dataSets.value.get(element.properties[prop.alias])
         }
     })
-    console.log(props)
     return props;
 
 }
@@ -189,7 +192,6 @@ const activeComponentProperties: ComputedRef<FieldConfigInterface[]> = computed(
 })
 
 
-
 async function init() {
     if (!route.params.id) {
         console.error("Id not provided in url params")
@@ -204,8 +206,6 @@ async function init() {
     }
 
     pageHeader.title = `Page designer #` + pageConfig.value.alias
-
-    //elements.value = pageConfig.value.elements
 
     pageHeader.actions = []
     pageHeader.actions.push({
@@ -225,46 +225,21 @@ async function init() {
     pageConfig.value.dataSets.forEach(config => {
         let ds = useDataSet(config)
         dataSets.value.set(ds.alias, ds)
-        //scriptContext.dataSets[ds.alias] = ds
     })
 
     elements.value = pageConfig.value.elements
 
-    // pageConfig.value.elements.forEach(element => {
-    //     let el:ElementInterface = {
-    //         layout: element.layout,
-    //         name: element.name,
-    //         properties: {}
-    //     }
-    //
-    //     Object.keys(element.properties).forEach(key => {
-    //         if (key === 'dataSet') {
-    //             if (element.properties.dataSet && element.properties.dataSet !== "") {
-    //                 if (!dataSets.value.has(element.properties.dataSet)) {
-    //                     console.warn(`DataSet "${element.properties.dataSet}" does not exist!`)
-    //                 } else {
-    //                     el.properties.dataSet = dataSets.value.get(element.properties.dataSet)
-    //                 }
-    //             }
-    //         } else {
-    //             el.properties[key] = _.cloneDeep(element.properties[key])
-    //         }
-    //     })
-    //     el.properties['context'] = {}
-    //     elements.value.push(el)
-    // })
+    advancedPanel.value.visible = true
+    selectWidget("")
+
 }
 
 async function onUpdateProperty(alias: string, value: any) {
-    //console.log(alias, value)
     if (!selectedIdx.value) {
         pageConfig.value[alias] = value
     } else {
-        console.log(value)
         elements.value[selectedIdx.value].properties[alias] = value
-        console.log(elements.value[selectedIdx.value])
     }
-
 }
 
 async function save() {
@@ -275,7 +250,6 @@ async function save() {
     pageConfig.value.elements = elements.value
 
     console.log(pageConfig.value.elements)
-
     try {
         await ds.updateById(pageConfig.value.id, pageConfig.value)
     } catch (e) {
@@ -315,6 +289,11 @@ function initDragBottom(e:MouseEvent) {
 
 function selectWidget(id: string) {
     selectedIdx.value = id
+
+    advancedPanel.value.parameters = activeComponentProperties.value
+    advancedPanel.value.element = id !== ""
+        ? elements.value[Number(id)]
+        : pageElement.value
 }
 
 function removeWidget(idx: number) {
