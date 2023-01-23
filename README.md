@@ -1,10 +1,13 @@
-## Tabbled
-
-<a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /> <a target="_blank" href="https://hub.docker.com/r/louislam/uptime-kuma"><img src="https://img.shields.io/docker/pulls/tabbled/server" />
-<img src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
+<div align="center" width="100%">
+    <img src="./public/icon.png" width="98" alt="" />
+</div>
+<h1 align="center">
+  Tabbled
+</h1>
 
 <div align="center" width="100%">
-    <img src="./public/icon.png" width="128" alt="" />
+<img src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
+<a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /></a>
 </div>
 
 It's a low-code platform for building web application like ERP/CRM/WMS/etc. system, to manage internal processes of any company.
