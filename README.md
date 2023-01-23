@@ -10,7 +10,7 @@
 <a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /></a>
 </div>
 
-It's a low-code platform for building web application like ERP/CRM/WMS/etc. system, to manage internal processes of any company.
+It's a low-code platform for building web application like ERP/CRM/WMS/etc. system, to manage internal processes of business.
 
 
 ## ⭐ Features
@@ -18,6 +18,7 @@ It's a low-code platform for building web application like ERP/CRM/WMS/etc. syst
 * Drag-and-drop user interface configuration
 * Built-in data sources or connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
 * Scripting - JavaScript works anywhere
+* Functions - cloud functions
 * Permission - you can limit access to any data for users and groups
 * Live data - each device gets synchronized data in real-time
 * Offline working - the data you chose as offline will be available offline wherever you go
@@ -36,10 +37,13 @@ It's a low-code platform for building web application like ERP/CRM/WMS/etc. syst
 - [ ] DataSource setting page
 - [ ] Menu setting page
 - [ ] Table cell editor widgets
-- [ ] DataSource connectors to
-  - [ ] PostgresSQL
-  - [ ] MongoDB
-  - [ ] MySQL
+- [ ] DataSources 
+  - [x] Internal DataSources
+  - [ ] REST API
+  - [ ] Databases:
+    - [ ] PostgresSQL
+    - [ ] MongoDB
+    - [ ] MySQL  
 - [ ] Dockerize entire project in the one image
 - [x] PWA application
 - [ ] Desktop version
