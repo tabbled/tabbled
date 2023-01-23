@@ -3,6 +3,7 @@ import {Router} from "vue-router";
 import {useDataSourceService} from "./datasource.service";
 import {ElementInterface, PageConfigInterface} from "../model/page";
 import {FieldConfigInterface} from "../model/field";
+import {DataSetConfigInterface} from "../model/dataset";
 
 let dsService = useDataSourceService()
 
@@ -21,6 +22,7 @@ export class AdvancedPanel {
     visible: boolean = true
     element: ElementInterface
     parameters: FieldConfigInterface[] = []
+    dataSets: DataSetConfigInterface[] = []
     onUpdate: Function = null
 }
 
@@ -52,8 +54,6 @@ class PageScriptHelper {
         if (!page) {
             throw Error(`Page by id "${id}" not found`)
         }
-
-        console.log(page)
 
         await this._router.push(`/designer/${page.id}`)
     }

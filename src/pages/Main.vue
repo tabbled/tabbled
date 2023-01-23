@@ -111,6 +111,7 @@
                 <ElementSettingPanel
                     :properties="advancedPanel.parameters"
                     :element="advancedPanel.element"
+                    :data-sets="advancedPanel.dataSets"
                     @update="advancedPanel.onUpdate" />
 
             </el-aside>

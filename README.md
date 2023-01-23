@@ -1,49 +1,59 @@
 ## Tabbled
 
-It is a self-hosted low-code platform for building ERP/CRM/WMS/etc. system, to manage processes of manufacturing.
+<a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /> <a target="_blank" href="https://hub.docker.com/r/louislam/uptime-kuma"><img src="https://img.shields.io/docker/pulls/tabbled/server" />
+<img src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
 
-Progressive Web App(PWA). It is intended to work on any platform with a standards-compliant browser, including desktop and mobile devices.
+<div align="center" width="100%">
+    <img src="./public/favicon.png" width="128" alt="" />
+</div>
+
+It's a low-code platform for building web application like ERP/CRM/WMS/etc. system, to manage internal processes of any company.
+
 
 ## ⭐ Features
 
-* User interface configuration through drag-and-drop
+* Drag-and-drop user interface configuration
+* Built-in data sources or connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
 * Scripting - JavaScript works anywhere
-* Multiple users can work on one certain entity at the same time
 * Permission - you can limit access to any data for users and groups
-* Live data - all devices that connected receive changes at the moment
+* Live data - each device gets synchronized data in real-time
 * Offline working - the data you chose as offline will be available offline wherever you go
 
-## Roadmap
+## 🌿 Roadmap
 
 - [x] Sign in and sign on
 - [x] Types implementation
 - [x] Table editor
-- [ ] Page designer
+- [x] Page designer
+- [x] Offline data first
+- [x] Progressive Web App
+- [x] View editor
+- [x] Store user data and config in IndexedDB
+- [ ] js models for tables
 - [ ] DataSource setting page
 - [ ] Menu setting page
 - [ ] Table cell editor widgets
-- [x] Offline data first
-- [x] Progressive Web App
-- [ ] Entity settings editor
-- [x] View editor
-- [ ] Store user data and config in IndexedDB
-- [ ] js models for tables
-- [ ] Dockerize entire project in the one image 
+- [ ] DataSource connectors to
+  - [ ] PostgresSQL
+  - [ ] MongoDB
+  - [ ] MySQL
+- [ ] Dockerize entire project in the one image
+- [x] PWA application
+- [ ] Desktop version
+- [ ] Mobile version
 
-
-## Dependencies
-
-* [Tubbled server](https://github.com/tabbled/tabbled-server)
-
-## How to Install
+## 🚀 How to Install
 
 ### 🐳 Docker
 
 [To be described]
 
-### 💪🏻 From source code
+### 💪🏻 Non-Docker
 
-First: you need to install and start the [Tubbled server](https://github.com/tabbled/tabbled-server)
+Required:
+- Node.js >= 14
+- Git
+- [Tubbled server](https://github.com/tabbled/tabbled-server)
 
 Second:
 ```bash
@@ -53,7 +63,7 @@ $ npm install
 $ npm start preview
 ```
 
-## Support
+## 	Support
 
 Tabbled is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers.
 

@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted, ComputedRef, computed} from "vue";
+import {ref, onMounted, onUnmounted, ComputedRef, computed, reactive} from "vue";
 import WidgetElement from "./WidgetElement.vue"
 import {
     ElementInterface,
@@ -229,7 +229,10 @@ async function init() {
 
     elements.value = pageConfig.value.elements
 
+
+    advancedPanel.value.dataSets = reactive(pageConfig.value.dataSets)
     advancedPanel.value.visible = true
+
     selectWidget("")
 
 }

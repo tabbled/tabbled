@@ -25,6 +25,13 @@
                              :model-value="element.properties[prop.alias]"
                              @change="(val) => onInput(prop.alias, val)"
                 />
+                <el-select-v2 v-else-if="prop.type === 'dataset'"
+                              style="width: 100%"
+                              filterable
+                              :model-value="element.properties[prop.alias]"
+                              :options="dataSetOptions"
+                />
+
                 <div v-else style="color: #c45656">Don't have an element for type "{{prop.type}}"</div>
             </el-form-item>
         </el-form>
@@ -33,26 +40,34 @@
 
 <script setup lang="ts">
 
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import {FieldConfigInterface} from "../model/field";
 import {ElementInterface} from "../model/page";
+import {DataSetConfigInterface} from "../model/dataset";
 
 let pageForm = ref(null)
+let dataSetOptions = ref([])
 
 
 const emit = defineEmits(['update'])
 const props = defineProps<{
     element: ElementInterface,
-    properties: FieldConfigInterface[]
+    properties: FieldConfigInterface[],
+    dataSets: DataSetConfigInterface[]
 }>()
 
-// watch(() => props.element,
-//     async () => {
-//         console.log(props.element)
-//     },
-//     {
-//         deep: true
-//     })
+watch(() => props,
+    async () => {
+        dataSetOptions.value = props.dataSets.map(item => {
+            return {
+                value: item.alias,
+                label: item.alias
+            }
+        })
+    },
+    {
+        deep: true
+    })
 
 function onInput(alias: string, value: any) {
     emit('update', alias, value)
