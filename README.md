@@ -4,7 +4,7 @@
 <img src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
 
 <div align="center" width="100%">
-    <img src="./public/favicon.png" width="128" alt="" />
+    <img src="./public/icon.png" width="128" alt="" />
 </div>
 
 It's a low-code platform for building web application like ERP/CRM/WMS/etc. system, to manage internal processes of any company.

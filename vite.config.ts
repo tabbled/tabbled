@@ -9,7 +9,7 @@ export default defineConfig({
             injectRegister: 'script',
             filename: "sw.ts",
             strategies: "injectManifest",
-            includeAssets: ["/favicon.png"],
+            includeAssets: ["/icon.png"],
             srcDir: "src",
             base: '/',
             workbox: {
@@ -24,7 +24,7 @@ export default defineConfig({
                 "display": "standalone",
                 "icons": [
                     {
-                        "src": "/favicon.png",
+                        "src": "/icon.png",
                         "type": "image/png",
                         "sizes": "256x256"
                     }
