@@ -19,7 +19,7 @@ export class PageHeader {
 }
 
 export class AdvancedPanel {
-    visible: boolean = true
+    visible: boolean = false
     element: ElementInterface
     parameters: FieldConfigInterface[] = []
     dataSets: DataSetConfigInterface[] = []

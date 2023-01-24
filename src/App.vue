@@ -40,19 +40,29 @@ const syncService = useSyncService()
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
-onMounted(() => {
+store.subscribe(async (payload) => {
+    if (payload.type === 'auth/userLoaded' && !isConfigLoaded.value) {
+        await loadConfig()
+        await loadData()
+    }
+
+    if (payload.type === 'auth/loggedOut') {
+        isConfigLoaded.value = false;
+        await db.close()
+        await dsService.clear(DataSourceType.config)
+        await dsService.clear(DataSourceType.data)
+    }
+})
+
+onMounted(async () => {
     window.addEventListener('resize', handleResize);
     handleResize();
+    isConfigLoaded.value = false;
 
     if (store.getters["auth/isAuthenticated"]) {
-        isConfigLoaded.value = false;
-        store.dispatch('auth/loadUserSettings').finally(()=>{
-            loadConfig().then(() => {
-                loadData()
-            })
-        })
-
-
+        await store.dispatch('auth/loadUserSettings')
+        await loadConfig()
+        await loadData()
     }
 })
 
@@ -61,6 +71,8 @@ onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
     isConfigLoaded.value = false;
 })
+
+
 
 function handleResize() {
     screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
@@ -71,6 +83,7 @@ async function loadData() {
 }
 
 async function loadConfig() {
+
     try {
         await db.open(store.getters["auth/account"], store.getters["auth/user"]);
         await dsService.registerConfig();
