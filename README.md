@@ -10,7 +10,7 @@
 <a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /></a>
 </div>
 
-It's a low-code platform for building web application like ERP/CRM/WMS/etc. system, to manage internal processes of business.
+It's a low-code platform for building web application for enterprise, to manage internal processes of business.
 
 
 ## ⭐ Features
