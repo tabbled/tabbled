@@ -26,7 +26,10 @@
                                      :index="menu.id"
                         >
                             <template #title>
-                                <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"></el-icon>
+                                <el-icon>
+                                    <Icon :icon=menu.icon width="24" color="gray"/>
+                                </el-icon>
+
                                 <span v-if="!isSideBarCollapsed">{{menu.title}}</span>
                             </template>
 
@@ -34,16 +37,21 @@
                                           :key="item.id"
                                           :index="item.path">
                                 <template #title>
+                                    <el-icon v-if="item.icon">
+                                        <Icon width="24" :icon=item.icon color="gray" style="min-width: 24px"/>
+                                    </el-icon>
                                     <span  style="width: 100%; text-align: left;">{{ item.title }}</span>
-                                    <div @click="$event.stopPropagation(); openInNewWindow(item.path);" class="open_new" style="width: 16px; height: 100%;">
-                                        <el-icon class="iconify " data-icon="mdi:open-in-new" style="width: 16px; height: 100%;"/>
+                                    <div @click="$event.stopPropagation(); openInNewWindow(item.path);" class="open_new" style="width: 16px; height: 100%; display: flex">
+                                        <Icon icon="mdi:open-in-new" width="16"/>
                                     </div>
                                 </template>
 
                             </el-menu-item>
                         </el-sub-menu>
                         <el-menu-item v-else :index="menu.path" >
-                            <el-icon class="iconify" :data-icon="'mdi:'+menu.icon" style="width: 18px; height: 18px; margin-right: 8px"/>
+                            <el-icon>
+                                <Icon width="24" :icon=menu.icon color="gray" style="min-width: 24px;"/>
+                            </el-icon>
                             <template #title>
                                 <span>{{menu.title}}</span>
                             </template>
@@ -58,18 +66,18 @@
                     >
 
                         <el-menu-item index="1">
-                            <el-icon class="iconify" data-icon="mdi:user" style="width: 24px; height: 24px; margin-right: 8px"/>
+                            <Icon width="24" icon="ic:baseline-account-circle" color="gray" style="margin-right: 8px; min-width: 24px;"/>
 
                             <span style="width: 100%; text-align: start;">{{username}}</span>
-                            <div v-if="!isSideBarCollapsed" @click="logout()" class="open_new" style="width: 16px; height: 100%;">
-                                <span class="iconify " data-icon="mdi:exit-to-app" style="width: 24px; height: 100%;"/>
+                            <div v-if="!isSideBarCollapsed" @click="logout()" class="open_new" style="height: 100%; display: flex">
+                                <Icon width="24" icon="ic:baseline-exit-to-app"></Icon>
                             </div>
                         </el-menu-item>
 
 
                         <div style="width: 100%;">
                             <el-button @click="setCollapsed" text style="width: 64px; opacity: 40%" size="small">
-                                <span class="iconify " :data-icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" style="width: 24px; height: 100%;"/>
+                                <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
                             </el-button>
                         </div>
 
@@ -258,6 +266,7 @@ function logout() {
     color: var(--el-border-color);
     border-radius: unset;
     align-content: center;
+    align-items: center;
 }
 
 .footer {

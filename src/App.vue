@@ -143,7 +143,7 @@ function addRoute(path: string, page: PageConfigInterface) {
 <style lang="scss">
 html,
 body {
-    font-family: "Noto Sans", Inter, Roboto, Avenir, Helvetica, sans-serif;
+    font-family: "Noto Sans", Inter, Roboto, sans-serif;
     min-height: 100vh;
 
     -webkit-font-smoothing: antialiased;

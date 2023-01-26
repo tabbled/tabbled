@@ -29,12 +29,14 @@ const app = createApp({
 })
 
 //components
+import { Icon } from "@iconify/vue"
 import CodeEditor from "./components/CodeEditor.vue"
 import Table from "./components/Table.vue"
 import DataSetActionPanel from './components/DataSetActionPanel.vue'
 import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
 import {properties as tableProps} from './components/configuration/table.config'
 
+app.component('Icon', Icon)
 app.component('Table', Table);
 app.component('CodeEditor', CodeEditor)
 app.component('DataSetActionPanel', DataSetActionPanel)
