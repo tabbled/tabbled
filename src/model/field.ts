@@ -4,6 +4,12 @@ export type FieldComponentType = 'handler' | 'dataset' | 'datasource'
 export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
 
+export interface EventHandlerConfigInterface {
+    type: 'script' | 'action'
+    script?: string,
+    action?: string
+}
+
 export interface FieldConfigInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations

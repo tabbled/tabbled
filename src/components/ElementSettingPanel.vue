@@ -11,27 +11,32 @@
                           :label="prop.type === 'bool' ? '' : prop.title"
                           :required="prop.required || false"
                           :prop="prop.alias">
-                <el-input v-if="prop.type === 'string'" :model-value="element.properties[prop.alias]"
-                            @input="(val) => onInput(prop.alias, val)"
+                <el-input v-if="prop.type === 'string'"
+                          :model-value="getValue(prop, element)"
+                          @input="(val) => onInput(prop.alias, val)"
                 />
                 <el-input v-else-if="prop.type === 'text'"
                           type="textarea"
                           :autosize="{ minRows: 2, maxRows: 4 }"
-                          :model-value="element.properties[prop.alias]"
+                          :model-value="getValue(prop, element)"
                           @input="(val) => onInput(prop.alias, val)"
                 />
                 <el-checkbox v-else-if="prop.type === 'bool'"
                              :label="prop.title"
-                             :model-value="element.properties[prop.alias]"
+                             :model-value="getValue(prop, element)"
                              @change="(val) => onInput(prop.alias, val)"
                 />
                 <el-select-v2 v-else-if="prop.type === 'dataset'"
                               style="width: 100%"
                               filterable
-                              :model-value="element.properties[prop.alias]"
+                              :model-value="getValue(prop, element)"
                               :options="dataSetOptions"
                 />
-
+                <HandlerEditor v-else-if="prop.type === 'handler'"
+                               :type="getValue(prop, element) ? getValue(prop, element).type : 'script'"
+                               :script="getValue(prop, element) ? getValue(prop, element).script : ''"
+                               @update="(val) => onInput(prop.alias, val)"
+                />
                 <div v-else style="color: #c45656">Don't have an element for type "{{prop.type}}"</div>
             </el-form-item>
         </el-form>
@@ -44,6 +49,7 @@ import {ref, watch} from "vue";
 import {FieldConfigInterface} from "../model/field";
 import {ElementInterface} from "../model/page";
 import {DataSetConfigInterface} from "../model/dataset";
+import HandlerEditor from "./HandlerEditor.vue";
 
 let pageForm = ref(null)
 let dataSetOptions = ref([])
@@ -71,6 +77,10 @@ watch(() => props,
 
 function onInput(alias: string, value: any) {
     emit('update', alias, value)
+}
+
+function getValue(prop: FieldConfigInterface, element: ElementInterface) {
+    return element.properties[prop.alias]
 }
 
 </script>
