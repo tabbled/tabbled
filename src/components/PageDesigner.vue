@@ -6,6 +6,28 @@
                 <el-radio-group v-model="selectedSize" size="small">
                     <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
                 </el-radio-group>
+                <el-divider direction="vertical"/>
+                <el-dropdown type="default"
+                             size="small"
+                             trigger="click"
+                             >
+                    <el-button size="small">
+                        Add element
+                        <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
+                    </el-button>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item v-for="(comp) in componentService.getList()"
+                                              @dragstart="(e) => startDragNewElement(e, comp)"
+                                              draggable="true"
+                                              style="cursor: move"
+                            >
+                                <Icon :icon="comp.icon" style="padding-right: 4px"/>
+                                {{comp.title}}
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
             </el-row>
             <div ref="grid"
                  class="grid-wrapper"
@@ -65,6 +87,7 @@
 import {ref, onMounted, onUnmounted, ComputedRef, computed, reactive} from "vue";
 import WidgetElement from "./WidgetElement.vue"
 import {
+    ComponentInterface,
     ElementInterface,
     getAvailableScreenSizes,
     PageConfigInterface,
@@ -78,6 +101,8 @@ import _ from 'lodash'
 import {DataSet, useDataSet} from "../model/dataset";
 import {FieldConfigInterface} from "../model/field";
 import {useComponentService} from "../services/component.service";
+import {ElMessage} from "element-plus";
+import {Icon} from "@iconify/vue";
 
 let pageProperties:FieldConfigInterface[]  = [
     {
@@ -99,6 +124,11 @@ let pageProperties:FieldConfigInterface[]  = [
         required: true
     }
 ]
+
+interface ComponentDropInterface extends ComponentInterface {
+    layerX: number,
+    layerY: number
+}
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -252,10 +282,11 @@ async function save() {
     //gather changes from elements to config after saving
     pageConfig.value.elements = elements.value
 
-    //console.log(pageConfig.value.elements)
     try {
         await ds.updateById(pageConfig.value.id, pageConfig.value)
+        ElMessage.success('Saved successfully')
     } catch (e) {
+        ElMessage.error(e.toString())
         console.error(e)
     }
 }
@@ -396,16 +427,17 @@ function getGridElStyle(element:ElementInterface) {
     return style;
 }
 
-// function startDragNewWidget(e:any, item: any) {
-//     let it = Object.assign({
-//         layerX: e.layerX,
-//         layerY: e.layerY
-//     }, item)
-//     e.dataTransfer?.setData('item', JSON.stringify(it))
-// }
+function startDragNewElement(e:any, item: ComponentInterface) {
+    let it = Object.assign({
+        layerX: e.layerX,
+        layerY: e.layerY
+    }, item)
+    e.dataTransfer?.setData('item', JSON.stringify(it))
+}
 
 function dropNewWidget(e:DragEvent) {
-    let item = JSON.parse(e.dataTransfer.getData('item'));
+    let item = <ComponentDropInterface>JSON.parse(e.dataTransfer.getData('item'));
+    let comp = componentService.getByName(item.name);
 
     let relatedX = e.offsetX
     let relatedY = e.offsetY
@@ -418,31 +450,43 @@ function dropNewWidget(e:DragEvent) {
 
 
     startCol = startCol >= 1 ? startCol : 1
-    let endCol = startCol + item.defaultCols;
+    let endCol = startCol + comp.defaultPosition.cols;
     if (endCol > 13) {
         endCol = 13
-        startCol = endCol - item.defaultCols
+        startCol = endCol - comp.defaultPosition.cols
     }
     startRow = startRow >= 1 ? startRow : 1
 
+    let properties = {}
+    comp.properties.forEach(prop => {
+        let val:any = null
+        switch (prop.type) {
+            case "dataset":  val = dataSets.value.size > 0 ? [...dataSets.value.keys()][0] : "";  break;
+            case "bool": val = prop.default ? prop.default : false; break;
+            case "string": val = prop.default ? prop.default : ""; break;
+            case "number": val = prop.default ? prop.default : 0; break;
+            default: prop.default ? prop.default : null;
+        }
+        properties[prop.alias] = val
+    })
+
     elements.value.push({
-        name: "",
+        name: comp.name,
         layout: {
             [ScreenSize.desktop]: {
                 colFrom: startCol,
                 colTo: endCol,
                 rowFrom: startRow,
-                rowTo: startRow + item.defaultRows,
+                rowTo: startRow + comp.defaultPosition.rows,
             },
             [ScreenSize.mobile]: {
                 colFrom: startCol,
                 colTo: endCol,
                 rowFrom: startRow,
-                rowTo: startRow + item.defaultRows,
+                rowTo: startRow + comp.defaultPosition.rows,
             }
         },
-        properties: {
-        }
+        properties: properties
     })
 }
 

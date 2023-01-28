@@ -8,15 +8,18 @@ export function properties():FieldConfigInterface[] {
     },{
         title: "Allow add",
         alias: "allowAdd",
-        type: 'bool'
+        type: 'bool',
+        default: true
     },{
         title: "Allow edit",
         alias: "allowEdit",
-        type: 'bool'
+        type: 'bool',
+        default: true
     },{
         title: "Allow remove",
         alias: "allowRemove",
-        type: 'bool'
+        type: 'bool',
+        default: true
     },{
         title: "onAdd",
         alias: "onAdd",

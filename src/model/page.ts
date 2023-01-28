@@ -50,7 +50,12 @@ export interface ElementInterface {
 export interface ComponentInterface {
     name: string,
     title: string,
-    properties: FieldConfigInterface[]
+    icon?: string,
+    properties: FieldConfigInterface[],
+    defaultPosition: {
+        cols: number,
+        rows: number
+    }
 }
 
 export interface PageConfigInterface {

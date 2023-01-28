@@ -3,7 +3,8 @@ import {ComponentInterface} from "../model/page";
 
 export interface ComponentTitle {
     name: string,
-    title: string
+    title: string,
+    icon?: string
 }
 
 export class ComponentService {
@@ -18,7 +19,8 @@ export class ComponentService {
         this._components.forEach(item => {
             list.push({
                 name: item.name,
-                title: item.title
+                title: item.title,
+                icon: item.icon
             })
         })
         return list;

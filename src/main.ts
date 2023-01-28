@@ -45,12 +45,22 @@ let componentService = useComponentService()
 componentService.registerComponent({
     name: 'DataSetActionPanel',
     title: "Action panel",
-    properties: actionPanelProps()
+    icon: "ic:round-control-point-duplicate",
+    properties: actionPanelProps(),
+    defaultPosition: {
+        rows: 1,
+        cols: 12
+    }
 })
 componentService.registerComponent({
     name: 'Table',
     title: "Table",
-    properties: tableProps()
+    icon: "mdi:table",
+    properties: tableProps(),
+    defaultPosition: {
+        rows: 4,
+        cols: 12
+    }
 })
 
 app.use(router(store));
