@@ -252,7 +252,7 @@ async function save() {
     //gather changes from elements to config after saving
     pageConfig.value.elements = elements.value
 
-    console.log(pageConfig.value.elements)
+    //console.log(pageConfig.value.elements)
     try {
         await ds.updateById(pageConfig.value.id, pageConfig.value)
     } catch (e) {
@@ -336,7 +336,7 @@ function onDrag(e: MouseEvent) {
 
     if (dragDirection.value == 'right') {
         let colW = ( grid?.value?.offsetWidth / 12 );
-        let colspan = Math.round((e.clientX - startX -40)  / colW)
+        let colspan = Math.round((e.clientX - startX -26)  / colW)
         let cTo = initWidget.colTo + colspan + 1
         widget.colTo =  cTo <= 13 ? initWidget.colTo + colspan + 1 : 13;
     }
@@ -358,7 +358,7 @@ function onDrag(e: MouseEvent) {
             widget.colTo =  initWidget.colTo + colspan;
         }
 
-        let rowW = 50
+        let rowW = 36
         let rowspan = Math.round((e.clientY - startY)  / rowW)
 
         if ((initWidget.rowFrom + rowspan) >= 1) {
@@ -453,7 +453,7 @@ function dropNewWidget(e:DragEvent) {
 .grid-wrapper {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(10, 40px) min(40px);
+    grid-template-rows: repeat(10, 26px) min(26px);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
 }

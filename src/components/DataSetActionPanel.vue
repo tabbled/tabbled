@@ -74,7 +74,7 @@ watch(() => props,
 
 
 async function compileAction(action) {
-    if (!action)
+    if (!action || (action.type === 'script' && (!action.script || action.script === '')))
         return null
 
     try {

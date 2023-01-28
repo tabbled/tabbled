@@ -1,5 +1,7 @@
 <template>
-    <el-container class="main">
+    <el-container class="main"
+                  @mouseup="endResizeSettingPanel"
+                  @mousemove="onResizeSettingPanel">
         <el-container>
             <el-aside :width="isSideBarCollapsed ? '64px' : mainSideBarWidth + 'px'" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
@@ -116,7 +118,11 @@
                       class="advancedPanel"
                       :width="String(settingPanelWidth) + 'px'">
 
+                <div class="resizer"
+                     @mousedown="initResizeSettingPanel"/>
+
                 <ElementSettingPanel
+                    style="width: 100%"
                     :properties="advancedPanel.parameters"
                     :element="advancedPanel.element"
                     :data-sets="advancedPanel.dataSets"
@@ -157,7 +163,9 @@ const advancedPanel = useAdvancedPanel()
 let mainViewHeight = ref(0)
 let mainViewWidth = ref(0)
 let mainSideBarWidth = ref(250)
-let settingPanelWidth = ref(300)
+let settingPanelWidth = ref<number>(getSettingsPanelWidth())
+let isResizingSettingPanel = false
+let startXResizingSettingPanel = 0
 
 let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
@@ -170,6 +178,11 @@ const pageHeader = usePageHeader()
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)
+
+function getSettingsPanelWidth():number {
+    let w = localStorage.getItem('settings_panel_width')
+    return w ? Number(w) : 300
+}
 
 socketClient.socket.on("connect", () => {
     isConnected.value = true;
@@ -258,9 +271,60 @@ function logout() {
         })
 }
 
+function onResizeSettingPanel(e: MouseEvent) {
+    if (!isResizingSettingPanel) {
+        return;
+    }
+
+    settingPanelWidth.value += startXResizingSettingPanel - e.clientX
+    startXResizingSettingPanel = e.clientX
+
+    localStorage.setItem('settings_panel_width', String(settingPanelWidth.value))
+
+    handleResize()
+}
+
+function initResizeSettingPanel(e:MouseEvent) {
+    isResizingSettingPanel = true;
+
+    startXResizingSettingPanel = e.clientX
+}
+
+function endResizeSettingPanel() {
+    isResizingSettingPanel = false
+}
+
 </script>
 
 <style lang="scss">
+
+.resizer {
+    position: absolute;
+    top:0;
+    bottom: 0;
+    width: 5px;
+    z-index: 11;
+    cursor: col-resize;
+}
+
+.resizer:hover {
+    //background: #c45656;
+    border-left-color: var(--el-border-color);
+    border-left-width: 2px;
+    border-left-style: solid;
+}
+
+.advancedPanel {
+    display: flex;
+    flex-wrap: wrap;
+    overflow: hidden;
+
+
+}
+
+.el-aside .advancedPanel{
+    overflow: unset;
+}
 
 .open_new {
     color: var(--el-border-color);
