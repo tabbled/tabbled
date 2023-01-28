@@ -308,7 +308,6 @@ function endResizeSettingPanel() {
 }
 
 .resizer:hover {
-    //background: #c45656;
     border-left-color: var(--el-border-color);
     border-left-width: 2px;
     border-left-style: solid;
@@ -319,11 +318,6 @@ function endResizeSettingPanel() {
     flex-wrap: wrap;
     overflow: hidden;
 
-
-}
-
-.el-aside .advancedPanel{
-    overflow: unset;
 }
 
 .open_new {

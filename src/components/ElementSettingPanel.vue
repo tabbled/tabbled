@@ -72,7 +72,6 @@ const props = defineProps<{
 
 watch(() => props,
     async () => {
-    console.log(divToHeight.value.$el.offsetTop)
         dataSetOptions.value = props.dataSets.map(item => {
             return {
                 value: item.alias,
@@ -113,6 +112,10 @@ function getValue(prop: FieldConfigInterface, element: ElementInterface) {
     .subtitle {
         margin-top: 4px;
         font-size: var(--el-font-size-small);
+    }
+
+    .el-scrollbar {
+        height: unset;
     }
 }
 
