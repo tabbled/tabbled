@@ -1,5 +1,6 @@
-import {DataSetConfigInterface} from "./dataset";
-import {FieldConfigInterface} from "./field";
+import {DataSetConfigInterface, dataSetProperties} from "./dataset";
+import {FieldConfigInterface, FieldListOfType} from "./field";
+import {columnProperties} from "./column";
 
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
 
@@ -45,6 +46,7 @@ export interface ElementInterface {
     properties: {
         [name: string]: any | undefined
     }
+    [name: string]: any | undefined
 }
 
 export interface ComponentInterface {
@@ -66,3 +68,69 @@ export interface PageConfigInterface {
     dataSets: DataSetConfigInterface[],
     elements: ElementInterface[]
 }
+
+interface PageListItemTypeInterface {
+    alias: FieldListOfType
+    propPath: string,
+    fields: FieldConfigInterface[]
+}
+
+export class PageTypesProperties {
+    constructor() {
+        this._types = new Map<FieldListOfType, PageListItemTypeInterface>()
+        this._types.set('dataset', {
+            alias: 'dataset',
+            propPath: '',
+            fields: dataSetProperties
+        })
+        this._types.set('column', {
+            alias: 'column',
+            propPath: '',
+            fields: columnProperties
+        })
+
+    }
+    private _types: Map<FieldListOfType, PageListItemTypeInterface>
+
+    getPropertiesByType(type: FieldListOfType) {
+        return this._types.get(type);
+    }
+}
+
+export const pageProperties:FieldConfigInterface[] = [
+    {
+        title: 'Title',
+        alias: 'title',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Path',
+        alias: 'path',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Alias',
+        alias: 'alias',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'DataSets',
+        alias: 'dataSets',
+        type: 'list',
+        listOf: "dataset",
+        keyProp: 'alias',
+        displayProp: 'alias',
+    },
+    {
+        title: 'Elements',
+        alias: 'elements',
+        type: 'list',
+        listOf: 'element',
+        keyProp: 'name',
+        displayProp: 'name',
+        hidden: false
+    }
+]

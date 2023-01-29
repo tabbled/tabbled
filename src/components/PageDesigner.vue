@@ -1,33 +1,43 @@
 <template>
     <el-row>
         <el-col :span="24">
-            <el-row align="middle" style="padding-bottom: 16px">
-                <div></div>
-                <el-radio-group v-model="selectedSize" size="small">
-                    <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
-                </el-radio-group>
-                <el-divider direction="vertical"/>
-                <el-dropdown type="default"
-                             size="small"
-                             trigger="click"
-                             >
-                    <el-button size="small">
-                        Add element
-                        <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
-                    </el-button>
-                    <template #dropdown>
-                        <el-dropdown-menu>
-                            <el-dropdown-item v-for="(comp) in componentService.getList()"
-                                              @dragstart="(e) => startDragNewElement(e, comp)"
-                                              draggable="true"
-                                              style="cursor: move"
-                            >
-                                <Icon :icon="comp.icon" style="padding-right: 4px"/>
-                                {{comp.title}}
-                            </el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
-                </el-dropdown>
+            <el-row align="middle" justify="space-between" style="padding-bottom: 16px">
+                <div style="display: flex; flex-flow: wrap; align-items: center;">
+                    <el-radio-group v-model="selectedSize" size="small">
+                        <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
+                    </el-radio-group>
+                    <el-divider direction="vertical"/>
+                    <el-dropdown type="default"
+                                 size="small"
+                                 trigger="click"
+                    >
+                        <el-button size="small">
+                            Add element
+                            <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item v-for="(comp) in componentService.getList()"
+                                                  @dragstart="(e) => startDragNewElement(e, comp)"
+                                                  draggable="true"
+                                                  style="cursor: move"
+                                >
+                                    <Icon :icon="comp.icon" style="padding-right: 4px"/>
+                                    {{comp.title}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+                </div>
+
+                <div style="display: flex; flex-flow: wrap; align-items: center;">
+                <el-button size="small" link @click="selectWidget('')">
+                    <Icon icon="mdi:cog" width="16" style="padding-right: 4px"/>
+                    Page settings
+                </el-button>
+
+                </div>
             </el-row>
             <div ref="grid"
                  class="grid-wrapper"
@@ -38,54 +48,39 @@
                  @drop="dropNewWidget($event)"
                  @click="gridClicked"
             >
-
-
                 <div v-for="(element, idx) in elements"
                      :id="String(idx)"
                      :style="getGridElStyle(element)"
+                     :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
 
                 >
-                    <div :class="{'widget-draggable': true, 'prevent-select': true}"
-                         style="height: inherit"
-                         :id="String(idx)"
-                    >
-                        <WidgetElement :properties="getElementProperties(element)"
-                                       style="height: inherit;"
-                                       :component="element.name"
-                                       :class="{'widget-selected': selectedIdx === String(idx)}"
-                        />
-                        <div :class="{
+                    <component
+                        style="height: inherit;"
+                        v-bind="getElementProperties(element)"
+                        :is="element.name"
+                    />
+                    <div :class="{
                         'resizer-right': true,
                         'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
-                             @mousedown="initDragRight" :id="String(idx)"></div>
-                        <div :class="{
+                         @mousedown="initDragRight" :id="String(idx)"></div>
+                    <div :class="{
                         'resizer-bottom': true,
                         'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
-                             @mousedown="initDragBottom" :id="String(idx)"></div>
-                        <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
+                         @mousedown="initDragBottom" :id="String(idx)"></div>
+                    <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
 
-                        <div @click="removeWidget(Number(idx))">
-                        <span class="iconify delete-icon" :id="String(idx)"
-                              data-icon="mdi:delete"
-                        />
-                        </div>
-
+                    <div @click="removeWidget(Number(idx))">
+                        <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
                     </div>
-
                 </div>
-
             </div>
-
         </el-col>
-
-
     </el-row>
 
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted, ComputedRef, computed, reactive} from "vue";
-import WidgetElement from "./WidgetElement.vue"
+import {ref, onMounted, onUnmounted} from "vue";
 import {
     ComponentInterface,
     ElementInterface,
@@ -99,31 +94,9 @@ import {useDataSourceService} from "../services/datasource.service";
 import {useAdvancedPanel, usePageHeader} from "../services/page.service";
 import _ from 'lodash'
 import {DataSet, useDataSet} from "../model/dataset";
-import {FieldConfigInterface} from "../model/field";
 import {useComponentService} from "../services/component.service";
 import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
-
-let pageProperties:FieldConfigInterface[]  = [
-    {
-        title: 'Title',
-        alias: 'title',
-        type: "string",
-        required: true
-    },
-    {
-        title: 'Path',
-        alias: 'path',
-        type: "string",
-        required: true
-    },
-    {
-        title: 'Alias',
-        alias: 'alias',
-        type: "string",
-        required: true
-    }
-]
 
 interface ComponentDropInterface extends ComponentInterface {
     layerX: number,
@@ -205,23 +178,6 @@ function getElementProperties(element: ElementInterface) {
 
 }
 
-const activeComponentProperties: ComputedRef<FieldConfigInterface[]> = computed((): FieldConfigInterface[] =>  {
-    if (!selectedIdx.value)
-        return pageProperties;
-
-    let el = elements.value[Number(selectedIdx.value)]
-
-    //console.log(componentService.getList())
-
-    let component = componentService.getByName(el.name)
-    if (!component) {
-        console.warn(`Component "${el.name}" not registered`)
-        return []
-    }
-    return component.properties
-})
-
-
 async function init() {
     if (!route.params.id) {
         console.error("Id not provided in url params")
@@ -260,19 +216,21 @@ async function init() {
     elements.value = pageConfig.value.elements
 
 
-    advancedPanel.value.dataSets = reactive(pageConfig.value.dataSets)
+    console.log("init")
+
+    advancedPanel.value.pageConfig = pageConfig.value
+    advancedPanel.value.currentPath = ""
     advancedPanel.value.visible = true
 
     selectWidget("")
-
 }
 
-async function onUpdateProperty(alias: string, value: any) {
-    if (!selectedIdx.value) {
-        pageConfig.value[alias] = value
-    } else {
-        elements.value[selectedIdx.value].properties[alias] = value
-    }
+async function onUpdateProperty(path: string, value: any) {
+    _.update(pageConfig.value, path, () => {
+        return value
+    })
+
+    console.log(pageConfig.value)
 }
 
 async function save() {
@@ -324,10 +282,12 @@ function initDragBottom(e:MouseEvent) {
 function selectWidget(id: string) {
     selectedIdx.value = id
 
-    advancedPanel.value.parameters = activeComponentProperties.value
-    advancedPanel.value.element = id !== ""
-        ? elements.value[Number(id)]
-        : pageElement.value
+    advancedPanel.value.currentPath = id !== "" ? `elements[${id}]` : ``
+
+    // advancedPanel.value.parameters = activeComponentProperties.value
+    // advancedPanel.value.element = id !== ""
+    //     ? elements.value[Number(id)]
+    //     : pageElement.value
 }
 
 function removeWidget(idx: number) {
@@ -494,6 +454,7 @@ function dropNewWidget(e:DragEvent) {
 
 <style lang="scss">
 
+
 .grid-wrapper {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -508,12 +469,6 @@ function dropNewWidget(e:DragEvent) {
     padding-left: 16px;
 }
 
-.element-setting-panel {
-    height: 100%;
-    z-index: 10;
-    opacity: 100;
-    padding-left: 16px;
-}
 
 
 .setting-panel-trans-enter-active {
@@ -544,6 +499,7 @@ function dropNewWidget(e:DragEvent) {
 .widget-draggable {
     position: relative;
     z-index: 1;
+    border: var(--el-border-color) dashed 1px;
 }
 
 .new-widget-draggable {
@@ -554,7 +510,7 @@ function dropNewWidget(e:DragEvent) {
 
 .widget-selected {
     background: var(--el-color-primary-light-9);
-    border-color: var(--el-color-primary-light-3);
+    outline: var(--el-color-primary-light-3) solid 1px;
 }
 
 .widget-draggable .dragging {
@@ -581,8 +537,8 @@ function dropNewWidget(e:DragEvent) {
 .delete-icon {
     color: transparent;
     position: absolute;
-    top:10px;
-    right: 10px;
+    top:5px;
+    right: 5px;
     z-index: 10;
 }
 
@@ -621,8 +577,12 @@ function dropNewWidget(e:DragEvent) {
     color: var(--el-color-danger);
 }
 
-.widget-draggable:active {
-    background: var(--el-color-primary-light-8);
+.widget-draggable:hover {
+    background: var(--el-color-primary-light-9);
+}
+
+.widget-draggable .resizer-bottom:hover {
+    background: var(--el-color-primary-light-9);
 }
 
 .widget-draggable .resizer-bottom:hover {

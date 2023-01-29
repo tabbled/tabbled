@@ -1,5 +1,5 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
-import {FieldInterface} from "./field";
+import {FieldConfigInterface, FieldInterface} from "./field";
 import {ColumnConfigInterface, Column} from "./column";
 import {ref, UnwrapRef} from "vue";
 import _ from 'lodash'
@@ -274,3 +274,26 @@ export class DataSet {
         return undefined
     }
 }
+
+export const dataSetProperties:FieldConfigInterface[] = [
+    {
+        title: 'Alias',
+        alias: 'alias',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'DataSource',
+        alias: 'dataSource',
+        type: 'link',
+        displayProp: 'title',
+    },
+    {
+        title: 'Columns',
+        alias: 'columns',
+        type: 'list',
+        listOf: 'column',
+        keyProp: 'field',
+        displayProp: 'title'
+    }
+]

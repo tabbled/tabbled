@@ -1,4 +1,4 @@
-import {FieldInterface} from "./field";
+import {FieldConfigInterface, FieldInterface} from "./field";
 
 export interface ColumnConfigInterface {
     field: string,
@@ -28,3 +28,30 @@ export class Column implements ColumnInterface {
     width: number;
 
 }
+
+export const columnProperties:FieldConfigInterface[] = [
+    {
+        title: 'Field',
+        alias: 'field',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Title',
+        alias: 'title',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Width',
+        alias: 'width',
+        type: "number",
+        required: true,
+        default: 150
+    },
+    {
+        title: 'Sortable',
+        alias: 'sortable',
+        type: "bool",
+        default: true
+    }]

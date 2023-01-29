@@ -1,8 +1,10 @@
 import {DataSourceConfigInterface} from "./datasource";
 
-export type FieldComponentType = 'handler' | 'dataset' | 'datasource'
+
+export type FieldComponentType = 'handler' | 'dataset' | 'datasets' | 'elements'
 export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
+export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field'
 
 export interface EventHandlerConfigInterface {
     type: 'script' | 'action'
@@ -16,6 +18,10 @@ export interface FieldConfigInterface {
     type: FieldType,
     tooltip?: string,
     required?: boolean,
+    hidden?:boolean,
+    listOf?: FieldListOfType
+    keyProp?: string,
+    displayProp?: string,
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,
@@ -31,6 +37,10 @@ export interface FieldInterface {
     alias: string,                      // Using in calculations
     type: FieldType,
     required?: boolean,
+    hidden?: boolean,
+    listOf?: FieldListOfType
+    keyProp?: string,
+    displayProp?: string,
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,

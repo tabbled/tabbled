@@ -1,9 +1,7 @@
 import {Ref, ref, UnwrapRef} from "vue";
 import {Router} from "vue-router";
 import {useDataSourceService} from "./datasource.service";
-import {ElementInterface, PageConfigInterface} from "../model/page";
-import {FieldConfigInterface} from "../model/field";
-import {DataSetConfigInterface} from "../model/dataset";
+import {PageConfigInterface} from "../model/page";
 
 let dsService = useDataSourceService()
 
@@ -20,9 +18,8 @@ export class PageHeader {
 
 export class AdvancedPanel {
     visible: boolean = false
-    element: ElementInterface
-    parameters: FieldConfigInterface[] = []
-    dataSets: DataSetConfigInterface[] = []
+    pageConfig: PageConfigInterface = null
+    currentPath: string = ""
     onUpdate: Function = null
 }
 

@@ -121,11 +121,10 @@
                 <div class="resizer"
                      @mousedown="initResizeSettingPanel"/>
 
-                <ElementSettingPanel
+                <PageSettingsPanel
                     style="width: 100%"
-                    :properties="advancedPanel.parameters"
-                    :element="advancedPanel.element"
-                    :data-sets="advancedPanel.dataSets"
+                    :page-config="advancedPanel.pageConfig"
+                    :current-path="advancedPanel.currentPath"
                     @update="advancedPanel.onUpdate" />
 
             </el-aside>
@@ -148,7 +147,7 @@ import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {useAdvancedPanel, usePageHeader} from "../services/page.service";
-import ElementSettingPanel from '../components/ElementSettingPanel.vue'
+import PageSettingsPanel from '../components/PageSettingsPanel.vue'
 
 
 const props = defineProps<{
