@@ -1,12 +1,28 @@
 <template>
     <div class="panel">
-        <div class="title">Settings</div>
-        <div class="subtitle">{{visiblePath}}</div>
+        <div style="padding: 16px 16px 0 16px">
+
+
+            <div class="title">Settings</div>
+            <div class="path">
+    <!--            {{visiblePath}}-->
+                <div class="path" v-for="(item,idx)  in _currentPathArray">
+                    <div v-if="idx > 0" class="path-separator">/</div>
+                    <el-button :disabled="idx === _currentPathArray.length -1"
+                               style="font-weight: normal; cursor: auto;"
+                               link
+                               @click="setPathIdx(idx)" >{{item}}</el-button>
+
+                </div>
+            </div>
+        </div>
         <el-divider ref="divToHeight" style="margin-top: 8px; margin-bottom: 8px"/>
+
+
 
         <div v-if="properties && currentElement" >
             <el-scrollbar :height="scrollHeight" always>
-                <el-form label-position="top" ref="pageForm" :model="currentElement" size="small">
+                <el-form label-position="top" style="padding: 0 16px 0 16px" ref="pageForm" :model="currentElement" size="small">
                     <el-form-item v-for="(prop, idx)  in properties.filter(item => !item.hidden)"
                                   style="margin-bottom: 8px;"
                                   :tabindex="idx"
@@ -76,9 +92,9 @@ let scrollHeight = ref(window.innerHeight)
 
 let properties = ref<FieldConfigInterface[]>([])
 let currentElement = ref(null)
-let visiblePath = ref('')
 let propertiesPath = ''
 let _currentPath = ''
+let _currentPathArray = ref(['Path'])
 let pageListTypesProperties = new PageTypesProperties()
 
 
@@ -106,68 +122,24 @@ watch(() => props.currentPath,
 
 function setCurrentElement(cpath: string) {
     if (cpath === '') {
-        //it means root it is a page config
         properties.value = pageProperties
         currentElement.value = props.pageConfig
-        propertiesPath = ''
 
-        visiblePath.value = 'Page'
         _currentPath = cpath;
-        return;
-    }
-
-    console.log(cpath)
-
-    let path = _.toPath(cpath)
-    let prop = getFieldByProp(path[path.length - 2])
-
-    if (!prop) {
-        console.error(`List item not found for property path ${cpath}`)
-        return;
-    }
-    if (prop.type !== 'list') {
-        console.error(`Property of path ${cpath} is not an list item`)
-        return;
-    }
-
-    // special condition for element because field should be gotten from element
-    if (prop.listOf === 'element') {
-
-        if (path.length > 2) {
-            console.warn(`Can't resolve path for elements ${cpath}`)
-            return
-        }
-        let el = _.get(props.pageConfig, cpath)
-        console.log(el)
-
-        let component = componentService.getByName(el.name)
-        if (!component) {
-            console.warn(`Component "${el.name}" not registered`)
-            return []
-        }
-
-        properties.value = component.properties
-        currentElement.value = el.properties
-        propertiesPath = '.properties'
-        visiblePath.value = 'Page / element'
-        _currentPath = cpath + propertiesPath;
-
     } else {
-
-        let el = _.get(props.pageConfig, cpath)
-        let listItemProps = pageListTypesProperties.getPropertiesByType(prop.listOf)
-
-        if (!listItemProps) {
-            console.error(`List item properties not found for type ${prop.listOf}`)
+        let fields = getFieldsByPath(cpath)
+        if (!fields) {
+            console.error(`List item not found for property path ${cpath}`)
             return;
         }
 
-        properties.value = listItemProps.fields
-        currentElement.value = el
-        propertiesPath = ''
-        visiblePath.value = 'Page / ' + prop.listOf
-        _currentPath = cpath;
+        properties.value = fields
+        currentElement.value = _.get(props.pageConfig, cpath)
+        _currentPath = cpath + propertiesPath;
     }
+
+    _currentPathArray.value = _currentPath !== "" ? _currentPath.split('.') : []
+    _currentPathArray.value.splice(0, 0, 'Page');
 }
 
 function getPropPath(prop: string) {
@@ -179,15 +151,72 @@ function getList(prop: string) {
     return _.get(props.pageConfig, getPropPath(prop))
 }
 
-function getFieldByProp(prop: string): FieldConfigInterface {
-    console.log('getFieldByProp', properties.value)
-
-    for(const i in properties.value) {
-        let p = properties.value[i]
-        if (p.alias === prop)
-            return p;
+function setPathIdx(idx: number) {
+    let path = ''
+    for (let i = 1; i <= idx; i++) {
+        if (path !== '') path += '.';
+        path += _currentPathArray.value[i]
     }
-    return undefined;
+    setCurrentElement(path)
+}
+
+function getFieldsByPath(path: string): FieldConfigInterface[] {
+    let parentProps = pageProperties;
+    let _path = _.toPath(path);
+
+    for(let i in _path) {
+        // !!! It's not a good way to determine a list element
+        if (!Number.isNaN(Number.parseInt(_path[i])))
+            continue;
+
+        let prop = getFieldByAlias(parentProps, _path[i])
+
+        if (prop.type !== 'list') {
+            console.error(`Field's ${_path[i]} type isn't a list`)
+            return undefined;
+        }
+
+        if (prop.listOf === 'element') {
+            //Each element consists their own properties unlike of list types
+            let el = _.get(props.pageConfig, buildPath(Number(i) + 1))
+
+            let elProps = componentService.getByName(el.name)
+            if (!elProps) {
+                console.warn(`Component "${el.name}" not registered`)
+                return undefined;
+            }
+
+            parentProps = elProps.properties
+        } else {
+            let listItemProps = pageListTypesProperties.getPropertiesByType(prop.listOf)
+
+            if (!listItemProps) {
+                console.error(`List item properties not found for type ${prop.listOf}`)
+                return;
+            }
+
+            parentProps = listItemProps.fields
+        }
+    }
+
+    function buildPath(count: number):any[] {
+        let res = []
+        for (let i = 0; i < count+1; i++) {
+            res.push(_path[i])
+        }
+        return res
+    }
+
+    function getFieldByAlias(list: FieldConfigInterface[], alias: string):FieldConfigInterface {
+        for(let i in list) {
+            if (list[i].alias === alias) {
+                return list[i]
+            }
+        }
+        return undefined;
+    }
+
+    return parentProps;
 }
 
 function onListEdit(path:string, idx: number) {
@@ -250,14 +279,21 @@ function getValue(prop: FieldConfigInterface, element: any) {
     background: white;
     z-index: 0;
     width: 100%;
-    padding: 16px;
+    //padding: 16px;
 
     .title {
         font-size: var(--el-font-size-medium);
     }
 
-    .subtitle {
+    .path {
         font-size: var(--el-font-size-small);
+        display: flex;
+        flex-flow: wrap;
+    }
+
+    .path-separator {
+        padding-left: 4px;
+        padding-right: 4px;
     }
 
     .el-scrollbar {

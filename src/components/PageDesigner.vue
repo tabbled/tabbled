@@ -116,11 +116,11 @@ const advancedPanel = useAdvancedPanel()
 let elements = ref<ElementInterface[]>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
 let pageConfig = ref<PageConfigInterface>(null)
-let pageElement = ref<ElementInterface>({
-    layout: null,
-    name: "Page",
-    properties: pageConfig
-})
+// let pageElement = ref<ElementInterface>({
+//     layout: null,
+//     name: "Page",
+//     properties: pageConfig
+// })
 
 let startX = 0
 let startY = 0
@@ -164,14 +164,14 @@ function getElementProperties(element: ElementInterface) {
 
     //Replace properties with type dataset/datasource/etc to ref
     component.properties.forEach(prop => {
-        props[prop.alias] = _.cloneDeep(element.properties[prop.alias])
+        props[prop.alias] = _.cloneDeep(element[prop.alias])
 
         if(props[prop.alias] === undefined) {
             props[prop.alias] = _.cloneDeep(prop.default)
         }
 
         if (prop.type === 'dataset') {
-            props[prop.alias] = dataSets.value.get(element.properties[prop.alias])
+            props[prop.alias] = dataSets.value.get(element[prop.alias])
         }
     })
     return props;
@@ -446,7 +446,7 @@ function dropNewWidget(e:DragEvent) {
                 rowTo: startRow + comp.defaultPosition.rows,
             }
         },
-        properties: properties
+        //properties: properties
     })
 }
 

@@ -43,10 +43,10 @@ export interface ElementInterface {
         [key in ScreenSize]: PositionElementInterface
     },
     name: string,
-    properties: {
-        [name: string]: any | undefined
-    }
-    [name: string]: any | undefined
+    // properties: {
+    //     [name: string]: any | undefined
+    // }
+    //[name: string]: any | undefined
 }
 
 export interface ComponentInterface {

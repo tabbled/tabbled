@@ -7,7 +7,7 @@
              :id="idx"
              :style="getGridElementStyle(element.layout)"
              class="element"
-                   :is="element.name" v-bind="element.properties"
+                   :is="element.name" v-bind="element"
         />
 
     </div>
@@ -88,23 +88,22 @@ function init() {
         let el:ElementInterface = {
             layout: element.layout,
             name: element.name,
-            properties: {}
         }
 
-        Object.keys(element.properties).forEach(key => {
+        Object.keys(element).forEach(key => {
             if (key === 'dataSet') {
-                if (element.properties.dataSet && element.properties.dataSet !== "") {
-                    if (!dataSets.value.has(element.properties.dataSet)) {
-                        console.warn(`DataSet "${element.properties.dataSet}" does not exist!`)
+                if (element.dataSet && element.dataSet !== "") {
+                    if (!dataSets.value.has(element.dataSet)) {
+                        console.warn(`DataSet "${element.dataSet}" does not exist!`)
                     } else {
-                        el.properties.dataSet = dataSets.value.get(element.properties.dataSet)
+                        el.dataSet = dataSets.value.get(element.dataSet)
                     }
                 }
             } else {
-                el.properties[key] = _.cloneDeep(element.properties[key])
+                el[key] = _.cloneDeep(element[key])
             }
         })
-        el.properties['context'] = scriptContext
+        el['context'] = scriptContext
         elements.value.push(el)
     })
     // pagesActions.buttons = []
