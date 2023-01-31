@@ -230,7 +230,7 @@ async function onUpdateProperty(path: string, value: any) {
         return value
     })
 
-    console.log(pageConfig.value)
+    console.log(path, pageConfig.value)
 }
 
 async function save() {

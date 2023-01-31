@@ -51,6 +51,12 @@
                                       :model-value="getValue(prop, currentElement)"
                                       :options="dataSetOptions"
                         />
+                        <el-select-v2 v-else-if="prop.type === 'link'"
+                                      style="width: 100%"
+                                      filterable
+                                      :model-value="getValue(prop, currentElement)"
+                                      :options="getDataForLink(prop.alias)"
+                        />
                         <HandlerEditor v-else-if="prop.type === 'handler'"
                                        :type="getValue(prop, currentElement) ? getValue(prop, currentElement).type : 'script'"
                                        :script="getValue(prop, currentElement) ? getValue(prop, currentElement).script : ''"
@@ -81,9 +87,13 @@ import HandlerEditor from "./HandlerEditor.vue";
 import ItemList from "./ItemList.vue";
 import _ from 'lodash'
 import {useComponentService} from "../services/component.service";
+import {useDataSourceService} from "../services/datasource.service";
 
 
 let componentService = useComponentService()
+let dsService = useDataSourceService()
+
+
 
 let pageForm = ref(null)
 let dataSetOptions = ref([])
@@ -92,7 +102,6 @@ let scrollHeight = ref(window.innerHeight)
 
 let properties = ref<FieldConfigInterface[]>([])
 let currentElement = ref(null)
-let propertiesPath = ''
 let _currentPath = ''
 let _currentPathArray = ref(['Path'])
 let pageListTypesProperties = new PageTypesProperties()
@@ -135,16 +144,38 @@ function setCurrentElement(cpath: string) {
 
         properties.value = fields
         currentElement.value = _.get(props.pageConfig, cpath)
-        _currentPath = cpath + propertiesPath;
+        _currentPath = cpath;
     }
 
     _currentPathArray.value = _currentPath !== "" ? _currentPath.split('.') : []
     _currentPathArray.value.splice(0, 0, 'Page');
 }
+ function getDataForLink() {
+        // let source = dsService.getDataSourceByAlias(alias)
+        //
+        // if (!source) {
+        //     console.warn(`DataSource "${alias}" is not found`)
+        //     return []
+        // }
+        // console.log(source)
+        // let data = await source.getAll()
+        // console.log(data)
+        //
+        // data = data.map(item => {
+        //     return {
+        //         value: item.alias,
+        //         label: item.alias
+        //     }
+        // })
 
-function getPropPath(prop: string) {
-    let p = `${_currentPath}${propertiesPath}`
-    return  p !== '' ? p + '.' + prop : prop
+    //console.log(data)
+
+
+    return []
+}
+
+function getPropPath(alias: string) {
+    return  _currentPath !== '' ? _currentPath + '.' + alias : alias
 }
 
 function getList(prop: string) {
@@ -223,11 +254,14 @@ function onListEdit(path:string, idx: number) {
     setCurrentElement(`${getPropPath(path)}[${idx}]`)
 }
 
-function onListInsert(path:string, field: FieldConfigInterface) {
+function onListInsert(alias:string, field: FieldConfigInterface) {
+    let path = _currentPath !== '' ?  _currentPath + '.' + alias : alias;
     let list = _.get(props.pageConfig, path)
 
-    console.log(path, field)
-    console.log(props.pageConfig)
+    if (list === undefined) {
+        list = []
+    }
+
     let n = {}
     n[field.keyProp] = `${field.listOf}${list.length + 1}`
     n[field.displayProp] = `${field.listOf}${list.length + 1}`
@@ -237,7 +271,8 @@ function onListInsert(path:string, field: FieldConfigInterface) {
     emit('update', path, list)
 }
 
-function onListRemove(path:string, idx: number) {
+function onListRemove(alias:string, idx: number) {
+    let path = getPropPath(alias)
     let lst =_.get(props.pageConfig, path);
     lst.splice(idx, 1)
     emit('update', path, lst)
@@ -260,11 +295,7 @@ onMounted(() => {
 })
 
 function onInput(alias: string, value: any) {
-    emit('update', `${
-        props.currentPath === ''
-            ? ''
-            : props.currentPath + propertiesPath + '.'
-    }${alias}`, value)
+    emit('update', getPropPath(alias), value)
 }
 
 function getValue(prop: FieldConfigInterface, element: any) {
