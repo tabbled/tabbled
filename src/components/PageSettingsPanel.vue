@@ -51,11 +51,11 @@
                                       :model-value="getValue(prop, currentElement)"
                                       :options="dataSetOptions"
                         />
-                        <el-select-v2 v-else-if="prop.type === 'link'"
-                                      style="width: 100%"
-                                      filterable
-                                      :model-value="getValue(prop, currentElement)"
-                                      :options="getDataForLink(prop.alias)"
+                        <LinkSelect v-else-if="prop.type === 'link'"
+                                    style="width: 100%"
+                                    :config="prop"
+                                    :model-value="getValue(prop, currentElement)"
+                                    @change="(val) => onInput(prop.alias, val)"
                         />
                         <HandlerEditor v-else-if="prop.type === 'handler'"
                                        :type="getValue(prop, currentElement) ? getValue(prop, currentElement).type : 'script'"
@@ -88,6 +88,7 @@ import ItemList from "./ItemList.vue";
 import _ from 'lodash'
 import {useComponentService} from "../services/component.service";
 import {useDataSourceService} from "../services/datasource.service";
+import LinkSelect from "./LinkSelect.vue";
 
 
 let componentService = useComponentService()
@@ -149,29 +150,6 @@ function setCurrentElement(cpath: string) {
 
     _currentPathArray.value = _currentPath !== "" ? _currentPath.split('.') : []
     _currentPathArray.value.splice(0, 0, 'Page');
-}
- function getDataForLink() {
-        // let source = dsService.getDataSourceByAlias(alias)
-        //
-        // if (!source) {
-        //     console.warn(`DataSource "${alias}" is not found`)
-        //     return []
-        // }
-        // console.log(source)
-        // let data = await source.getAll()
-        // console.log(data)
-        //
-        // data = data.map(item => {
-        //     return {
-        //         value: item.alias,
-        //         label: item.alias
-        //     }
-        // })
-
-    //console.log(data)
-
-
-    return []
 }
 
 function getPropPath(alias: string) {

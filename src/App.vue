@@ -60,7 +60,13 @@ onMounted(async () => {
     isConfigLoaded.value = false;
 
     if (store.getters["auth/isAuthenticated"]) {
-        await store.dispatch('auth/loadUserSettings')
+        try {
+            await store.dispatch('auth/loadUserSettings')
+        } catch (e) {
+            console.error(e)
+            logout()
+        }
+
         await loadConfig()
         await loadData()
     }
@@ -100,6 +106,13 @@ async function loadConfig() {
     }).catch(e => {
         console.error(e)
     })
+}
+
+function logout() {
+    store.dispatch('auth/logout')
+        .then(() => {
+            router.push('/login')
+        })
 }
 
 async function registerPages() {

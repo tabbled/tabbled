@@ -284,9 +284,11 @@ export const dataSetProperties:FieldConfigInterface[] = [
     },
     {
         title: 'DataSource',
-        alias: 'datasource',
+        alias: 'dataSource',
         type: 'link',
+        link: 'datasource',
         displayProp: 'title',
+        keyProp: 'alias'
     },
     {
         title: 'Columns',
