@@ -191,6 +191,8 @@ async function init() {
         return;
     }
 
+    console.log(pageConfig.value)
+
     pageHeader.title = `Page designer #` + pageConfig.value.alias
 
     pageHeader.actions = []
@@ -210,7 +212,11 @@ async function init() {
 
     pageConfig.value.dataSets.forEach(config => {
         let ds = useDataSet(config)
-        dataSets.value.set(ds.alias, ds)
+
+        if (ds)
+            dataSets.value.set(ds.alias, ds)
+        else
+            console.error(`DataSet "${config.alias}" not created`)
     })
 
     elements.value = pageConfig.value.elements
@@ -446,7 +452,7 @@ function dropNewWidget(e:DragEvent) {
                 rowTo: startRow + comp.defaultPosition.rows,
             }
         },
-        //properties: properties
+        ...properties
     })
 }
 

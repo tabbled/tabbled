@@ -57,8 +57,15 @@
                                       filterable
                                       :model-value="getValue(prop, currentElement)"
                                       :options="dataSetOptions"
+                                      @change="(val) => onInput(prop.alias, val)"
                         />
                         <LinkSelect v-else-if="prop.type === 'link'"
+                                    style="width: 100%"
+                                    :config="prop"
+                                    :model-value="getValue(prop, currentElement)"
+                                    @change="(val) => onInput(prop.alias, val)"
+                        />
+                        <DataSourceSelect v-else-if="prop.type === 'datasource'"
                                     style="width: 100%"
                                     :config="prop"
                                     :model-value="getValue(prop, currentElement)"
@@ -88,18 +95,17 @@
 <script setup lang="ts">
 
 import {onMounted, ref, watch} from "vue";
-import {FieldConfigInterface} from "../model/field";
+import {FieldConfigInterface, generateEntityWithDefault} from "../model/field";
 import {PageConfigInterface, pageProperties, PageTypesProperties} from "../model/page";
 import HandlerEditor from "./HandlerEditor.vue";
 import ItemList from "./ItemList.vue";
 import _ from 'lodash'
 import {useComponentService} from "../services/component.service";
-import {useDataSourceService} from "../services/datasource.service";
 import LinkSelect from "./LinkSelect.vue";
+import DataSourceSelect from "./DataSourceSelect.vue";
 
 
 let componentService = useComponentService()
-let dsService = useDataSourceService()
 
 
 
@@ -242,14 +248,17 @@ function onListEdit(path:string, idx: number) {
 function onListInsert(alias:string, field: FieldConfigInterface) {
     let path = _currentPath !== '' ?  _currentPath + '.' + alias : alias;
     let list = _.get(props.pageConfig, path)
+    let fields = getFieldsByPath(path)
 
     if (list === undefined) {
         list = []
     }
 
-    let n = {}
+    let n = generateEntityWithDefault(fields)
     n[field.keyProp] = `${field.listOf}${list.length + 1}`
     n[field.displayProp] = `${field.listOf}${list.length + 1}`
+
+
 
     list.push(n)
 
@@ -280,6 +289,7 @@ onMounted(() => {
 })
 
 function onInput(alias: string, value: any) {
+    console.log(alias, value)
     emit('update', getPropPath(alias), value)
 }
 
@@ -314,6 +324,7 @@ function getValue(prop: FieldConfigInterface, element: any) {
         font-size: var(--el-font-size-small);
         display: flex;
         flex-flow: wrap;
+        height: 24px;
     }
 
     .path-separator {

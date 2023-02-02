@@ -1,5 +1,5 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
-import {FieldConfigInterface, FieldInterface} from "./field";
+import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from "./field";
 import {ColumnConfigInterface, Column} from "./column";
 import {ref, UnwrapRef} from "vue";
 import _ from 'lodash'
@@ -23,6 +23,12 @@ interface RowChange {
 }
 
 export function useDataSet(config: DataSetConfigInterface) {
+
+    let ds = dsService.getDataSourceByAlias(config.dataSource);
+
+    if (!ds)
+        return undefined;
+
     return new DataSet(config.alias, dsService.getDataSourceByAlias(config.dataSource), config.columns)
 }
 
@@ -143,9 +149,12 @@ export class DataSet {
             r = row;
 
         let id = (await flakeId.generateId()).toString()
-        let item = {
-            id: id.toString()
-        }
+
+        let item = generateEntityWithDefault(this.dataSource.fields)
+        item.id = id.toString()
+
+        console.log(item)
+
 
         this._data.value.splice(r ? r : 0, 0, item);
 
@@ -285,10 +294,8 @@ export const dataSetProperties:FieldConfigInterface[] = [
     {
         title: 'DataSource',
         alias: 'dataSource',
-        type: 'link',
-        link: 'datasource',
-        displayProp: 'title',
-        keyProp: 'alias'
+        type: 'datasource',
+        required: true
     },
     {
         title: 'Columns',

@@ -294,32 +294,42 @@ export class PageConfigDataSource extends DataSource {
             type: DataSourceType.config,
             alias: 'page',
             keyField: 'alias',
-            fields: [
-            {
+            fields: [{
                 title: 'Title',
                 alias: 'title',
                 type: "string",
                 required: true
             },
-            {
-                title: 'Path',
-                alias: 'path',
-                type: "string",
-                required: true
-            },
-            {
-                title: 'Alias',
-                alias: 'alias',
-                type: "string",
-                required: true
-            },
-            {
-                title: 'Layout',
-                alias: 'layout',
-                type: "text",
-                required: true
-            }
-        ]});
+                {
+                    title: 'Path',
+                    alias: 'path',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Alias',
+                    alias: 'alias',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'DataSets',
+                    alias: 'dataSets',
+                    type: 'list',
+                    listOf: "dataset",
+                    keyProp: 'alias',
+                    displayProp: 'alias',
+                },
+                {
+                    title: 'Elements',
+                    alias: 'elements',
+                    type: 'list',
+                    listOf: 'element',
+                    keyProp: 'name',
+                    displayProp: 'name',
+                    hidden: false
+                }]
+        });
     }
 }
 

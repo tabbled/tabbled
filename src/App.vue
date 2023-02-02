@@ -129,6 +129,11 @@ function addRoute(path: string, page: PageConfigInterface) {
     if (!path || !page)
         return;
 
+    if (!path.startsWith('/')) {
+        console.error(`Page ${page.alias} path should start with /`)
+        return
+    }
+
     router.addRoute({
         path: path,
         component: PageView,

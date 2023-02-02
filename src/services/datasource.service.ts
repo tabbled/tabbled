@@ -32,6 +32,14 @@ export class DataSourceService {
             throw 'TableField dataSource cant be registered'
     }
 
+    getConfigDataSources() {
+        return [...this.configDataSources.values()]
+    }
+
+    getDataSources() {
+        return [...this.dataSources.values()]
+    }
+
     addDataSource(dataSource: DataSourceInterface) {
         let target;
         switch (dataSource.type) {

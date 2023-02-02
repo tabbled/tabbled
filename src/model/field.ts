@@ -1,7 +1,7 @@
-import {DataSourceConfigInterface} from "./datasource";
+import {DataSourceConfigInterface, EntityInterface} from "./datasource";
 
 
-export type FieldComponentType = 'handler' | 'dataset' | 'datasets' | 'elements'
+export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements'
 export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
 export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field'
@@ -82,4 +82,23 @@ export class Field implements FieldInterface {
     async getValues(): Promise<object[]> {
         return []
     }
+}
+
+export function generateEntityWithDefault(fields: FieldConfigInterface[]):EntityInterface {
+    let item = {}
+    for (let i in fields) {
+        const f = fields[i]
+
+        switch (f.type) {
+            case "bool": item[f.alias] = f.default ? f.default : false; break;
+            case "string":
+            case "text": item[f.alias] = f.default ? f.default : ""; break;
+            case "list":
+            case "elements":
+            case "table": item[f.alias] = []; break;
+            case "handler": item[f.alias] = {type: 'script', script: ""};break;
+            default: item[f.alias] = null;
+        }
+    }
+    return item;
 }

@@ -1,5 +1,5 @@
 import {Ref, ref, UnwrapRef} from "vue";
-import {Router} from "vue-router";
+import {RouteParamsRaw, Router} from "vue-router";
 import {useDataSourceService} from "./datasource.service";
 import {PageConfigInterface} from "../model/page";
 
@@ -32,7 +32,7 @@ class PageScriptHelper {
     private _router:Router = null
     private _pageDataSource = null
 
-    async open(alias: string) {
+    async open(alias: string, params: RouteParamsRaw | undefined) {
         let page = await <PageConfigInterface>this._pageDataSource.getByKey(alias)
 
         if (!page) {
@@ -42,7 +42,9 @@ class PageScriptHelper {
             throw Error(`Page by alias "${alias}" doesn't have path`)
         }
 
-        await this._router.push(page.path)
+
+
+        await this._router.push({ path: page.path, params: params})
     }
 
     async design(id: string) {
