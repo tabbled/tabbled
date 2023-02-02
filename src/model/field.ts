@@ -25,7 +25,7 @@ export interface FieldConfigInterface {
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,
-    decimals?: number,                  // Only for type numeric
+    precision?: number,                  // Only for type numeric
     default?: any,
     datasource?: DataSourceConfigInterface  // Only for type Table, that can be passed a DataSourceConfig
     getValueScript?: string                    // Evaluate when entity changed, result of eval sets to field value
@@ -44,7 +44,7 @@ export interface FieldInterface {
     link?: string,                      // Data source alias
     values?: string[] | number[],       // Only for types
     isMultiple?: boolean,
-    decimals?: number,                  // Only for type numeric
+    precision?: number,                  // Only for type numeric
     default?: string | number |
         object | object[] | null,
     datasource?: DataSourceConfigInterface  // Only for type Table, that can be passed a DataSourceConfig
@@ -59,7 +59,7 @@ export class Field implements FieldInterface {
         this.title = config.title
         this.type = config.type;
         this.datasource = undefined;
-        this.decimals = config.decimals;
+        this.precision = config.precision;
         this.isMultiple = config.isMultiple;
         this.link = config.link;
         this.required = config.required;
@@ -67,7 +67,7 @@ export class Field implements FieldInterface {
     }
     alias: string;
     type: FieldType;
-    decimals?: number;
+    precision?: number;
     default?: string | number | object | object[] | null;
     isMultiple?: boolean;
     link?: string;

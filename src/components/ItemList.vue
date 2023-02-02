@@ -1,24 +1,24 @@
 <template>
     <el-card shadow="never" body-style="padding: 0" style="width: 100%">
-        <div v-for="(item, idx)  in list" :id="item[keyProp]" class="list-item">
-            <div class="list-item-title">
-                <Icon icon="ic:baseline-drag-indicator" style="padding-right: 4px; color: var(--el-border-color)" width="16"/>
+        <div v-for="(item, idx)  in list" :id="item[keyProp]"
+             class="list-item"
+
+        >
+            <div class="list-item-title" @click="emit('edit', idx)">
+                <Icon icon="ic:baseline-drag-indicator"
+                      style="padding-right: 4px; color: var(--el-border-color); cursor: move" width="16"/>
                 {{item[titleProp]}}
             </div>
             <div class="list-item-actions">
                 <el-button link
                            size="small"
-                           @click="emit('edit', idx)">
-                    <Icon icon="ic:baseline-edit" width="16"/>
-                </el-button>
-                <el-button link
-                           size="small"
-                           @click="emit('remove', idx)">
+                           @click="emit('remove', idx)"
+                           style="z-index: 99"
+                >
                     <Icon icon="ic:baseline-delete" width="16"
                           />
                 </el-button>
             </div>
-
         </div>
         <el-divider style="margin: 0"/>
         <el-button link size="small"
@@ -64,11 +64,12 @@ onMounted(() => {
 
 .list-item {
     display: flex;
-    flex-flow: wrap;
+    flex-flow: row;
     padding-top: 4px;
     padding-bottom: 4px;
     align-items: center;
     justify-content: space-between;
+
 }
 
 .list-item-title {
@@ -76,6 +77,12 @@ onMounted(() => {
     flex-flow: wrap;
     align-items: center;
     padding-left: 8px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.list-item-title:hover {
+    color: var(--el-color-primary);
 }
 
 .list-item-actions {

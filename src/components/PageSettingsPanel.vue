@@ -40,6 +40,13 @@
                                   :model-value="getValue(prop, currentElement)"
                                   @input="(val) => onInput(prop.alias, val)"
                         />
+                        <el-input-number
+                            v-else-if="prop.type === 'number'"
+                            :controls="false"
+                            :precision="prop.precision ? prop.precision : 0"
+                            :model-value="getValue(prop, currentElement)"
+                            @input="(val) => onInput(prop.alias, val)"
+                        />
                         <el-checkbox v-else-if="prop.type === 'bool'"
                                      :label="prop.title"
                                      :model-value="getValue(prop, currentElement)"
@@ -283,6 +290,15 @@ function getValue(prop: FieldConfigInterface, element: any) {
 </script>
 
 <style lang="scss">
+
+.el-input-number .el-input__inner {
+    text-align: left !important;
+}
+
+.el-input-number.is-without-controls .el-input__wrapper {
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+}
 
 .panel {
     background: white;
