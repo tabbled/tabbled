@@ -18,14 +18,11 @@ import { ElMessageBox } from 'element-plus'
 import {onMounted, ref, watch} from "vue"
 import {useI18n} from "vue-i18n";
 import {CompiledFunc, compileScript} from "../services/compiler"
+import {EventHandlerConfigInterface} from "../model/field";
 
 const { t } = useI18n();
 
-interface ActionConfig {
-    type: "script" | "func",
-    script?: string,
-    func?: string
-}
+
 
 interface Props {
     dataSet: DataSet,
@@ -33,9 +30,9 @@ interface Props {
     allowAdd?: boolean
     allowEdit?: boolean
     allowRemove?: boolean
-    onEdit?: ActionConfig
-    onAdd?: ActionConfig
-    onRemove?: ActionConfig
+    onEdit?: EventHandlerConfigInterface
+    onAdd?: EventHandlerConfigInterface
+    onRemove?: EventHandlerConfigInterface
 }
 
 const props = withDefaults(defineProps<Props>(), {

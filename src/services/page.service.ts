@@ -42,9 +42,7 @@ class PageScriptHelper {
             throw Error(`Page by alias "${alias}" doesn't have path`)
         }
 
-
-
-        await this._router.push({ path: page.path, params: params})
+        await this._router.push({ name: alias, params: params})
     }
 
     async design(id: string) {

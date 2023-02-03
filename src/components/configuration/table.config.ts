@@ -15,5 +15,13 @@ export function properties():FieldConfigInterface[] {
         alias: "isInlineEditing",
         type: 'bool',
         default: true
+    },{
+        title: "onRowDoubleClick",
+        alias: "onRowDoubleClick",
+        type: 'handler'
+    },{
+        title: "onRowClick",
+        alias: "onRowClick",
+        type: 'handler'
     }]
 }

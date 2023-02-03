@@ -136,6 +136,7 @@ function addRoute(path: string, page: PageConfigInterface) {
 
     router.addRoute({
         path: path,
+        name: page.alias,
         component: PageView,
         props: {
             pageConfig: page,

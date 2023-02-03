@@ -12,6 +12,8 @@
             @mouseleave="onMouseLeave"
             @current-change="currentRowChanged"
             @selection-change="selectionChange"
+            @row-click="onTableRowClick"
+            @rowDblclick="onTableRowDblClick"
 
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
@@ -57,16 +59,25 @@ import {onMounted, ref, watch} from 'vue'
 import {Column} from "../model/column";
 import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
+import {CompiledFunc, compileScript} from "../services/compiler";
+import {EventHandlerConfigInterface} from "../model/field";
 
 
 interface Props {
     dataSet: DataSet,
     isRowSelectable?: boolean,
     isInlineEditing?: boolean
+    context: any,
+    onRowClick?: EventHandlerConfigInterface
+    onRowDoubleClick?: EventHandlerConfigInterface
 }
 const props = withDefaults(defineProps<Props>(), {
     isRowSelectable: true,
     isInlineEditing: true
+})
+let actions = ref({
+    onRowDoubleClick: null,
+    onRowClick: null
 })
 
 //let data = ref<Array<EntityInterface>>([])
@@ -87,12 +98,46 @@ onMounted(() => {
     init();
 });
 
+async function compileAction(action) {
+    if (!action || (action.type === 'script' && (!action.script || action.script === '')))
+        return null
+
+    try {
+        return await compileScript(action.script, 'ctx')
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+}
+
+async function execAction(action: CompiledFunc, additionalContext?: object) {
+    try {
+        let ctx = Object.assign(props.context, additionalContext)
+        action.exec(ctx)
+    } catch (e) {
+        console.error(`Execution error in action`)
+        console.error(e);
+    }
+}
+
 function selectionChange(rows: Array<any>) {
     let ids: string[] = []
     rows.forEach(row => {
         ids.push(row.id)
     })
     props.dataSet.selectedIds = ids;
+}
+
+function onTableRowClick(row) {
+    if (actions.value.onRowClick) {
+        execAction(actions.value.onRowClick, { row: row })
+    }
+}
+
+function onTableRowDblClick(row) {
+    if (actions.value.onRowDoubleClick) {
+        execAction(actions.value.onRowDoubleClick, { row: row })
+    }
 }
 
 function currentRowChanged(row: any) {
@@ -183,8 +228,11 @@ function getHeaderClass() {
     return "table-header"
 }
 
-function init() {
-    //data.value = []
+async function init() {
+
+    actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
+    actions.value.onRowClick = await compileAction(props.onRowClick)
+
     columns.value = []
 
 
