@@ -5,7 +5,6 @@
 
             <div class="title">Settings</div>
             <div class="path">
-    <!--            {{visiblePath}}-->
                 <div class="path" v-for="(item,idx)  in _currentPathArray">
                     <div v-if="idx > 0" class="path-separator">/</div>
                     <el-button :disabled="idx === _currentPathArray.length -1"
@@ -121,7 +120,7 @@ let _currentPathArray = ref(['Path'])
 let pageListTypesProperties = new PageTypesProperties()
 
 
-const emit = defineEmits(['update'])
+const emit = defineEmits(['update', 'path-changed'])
 const props = defineProps<{
     pageConfig: PageConfigInterface,
     currentPath: string
@@ -147,8 +146,6 @@ function setCurrentElement(cpath: string) {
     if (cpath === '') {
         properties.value = pageProperties
         currentElement.value = props.pageConfig
-
-        _currentPath = cpath;
     } else {
         let fields = getFieldsByPath(cpath)
         if (!fields) {
@@ -158,7 +155,11 @@ function setCurrentElement(cpath: string) {
 
         properties.value = fields
         currentElement.value = _.get(props.pageConfig, cpath)
-        _currentPath = cpath;
+    }
+
+    if (_currentPath !== cpath) {
+        _currentPath = cpath
+        emit('path-changed', cpath)
     }
 
     _currentPathArray.value = _currentPath !== "" ? _currentPath.split('.') : []

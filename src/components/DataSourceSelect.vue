@@ -10,22 +10,12 @@
                   @change="(val) => emit('change', val)"
     >
         <el-option-group
-            key="config"
-            label="Configuration"
+            v-for="group in dataGroups"
+            :key="group.key"
+            :label="group.label"
         >
             <el-option
-                v-for="item in data.config"
-                :key="item.alias"
-                :label="item.alias"
-                :value="item.alias"
-            />
-        </el-option-group>
-        <el-option-group
-            key="user"
-            label="User's"
-        >
-            <el-option
-                v-for="item in data.user"
+                v-for="item in data[group.key]"
                 :key="item.alias"
                 :label="item.alias"
                 :value="item.alias"
@@ -46,6 +36,14 @@ let data = ref<{config: DataSourceInterface[], user: DataSourceInterface[]}>({
     config: [],
     user: []
 })
+
+let dataGroups = ref([{
+    key: 'user',
+    label: "User's"
+},{
+    key: 'config',
+    label: "Config"
+}])
 
 
 const props = defineProps<{

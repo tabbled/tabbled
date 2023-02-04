@@ -95,7 +95,7 @@
                         </template>
 
                         <template #extra>
-                            <div class="flex items-center">
+                            <div class="page-header-action-panel">
                                 <el-button v-for="action in pageHeader.actions"
                                            :type="action.type ? action.type : 'default'"
                                            @click="action.func()"
@@ -125,7 +125,9 @@
                     style="width: 100%"
                     :page-config="advancedPanel.pageConfig"
                     :current-path="advancedPanel.currentPath"
-                    @update="advancedPanel.onUpdate" />
+                    @update="advancedPanel.onUpdate"
+                    @path-changed="advancedPanel.onPathChanged"
+                />
 
             </el-aside>
         </el-container>
@@ -296,6 +298,11 @@ function endResizeSettingPanel() {
 </script>
 
 <style lang="scss">
+
+.page-header-action-panel {
+    display: flex;
+    flex-flow: row;
+}
 
 .resizer {
     position: absolute;

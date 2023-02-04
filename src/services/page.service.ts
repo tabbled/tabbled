@@ -21,6 +21,7 @@ export class AdvancedPanel {
     pageConfig: PageConfigInterface = null
     currentPath: string = ""
     onUpdate: Function = null
+    onPathChanged: Function = null
 }
 
 class PageScriptHelper {

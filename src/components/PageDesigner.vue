@@ -52,7 +52,6 @@
                      :id="String(idx)"
                      :style="getGridElStyle(element)"
                      :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
-
                 >
                     <component
                         style="height: inherit;"
@@ -116,11 +115,6 @@ const advancedPanel = useAdvancedPanel()
 let elements = ref<ElementInterface[]>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
 let pageConfig = ref<PageConfigInterface>(null)
-// let pageElement = ref<ElementInterface>({
-//     layout: null,
-//     name: "Page",
-//     properties: pageConfig
-// })
 
 let startX = 0
 let startY = 0
@@ -142,6 +136,7 @@ onMounted(async () => {
         await init()
         advancedPanel.value.visible = true
         advancedPanel.value.onUpdate = onUpdateProperty
+        advancedPanel.value.onPathChanged = onPathChanged
     } catch (e) {
         console.error(e)
     }
@@ -152,6 +147,7 @@ onUnmounted(() => {
     pageHeader.title = ""
     advancedPanel.value.visible = false
     advancedPanel.value.onUpdate = null
+    advancedPanel.value.onPathChanged = null
 })
 
 function getElementProperties(element: ElementInterface) {
@@ -190,8 +186,6 @@ async function init() {
         console.error(`Page with id ${route.params.id} not found`)
         return;
     }
-
-    console.log(pageConfig.value)
 
     pageHeader.title = `Page designer #` + pageConfig.value.alias
 
@@ -237,6 +231,10 @@ async function onUpdateProperty(path: string, value: any) {
     })
 
     console.log(path, pageConfig.value)
+}
+
+function onPathChanged(path) {
+    advancedPanel.value.currentPath = path
 }
 
 async function save() {
@@ -287,13 +285,7 @@ function initDragBottom(e:MouseEvent) {
 
 function selectWidget(id: string) {
     selectedIdx.value = id
-
     advancedPanel.value.currentPath = id !== "" ? `elements[${id}]` : ``
-
-    // advancedPanel.value.parameters = activeComponentProperties.value
-    // advancedPanel.value.element = id !== ""
-    //     ? elements.value[Number(id)]
-    //     : pageElement.value
 }
 
 function removeWidget(idx: number) {
