@@ -41,15 +41,15 @@
             </template>
         </el-table-column>
 
-        <el-table-column fixed="right" width="40" :resizable="false" class-name="adv-column">
-            <template #header>
-                <el-button text style="border-radius: 0; padding: 0; margin: 0 ">
-                    <span class="iconify " data-icon="mdi:cog" style="width: 18px; height: 18px; " />
-                </el-button>
-            </template>
-            <template #default>
-            </template>
-        </el-table-column>
+<!--        <el-table-column fixed="right" width="40" :resizable="false" class-name="adv-column">-->
+<!--            <template #header>-->
+<!--                <el-button text style="border-radius: 0; padding: 0; margin: 0 ">-->
+<!--                    <span class="iconify " data-icon="mdi:cog" style="width: 18px; height: 18px; " />-->
+<!--                </el-button>-->
+<!--            </template>-->
+<!--            <template #default>-->
+<!--            </template>-->
+<!--        </el-table-column>-->
     </el-table>
 </template>
 
@@ -264,8 +264,7 @@ async function init() {
     }
 
     .cell {
-        padding-left: 8px;
-        padding-right: 8px;
+        padding: 4px 8px 4px 8px;
     }
 }
 

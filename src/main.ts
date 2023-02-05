@@ -35,6 +35,7 @@ import Table from "./components/Table.vue"
 import DataSetActionPanel from './components/DataSetActionPanel.vue'
 import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
 import {properties as tableProps} from './components/configuration/table.config'
+import {properties as codeEditorProps} from './components/configuration/codeEditor.config'
 
 app.component('Icon', Icon)
 app.component('Table', Table);
@@ -57,6 +58,17 @@ componentService.registerComponent({
     title: "Table",
     icon: "mdi:table",
     properties: tableProps(),
+    defaultPosition: {
+        rows: 4,
+        cols: 12
+    }
+})
+
+componentService.registerComponent({
+    name: 'CodeEditor',
+    title: "Code editor",
+    icon: "fluent:document-javascript-24-regular",
+    properties: codeEditorProps(),
     defaultPosition: {
         rows: 4,
         cols: 12
