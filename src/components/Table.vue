@@ -19,10 +19,10 @@
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
         <el-table-column v-for="element in columns"
                          :sortable="element.sortable ? 'custom' : false"
-                         :key="element.field.alias"
+                         :key="element.field"
                          :label="element.title"
                          :width="element.width"
-                         :prop="element.field.alias"
+                         :prop="element.field"
 
         >
             <template #default="scope">
@@ -65,6 +65,7 @@ import {EventHandlerConfigInterface} from "../model/field";
 
 interface Props {
     dataSet: DataSet,
+    columns: Column[];
     isRowSelectable?: boolean,
     isInlineEditing?: boolean
     context: any,
@@ -81,7 +82,7 @@ let actions = ref({
 })
 
 //let data = ref<Array<EntityInterface>>([])
-let columns = ref<Array<Column>>([])
+//let columns = ref<Array<Column>>([])
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)
 //let data = ref<Array<EntityInterface>>([])
@@ -195,7 +196,7 @@ let getHeaderCellClass = (column: any) => {
 
 let getHeaderTitle = (scope: any) => {
     let idx = props.isRowSelectable ? scope.$index -1 : scope.$index
-    let col = columns.value[idx];
+    let col = props.columns[idx];
     if (!col)
         return "error"
 
@@ -233,11 +234,11 @@ async function init() {
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
 
-    columns.value = []
+    //columns.value = []
 
 
     if (props.dataSet) {
-        columns.value = props.dataSet.columns
+        //columns.value = props.dataSet.columns
         //data.value = props.dataSet.data
 
     } else

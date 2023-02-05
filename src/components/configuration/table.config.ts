@@ -16,6 +16,13 @@ export function properties():FieldConfigInterface[] {
         type: 'bool',
         default: true
     },{
+        title: 'Columns',
+        alias: 'columns',
+        type: 'list',
+        listOf: 'column',
+        keyProp: 'field',
+        displayProp: 'title'
+    },{
         title: "onRowDoubleClick",
         alias: "onRowDoubleClick",
         type: 'handler'

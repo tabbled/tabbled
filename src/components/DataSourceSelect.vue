@@ -53,21 +53,15 @@ const props = defineProps<{
 const emit = defineEmits(['change'])
 
 onMounted(() => {
-    console.log(props)
     getData()
 })
 
-function getData(query?: string) {
-    console.log(query)
-
-    //let source = dsService.getDataSourceByAlias(props.config.link)
-
+function getData() {
     isLoading.value = true;
     data.value = {
         config: dsService.getConfigDataSources(),
         user: dsService.getDataSources()
     }
-    console.log(data)
 
     isLoading.value = false;
 }
