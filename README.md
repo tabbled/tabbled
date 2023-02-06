@@ -18,7 +18,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 * Drag-and-drop user interface configuration
 * Built-in data sources or connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
 * Scripting - JavaScript works anywhere
-* Functions - cloud functions
+* Functions - cloud functions, evaluating on the server side 
 * Permission - you can limit access to any data for users and groups
 * Live data - each device gets synchronized data in real-time
 * Offline working - the data you chose as offline will be available offline wherever you go
@@ -37,6 +37,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [ ] DataSource setting page
 - [ ] Menu setting page
 - [ ] Table cell editor widgets
+- [ ] Functions
 - [ ] DataSources 
   - [x] Internal DataSources
   - [ ] REST API
