@@ -32,9 +32,12 @@
 import {shallowRef} from "vue";
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
+import {DataSet} from "../model/dataset";
 
 const props = defineProps<{
-    modelValue: string
+    modelValue: string,
+    dataSet?: DataSet,
+    field?: string
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -44,6 +47,10 @@ const view = shallowRef()
 const handleReady = (payload) => {
     view.value = payload.view
 }
+
+console.log(props.dataSet)
+console.log(props.field)
+
 
 // Status is available at all times via Codemirror EditorView
 // function getCodemirrorStates() {
@@ -58,8 +65,16 @@ const handleReady = (payload) => {
 // }
 
 function log(type:string, event: any) {
-    if (type === 'change')
+    if (type === 'change') {
         emit('update:modelValue', event)
+
+
+
+        if (props.dataSet && props.field && props.field !== '') {
+            props.dataSet.update(props.field, event)
+        }
+    }
+
 }
 
 </script>

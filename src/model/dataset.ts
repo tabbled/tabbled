@@ -23,7 +23,6 @@ interface RowChange {
 }
 
 export function useDataSet(config: DataSetConfigInterface) {
-
     let ds = dsService.getDataSourceByAlias(config.dataSource);
 
     if (!ds)
@@ -79,8 +78,11 @@ export class DataSet {
     readonly keyField: string;
     autoCommit: boolean = true;
     private _data = ref<Array<EntityInterface>>([]);
+    private _isOpen = false
 
-
+    get isOpen() {
+        return this._isOpen;
+    }
 
     private _changesById: Map<string, RowChange> = new Map<string, RowChange>()
 
@@ -92,6 +94,39 @@ export class DataSet {
         return this._data.value
     }
 
+    async open() {
+        this.close()
+        try {
+            await this.load()
+            this._isOpen = true;
+        } catch (e) {
+            throw e
+        }
+    }
+
+    async openOne(id: string) {
+        this.close()
+
+        let one = undefined
+        try {
+            one = await this.dataSource.getById(id)
+        } catch (e) {
+            throw e
+        }
+
+        if (one) {
+            this._data.value.push(one)
+            this._currentId = id;
+            this._isOpen = true;
+        }
+    }
+
+    close() {
+        this._data.value = []
+        this._changesById.clear();
+        this._isOpen = false;
+        this._currentId = null;
+    }
 
     selectedIds: string[] = []
     private _currentId: string | null = null
@@ -166,6 +201,17 @@ export class DataSet {
         })
 
         return true
+    }
+
+    update(field: string, data: any):boolean {
+        if (!this._isOpen || !this._currentId)
+            return false;
+
+        let row = this.getRowById(this._currentId)
+        if (!row)
+            return false;
+
+        return this.updateDataRow(row, field, data);
     }
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
