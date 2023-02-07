@@ -328,6 +328,10 @@ export class PageConfigDataSource extends DataSource {
                     keyProp: 'name',
                     displayProp: 'name',
                     hidden: false
+                },{
+                    title: "onOpen",
+                    alias: "onOpen",
+                    type: 'handler'
                 }]
         });
     }

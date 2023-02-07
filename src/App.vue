@@ -123,6 +123,8 @@ async function registerPages() {
     pages.forEach((item: PageConfigInterface) => {
         addRoute(item.path, item);
     })
+
+    await router.replace(router.currentRoute.value.path)
 }
 
 function addRoute(path: string, page: PageConfigInterface) {
@@ -150,10 +152,6 @@ function addRoute(path: string, page: PageConfigInterface) {
     })
     pagesByAlias.value.set(path, page);
     console.info('Route ' + path + ' added')
-
-    if (path === router.currentRoute.value.path) {
-        router.replace(path)
-    }
 }
 
 </script>

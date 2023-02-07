@@ -130,7 +130,11 @@ export const pageProperties:FieldConfigInterface[] = [
         type: 'list',
         listOf: 'element',
         keyProp: 'name',
-        displayProp: 'name',
-        hidden: false
+        displayProp: 'name'
+    },
+    {
+        title: "onOpen",
+        alias: "onOpen",
+        type: 'handler'
     }
 ]

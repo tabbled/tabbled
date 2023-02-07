@@ -1,6 +1,5 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from "./field";
-import {ColumnConfigInterface, Column} from "./column";
 import {ref, UnwrapRef} from "vue";
 import _ from 'lodash'
 import { FlakeId } from '../flake-id'
@@ -11,8 +10,9 @@ let dsService = useDataSourceService()
 
 export interface DataSetConfigInterface {
     alias: string,
-    columns: ColumnConfigInterface[],
-    dataSource: string
+    dataSource: string,
+    autoCommit: boolean,
+    autoOpen: boolean
 }
 
 interface RowChange {
@@ -28,19 +28,17 @@ export function useDataSet(config: DataSetConfigInterface) {
     if (!ds)
         return undefined;
 
-    return new DataSet(config.alias, dsService.getDataSourceByAlias(config.dataSource), config.columns)
+    return new DataSet(config, ds)
 }
 
 export class DataSet {
 
-    constructor(alias: string, dataSource: DataSourceInterface, columns: ColumnConfigInterface[] | undefined) {
+    constructor(config: DataSetConfigInterface, dataSource: DataSourceInterface) {
         this.dataSource = dataSource;
-        this.alias = alias;
+        this.alias = config.alias;
+        this.autoOpen = config.autoOpen;
+        this.autoCommit = config.autoCommit;
         this.keyField = this.dataSource.keyField
-
-        if (columns)
-            this.setColumns(columns)
-
 
         this.dataSource.on('updated', async (value) => {
             // @ts-ignore
@@ -74,9 +72,9 @@ export class DataSet {
 
     readonly alias: string;
     readonly dataSource: DataSourceInterface;
-    readonly columns: Column[] = [];
     readonly keyField: string;
     autoCommit: boolean = true;
+    autoOpen: boolean = true;
     private _data = ref<Array<EntityInterface>>([]);
     private _isOpen = false
 
@@ -147,18 +145,6 @@ export class DataSet {
             await this.commit()
         }
         this._currentId = id
-    }
-
-    setColumns(columns: ColumnConfigInterface[]) {
-        columns.forEach(colConfig => {
-            let field = _.cloneDeep(this.dataSource.getFieldByAlias(colConfig.field));
-
-            if (field) {
-                let column = new Column(colConfig, field)
-                this.columns.push(column)
-            } else
-                console.warn(`Field "${colConfig.field}" not found in data source ${this.dataSource.alias}`)
-        })
     }
 
     async load() {
@@ -342,5 +328,19 @@ export const dataSetProperties:FieldConfigInterface[] = [
         alias: 'dataSource',
         type: 'datasource',
         required: true
-    }
+    },
+    {
+        title: 'Auto open',
+        alias: 'autoOpen',
+        type: 'bool',
+        required: false,
+        default: true
+    },
+    {
+        title: 'Auto commit changes',
+        alias: 'autoCommit',
+        type: 'bool',
+        required: false,
+        default: true
+    },
 ]

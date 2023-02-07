@@ -133,7 +133,8 @@ function init() {
     // })
 
     dataSets.value.forEach(ds => {
-        ds.load()
+        if (ds.autoOpen)
+            ds.load()
     })
 }
 
