@@ -22,6 +22,7 @@ import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterf
 import {useRouter, useRoute} from 'vue-router';
 import {DataSet, useDataSet} from "../model/dataset";
 import {usePageScriptHelper} from "../services/page.service";
+import {CompiledFunc, compileScript} from "../services/compiler";
 
 let store = useStore();
 let router = useRouter();
@@ -29,7 +30,10 @@ let route = useRoute();
 const pageService = usePageScriptHelper(router)
 const scriptContext = {
     pages: pageService,
-    dataSets: {}
+    page: {
+        dataSets: {},
+        params: {}
+    }
 }
 // const pagesActions = usePagesActions()
 // let dsService = useDataSourceService();
@@ -43,6 +47,10 @@ const props = defineProps<{
     screenSize: ScreenSize
 }>()
 
+let actions = ref({
+    onOpen: null
+})
+
 const actionButtons = ref<Array<Object>>( [])
 
 defineExpose({
@@ -51,17 +59,16 @@ defineExpose({
 
 watch(() => props.pageConfig,
     async () => {
-        init()
+        await init()
     })
 
-
-onMounted(() => {
-    init()
+onMounted(async () => {
+    await init()
 })
 
-function init() {
+async function init() {
     // if (!route.params.id) {
-    //     console.error("Id not provided in url params")
+    //     console.error("id is not provided in url params")
     //     return;
     // }
     // pageConfig.value = await getPageConfig(route.params.id.toString())
@@ -72,16 +79,21 @@ function init() {
     //     return;
     // }
 
+    console.log('init onOpen', props.pageConfig.onOpen)
+
+    actions.value.onOpen = await compileAction(props.pageConfig.onOpen)
 
     elements.value = []
     dataSets.value.clear();
+
+    scriptContext.page.params = route.params
 
 
 
     props.pageConfig.dataSets.forEach(config => {
         let ds = useDataSet(config)
         dataSets.value.set(ds.alias, ds)
-        scriptContext.dataSets[ds.alias] = ds
+        scriptContext.page.dataSets[ds.alias] = ds
     })
 
     props.pageConfig.elements.forEach(element => {
@@ -133,9 +145,36 @@ function init() {
     // })
 
     dataSets.value.forEach(ds => {
+        console.log('ds.autoOpen', ds.autoOpen)
         if (ds.autoOpen)
-            ds.load()
+            ds.open()
     })
+
+    if (actions.value.onOpen) {
+        await execAction(actions.value.onOpen)
+    }
+}
+
+async function compileAction(action) {
+    if (!action || (action.type === 'script' && (!action.script || action.script === '')))
+        return null
+
+    try {
+        return await compileScript(action.script, 'ctx')
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+}
+
+async function execAction(action: CompiledFunc, additionalContext?: object) {
+    try {
+        let ctx = Object.assign(scriptContext, additionalContext)
+        action.exec(ctx)
+    } catch (e) {
+        console.error(`Execution error in action`)
+        console.error(e);
+    }
 }
 
 function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterface}) {

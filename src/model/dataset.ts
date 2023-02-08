@@ -93,6 +93,7 @@ export class DataSet {
     }
 
     async open() {
+        console.log("dataset opened ", this.alias)
         this.close()
         try {
             await this.load()

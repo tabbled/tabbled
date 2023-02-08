@@ -1,5 +1,5 @@
 import {DataSetConfigInterface, dataSetProperties} from "./dataset";
-import {FieldConfigInterface, FieldListOfType} from "./field";
+import {EventHandlerConfigInterface, FieldConfigInterface, FieldListOfType} from "./field";
 import {columnProperties} from "./column";
 
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
@@ -67,6 +67,7 @@ export interface PageConfigInterface {
     title: string,
     dataSets: DataSetConfigInterface[],
     elements: ElementInterface[]
+    onOpen: EventHandlerConfigInterface
 }
 
 interface PageListItemTypeInterface {
