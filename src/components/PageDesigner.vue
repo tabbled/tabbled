@@ -230,7 +230,7 @@ async function onUpdateProperty(path: string, value: any) {
         return value
     })
 
-    console.log(path, pageConfig.value)
+    //console.log(path, pageConfig.value)
 }
 
 function onPathChanged(path) {

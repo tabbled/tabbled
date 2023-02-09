@@ -1,6 +1,5 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from "./field";
-import {ref, UnwrapRef} from "vue";
 import _ from 'lodash'
 import { FlakeId } from '../flake-id'
 import {useDataSourceService} from "../services/datasource.service";
@@ -43,7 +42,7 @@ export class DataSet {
         this.dataSource.on('updated', async (value) => {
             // @ts-ignore
             // I don't know, but we access the ref<> in emit callback then ref need to get with .value
-            let data = this.dataRef().value
+            let data = this.data().value
             console.log(value)
             for(let i in data) {
                 console.log(value.id, 'updated')
@@ -57,14 +56,14 @@ export class DataSet {
 
         this.dataSource.on('inserted', async () => {
             // @ts-ignore
-            this._data.value.value = await this.dataSource.getAll();
+            this._data = await this.dataSource.getAll();
             this._changesById.clear();
             console.log("inserted")
         })
 
         this.dataSource.on('removed', async () => {
             // @ts-ignore
-            this._data.value.value = await this.dataSource.getAll();
+            this._data = await this.dataSource.getAll();
             this._changesById.clear();
             console.log("removed")
         })
@@ -75,7 +74,7 @@ export class DataSet {
     readonly keyField: string;
     autoCommit: boolean = true;
     autoOpen: boolean = true;
-    private _data = ref<Array<EntityInterface>>([]);
+    private _data = new Array<EntityInterface>()
     private _isOpen = false
 
     get isOpen() {
@@ -88,8 +87,8 @@ export class DataSet {
         return this._changesById.size > 0
     }
 
-    dataRef(): UnwrapRef<Array<EntityInterface>>{
-        return this._data.value
+    get data(): Array<EntityInterface> {
+        return this._data
     }
 
     async open() {
@@ -106,6 +105,8 @@ export class DataSet {
     async openOne(id: string) {
         this.close()
 
+        console.log('openOne', id)
+
         let one = undefined
         try {
             one = await this.dataSource.getById(id)
@@ -114,14 +115,15 @@ export class DataSet {
         }
 
         if (one) {
-            this._data.value.push(one)
+            this.data.push(one)
             this._currentId = id;
             this._isOpen = true;
         }
+        console.log(this.data)
     }
 
     close() {
-        this._data.value = []
+        this._data = []
         this._changesById.clear();
         this._isOpen = false;
         this._currentId = null;
@@ -138,6 +140,14 @@ export class DataSet {
         this._currentId = val
     }
 
+    get current() : EntityInterface {
+        if (this._isOpen) {
+            let row = this.getRowById(this.currentId)
+            return this._data[row]
+        }
+        return undefined;
+    }
+
     async setCurrentId(id: string | null) {
         if (this.autoCommit &&
             this.isChanged() &&
@@ -149,13 +159,13 @@ export class DataSet {
     }
 
     async load() {
-        this._data.value = await this.dataSource.getAll();
+        this._data = await this.dataSource.getAll();
         this._changesById.clear();
     }
 
 
     getByRow(row: number) : EntityInterface {
-        return this._data.value[row]
+        return this.data[row]
     }
 
     getColumnByAlias(alias: string): FieldInterface | undefined {
@@ -175,10 +185,8 @@ export class DataSet {
         let item = generateEntityWithDefault(this.dataSource.fields)
         item.id = id.toString()
 
-        console.log(item)
 
-
-        this._data.value.splice(r ? r : 0, 0, item);
+        this._data.splice(r ? r : 0, 0, item);
 
         this._changesById.set(id, {
             new: item,
@@ -191,19 +199,18 @@ export class DataSet {
     }
 
     update(field: string, data: any):boolean {
+
         if (!this._isOpen || !this._currentId)
             return false;
 
         let row = this.getRowById(this._currentId)
-        if (!row)
-            return false;
 
         return this.updateDataRow(row, field, data);
     }
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
 
-        let ent = this._data.value[row]
+        let ent = this._data[row]
         if (!ent)
             return false;
 
@@ -224,7 +231,7 @@ export class DataSet {
             }
         }
 
-        this._data.value.splice(row, 1, ent)
+        this._data.splice(row, 1, ent)
         this._changesById.set(ent.id, change)
 
         return true;
@@ -232,7 +239,7 @@ export class DataSet {
 
     removeRow(row: number) : boolean {
 
-        let id = this._data.value[row].id;
+        let id = this._data[row].id;
         let change = this._changesById.get(id);
 
         if (change) {
@@ -245,7 +252,7 @@ export class DataSet {
         } else {
             change = {
                 new: null,
-                old: _.cloneDeep(this._data.value[row]),
+                old: _.cloneDeep(this._data[row]),
                 type: "remove",
                 at: new Date()
             }
@@ -253,7 +260,7 @@ export class DataSet {
 
         this._changesById.set(id, change)
 
-        this._data.value.splice(row, 1)
+        this._data.splice(row, 1)
 
         return false
     }
@@ -267,7 +274,7 @@ export class DataSet {
         if (!row)
             return false;
 
-        this._data.value.splice(row, 1)
+        this._data.splice(row, 1)
         return true
     }
 
@@ -308,8 +315,8 @@ export class DataSet {
     }
 
     private getRowById(id: string): number | undefined {
-        for (let i in this._data.value) {
-            if (this._data.value[i].id === id) {
+        for (let i in this._data) {
+            if (this._data[i].id === id) {
                 return Number(i)
             }
         }
