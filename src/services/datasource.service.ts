@@ -4,7 +4,7 @@ import {
     DataSourceConfigDataSource,
     DataSourceConfigInterface,
     DataSourceInterface,
-    DataSourceType,
+    DataSourceType, FunctionsConfigDataSource,
     MenuConfigDataSource,
     PageConfigDataSource
 } from "../model/datasource";
@@ -14,6 +14,7 @@ import {useSyncService} from "./sync.service";
 let pagesDataSource = new PageConfigDataSource()
 let dsDataSource = new DataSourceConfigDataSource()
 let menuDataSource = new MenuConfigDataSource()
+let functionDataSource = new FunctionsConfigDataSource()
 
 let syncService = useSyncService()
 
@@ -87,6 +88,7 @@ export class DataSourceService {
         this.addDataSource(dsDataSource);
         this.addDataSource(pagesDataSource);
         this.addDataSource(menuDataSource);
+        this.addDataSource(functionDataSource);
 
         syncService.setConfigDataSources(this.configDataSources)
     }

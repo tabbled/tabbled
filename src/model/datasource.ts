@@ -406,3 +406,39 @@ export class DataSourceConfigDataSource extends DataSource {
         ]});
     }
 }
+
+export class FunctionsConfigDataSource extends DataSource {
+    constructor() {
+        super({
+            type: DataSourceType.config,
+            alias: 'function',
+            keyField: 'alias',
+            fields: [
+                {
+                    title: 'Title',
+                    alias: 'title',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Alias',
+                    alias: 'alias',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: "Script",
+                    alias: "script",
+                    type: "text",
+                    required: true
+                },
+                {
+                    title: "Test context",
+                    alias: "context",
+                    type: "text",
+                    required: true,
+                    default: "{}"
+                }
+            ]});
+    }
+}

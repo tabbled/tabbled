@@ -173,6 +173,10 @@ export class DataSet {
     }
 
     async insertRow(row?: number): Promise<boolean> {
+        if (!this.isOpen) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
+
         let r:number | undefined;
         if (!row && this._currentId) {
             r = this.getRowById(this._currentId)
@@ -188,6 +192,8 @@ export class DataSet {
 
         this._data.splice(r ? r : 0, 0, item);
 
+        //console.log(id, item)
+
         this._changesById.set(id, {
             new: item,
             old: undefined,
@@ -199,9 +205,9 @@ export class DataSet {
     }
 
     update(field: string, data: any):boolean {
-
-        if (!this._isOpen || !this._currentId)
-            return false;
+        if (!this.isOpen  || !this._currentId) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
 
         let row = this.getRowById(this._currentId)
 
@@ -238,7 +244,9 @@ export class DataSet {
     }
 
     removeRow(row: number) : boolean {
-
+        if (!this.isOpen) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
         let id = this._data[row].id;
         let change = this._changesById.get(id);
 
@@ -266,6 +274,9 @@ export class DataSet {
     }
 
     removeByCurrentId() : boolean {
+        if (!this.isOpen) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
         if (!this._currentId)
             return false;
 
@@ -279,6 +290,9 @@ export class DataSet {
     }
 
     removeBySelectedId() : boolean {
+        if (!this.isOpen) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
 
         if (!this.selectedIds.length)
             return false;
@@ -293,6 +307,9 @@ export class DataSet {
     }
 
     async commit() {
+        if (!this.isOpen) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
         if (!this._changesById.size)
             return;
 
@@ -311,7 +328,9 @@ export class DataSet {
     }
 
     rollback() {
-
+        if (!this.isOpen  || !this._currentId) {
+            throw new Error(`DataSet ${this.alias} is not open`)
+        }
     }
 
     private getRowById(id: string): number | undefined {

@@ -46,9 +46,16 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const extensions = [javascript()]
 
 const view = shallowRef()
-let script = ref(props.dataSet ? props.dataSet.current[props.field] : props.modelValue)
+let script = ref(getScript())
 const handleReady = (payload) => {
     view.value = payload.view
+}
+
+function getScript() {
+    if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
+        return props.modelValue
+
+    return props.dataSet.current[props.field]
 }
 
 // console.log(props.dataSet)
