@@ -12,7 +12,7 @@ export enum ScreenSize {
 export interface PageActionConfigInterface {
     title: string,
     type?: PageActionType
-    script: string
+    onClick: string
 }
 
 export interface ScreenSizeItemInterface {
@@ -67,7 +67,8 @@ export interface PageConfigInterface {
     title: string,
     dataSets: DataSetConfigInterface[],
     elements: ElementInterface[]
-    onOpen: EventHandlerConfigInterface
+    onOpen: EventHandlerConfigInterface,
+    headerActions: PageActionConfigInterface[]
 }
 
 interface PageListItemTypeInterface {
@@ -89,6 +90,11 @@ export class PageTypesProperties {
             propPath: '',
             fields: columnProperties
         })
+        this._types.set('action', {
+            alias: 'action',
+            propPath: '',
+            fields: actionProperties
+        })
 
     }
     private _types: Map<FieldListOfType, PageListItemTypeInterface>
@@ -97,6 +103,26 @@ export class PageTypesProperties {
         return this._types.get(type);
     }
 }
+
+export const actionProperties:FieldConfigInterface[] = [
+    {
+        title: 'Alias',
+        alias: 'alias',
+        type: "string",
+        required: true
+    },
+    {
+        title: 'Title',
+        alias: 'title',
+        type: "string",
+        required: true
+    },
+    {
+        title: "onClick",
+        alias: "onClick",
+        type: 'handler'
+    }
+    ]
 
 export const pageProperties:FieldConfigInterface[] = [
     {
@@ -132,6 +158,14 @@ export const pageProperties:FieldConfigInterface[] = [
         listOf: 'element',
         keyProp: 'name',
         displayProp: 'name'
+    },
+    {
+        title: "Header actions",
+        alias: "headerActions",
+        type: 'list',
+        listOf: 'action',
+        keyProp: 'alias',
+        displayProp: 'alias',
     },
     {
         title: "onOpen",

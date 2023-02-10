@@ -4,7 +4,7 @@ import {DataSourceConfigInterface, EntityInterface} from "./datasource";
 export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements'
 export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
-export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field'
+export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action'
 
 export interface EventHandlerConfigInterface {
     type: 'script' | 'action'

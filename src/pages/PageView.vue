@@ -21,7 +21,7 @@ import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
 import {useRouter, useRoute} from 'vue-router';
 import {DataSet, useDataSet} from "../model/dataset";
-import {usePageScriptHelper} from "../services/page.service";
+import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 
 let store = useStore();
@@ -35,8 +35,7 @@ const scriptContext = {
         params: {}
     }
 }
-// const pagesActions = usePagesActions()
-// let dsService = useDataSourceService();
+const pageHeader = usePageHeader()
 
 let elements = ref<Array<ElementInterface>>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
@@ -118,31 +117,33 @@ async function init() {
         el['context'] = scriptContext
         elements.value.push(el)
     })
-    // pagesActions.buttons = []
-    // props.pageConfig.actions?.buttons?.forEach(async (action) => {
-    //
-    //     let compiledFunc: CompiledFunc
-    //     let act = {
-    //         title: action.title,
-    //         type: action.type,
-    //         func: async () => {
-    //             try {
-    //                 compiledFunc.exec(dataSets)
-    //             } catch (e) {
-    //                 console.error(`Execution error in action "${action.title}"`)
-    //                 console.error(e);
-    //             }
-    //         }
-    //     }
-    //
-    //     try {
-    //         compiledFunc = await compileScript(action.script, 'dataSets')
-    //         pagesActions.buttons.push(act)
-    //     } catch (e) {
-    //         console.error(`Compilation error in script for action "${action.title}"`)
-    //         console.error(e)
-    //     }
-    // })
+    pageHeader.actions = []
+
+    for(let i in props.pageConfig.headerActions) {
+        const action = props.pageConfig.headerActions[i]
+
+        let compiledFunc: CompiledFunc
+        let act = {
+            title: action.title,
+            type: action.type,
+            func: async () => {
+                try {
+                    await execAction(compiledFunc)
+                } catch (e) {
+                    //console.error(`Execution error in action "${action.title}"`)
+                    //console.error(e);
+                }
+            }
+        }
+
+        try {
+            compiledFunc = await compileAction(action.onClick)
+            pageHeader.actions.push(act)
+        } catch (e) {
+            //console.error(`Compilation error in script for action "${action.title}"`)
+            //console.error(e)
+        }
+    }
 
     dataSets.value.forEach(ds => {
         console.log('ds.autoOpen', ds.autoOpen)
@@ -156,6 +157,7 @@ async function init() {
 }
 
 async function compileAction(action) {
+    console.log(action)
     if (!action || (action.type === 'script' && (!action.script || action.script === '')))
         return null
 
