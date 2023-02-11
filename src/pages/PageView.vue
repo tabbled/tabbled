@@ -66,17 +66,16 @@ onMounted(async () => {
 })
 
 async function init() {
-    // if (!route.params.id) {
-    //     console.error("id is not provided in url params")
-    //     return;
-    // }
-    // pageConfig.value = await getPageConfig(route.params.id.toString())
-    //
-    // if (!pageConfig.value) {
-    //     router.back()
-    //     console.error(`Page with id ${route.params.id} not found`)
-    //     return;
-    // }
+    if (!props.pageConfig) {
+        router.back()
+        console.error(`Page has no config`)
+        return;
+    }
+
+    if (props.pageConfig.isEditPage && !route.params.id) {
+        console.error(`id is not provided for edit page "${props.pageConfig.alias}"`)
+        return;
+    }
 
     console.log('init onOpen', props.pageConfig.onOpen)
 
@@ -146,9 +145,12 @@ async function init() {
     }
 
     dataSets.value.forEach(ds => {
-        console.log('ds.autoOpen', ds.autoOpen)
-        if (ds.autoOpen)
-            ds.open()
+        if (ds.autoOpen) {
+            if (props.pageConfig.isEditPage) {
+                ds.openOne(<string>route.params.id);
+            } else
+                ds.open()
+        }
     })
 
     if (actions.value.onOpen) {

@@ -68,7 +68,8 @@ export interface PageConfigInterface {
     dataSets: DataSetConfigInterface[],
     elements: ElementInterface[]
     onOpen: EventHandlerConfigInterface,
-    headerActions: PageActionConfigInterface[]
+    headerActions: PageActionConfigInterface[],
+    isEditPage: boolean
 }
 
 interface PageListItemTypeInterface {
@@ -142,6 +143,13 @@ export const pageProperties:FieldConfigInterface[] = [
         alias: 'alias',
         type: "string",
         required: true
+    },
+    {
+        title: "Editing page",
+        alias: "isEditPage",
+        type: 'bool',
+        tooltip: 'Form validation is enabled',
+        default: false
     },
     {
         title: 'DataSets',

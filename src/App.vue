@@ -78,8 +78,6 @@ onUnmounted(() => {
     isConfigLoaded.value = false;
 })
 
-
-
 function handleResize() {
     screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
 }

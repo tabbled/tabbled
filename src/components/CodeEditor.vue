@@ -95,8 +95,6 @@ async function runScript() {
     }
 }
 
-console.log(props.context)
-
 </script>
 
 <style lang="scss">
