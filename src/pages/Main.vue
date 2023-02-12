@@ -1,7 +1,5 @@
 <template>
-    <el-container class="main"
-                  @mouseup="endResizeSettingPanel"
-                  @mousemove="onResizeSettingPanel">
+    <el-container class="main">
         <el-container>
             <el-aside :width="isSideBarCollapsed ? '64px' : mainSideBarWidth + 'px'" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
@@ -87,49 +85,15 @@
                     </el-menu>
                 </div>
             </el-aside>
-            <el-container :style="{width: mainViewWidth + 'px'}">
+            <el-container :style="{width: mainViewWidth + 'px', padding: 0}">
                 <el-col class="main-router-view" ref="mainContainer" >
-                    <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
-                        <template #content>
-                            <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
-                        </template>
-
-                        <template #extra>
-                            <div class="page-header-action-panel">
-                                <el-button v-for="action in pageHeader.actions"
-                                           :type="action.type ? action.type : 'default'"
-                                           @click="action.func()"
-                                >
-                                    {{action.title}}
-                                </el-button>
-                            </div>
-                        </template>
-                    </el-page-header>
-                    <el-main :style="{height: mainViewHeight + 'px'}">
+                    <el-main :style="{height: mainViewHeight + 'px', padding: 0}">
                         <router-view :screenSize="screenSize" v-slot="{Component}">
                             <component ref="rView" :is="Component" />
                         </router-view>
-
-
                     </el-main>
                 </el-col>
             </el-container>
-            <el-aside v-if="advancedPanel.visible"
-                      class="advancedPanel"
-                      :width="String(settingPanelWidth) + 'px'">
-
-                <div class="resizer"
-                     @mousedown="initResizeSettingPanel"/>
-
-                <PageSettingsPanel
-                    style="width: 100%"
-                    :page-config="advancedPanel.pageConfig"
-                    :current-path="advancedPanel.currentPath"
-                    @update="advancedPanel.onUpdate"
-                    @path-changed="advancedPanel.onPathChanged"
-                />
-
-            </el-aside>
         </el-container>
     </el-container>
     <!--    <div class="locale-changer">-->
@@ -140,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ComputedRef, onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
 import {MenuConfigInterface} from "../model/menu";
 import {useStore} from "vuex";
 import {useRoute, useRouter} from 'vue-router'
@@ -148,8 +112,7 @@ import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
-import {useAdvancedPanel, usePageHeader} from "../services/page.service";
-import PageSettingsPanel from '../components/PageSettingsPanel.vue'
+import {usePageHeader} from "../services/page.service";
 
 
 const props = defineProps<{
@@ -159,14 +122,11 @@ const props = defineProps<{
 const mainContainer = ref(null);
 const mainHeader = ref(null);
 const rView = ref(null)
-const advancedPanel = useAdvancedPanel()
 
 let mainViewHeight = ref(0)
 let mainViewWidth = ref(0)
 let mainSideBarWidth = ref(250)
-let settingPanelWidth = ref<number>(getSettingsPanelWidth())
-let isResizingSettingPanel = false
-let startXResizingSettingPanel = 0
+
 
 let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
@@ -179,11 +139,6 @@ const pageHeader = usePageHeader()
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)
-
-function getSettingsPanelWidth():number {
-    let w = localStorage.getItem('settings_panel_width')
-    return w ? Number(w) : 300
-}
 
 socketClient.socket.on("connect", () => {
     isConnected.value = true;
@@ -202,7 +157,7 @@ let sidebarMenu = ref<Array<MenuConfigInterface>>(null)
 function getMainViewWidth(): number {
     let width = window.innerWidth;
     width = isSideBarCollapsed.value ? width - 64 : width - mainSideBarWidth.value
-    width = advancedPanel.value.visible ? width - settingPanelWidth.value : width
+    //width = advancedPanel.value.visible ? width - settingPanelWidth.value : width
     return width
 }
 
@@ -218,7 +173,7 @@ const currentPageTitle: ComputedRef<string> = computed((): string =>  {
 
 onMounted(() => {
     console.log('Main mounted')
-    mainViewHeight.value = mainContainer.value.$el.clientHeight - mainHeader.value.$el.clientHeight;
+    mainViewHeight.value = mainContainer.value.$el.clientHeight
     handleResize();
     window.addEventListener('resize', handleResize);
     loadMenu();
@@ -228,14 +183,6 @@ onUnmounted(() => {
     console.log('Main unmounted')
     window.removeEventListener('resize', handleResize);
 })
-
-watch(() => advancedPanel.value.visible,
-    async () => {
-        handleResize()
-    },
-    {
-        deep: true
-    })
 
 function handleResize() {
     mainViewWidth.value = getMainViewWidth();
@@ -272,29 +219,6 @@ function logout() {
         })
 }
 
-function onResizeSettingPanel(e: MouseEvent) {
-    if (!isResizingSettingPanel) {
-        return;
-    }
-
-    settingPanelWidth.value += startXResizingSettingPanel - e.clientX
-    startXResizingSettingPanel = e.clientX
-
-    localStorage.setItem('settings_panel_width', String(settingPanelWidth.value))
-
-    handleResize()
-}
-
-function initResizeSettingPanel(e:MouseEvent) {
-    isResizingSettingPanel = true;
-
-    startXResizingSettingPanel = e.clientX
-}
-
-function endResizeSettingPanel() {
-    isResizingSettingPanel = false
-}
-
 </script>
 
 <style lang="scss">
@@ -302,28 +226,6 @@ function endResizeSettingPanel() {
 .page-header-action-panel {
     display: flex;
     flex-flow: row;
-}
-
-.resizer {
-    position: absolute;
-    top:0;
-    bottom: 0;
-    width: 5px;
-    z-index: 11;
-    cursor: col-resize;
-}
-
-.resizer:hover {
-    border-left-color: var(--el-border-color);
-    border-left-width: 2px;
-    border-left-style: solid;
-}
-
-.advancedPanel {
-    display: flex;
-    flex-wrap: wrap;
-    overflow: hidden;
-
 }
 
 .open_new {
@@ -346,7 +248,6 @@ function endResizeSettingPanel() {
 
 .main {
     margin: 0;
-    padding: 0;
     width: 100vw;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -363,7 +264,7 @@ function endResizeSettingPanel() {
     height: 100%;
     width: inherit;
     position: absolute;
-    overflow: hidden
+    overflow: hidden;
 }
 
 .el-sub-menu__title {

@@ -1,80 +1,143 @@
 <template>
-    <el-row>
-        <el-col :span="24">
-            <el-row align="middle" justify="space-between" style="padding-bottom: 16px">
-                <div style="display: flex; flex-flow: wrap; align-items: center;">
-                    <el-radio-group v-model="selectedSize" size="small">
-                        <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
-                    </el-radio-group>
-                    <el-divider direction="vertical"/>
-                    <el-dropdown type="default"
-                                 size="small"
-                                 trigger="click"
-                    >
-                        <el-button size="small">
-                            Add element
-                            <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
-                        </el-button>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item v-for="(comp) in componentService.getList()"
-                                                  @dragstart="(e) => startDragNewElement(e, comp)"
-                                                  draggable="true"
-                                                  style="cursor: move"
-                                >
-                                    <Icon :icon="comp.icon" style="padding-right: 4px"/>
-                                    {{comp.title}}
-                                </el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
 
-                </div>
+    <div style="display: flex; flex-flow: column; padding: 16px"
+         @mouseup="endResizeSettingPanel"
+         @mousemove="onResizeSettingPanel">
 
-                <div style="display: flex; flex-flow: wrap; align-items: center;">
+    <el-row align="middle" justify="space-between" style="padding-bottom: 16px">
+        <div style="display: flex; flex-flow: wrap; align-items: center;">
+            <el-radio-group v-model="selectedSize" size="small">
+                <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
+            </el-radio-group>
+            <el-divider direction="vertical"/>
+            <el-dropdown type="default"
+                         size="small"
+                         trigger="click"
+            >
+                <el-button size="small">
+                    Add element
+                    <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
+                </el-button>
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <el-dropdown-item v-for="(comp) in componentService.getList()"
+                                          @dragstart="(e) => startDragNewElement(e, comp)"
+                                          draggable="true"
+                                          style="cursor: move"
+                        >
+                            <Icon :icon="comp.icon" style="padding-right: 4px"/>
+                            {{comp.title}}
+                        </el-dropdown-item>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
+
+            <div style="display: flex; flex-flow: wrap; align-items: center;">
                 <el-button size="small" link @click="selectWidget('')">
                     <Icon icon="mdi:cog" width="16" style="padding-right: 4px"/>
                     Page settings
                 </el-button>
 
-                </div>
-            </el-row>
-            <div ref="grid"
-                 class="grid-wrapper"
-                 @mouseup="endDrag"
-                 @mousemove="onDrag"
-                 @dragover.prevent
-                 @dragenter.prevent
-                 @drop="dropNewWidget($event)"
-                 @click="gridClicked"
-            >
-                <div v-for="(element, idx) in elements"
-                     :id="String(idx)"
-                     :style="getGridElStyle(element)"
-                     :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
-                >
-                    <component
-                        style="height: inherit;"
-                        v-bind="getElementProperties(element)"
-                        :is="element.name"
-                    />
-                    <div :class="{
-                        'resizer-right': true,
-                        'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
-                         @mousedown="initDragRight" :id="String(idx)"></div>
-                    <div :class="{
-                        'resizer-bottom': true,
-                        'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
-                         @mousedown="initDragBottom" :id="String(idx)"></div>
-                    <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
+            </div>
+        </div>
 
-                    <div @click="removeWidget(Number(idx))">
-                        <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
-                    </div>
+
+        <div class="settings-panel" :style="{width: String(settingPanelWidth) + 'px'}">
+            <div class="title">Settings</div>
+            <div class="path">
+                <div style="display: flex" v-for="(item,idx)  in _currentPathArray">
+                    <div v-if="idx > 0" class="path-separator">/</div>
+                    <el-button :disabled="idx === _currentPathArray.length -1"
+                               style="font-weight: normal; cursor: auto;"
+                               link
+                               @click="setPathIdx(idx)" >{{item}}</el-button>
+
                 </div>
             </div>
-        </el-col>
+        </div>
+
     </el-row>
+
+    <div style="display: flex; flex-flow: row">
+
+    <div style="display: flex; flex-flow: column; width: 100%" >
+
+
+
+        <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
+            <template #content>
+                <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
+            </template>
+
+            <template #extra>
+                <div class="page-header-action-panel">
+                    <el-button v-for="action in pageHeader.actions"
+                               :type="action.type ? action.type : 'default'"
+                               @click="action.func()"
+                    >
+                        {{action.title}}
+                    </el-button>
+                </div>
+            </template>
+        </el-page-header>
+
+        <div ref="grid"
+             class="grid-wrapper"
+             @mouseup="endDrag"
+             @mousemove="onDrag"
+             @dragover.prevent
+             @dragenter.prevent
+             @drop="dropNewWidget($event)"
+             @click="gridClicked"
+        >
+            <div v-for="(element, idx) in elements"
+                 :id="String(idx)"
+                 :style="getGridElStyle(element)"
+                 :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
+            >
+                <component
+                    style="height: inherit;"
+                    v-bind="getElementProperties(element)"
+                    :is="element.name"
+                />
+                <div :class="{
+                        'resizer-right': true,
+                        'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
+                     @mousedown="initDragRight" :id="String(idx)"></div>
+                <div :class="{
+                        'resizer-bottom': true,
+                        'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
+                     @mousedown="initDragBottom" :id="String(idx)"></div>
+                <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
+
+                <div @click="removeWidget(Number(idx))">
+                    <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        <el-aside
+            class="settingsPanel"
+            :width="String(settingPanelWidth) + 'px'">
+
+            <div class="resizer"
+                 @mousedown="initResizeSettingPanel"/>
+
+            <PageSettingsPanel
+                style="width: 100%"
+                :page-config="pageConfig"
+                :current-path="currentConfigPath"
+                @update="onUpdateProperty"
+                @path-changed="onPathChanged"
+            />
+
+        </el-aside>
+
+    </div>
+    </div>
+
 
 </template>
 
@@ -90,12 +153,13 @@ import {
 } from "../model/page";
 import {useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../services/datasource.service";
-import {useAdvancedPanel, usePageHeader} from "../services/page.service";
+import {usePageHeader} from "../services/page.service";
 import _ from 'lodash'
 import {DataSet, useDataSet} from "../model/dataset";
 import {useComponentService} from "../services/component.service";
 import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
+import PageSettingsPanel from '../components/PageSettingsPanel.vue'
 
 interface ComponentDropInterface extends ComponentInterface {
     layerX: number,
@@ -110,7 +174,6 @@ let route = useRoute()
 let router = useRouter()
 let dsService = useDataSourceService()
 let componentService = useComponentService()
-const advancedPanel = useAdvancedPanel()
 
 let elements = ref<ElementInterface[]>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
@@ -126,6 +189,11 @@ let dragDirection = ref("");
 let dragIdx = ref("")
 let selectedIdx = ref("")
 let selectedSize = ref(ScreenSize.desktop)
+let currentConfigPath = ref('')
+let settingPanelWidth = ref<number>(getSettingsPanelWidth())
+let isResizingSettingPanel = false
+let startXResizingSettingPanel = 0
+let _currentPathArray = ref(['Path'])
 
 const grid = ref(null);
 
@@ -134,9 +202,6 @@ let pageHeader = usePageHeader()
 onMounted(async () => {
     try {
         await init()
-        advancedPanel.value.visible = true
-        advancedPanel.value.onUpdate = onUpdateProperty
-        advancedPanel.value.onPathChanged = onPathChanged
     } catch (e) {
         console.error(e)
     }
@@ -145,10 +210,45 @@ onMounted(async () => {
 onUnmounted(() => {
     pageHeader.actions = []
     pageHeader.title = ""
-    advancedPanel.value.visible = false
-    advancedPanel.value.onUpdate = null
-    advancedPanel.value.onPathChanged = null
 })
+
+function setPathIdx(idx: number) {
+    let path = ''
+    for (let i = 1; i <= idx; i++) {
+        if (path !== '') path += '.';
+        path += _currentPathArray.value[i]
+    }
+    currentConfigPath.value = path
+    //setCurrentElement(path)
+}
+
+function getSettingsPanelWidth():number {
+    let w = localStorage.getItem('settings_panel_width')
+    return w ? Number(w) : 300
+}
+
+function initResizeSettingPanel(e:MouseEvent) {
+    isResizingSettingPanel = true;
+
+    startXResizingSettingPanel = e.clientX
+}
+
+function endResizeSettingPanel() {
+    isResizingSettingPanel = false
+}
+
+function onResizeSettingPanel(e: MouseEvent) {
+    if (!isResizingSettingPanel) {
+        return;
+    }
+
+    settingPanelWidth.value += startXResizingSettingPanel - e.clientX
+    startXResizingSettingPanel = e.clientX
+
+    localStorage.setItem('settings_panel_width', String(settingPanelWidth.value))
+
+    //handleResize()
+}
 
 function getElementProperties(element: ElementInterface) {
     let component = componentService.getByName(element.name)
@@ -214,13 +314,7 @@ async function init() {
     })
 
     elements.value = pageConfig.value.elements
-
-
-    console.log("init")
-
-    advancedPanel.value.pageConfig = pageConfig.value
-    advancedPanel.value.currentPath = ""
-    advancedPanel.value.visible = true
+    currentConfigPath.value = ''
 
     selectWidget("")
 }
@@ -234,7 +328,10 @@ async function onUpdateProperty(path: string, value: any) {
 }
 
 function onPathChanged(path) {
-    advancedPanel.value.currentPath = path
+    currentConfigPath.value = path
+
+    _currentPathArray.value = path !== "" ? path.split('.') : []
+    _currentPathArray.value.splice(0, 0, 'Page');
 }
 
 async function save() {
@@ -285,7 +382,7 @@ function initDragBottom(e:MouseEvent) {
 
 function selectWidget(id: string) {
     selectedIdx.value = id
-    advancedPanel.value.currentPath = id !== "" ? `elements[${id}]` : ``
+    currentConfigPath.value = id !== "" ? `elements[${id}]` : ``
 }
 
 function removeWidget(idx: number) {
@@ -459,6 +556,33 @@ function dropNewWidget(e:DragEvent) {
     grid-template-rows: repeat(10, 26px) min(26px);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
+    padding-right: 16px;
+}
+
+.settings-panel{
+    display: flex;
+    flex-flow: column;
+    padding-left: 16px;
+
+
+    .title {
+        font-size: var(--el-font-size-medium);
+        width: 100%;
+        padding-left: 16px;
+    }
+
+    .path {
+        font-size: var(--el-font-size-small);
+        display: flex;
+        flex-flow: wrap;
+        height: 24px;
+        padding-left: 16px;
+    }
+
+    .path-separator {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
 }
 
 .setting-panel {
@@ -540,9 +664,6 @@ function dropNewWidget(e:DragEvent) {
     z-index: 10;
 }
 
-//  For disable clicking on widget
-// pointer-events: none;
-
 .widget-draggable .resizer-right {
     width: 3px;
     background: transparent;
@@ -601,6 +722,26 @@ function dropNewWidget(e:DragEvent) {
     -ms-user-select: none;      /* IE 10 and IE 11 */
     user-select: none;          /* Standard syntax */
 }
+
+
+.resizer {
+    position: absolute;
+    top:0;
+    bottom: 0;
+    width: 5px;
+    z-index: 11;
+    cursor: col-resize;
+    border-left-color: var(--el-border-color-lighter) ;
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+
+.resizer:hover {
+    border-left-color: var(--el-border-color-dark);
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+
 
 
 </style>

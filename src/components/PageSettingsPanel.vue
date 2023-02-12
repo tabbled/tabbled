@@ -1,27 +1,11 @@
 <template>
     <div class="panel">
-        <div style="padding: 16px 16px 0 16px">
-
-
-            <div class="title">Settings</div>
-            <div class="path">
-                <div class="path" v-for="(item,idx)  in _currentPathArray">
-                    <div v-if="idx > 0" class="path-separator">/</div>
-                    <el-button :disabled="idx === _currentPathArray.length -1"
-                               style="font-weight: normal; cursor: auto;"
-                               link
-                               @click="setPathIdx(idx)" >{{item}}</el-button>
-
-                </div>
-            </div>
-        </div>
-        <el-divider ref="divToHeight" style="margin-top: 8px; margin-bottom: 8px"/>
+<!--        <el-divider ref="divToHeight" style="margin-top: 8px; margin-bottom: 8px"/>-->
 
 
 
-        <div v-if="properties && currentElement" >
-            <el-scrollbar :height="scrollHeight" always>
-                <el-form label-position="top" style="padding: 0 16px 0 16px" ref="pageForm" :model="currentElement" size="small">
+        <div v-if="properties && currentElement" :style="{'max-height': scrollHeight - 60 + 'px'}">
+                <el-form label-position="top" style="padding: 0 0 0 16px" ref="pageForm" :model="currentElement" size="small">
                     <el-form-item v-for="(prop, idx)  in properties.filter(item => !item.hidden)"
                                   style="margin-bottom: 8px;"
                                   :tabindex="idx"
@@ -86,7 +70,6 @@
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
                     </el-form-item>
                 </el-form>
-            </el-scrollbar>
         </div>
     </div>
 </template>
@@ -116,7 +99,7 @@ let scrollHeight = ref(window.innerHeight)
 let properties = ref<FieldConfigInterface[]>([])
 let currentElement = ref(null)
 let _currentPath = ''
-let _currentPathArray = ref(['Path'])
+
 let pageListTypesProperties = new PageTypesProperties()
 
 
@@ -129,6 +112,7 @@ const props = defineProps<{
 watch(() => props,
     async () => {
         populateDataSetsList()
+        setCurrentElement(props.currentPath ? props.currentPath : '')
     },
     {
         deep: true
@@ -161,9 +145,6 @@ function setCurrentElement(cpath: string) {
         _currentPath = cpath
         emit('path-changed', cpath)
     }
-
-    _currentPathArray.value = _currentPath !== "" ? _currentPath.split('.') : []
-    _currentPathArray.value.splice(0, 0, 'Page');
 }
 
 function getPropPath(alias: string) {
@@ -172,15 +153,6 @@ function getPropPath(alias: string) {
 
 function getList(prop: string) {
     return _.get(props.pageConfig, getPropPath(prop))
-}
-
-function setPathIdx(idx: number) {
-    let path = ''
-    for (let i = 1; i <= idx; i++) {
-        if (path !== '') path += '.';
-        path += _currentPathArray.value[i]
-    }
-    setCurrentElement(path)
 }
 
 function getFieldsByPath(path: string): FieldConfigInterface[] {
@@ -274,6 +246,9 @@ function onListRemove(alias:string, idx: number) {
 }
 
 function populateDataSetsList() {
+    if (!props.pageConfig)
+        return;
+
     dataSetOptions.value = props.pageConfig.dataSets.map(item => {
         return {
             value: item.alias,
@@ -316,26 +291,9 @@ function getValue(prop: FieldConfigInterface, element: any) {
     z-index: 0;
     width: 100%;
     //padding: 16px;
-
-    .title {
-        font-size: var(--el-font-size-medium);
-    }
-
-    .path {
-        font-size: var(--el-font-size-small);
-        display: flex;
-        flex-flow: wrap;
-        height: 24px;
-    }
-
-    .path-separator {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-
-    .el-scrollbar {
-        height: unset;
-    }
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: auto;
 }
 
 

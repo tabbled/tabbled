@@ -1,4 +1,4 @@
-import {Ref, ref, UnwrapRef} from "vue";
+import {ref, UnwrapRef} from "vue";
 import {RouteParamsRaw, Router} from "vue-router";
 import {useDataSourceService} from "./datasource.service";
 import {PageConfigInterface} from "../model/page";
@@ -14,14 +14,6 @@ export interface PageActionsInterface {
 export class PageHeader {
     actions: PageActionsInterface[] = []
     title: string
-}
-
-export class AdvancedPanel {
-    visible: boolean = false
-    pageConfig: PageConfigInterface = null
-    currentPath: string = ""
-    onUpdate: Function = null
-    onPathChanged: Function = null
 }
 
 class PageScriptHelper {
@@ -58,14 +50,9 @@ class PageScriptHelper {
 }
 
 let pageActions = ref<PageHeader>(new PageHeader())
-let advancedPanel = ref<AdvancedPanel>(new AdvancedPanel())
 
 export function usePageHeader(): UnwrapRef<PageHeader> {
     return pageActions.value
-}
-
-export function useAdvancedPanel(): Ref<AdvancedPanel> {
-    return advancedPanel
 }
 
 export function usePageScriptHelper(router: Router):PageScriptHelper {
