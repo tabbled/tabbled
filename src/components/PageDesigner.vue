@@ -33,7 +33,7 @@
             </el-dropdown>
 
             <div style="display: flex; flex-flow: wrap; align-items: center;">
-                <el-button size="small" link @click="selectWidget('')">
+                <el-button size="small" link @click="selectWidget('')" style="padding-left: 8px">
                     <Icon icon="mdi:cog" width="16" style="padding-right: 4px"/>
                     Page settings
                 </el-button>
@@ -43,16 +43,23 @@
 
 
         <div class="settings-panel" :style="{width: String(settingPanelWidth) + 'px'}">
-            <div class="title">Settings</div>
-            <div class="path">
-                <div style="display: flex" v-for="(item,idx)  in _currentPathArray">
-                    <div v-if="idx > 0" class="path-separator">/</div>
-                    <el-button :disabled="idx === _currentPathArray.length -1"
-                               style="font-weight: normal; cursor: auto;"
-                               link
-                               @click="setPathIdx(idx)" >{{item}}</el-button>
+            <div style="display: flex; flex-flow: column;">
+                <div class="title">Settings</div>
+                <div class="path">
+                    <div style="display: flex" v-for="(item,idx)  in _currentPathArray">
+                        <div v-if="idx > 0" class="path-separator">/</div>
+                        <el-button :disabled="idx === _currentPathArray.length -1"
+                                   style="font-weight: normal; cursor: auto;"
+                                   link
+                                   @click="setPathIdx(idx)" >{{item}}</el-button>
 
+                    </div>
                 </div>
+            </div>
+            <div>
+                <el-button size="small" @click="cancel">Cancel</el-button>
+               <el-button size="small" type="primary" @click="save" :disabled="!isChanged">Save</el-button>
+
             </div>
         </div>
 
@@ -194,6 +201,7 @@ let settingPanelWidth = ref<number>(getSettingsPanelWidth())
 let isResizingSettingPanel = false
 let startXResizingSettingPanel = 0
 let _currentPathArray = ref(['Path'])
+let isChanged = ref(false)
 
 const grid = ref(null);
 
@@ -208,8 +216,8 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-    pageHeader.actions = []
-    pageHeader.title = ""
+    // pageHeader.actions = []
+    // pageHeader.title = ""
 })
 
 function setPathIdx(idx: number) {
@@ -289,17 +297,17 @@ async function init() {
 
     pageHeader.title = `Page designer #` + pageConfig.value.alias
 
-    pageHeader.actions = []
-    pageHeader.actions.push({
-        title: 'Cancel',
-        type: 'default',
-        func: cancel
-    })
-    pageHeader.actions.push({
-        title: 'Save',
-        type: 'primary',
-        func: save
-    })
+    // pageHeader.actions = []
+    // pageHeader.actions.push({
+    //     title: 'Cancel',
+    //     type: 'default',
+    //     func: cancel
+    // })
+    // pageHeader.actions.push({
+    //     title: 'Save',
+    //     type: 'primary',
+    //     func: save
+    // })
 
     elements.value = []
     dataSets.value.clear();
@@ -317,6 +325,8 @@ async function init() {
     currentConfigPath.value = ''
 
     selectWidget("")
+
+    isChanged.value = false
 }
 
 async function onUpdateProperty(path: string, value: any) {
@@ -324,7 +334,7 @@ async function onUpdateProperty(path: string, value: any) {
         return value
     })
 
-    //console.log(path, pageConfig.value)
+    isChanged.value = true
 }
 
 function onPathChanged(path) {
@@ -561,9 +571,9 @@ function dropNewWidget(e:DragEvent) {
 
 .settings-panel{
     display: flex;
-    flex-flow: column;
+    flex-flow: row;
     padding-left: 16px;
-
+    justify-content: space-between;
 
     .title {
         font-size: var(--el-font-size-medium);
