@@ -1,15 +1,33 @@
 <template>
+    <div class="page-view">
+        <el-page-header ref="mainHeader" style="padding: 0; padding-bottom: 16px" @back="$router.back()">
+            <template #content>
+                <span class="text-large font-600 mr-3"> {{route.meta.title}} </span>
+            </template>
 
-    <div  class="grid-wrap">
+            <template #extra>
+                <div class="page-header-action-panel">
+                    <el-button v-for="action in pageHeader.actions"
+                               :type="action.type ? action.type : 'default'"
+                               @click="action.func()"
+                    >
+                        {{action.title}}
+                    </el-button>
+                </div>
+            </template>
+        </el-page-header>
+
+        <div  class="grid-wrap">
 
 
-        <component v-for="(element, idx) in elements"
-             :id="idx"
-             :style="getGridElementStyle(element.layout)"
-             class="element"
-                   :is="element.name" v-bind="element"
-        />
+            <component v-for="(element, idx) in elements"
+                       :id="idx"
+                       :style="getGridElementStyle(element.layout)"
+                       class="element"
+                       :is="element.name" v-bind="element"
+            />
 
+        </div>
     </div>
 </template>
 
@@ -210,7 +228,12 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
 
 <style lang="scss">
 
+.page-view {
+    margin: 16px;
+}
+
 .grid-wrap {
+
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: 10px;

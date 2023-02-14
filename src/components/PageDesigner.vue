@@ -73,7 +73,7 @@
 
         <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
             <template #content>
-                <span class="text-large font-600 mr-3"> {{currentPageTitle}} </span>
+                <span class="text-large font-600 mr-3"> {{pageConfig.title}} </span>
             </template>
 
             <template #extra>
