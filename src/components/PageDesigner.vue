@@ -73,7 +73,7 @@
 
         <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
             <template #content>
-                <span class="text-large font-600 mr-3"> {{pageConfig.title}} </span>
+                <span class="text-large font-600 mr-3"> {{pageConfig ? pageConfig.title : ""}} </span>
             </template>
 
             <template #extra>
@@ -88,41 +88,45 @@
             </template>
         </el-page-header>
 
-        <div ref="grid"
-             class="grid-wrapper"
-             @mouseup="endDrag"
-             @mousemove="onDrag"
-             @dragover.prevent
-             @dragenter.prevent
-             @drop="dropNewWidget($event)"
-             @click="gridClicked"
-        >
-            <div v-for="(element, idx) in elements"
-                 :id="String(idx)"
-                 :style="getGridElStyle(element)"
-                 :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
+        <el-form label-position="top">
+            <div ref="grid"
+                 class="grid-wrapper"
+                 @mouseup="endDrag"
+                 @mousemove="onDrag"
+                 @dragover.prevent
+                 @dragenter.prevent
+                 @drop="dropNewWidget($event)"
+                 @click="gridClicked"
             >
-                <component
-                    style="height: inherit;"
-                    v-bind="getElementProperties(element)"
-                    :is="element.name"
-                />
-                <div :class="{
-                        'resizer-right': true,
-                        'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
-                     @mousedown="initDragRight" :id="String(idx)"></div>
-                <div :class="{
-                        'resizer-bottom': true,
-                        'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
-                     @mousedown="initDragBottom" :id="String(idx)"></div>
-                <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
+                <div v-for="(element, idx) in elements"
+                     :id="String(idx)"
+                     :style="getGridElStyle(element)"
+                     :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
+                >
+                        <component
+                            style="height: inherit;"
+                            v-bind="getElementProperties(element)"
+                            :is="element.name"
+                        />
 
-                <div @click="removeWidget(Number(idx))">
-                    <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                    <div :class="{
+                            'resizer-right': true,
+                            'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
+                         @mousedown="initDragRight" :id="String(idx)"></div>
+                    <div :class="{
+                            'resizer-bottom': true,
+                            'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
+                         @mousedown="initDragBottom" :id="String(idx)"></div>
+                    <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
+
+                    <div @click="removeWidget(Number(idx))">
+                        <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                    </div>
                 </div>
             </div>
-        </div>
+        </el-form>
     </div>
+
 
 
         <el-aside

@@ -101,6 +101,7 @@ async function runScript() {
 
 .editor {
     text-align: left;
+    width: 100%;
     .el-card__body {
         padding: 0;
     }
