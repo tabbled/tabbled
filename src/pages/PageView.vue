@@ -13,6 +13,8 @@
                     >
                         {{action.title}}
                     </el-button>
+                    <el-button v-if="isEditPage" @click="cancel">Cancel</el-button>
+                    <el-button v-if="isEditPage" @click="save" type="primary">Save</el-button>
                 </div>
             </template>
         </el-page-header>
@@ -41,6 +43,7 @@ import {useRouter, useRoute} from 'vue-router';
 import {DataSet, useDataSet} from "../model/dataset";
 import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
+import {ElMessage} from "element-plus";
 
 let store = useStore();
 let router = useRouter();
@@ -58,6 +61,7 @@ const pageHeader = usePageHeader()
 let elements = ref<Array<ElementInterface>>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
 let grid = ref(null)
+let isEditPage = ref(false)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -83,6 +87,38 @@ onMounted(async () => {
     await init()
 })
 
+async function save() {
+    try {
+        dataSets.value.forEach(ds => {
+            ds.commit()
+        })
+        ElMessage.success('Saved successfully')
+    }catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
+}
+
+async function cancel() {
+    console.log('cancel')
+
+    let changed = false
+
+    dataSets.value.forEach(ds => {
+        if (ds.isChanged()) {
+            changed = true
+        }
+    })
+
+    if (changed) {
+        console.log("changed")
+        dataSets.value.forEach(ds => {
+            ds.rollback()
+        })
+    }
+    router.back();
+}
+
 async function init() {
     if (!props.pageConfig) {
         router.back()
@@ -92,8 +128,11 @@ async function init() {
 
     if (props.pageConfig.isEditPage && !route.params.id) {
         console.error(`id is not provided for edit page "${props.pageConfig.alias}"`)
+
         return;
     }
+
+    isEditPage.value = props.pageConfig.isEditPage;
 
     console.log('init onOpen', props.pageConfig.onOpen)
 
@@ -108,6 +147,7 @@ async function init() {
 
     props.pageConfig.dataSets.forEach(config => {
         let ds = useDataSet(config)
+        // @ts-ignore
         dataSets.value.set(ds.alias, ds)
         scriptContext.page.dataSets[ds.alias] = ds
     })
@@ -120,10 +160,14 @@ async function init() {
 
         Object.keys(element).forEach(key => {
             if (key === 'dataSet') {
+                // @ts-ignore
                 if (element.dataSet && element.dataSet !== "") {
+                    // @ts-ignore
                     if (!dataSets.value.has(element.dataSet)) {
+                        // @ts-ignore
                         console.warn(`DataSet "${element.dataSet}" does not exist!`)
                     } else {
+                        // @ts-ignore
                         el.dataSet = dataSets.value.get(element.dataSet)
                     }
                 }

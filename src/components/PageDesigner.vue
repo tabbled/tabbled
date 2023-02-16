@@ -1,6 +1,6 @@
 <template>
 
-    <div style="display: flex; flex-flow: column; padding: 16px"
+    <div style="display: flex; flex-flow: column; padding: 16px; height: calc(100% - 32px)"
          @mouseup="endResizeSettingPanel"
          @mousemove="onResizeSettingPanel">
 
@@ -42,7 +42,8 @@
         </div>
 
 
-        <div class="settings-panel" :style="{width: String(settingPanelWidth) + 'px'}">
+        <div class="settings-panel" :style="{width: String(settingPanelWidth) + 'px'}"
+        >
             <div style="display: flex; flex-flow: column;">
                 <div class="title">Settings</div>
                 <div class="path">
@@ -58,7 +59,7 @@
             </div>
             <div>
                 <el-button size="small" @click="cancel">Cancel</el-button>
-               <el-button size="small" type="primary" @click="save" :disabled="!isChanged">Save</el-button>
+                <el-button size="small" type="primary" @click="save" :disabled="!isChanged">Save</el-button>
 
             </div>
         </div>
@@ -84,6 +85,8 @@
                     >
                         {{action.title}}
                     </el-button>
+                    <el-button v-if="pageConfig ? pageConfig.isEditPage : false" disabled>Cancel</el-button>
+                    <el-button v-if="pageConfig ? pageConfig.isEditPage : false" type="primary" disabled>Save</el-button>
                 </div>
             </template>
         </el-page-header>
@@ -167,7 +170,7 @@ import {useDataSourceService} from "../services/datasource.service";
 import {usePageHeader} from "../services/page.service";
 import _ from 'lodash'
 import {DataSet, useDataSet} from "../model/dataset";
-import {useComponentService} from "../services/component.service";
+import {ComponentTitle, useComponentService} from "../services/component.service";
 import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
 import PageSettingsPanel from '../components/PageSettingsPanel.vue'
@@ -250,6 +253,7 @@ function endResizeSettingPanel() {
 }
 
 function onResizeSettingPanel(e: MouseEvent) {
+    console.log(e)
     if (!isResizingSettingPanel) {
         return;
     }
@@ -301,16 +305,16 @@ async function init() {
 
     pageHeader.title = `Page designer #` + pageConfig.value.alias
 
-    // pageHeader.actions = []
+    pageHeader.actions = []
     // pageHeader.actions.push({
     //     title: 'Cancel',
     //     type: 'default',
-    //     func: cancel
+    //     func: () => { console.log('cancel') }
     // })
     // pageHeader.actions.push({
     //     title: 'Save',
     //     type: 'primary',
-    //     func: save
+    //     func: () => { console.log('save') }
     // })
 
     elements.value = []
@@ -320,6 +324,7 @@ async function init() {
         let ds = useDataSet(config)
 
         if (ds)
+            // @ts-ignore
             dataSets.value.set(ds.alias, ds)
         else
             console.error(`DataSet "${config.alias}" not created`)
@@ -496,7 +501,7 @@ function getGridElStyle(element:ElementInterface) {
     return style;
 }
 
-function startDragNewElement(e:any, item: ComponentInterface) {
+function startDragNewElement(e:any, item: ComponentTitle) {
     let it = Object.assign({
         layerX: e.layerX,
         layerY: e.layerY

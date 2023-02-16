@@ -29,9 +29,9 @@
 
 <script setup lang="ts">
 
-import {ref, shallowRef} from "vue";
-import { Codemirror } from 'vue-codemirror'
-import { javascript } from '@codemirror/lang-javascript'
+import {ref, shallowRef, watch} from "vue";
+import {Codemirror} from 'vue-codemirror'
+import {javascript} from '@codemirror/lang-javascript'
 import {DataSet} from "../model/dataset";
 import {CompiledFunc, compileScript} from "../services/compiler";
 
@@ -58,6 +58,16 @@ function getScript() {
     return props.dataSet.current[props.field]
 }
 
+
+watch(() => props.dataSet,
+    async () => {
+    if (props.dataSet.isOpen)
+        script.value = getScript()
+    },
+    {
+        deep: true
+    })
+
 // console.log(props.dataSet)
 // console.log(props.field)
 
@@ -79,9 +89,13 @@ function log(type:string, event: any) {
         script.value = event
         emit('update:modelValue', event)
 
-        if (props.dataSet && props.field && props.field !== '') {
-            props.dataSet.update(props.field, event)
+
+        if (!props.dataSet || !props.field || props.field == '') {
+            console.warn(`DataSet or field haven't set`)
+            return;
         }
+
+        props.dataSet.update(props.field, event)
     }
 }
 
