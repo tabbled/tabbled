@@ -1,6 +1,12 @@
 <template>
 
-    <el-card shadow="never" class="editor">
+    <el-card
+        shadow="never"
+        class="editor">
+
+        <div v-if="header !== ''"  style="padding: 8px">{{ header }}</div>
+        <el-divider v-if="header !== ''" style="padding: 0; margin: 0"/>
+
     <Codemirror
         :model-value="script"
         placeholder="Code goes here..."
@@ -39,7 +45,7 @@ const props = defineProps<{
     modelValue?: string,
     dataSet?: DataSet,
     field?: string,
-    context?:any
+    context?:any,
 }>()
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -47,11 +53,12 @@ const extensions = [javascript()]
 
 const view = shallowRef()
 let script = ref(getScript())
+let header = ref('')
 const handleReady = (payload) => {
     view.value = payload.view
 }
 
-function getScript() {
+function getScript():string {
     if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
         return props.modelValue
 
@@ -61,8 +68,13 @@ function getScript() {
 
 watch(() => props.dataSet,
     async () => {
-    if (props.dataSet.isOpen)
-        script.value = getScript()
+        if (props.dataSet && props.field && props.field !== '') {
+            header.value = props.dataSet.dataSource.getFieldByAlias(props.field).title
+            console.log(header.value)
+        }
+
+        if (props.dataSet.isOpen)
+            script.value = getScript()
     },
     {
         deep: true
