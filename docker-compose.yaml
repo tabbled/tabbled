@@ -3,16 +3,44 @@ version: '3.9'
 services:
 
   web:
-    build: .
-    container_name: "yourprice-web"
+    image: tabbled/web:latest
+    container_name: "tabbled-web"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - server
+
+  server:
+    image: tabbled/server:latest
+    container_name: "tabbled-server"
     restart: always
     ports:
-      - "443:443"
-    volumes:
-      - /etc/nginx/ssl:/etc/nginx/ssl
-    networks:
-      - yourprice
+      - "${PORT}:${PORT}"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=${DB_USER}
+      - DB_DATABASE=${DB_DATABASE}
+      - JWT_SECRET=${JWT_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - db
 
-networks:
-  yourprice:
+  db:
+    container_name: postgres
+    image: postgres:12-alpine
+    restart: always
+    volumes:
+      - pg_data:/data/db
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_DATABASE}
+
+volumes:
+  pg_data:
     external: true

@@ -9,7 +9,9 @@ function getAccountId(): number {
 
 export class SocketIOClient {
     constructor() {
-        this.socket = io(this.url(),{
+        let url = this.url()
+        console.log('Socket server url - ', url)
+        this.socket = io(url,{
             transports: [ 'websocket', 'polling' ],
             auth: (cb) => {
                 cb({
@@ -35,13 +37,20 @@ export class SocketIOClient {
             console.log("Disconnected from the socket server");
         })
     }
-
+    //import.meta.env.VITE_SOME_KEY
     readonly socket: Socket
 
     url(): string {
+        // If url provided in env file then it passes to socket client
+        // @ts-ignore
+        let envUrl = import.meta.env.VITE_SERVER_WS
+        if (envUrl && envUrl !== '')
+            return envUrl
+
         let protocol = (location.protocol === "https:") ? "wss://" : "ws://";
         let url;
-        const env = process.env.NODE_ENV || "production";
+        // @ts-ignore
+        const env = import.meta.env.MODE || "production";
 
         if (env === "development" || localStorage.dev === "dev") {
             url = protocol + location.hostname + ":3000";
