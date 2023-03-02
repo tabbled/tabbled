@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+
+  web:
+    build: .
+    container_name: "yourprice-web"
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - /etc/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - yourprice
+
+networks:
+  yourprice:
+    external: true

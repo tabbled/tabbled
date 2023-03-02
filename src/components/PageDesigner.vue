@@ -253,7 +253,6 @@ function endResizeSettingPanel() {
 }
 
 function onResizeSettingPanel(e: MouseEvent) {
-    console.log(e)
     if (!isResizingSettingPanel) {
         return;
     }
