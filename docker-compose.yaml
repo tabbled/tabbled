@@ -2,25 +2,36 @@ version: '3.9'
 
 services:
 
+  reverse-proxy:
+    image: traefik:v2.9
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   web:
     image: tabbled/web:latest
-    container_name: "tabbled-web"
-    ports:
-      - "80:80"
-      - "8080:8080"
+    container_name: "web"
+    labels:
+      - "traefik.http.routers.web.rule=Host(`localhost`)"
     restart: always
     depends_on:
       - server
 
   server:
     image: tabbled/server:latest
-    container_name: "tabbled-server"
+    container_name: "server"
     restart: always
     ports:
       - "${PORT}:${PORT}"
     environment:
       - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+      - DB_PORT=5432
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
       - DB_DATABASE=${DB_DATABASE}
@@ -34,6 +45,9 @@ services:
     container_name: postgres
     image: postgres:12-alpine
     restart: always
+    ports:
+      # Not for production
+      - "${DB_PORT}:5432"
     volumes:
       - pg_data:/data/db
     environment:
