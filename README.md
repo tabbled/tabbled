@@ -71,7 +71,7 @@ wget https://raw.githubusercontent.com/tabbled/tabbled/main/.env.example
 docker volume create pg_data
 ```
 
-**4.Install and start Tabbled**
+**4.Install and start Tabbled application**
 ```shell
 docker compose up
 ```
@@ -87,7 +87,6 @@ Required:
 - Git
 - [Tubbled server](https://github.com/tabbled/tabbled-server)
 
-Second:
 ```bash
 $ git clone https://github.com/tabbled/tabbled
 $ cd tabbled
