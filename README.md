@@ -52,8 +52,6 @@ It's a low-code platform for building web application for enterprise, to manage 
 
 ## 🚀 How to Install
 
-### 🐳 Docker
-
 **1.Download the example docker-compose file**
 ```shell
 https://raw.githubusercontent.com/tabbled/tabbled/main/docker-compose.yaml
@@ -79,20 +77,6 @@ docker compose up
 **5.Open `localhost` on a web browser.**
 
 Note: Default login:password are admin:admin
-
-### 💪🏻 Non-Docker
-
-Required:
-- Node.js >= 14
-- Git
-- [Tubbled server](https://github.com/tabbled/tabbled-server)
-
-```bash
-$ git clone https://github.com/tabbled/tabbled
-$ cd tabbled
-$ npm install
-$ npm start preview
-```
 
 ## 	Support
 
