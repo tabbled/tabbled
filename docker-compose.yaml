@@ -22,6 +22,7 @@ services:
     restart: always
     depends_on:
       - server
+    pull_policy: always
 
   server:
     image: tabbled/server:latest
@@ -40,6 +41,7 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - db
+    pull_policy: always
 
   db:
     container_name: postgres
