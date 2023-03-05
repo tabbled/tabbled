@@ -3,6 +3,7 @@ import Login from "./pages/Login.vue";
 import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
 import PageDesigner from "./components/PageDesigner.vue";
+import Configuration from "./pages/Configuration.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -29,6 +30,15 @@ const routes: RouteRecordRaw[] = [
             isSingle: false,
             authRequired: true,
             title: "Designer"
+        },
+    },
+    {
+        path: "/configuration",
+        component: Configuration,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "Configuration"
         },
     },
     {

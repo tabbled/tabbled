@@ -33,12 +33,14 @@ interface Props {
     onEdit?: EventHandlerConfigInterface
     onAdd?: EventHandlerConfigInterface
     onRemove?: EventHandlerConfigInterface
+    isPure: boolean // onEdit, onAdd, onRemove, and data set actions will not use
 }
 
 const props = withDefaults(defineProps<Props>(), {
     allowAdd: true,
     allowEdit: true,
-    allowRemove: true
+    allowRemove: true,
+    isPure: false
 })
 
 let canAdd = ref(props.allowAdd)
@@ -49,6 +51,7 @@ let actions = ref({
     onAdd: null,
     onRemove: null
 })
+const emit = defineEmits(['add', 'edit', 'remove'])
 
 onMounted(() => {
 
@@ -92,6 +95,11 @@ async function execAction(action: CompiledFunc) {
 }
 
 function add() {
+    emit('add')
+
+    if (props.isPure)
+        return;
+
     if (actions.value.onAdd) {
         execAction(actions.value.onAdd)
     } else
@@ -99,6 +107,11 @@ function add() {
 }
 
 function edit() {
+    emit('edit', { id: props.dataSet.currentId })
+
+    if (props.isPure)
+        return;
+
     if (actions.value.onEdit) {
         execAction(actions.value.onEdit)
     } else {
@@ -117,6 +130,8 @@ function remove() {
         }
     )
         .then(() => {
+            emit('remove', { ids: props.dataSet.selectedIds })
+
             if (actions.value.onRemove) {
                 execAction(actions.value.onRemove)
             } else {

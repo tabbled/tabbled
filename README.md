@@ -44,7 +44,7 @@ It's a low-code platform for building web application for enterprise, to manage 
   - [ ] Databases:
     - [ ] PostgresSQL
     - [ ] MongoDB
-    - [ ] MySQL  
+    - [ ] MySQL
 - [ ] Dockerize entire project in the one image
 - [x] PWA application
 - [ ] Desktop version
@@ -52,7 +52,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 
 ## 🚀 How to Install
 
-**1.Download the example docker-compose file**
+**1.Download the docker-compose file example**
 ```shell
 https://raw.githubusercontent.com/tabbled/tabbled/main/docker-compose.yaml
 ```

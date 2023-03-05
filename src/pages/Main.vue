@@ -60,29 +60,52 @@
                 </el-menu>
 
                 <div class="footer ">
-                    <el-menu
-                        :collapse="isSideBarCollapsed"
-                        :collapse-transition="false"
+
+                    <div style="width: 100%;">
+                        <el-button text @click="router.push('/configuration')" :style="{width: isSideBarCollapsed ? '64px' : '100%', 'justify-content': 'left'}" size="large">
+                            <Icon style="padding: 4px" icon="ic:outline-display-settings" width="20"/>
+                            <div v-if="!isSideBarCollapsed" style="text-align: start;">Configuration</div>
+                        </el-button>
+                    </div>
+
+                    <el-popover
+                        placement="right"
+                        :width="200"
+                        trigger="click"
                     >
-
-                        <el-menu-item index="1">
-                            <Icon width="24" icon="ic:baseline-account-circle" color="gray" style="margin-right: 8px; min-width: 24px;"/>
-
-                            <span style="width: 100%; text-align: start;">{{username}}</span>
-                            <div v-if="!isSideBarCollapsed" @click="logout()" class="open_new" style="height: 100%; display: flex">
-                                <Icon width="24" icon="ic:baseline-exit-to-app"></Icon>
+                        <template #reference>
+                            <div style="width: 100%;">
+                                <el-button text :style="{width: isSideBarCollapsed ? '64px' : '100%', 'justify-content': 'left'}" size="large">
+                                    <Icon style="padding: 4px" icon="ic:baseline-account-circle" width="20"/>
+                                    <div v-if="!isSideBarCollapsed" style="text-align: start;">{{username}}</div>
+                                    <Icon v-if="!isSideBarCollapsed" style="position: absolute; right: 8px; opacity:0.2" icon="mdi:chevron-right" width="24"/>
+                                </el-button>
                             </div>
-                        </el-menu-item>
+                        </template>
+                        <template #default>
+                            <div>
+                                <el-button @click="" text style="width: 100%; justify-content: left">
+                                    <template #icon>
+                                        <Icon icon="ic:outline-settings" width="24"/>
+                                    </template>
+                                    Settings
+                                </el-button>
+                                <el-button @click="logout" text style="width: 100%; justify-content: left; margin-left: 0">
+                                    <template #icon>
+                                        <Icon icon="ic:baseline-logout" width="24"/>
+                                    </template>
+                                    Logout
+                                </el-button>
+                            </div>
 
+                        </template>
+                    </el-popover>
 
-                        <div style="width: 100%;">
-                            <el-button @click="setCollapsed" text style="width: 64px; opacity: 40%" size="small">
-                                <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
-                            </el-button>
-                        </div>
-
-
-                    </el-menu>
+                    <div style="width: 100%;">
+                        <el-button @click="setCollapsed" text style="width: 32px; opacity:0.2" size="small">
+                            <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
+                        </el-button>
+                    </div>
                 </div>
             </el-aside>
             <el-container :style="{width: mainViewWidth + 'px', padding: 0}">

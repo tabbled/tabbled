@@ -56,7 +56,7 @@
 <script setup lang="ts">
 
 import {onMounted, ref, watch} from 'vue'
-import {Column} from "../model/column";
+import {ColumnConfigInterface} from "../model/column";
 import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
@@ -65,7 +65,7 @@ import {EventHandlerConfigInterface} from "../model/field";
 
 interface Props {
     dataSet: DataSet,
-    columns: Column[];
+    columns: ColumnConfigInterface[];
     isRowSelectable?: boolean,
     isInlineEditing?: boolean
     context: any,
@@ -80,6 +80,7 @@ let actions = ref({
     onRowDoubleClick: null,
     onRowClick: null
 })
+const emit = defineEmits(['rowDblClick', 'rowClick'])
 
 //let data = ref<Array<EntityInterface>>([])
 //let columns = ref<Array<Column>>([])
@@ -130,12 +131,14 @@ function selectionChange(rows: Array<any>) {
 }
 
 function onTableRowClick(row) {
+    emit('rowClick', { id: row.id })
     if (actions.value.onRowClick) {
         execAction(actions.value.onRowClick, { row: row })
     }
 }
 
 function onTableRowDblClick(row) {
+    emit('rowDblClick', { id: row.id })
     if (actions.value.onRowDoubleClick) {
         execAction(actions.value.onRowDoubleClick, { row: row })
     }
@@ -264,7 +267,7 @@ async function init() {
     }
 
     .cell {
-        padding: 4px 8px 4px 8px;
+        padding: 4px 8px 4px 8px !important;
     }
 }
 
@@ -305,7 +308,6 @@ async function init() {
 
 .el-table .el-table__cell {
     padding: 0 !important;
-
 }
 
 .table-cell:hover {

@@ -174,6 +174,8 @@ import {ComponentTitle, useComponentService} from "../services/component.service
 import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
 import PageSettingsPanel from '../components/PageSettingsPanel.vue'
+import { FlakeId } from '../flake-id'
+let flakeId = new FlakeId()
 
 interface ComponentDropInterface extends ComponentInterface {
     layerX: number,
@@ -294,7 +296,24 @@ async function init() {
         console.error("Id not provided in url params")
         return;
     }
-    pageConfig.value = await getPageConfig(route.params.id.toString())
+
+    if (route.params.id === 'new') {
+        // TODO need to use generateEntityWithDefault(...)
+        pageConfig.value = {
+            id: null,
+            alias: '',
+            path: '',
+            title: '',
+            dataSets: [],
+            elements: [],
+            onOpen: null,
+            headerActions: [],
+            isEditPage: false
+        }
+    } else {
+        pageConfig.value = await getPageConfig(route.params.id.toString())
+    }
+
 
     if (!pageConfig.value) {
         router.back()
@@ -360,7 +379,14 @@ async function save() {
     pageConfig.value.elements = elements.value
 
     try {
-        await ds.updateById(pageConfig.value.id, pageConfig.value)
+        if (pageConfig.value.id === null) {
+            let id = (await flakeId.generateId()).toString()
+            pageConfig.value.id = id
+            await ds.insert(id, pageConfig.value)
+        } else {
+            await ds.updateById(pageConfig.value.id, pageConfig.value)
+        }
+
         ElMessage.success('Saved successfully')
     } catch (e) {
         ElMessage.error(e.toString())

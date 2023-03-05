@@ -1,9 +1,9 @@
 import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from "./field";
 import _ from 'lodash'
-import { FlakeId } from '../flake-id'
 import {useDataSourceService} from "../services/datasource.service";
 import {ref, UnwrapRef} from "vue";
+import { FlakeId } from '../flake-id'
 let flakeId = new FlakeId()
 
 let dsService = useDataSourceService()
