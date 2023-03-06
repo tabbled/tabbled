@@ -103,21 +103,36 @@ export class DataSet {
         }
     }
 
-    async openOne(id: string) {
+    async openOne(id?: string) {
         this.close()
 
-        console.log('openOne', id)
+        console.log('openOne', this)
+
+        let _id = id;
 
         let one = undefined
         try {
-            one = await this.dataSource.getById(id)
+            if (id) {
+                one = await this.dataSource.getById(id)
+            } else {
+                _id = (await flakeId.generateId()).toString()
+                one = generateEntityWithDefault(this.dataSource.fields)
+                one.id = _id
+                this._changesById.set(_id, {
+                    new: one,
+                    old: undefined,
+                    at: new Date(),
+                    type: 'insert'
+                })
+            }
+
         } catch (e) {
             throw e
         }
 
         if (one) {
             this.data.push(one)
-            this._currentId = id;
+            this._currentId = _id;
             this._isOpen = true;
         }
         console.log(this.data)
@@ -173,7 +188,7 @@ export class DataSet {
         return this.dataSource.getFieldByAlias(alias);
     }
 
-    async insertRow(row?: number): Promise<boolean> {
+    async insertRow(row?: number): Promise<string> {
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
@@ -193,8 +208,6 @@ export class DataSet {
 
         this._data.splice(r ? r : 0, 0, item);
 
-        //console.log(id, item)
-
         this._changesById.set(id, {
             new: item,
             old: undefined,
@@ -202,7 +215,7 @@ export class DataSet {
             type: 'insert'
         })
 
-        return true
+        return this.currentId
     }
 
     update(field: string, data: any):boolean {
@@ -221,10 +234,14 @@ export class DataSet {
         if (!ent)
             return false;
 
+        console.log(ent)
+
         let oldEnt = _.cloneDeep(ent)
         let change = this._changesById.get(ent.id);
 
          ent[field] = cellData
+
+        console.log(change)
 
         if (change) {
             change.new = _.cloneDeep(ent)
@@ -314,8 +331,13 @@ export class DataSet {
         if (!this._changesById.size)
             return;
 
+
+
         console.log('Commit changes')
         let changes = [...this._changesById.values()]
+
+        console.log(changes)
+
         this._changesById.clear()
         for (let i in changes) {
             let item:any = changes[i]

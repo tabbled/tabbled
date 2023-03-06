@@ -6,9 +6,9 @@
 
     </el-page-header>
 
-    <el-tabs tab-position="left" style="height: calc(100% - 64px)">
+    <el-tabs tab-position="left" style="height: calc(100% - 64px)" v-model="activeTab" @tab-change="tabChange">
 
-        <el-tab-pane label="Pages"  style="padding: 16px">
+        <el-tab-pane label="Pages"  style="padding: 16px" name="pages">
             <DataSetActionPanel context=""
                                 :data-set="pagesDataSet"
                                 style="padding-bottom: 16px"
@@ -24,11 +24,11 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Data sources" style="padding: 16px">
+        <el-tab-pane label="Data sources" style="padding: 16px" name="datasources">
             DataSources coming soon
         </el-tab-pane>
 
-        <el-tab-pane label="Functions" style="padding: 16px">
+        <el-tab-pane label="Functions" style="padding: 16px" name="functions">
             <DataSetActionPanel context=""
                                 :data-set="funcDataSet"
                                 style="padding-bottom: 16px"
@@ -44,7 +44,9 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Report templates" style="padding: 16px">Report templates coming soon</el-tab-pane>
+        <el-tab-pane label="Report templates" style="padding: 16px" name="reports">
+            Report templates coming soon
+        </el-tab-pane>
     </el-tabs>
 </template>
 
@@ -53,11 +55,12 @@ import {useRoute, useRouter} from "vue-router";
 import Table from "../components/Table.vue";
 import {ColumnConfigInterface} from "../model/column";
 import {useDataSet} from "../model/dataset";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import DataSetActionPanel from "../components/DataSetActionPanel.vue";
 
 const route = useRoute()
 const router = useRouter()
+let activeTab = ref('')
 const pagesDataSet = useDataSet({
     dataSource: 'page',
     alias: 'pages',
@@ -103,10 +106,18 @@ const funcColumns:ColumnConfigInterface[] = [
 
 
 
-onMounted(() => {
-    pagesDataSet.open()
-    funcDataSet.open()
+onMounted(async () => {
+    await pagesDataSet.open()
+    await funcDataSet.open()
+
+    activeTab.value = route.query.activeTab ? <string>route.query.activeTab : 'pages'
+    await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
+
 });
+
+function tabChange(d) {
+    router.replace({path: '/configuration', query: {activeTab: d}})
+}
 
 function addPage() {
     router.push(`/designer/new`)

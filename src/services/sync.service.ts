@@ -97,7 +97,7 @@ export class SyncService extends EventEmitter {
 
     async pull(type: DataSourceType) {
         let rev = await this.getLastRevision(type);
-        console.log(type, 'pull', rev)
+        console.log('pull', type, 'rev', rev.toString())
         let targetDs;
         switch (type) {
             case DataSourceType.config:

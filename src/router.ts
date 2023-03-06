@@ -2,8 +2,9 @@ import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 import Login from "./pages/Login.vue";
 import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
-import PageDesigner from "./components/PageDesigner.vue";
+import PageDesigner from "./pages/PageDesigner.vue";
 import Configuration from "./pages/Configuration.vue";
+import FunctionEdit from "./pages/FunctionEdit.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -30,6 +31,16 @@ const routes: RouteRecordRaw[] = [
             isSingle: false,
             authRequired: true,
             title: "Designer"
+        },
+    },
+    {
+        name: 'functionEdit',
+        path: "/functions/:id",
+        component: FunctionEdit,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "Function"
         },
     },
     {
