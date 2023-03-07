@@ -13,8 +13,35 @@
         </template>
     </el-page-header>
 
-    <CodeEditor context="" :data-set="dataSet" field="context"/>
-    <CodeEditor context="" :data-set="dataSet" field="script"/>
+    <el-form label-position="top">
+        <div style="display: flex; flex-direction: row; width: 100%">
+            <el-form-item label="Title" style="width: 50%; padding-right: 8px">
+                <Input :data-set="dataSet" field="title" />
+            </el-form-item>
+
+            <el-form-item label="Alias" style="width: 50%">
+                <Input :data-set="dataSet" field="alias" />
+            </el-form-item>
+        </div>
+
+        <el-form-item label="Context">
+            <CodeEditor :data-set="dataSet"
+                        field="context"
+                        format="json"
+                        :runnable="false"
+            />
+        </el-form-item>
+
+        <el-form-item label="Script">
+            <CodeEditor :context="context()"
+                        :data-set="dataSet"
+                        field="script"
+                        format="javascript"
+                        runnable
+            />
+        </el-form-item>
+    </el-form>
+
 </div>
 </template>
 
@@ -25,6 +52,7 @@ import {useDataSet} from "../model/dataset";
 import {useRoute, useRouter} from "vue-router";
 import {onMounted} from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
+import Input from "../components/Input.vue";
 
 let router = useRouter();
 let route = useRoute()
@@ -58,6 +86,17 @@ async function cancel() {
     }
 
     router.back()
+}
+
+function context() {
+    try {
+        return JSON.parse(dataSet.current.context)
+    }
+    catch (e) {
+        console.error(e)
+        return {}
+    }
+
 }
 
 </script>

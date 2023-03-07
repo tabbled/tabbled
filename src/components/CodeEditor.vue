@@ -4,8 +4,8 @@
         shadow="never"
         class="editor">
 
-        <div v-if="header !== ''"  style="padding: 8px">{{ header }}</div>
-        <el-divider v-if="header !== ''" style="padding: 0; margin: 0"/>
+<!--        <div v-if="header !== ''"  style="padding: 8px">{{ header }}</div>-->
+<!--        <el-divider v-if="header !== ''" style="padding: 0; margin: 0"/>-->
 
     <Codemirror
         :model-value="script"
@@ -14,13 +14,12 @@
         :indent-with-tab="true"
         :tab-size="4"
         :extensions="extensions"
+
         @ready="handleReady"
-        @change="log('change', $event)"
-        @focus="log('focus', $event)"
-        @blur="log('blur', $event)"
+        @change="change($event)"
     />
-        <el-divider style="padding: 0; margin: 0"/>
-        <el-row justify="end">
+        <el-divider v-if="runnable" style="padding: 0; margin: 0"/>
+        <el-row v-if="runnable" justify="end">
             <el-divider style="padding: 0; margin: 0; height: inherit" direction="vertical"/>
             <el-button text type="primary" style="border-radius: 0" @click="runScript">
                 <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
@@ -35,21 +34,29 @@
 
 <script setup lang="ts">
 
-import {ref, shallowRef, watch} from "vue";
+import {onMounted, ref, shallowRef, watch} from "vue";
 import {Codemirror} from 'vue-codemirror'
 import {javascript} from '@codemirror/lang-javascript'
+import {json} from '@codemirror/lang-json'
 import {DataSet} from "../model/dataset";
 import {CompiledFunc, compileScript} from "../services/compiler";
 
-const props = defineProps<{
+interface Props {
     modelValue?: string,
     dataSet?: DataSet,
     field?: string,
     context?:any,
-}>()
+    format: 'json' | 'javascript',
+    runnable: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    format: "javascript",
+    runnable: false
+})
 
 const emit = defineEmits(['update:modelValue', 'change'])
-const extensions = [javascript()]
+const extensions = ref([javascript()])
 
 const view = shallowRef()
 let script = ref(getScript())
@@ -65,7 +72,6 @@ function getScript():string {
     return props.dataSet.current[props.field]
 }
 
-
 watch(() => props.dataSet,
     async () => {
         if (props.dataSet && props.field && props.field !== '') {
@@ -75,40 +81,40 @@ watch(() => props.dataSet,
 
         if (props.dataSet.isOpen)
             script.value = getScript()
-    },
-    {
+    }, {
         deep: true
     })
 
-// console.log(props.dataSet)
-// console.log(props.field)
+onMounted(async () => {
+    setExtensions()
+});
 
 
-// Status is available at all times via Codemirror EditorView
-// function getCodemirrorStates() {
-//     const state = view.value.state
-//     const ranges = state.selection.ranges
-//     const selected = ranges.reduce((r, range) => r + range.to - range.from, 0)
-//     const cursor = ranges[0].anchor
-//     const length = state.doc.length
-//     const lines = state.doc.lines
-//     // more state info ...
-//     // return ...
-// }
+watch(() => props.format,
+    async () => {
+        await setExtensions()
+    })
 
-function log(type:string, event: any) {
-    if (type === 'change') {
-        script.value = event
-        emit('update:modelValue', event)
+function setExtensions() {
+    let arr = []
+    if (props.format === 'json')
+        arr.push(json())
+    if (props.format === 'javascript')
+        arr.push(javascript())
 
+    extensions.value = arr
+}
 
-        if (!props.dataSet || !props.field || props.field == '') {
-            console.warn(`DataSet or field haven't set`)
-            return;
-        }
+function change(event: any) {
+    script.value = event
+    emit('update:modelValue', event)
 
-        props.dataSet.update(props.field, event)
+    if (!props.dataSet || !props.field || props.field == '') {
+        console.warn(`DataSet or field haven't set`)
+        return;
     }
+
+    props.dataSet.update(props.field, event)
 }
 
 async function runScript() {

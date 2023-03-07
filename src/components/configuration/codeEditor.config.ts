@@ -9,5 +9,15 @@ export function properties():FieldConfigInterface[] {
         title: "Field",
         alias: "field",
         type: "string"
-    }]
+    },{
+        title: "Format",
+        alias: "format",
+        type: "enum",
+        values: ['json', 'javascript']
+    },{
+        title: "Runnable",
+        alias: "runnable",
+        type: "bool"
+    }
+    ]
 }
