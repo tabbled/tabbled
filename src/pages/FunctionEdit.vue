@@ -65,8 +65,10 @@ let dataSet = useDataSet({
 })
 
 onMounted(async () => {
-    await dataSet.openOne(!route.params.id || route.params.id === 'new' ? undefined : <string>route.params.id)
-    //await router.replace({name: 'functionEdit', params: { id: dataSet.currentId }})
+    let n = !route.params.id || route.params.id === 'new'
+    await dataSet.openOne( n ? undefined : <string>route.params.id)
+    //@ts-ignore
+    document.title = `Function ${ n ? 'new' : ' ' + dataSet.current.title } | ${import.meta.env.VITE_APP_TITLE}`
 });
 
 async function save() {

@@ -71,7 +71,8 @@ export default function (store: any) {
     });
 
     router.beforeEach(async (to, from, next) => {
-        window.document.title = `${to.meta && to.meta.title ? to.meta.title + ' | ' : ''}Tabbled`;
+        // @ts-ignore
+        window.document.title = `${to.meta && to.meta.title ? to.meta.title + ' | ' : ''}${ import.meta.env.VITE_APP_TITLE }`;
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
                 next();

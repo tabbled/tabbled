@@ -105,6 +105,22 @@ function setExtensions() {
     extensions.value = arr
 }
 
+// console.log(props.dataSet)
+// console.log(props.field)
+
+
+// Status is available at all times via Codemirror EditorView
+// function getCodemirrorStates() {
+//     const state = view.value.state
+//     const ranges = state.selection.ranges
+//     const selected = ranges.reduce((r, range) => r + range.to - range.from, 0)
+//     const cursor = ranges[0].anchor
+//     const length = state.doc.length
+//     const lines = state.doc.lines
+//     // more state info ...
+//     // return ...
+// }
+
 function change(event: any) {
     script.value = event
     emit('update:modelValue', event)
