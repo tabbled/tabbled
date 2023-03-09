@@ -5,6 +5,7 @@ import NotFound from "./pages/NotFound.vue";
 import PageDesigner from "./pages/PageDesigner.vue";
 import Configuration from "./pages/Configuration.vue";
 import FunctionEdit from "./pages/FunctionEdit.vue";
+import DataSourceEdit from "./pages/DataSourceEdit.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -41,6 +42,16 @@ const routes: RouteRecordRaw[] = [
             isSingle: false,
             authRequired: true,
             title: "Function"
+        },
+    },
+    {
+        name: 'dataSoruceEdit',
+        path: "/datasources/:id",
+        component: DataSourceEdit,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "DataSource"
         },
     },
     {

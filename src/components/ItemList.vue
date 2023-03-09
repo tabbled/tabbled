@@ -37,7 +37,7 @@ import {onMounted} from "vue";
 import {Icon} from "@iconify/vue";
 
 interface Props {
-    list: Array<object>
+    list?: Array<object>
     keyProp: string,
     titleProp: string,
     subtitle?: string,

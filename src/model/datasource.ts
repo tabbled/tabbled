@@ -8,9 +8,15 @@ const db = useDatabase()
 const syncService = useSyncService()
 
 export enum DataSourceType {
-    tableField = 'tableField',
     config = 'config',
-    data = 'data'
+    data = 'data',
+}
+
+export enum DataSourceSource {
+    internal = 'internal',
+    custom = 'custom',
+    restapi = 'restapi',
+    sql = 'sql'
 }
 
 export interface EntityInterface {
@@ -32,6 +38,7 @@ export interface DataSourceInterface extends EventEmitter{
     cached: boolean,
     keyField: string,
     type: DataSourceType
+    source: DataSourceSource
 
     /**
      * Get all data store from the data source
@@ -75,6 +82,7 @@ export interface DataSourceConfigInterface {
     readonly?: boolean,
     keyField: string,
     isTree?: boolean,
+    source?: DataSourceSource
 }
 
 export class DataSource extends EventEmitter implements DataSourceInterface {
@@ -85,11 +93,18 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.keyField = config.keyField
         this.type = config.type
         this.config = config
+        this.source = DataSourceSource.internal
+        this.fields = []
+
+
+
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
         })
-        this.fields = [...this.fieldByAlias.values()]
+        if (this.fieldByAlias.size > 0)
+            this.fields = [...this.fieldByAlias.values()]
+
     }
 
     private fieldByAlias: Map<string, FieldInterface>
@@ -101,6 +116,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     cached = true;
     readonly = false
     type: DataSourceType
+    source: DataSourceSource
 
     async getAll(): Promise<EntityInterface[]> {
         if (!db.database)
@@ -379,31 +395,54 @@ export class DataSourceConfigDataSource extends DataSource {
             alias: 'datasource',
             keyField: 'alias',
             fields: [
-            {
-                title: 'Title',
-                alias: 'title',
-                type: "string",
-                required: true
-            },
-            {
-                title: 'Type',
-                alias: 'type',
-                type: "string",
-                required: true
-            },
-            {
-                title: 'Alias',
-                alias: 'alias',
-                type: "string",
-                required: false
-            },
-            {
-                title: "Fields",
-                alias: "fields",
-                type: "list",
-                required: true
-            }
-        ]});
+                {
+                    title: 'Title',
+                    alias: 'title',
+                    type: "string",
+                    required: true,
+                    default: "New data source"
+                },
+                {
+                    title: 'Type',
+                    alias: 'type',
+                    type: "string",
+                    required: true,
+                    default: 'data'
+                },
+                {
+                    title: 'Alias',
+                    alias: 'alias',
+                    type: "string",
+                    required: false,
+                    default: 'data-source'
+                },
+                {
+                    title: "Fields",
+                    alias: "fields",
+                    type: "list",
+                    required: true
+                },
+                {
+                    title: "Source",
+                    alias: "source",
+                    type: "enum",
+                    required: true,
+                    default: 'internal',
+                    values: [{
+                        key: 'internal',
+                        title: "Internal"
+                    },{
+                        key: 'custom',
+                        title: "Custom"
+                    },{
+                        key: 'restapi',
+                        title: "REST API"
+                    },{
+                        key: 'sql',
+                        title: "SQL"
+                    }]
+                }
+            ]});
     }
 }
 

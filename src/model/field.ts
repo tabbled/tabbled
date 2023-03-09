@@ -12,6 +12,11 @@ export interface EventHandlerConfigInterface {
     action?: string
 }
 
+export interface EnumValuesInterface {
+    key: string | number,
+    title: string
+}
+
 export interface FieldConfigInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations
@@ -23,7 +28,7 @@ export interface FieldConfigInterface {
     keyProp?: string,
     displayProp?: string,
     link?: string,                      // Data source alias
-    values?: string[] | number[],       // Only for types
+    values?: EnumValuesInterface[],       // Only for types
     isMultiple?: boolean,
     precision?: number,                  // Only for type numeric
     default?: any,
@@ -42,7 +47,7 @@ export interface FieldInterface {
     keyProp?: string,
     displayProp?: string,
     link?: string,                      // Data source alias
-    values?: string[] | number[],       // Only for types
+    values?: EnumValuesInterface[],       // Only for types
     isMultiple?: boolean,
     precision?: number,                  // Only for type numeric
     default?: string | number |
@@ -63,6 +68,8 @@ export class Field implements FieldInterface {
         this.isMultiple = config.isMultiple;
         this.link = config.link;
         this.required = config.required;
+        this.values = config.values
+        this.default = config.default
 
     }
     alias: string;
@@ -74,6 +81,7 @@ export class Field implements FieldInterface {
     required: boolean;
     title: string;
     datasource?: DataSourceConfigInterface;
+    values: EnumValuesInterface[]
 
     async getFormattedValue(value: any): Promise<any> {
         return []
@@ -92,6 +100,7 @@ export function generateEntityWithDefault(fields: FieldConfigInterface[]):Entity
         switch (f.type) {
             case "bool": item[f.alias] = f.default ? f.default : false; break;
             case "string":
+            case "enum":
             case "text": item[f.alias] = f.default ? f.default : ""; break;
             case "list":
             case "elements":
@@ -99,6 +108,8 @@ export function generateEntityWithDefault(fields: FieldConfigInterface[]):Entity
             case "handler": item[f.alias] = {type: 'script', script: ""};break;
             default: item[f.alias] = null;
         }
+
+        console.log(f)
     }
     return item;
 }

@@ -25,7 +25,19 @@
         </el-tab-pane>
 
         <el-tab-pane label="Data sources" style="padding: 16px" name="datasources">
-            DataSources coming soon
+            <DataSetActionPanel context=""
+                                :data-set="dsDataSet"
+                                style="padding-bottom: 16px"
+                                is-pure
+                                @add="addDataSource"
+                                @edit="editDataSource"
+            />
+            <Table :columns="dsColumns"
+                   context=""
+                   :data-set="dsDataSet"
+                   :is-inline-editing="false"
+                   @row-dbl-click="editDataSource"
+            />
         </el-tab-pane>
 
         <el-tab-pane label="Functions" style="padding: 16px" name="functions">
@@ -73,6 +85,13 @@ const funcDataSet = useDataSet({
     autoOpen: true,
     autoCommit: false
 })
+const dsDataSet = useDataSet({
+    dataSource: 'datasource',
+    alias: 'datasources',
+    autoOpen: true,
+    autoCommit: false
+})
+
 
 const pagesColumns:ColumnConfigInterface[] = [
     {
@@ -103,12 +122,33 @@ const funcColumns:ColumnConfigInterface[] = [
         "sortable": true
     }
 ]
+const dsColumns:ColumnConfigInterface[] = [
+    {
+        "field": "alias",
+        "title": "alias",
+        "width": 150,
+        "sortable": true
+    },
+    {
+        "field": "title",
+        "title": "Title",
+        "width": 200,
+        "sortable": true
+    },
+    {
+        "field": "Source",
+        "title": "source",
+        "width": 200,
+        "sortable": true
+    }
+]
 
 
 
 onMounted(async () => {
     await pagesDataSet.open()
     await funcDataSet.open()
+    await dsDataSet.open()
 
     activeTab.value = route.query.activeTab ? <string>route.query.activeTab : 'pages'
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
@@ -133,6 +173,14 @@ function addFunc() {
 
 function editFunc(ctx) {
     router.push(`/functions/${ctx.id}`)
+}
+
+function addDataSource() {
+    router.push(`/datasources/new`)
+}
+
+function editDataSource(ctx) {
+    router.push(`/datasources/${ctx.id}`)
 }
 
 

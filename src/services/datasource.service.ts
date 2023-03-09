@@ -25,12 +25,9 @@ export class DataSourceService {
     private configDataSources: Map<string, DataSourceInterface> = new Map()
 
     registerDataSource(config: DataSourceConfigInterface): DataSourceInterface | undefined {
-        if (config.type !== DataSourceType.tableField) {
-            let ds = new DataSource(config)
-            this.addDataSource(ds);
-            return ds;
-        } else
-            throw 'TableField dataSource cant be registered'
+        let ds = new DataSource(config)
+        this.addDataSource(ds);
+        return ds;
     }
 
     getConfigDataSources() {
@@ -50,6 +47,9 @@ export class DataSourceService {
             case DataSourceType.data:
                 target = this.dataSources
                 break;
+            default:
+                console.warn(`Can't register datasource ${dataSource.alias} with type ${dataSource.type}`)
+                return;
         }
 
         if (target.has(dataSource.alias)) {
