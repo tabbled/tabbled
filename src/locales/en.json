@@ -15,5 +15,29 @@
     "delete": "Delete",
     "add": "Add",
     "edit": "Edit",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "fieldConfig": {
+        "title": "Title",
+        "alias": "Alias",
+        "datasource": "Data source",
+        "default": "Default",
+        "isMultiple": "Multiple",
+        "type": "Type",
+        "precision": "Precision"
+    },
+    "fieldTypes": {
+        "number": "Number",
+        "string": "String",
+        "bool": "Boolean",
+        "text": "Text",
+        "list": "List",
+        "enum": "Enum",
+        "status": "Status",
+        "image": "Image",
+        "datetime": "Datetime",
+        "date":  "Date",
+        "time": "Time",
+        "link": "Link",
+        "table": "Table"
+    }
 }

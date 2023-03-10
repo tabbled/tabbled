@@ -24,11 +24,11 @@
             </el-form-item>
         </div>
 
-        <el-form-item label="Source" style="width: 50%">
+        <el-form-item label="Source">
             <EnumSelect :data-set="dataSet" field="source" />
         </el-form-item>
 
-        <el-form-item label="Fields" style="width: 50%">
+        <el-form-item label="Fields">
             <ItemList :data-set="dataSet"
                       field="fields"
                       key-prop="alias"
@@ -51,7 +51,7 @@
         <template #footer>
           <span class="dialog-footer">
               <el-button @click="fieldEditDialogVisible = false">Cancel</el-button>
-              <el-button type="primary" @click="fieldEditDialogVisible = false">Save</el-button>
+              <el-button type="primary" @click="saveField">Save</el-button>
           </span>
         </template>
     </el-dialog>
@@ -71,11 +71,13 @@ import ItemList from "../components/ItemList.vue";
 import {useI18n} from "vue-i18n";
 import FieldEdit from "../components/FieldEdit.vue";
 import {FieldConfigInterface} from "../model/field";
+import _ from 'lodash'
 
 let router = useRouter();
 let route = useRoute()
 let fields = ref([])
 let currentField = ref<FieldConfigInterface>(null)
+let currentIndex = -1;
 let fieldEditDialogVisible = ref(false)
 const { t } = useI18n();
 
@@ -97,6 +99,7 @@ onMounted(async () => {
 
 async function save() {
     try {
+        console.log(dataSet.current)
         await dataSet.commit()
         ElMessage.success('Saved successfully')
     }catch (e) {
@@ -124,19 +127,32 @@ function context() {
     }
 }
 
+function saveField() {
+    fieldEditDialogVisible.value = false;
+
+    if (currentIndex == -1) {
+        fields.value.push(currentField.value)
+    } else {
+        fields.value[currentIndex] = currentField.value
+    }
+
+    dataSet.update('fields', fields.value)
+}
+
 function insertField() {
-    console.log('insert')
+    currentField.value = {
+        alias: "",
+        title: "",
+        type: "string"
+    }
+    currentIndex = -1;
     fieldEditDialogVisible.value = true
 }
 
 function editField(row) {
-    console.log('edit')
-    currentField.value = fields.value[row]
-    console.log(
-        currentField.value
-    )
+    currentField.value = _.cloneDeep(fields.value[row])
+    currentIndex = row;
     fieldEditDialogVisible.value = true
-
 }
 
 function removeField(row) {
@@ -150,8 +166,8 @@ function removeField(row) {
         }
     )
         .then(() => {
-            console.log(row)
             fields.value.splice(row, 1)
+            dataSet.update('fields', fields.value)
         })
 }
 

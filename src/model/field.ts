@@ -6,6 +6,24 @@ export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'en
 export type FieldType = FieldComponentType | FieldDataType
 export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action'
 
+export function getFieldDataTypes():Array<FieldDataType> {
+    return [
+        'number',
+        'string',
+        'bool',
+        'text',
+        'list',
+        'enum',
+        'status',
+        'image',
+        'datetime',
+        'date',
+        'time',
+        'link',
+        'table'
+    ]
+}
+
 export interface EventHandlerConfigInterface {
     type: 'script' | 'action'
     script?: string,
