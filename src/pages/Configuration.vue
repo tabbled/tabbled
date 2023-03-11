@@ -8,6 +8,22 @@
 
     <el-tabs tab-position="left" style="height: calc(100% - 64px)" v-model="activeTab" @tab-change="tabChange">
 
+        <el-tab-pane label="Menus"  style="padding: 16px" name="menus">
+            <DataSetActionPanel context=""
+                                :data-set="menusDataSet"
+                                style="padding-bottom: 16px"
+                                is-pure
+                                @add="addMenu"
+                                @edit="editMenu"
+            />
+            <Table :columns="menuColumns"
+                   context=""
+                   :data-set="menusDataSet"
+                   :is-inline-editing="false"
+                   @row-dbl-click="editMenu"
+            />
+        </el-tab-pane>
+
         <el-tab-pane label="Pages"  style="padding: 16px" name="pages">
             <DataSetActionPanel context=""
                                 :data-set="pagesDataSet"
@@ -69,6 +85,11 @@ import {ColumnConfigInterface} from "../model/column";
 import {useDataSet} from "../model/dataset";
 import {onMounted, ref} from "vue";
 import DataSetActionPanel from "../components/DataSetActionPanel.vue";
+import {ScreenSize} from "../model/page";
+
+const props = defineProps<{
+    screenSize: ScreenSize
+}>()
 
 const route = useRoute()
 const router = useRouter()
@@ -88,6 +109,12 @@ const funcDataSet = useDataSet({
 const dsDataSet = useDataSet({
     dataSource: 'datasource',
     alias: 'datasources',
+    autoOpen: true,
+    autoCommit: false
+})
+const menusDataSet = useDataSet({
+    dataSource: 'menu',
+    alias: 'menus',
     autoOpen: true,
     autoCommit: false
 })
@@ -142,13 +169,21 @@ const dsColumns:ColumnConfigInterface[] = [
         "sortable": true
     }
 ]
-
+const menuColumns:ColumnConfigInterface[] = [
+    {
+        "field": "title",
+        "title": "Title",
+        "width": 150,
+        "sortable": true
+    }
+]
 
 
 onMounted(async () => {
     await pagesDataSet.open()
     await funcDataSet.open()
     await dsDataSet.open()
+    await menusDataSet.open()
 
     activeTab.value = route.query.activeTab ? <string>route.query.activeTab : 'pages'
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
@@ -181,6 +216,14 @@ function addDataSource() {
 
 function editDataSource(ctx) {
     router.push(`/datasources/${ctx.id}`)
+}
+
+function addMenu() {
+    router.push(`/menus/new`)
+}
+
+function editMenu(ctx) {
+    router.push(`/menus/${ctx.id}`)
 }
 
 

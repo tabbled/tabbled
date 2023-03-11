@@ -220,16 +220,22 @@ function openInNewWindow(to: string) {
     window.open(route.href);
 }
 
-
 async function loadMenu() {
-    let menus = await dsService.getDataSourceByAlias('menu').getAll()
+    let menus
+    try {
+        menus = await dsService.getDataSourceByAlias('menu').getAll()
+    } catch (e) {
+        console.error(e)
+        return;
+    }
+
 
     if (!menus.length) {
         console.warn('No menu for sideBar in config')
         return;
     }
 
-    sidebarMenu.value = (menus[0] as MenuConfigInterface[])
+    sidebarMenu.value = (menus[0].items as MenuConfigInterface[])
 
     if (menus.length > 1)
         console.warn('Number of menu over the 1, for sideBar menu has taken first item')

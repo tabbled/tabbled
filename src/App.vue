@@ -2,7 +2,7 @@
     <div v-if="route.meta.isSingle" style="width: 100vw" >
         <router-view />
     </div>
-    <div v-else-if="!isConfigLoaded" style="width: 30vw; margin: auto">
+    <div v-else-if="configLoadState !== ConfigLoadState.Loaded" style="width: 30vw; margin: auto">
         <el-progress
             status="success"
             :indeterminate="true"
@@ -26,12 +26,18 @@ import {useDatabase} from "./services/database.service";
 import {useSyncService} from "./services/sync.service";
 import PageView from "./pages/PageView.vue";
 
+enum ConfigLoadState {
+    NotLoaded = 0,
+    Loading,
+    Loaded
+}
+
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
 
-let isConfigLoaded = ref(false)
+let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
 
 const dsService = useDataSourceService();
@@ -41,13 +47,14 @@ const syncService = useSyncService()
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
 store.subscribe(async (payload) => {
-    if (payload.type === 'auth/userLoaded' && !isConfigLoaded.value) {
+    if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
+        console.log('auth/userLoaded')
         await loadConfig()
         await loadData()
     }
 
     if (payload.type === 'auth/loggedOut') {
-        isConfigLoaded.value = false;
+        configLoadState.value = ConfigLoadState.NotLoaded
         await db.close()
         await dsService.clear(DataSourceType.config)
         await dsService.clear(DataSourceType.data)
@@ -57,7 +64,9 @@ store.subscribe(async (payload) => {
 onMounted(async () => {
     window.addEventListener('resize', handleResize);
     handleResize();
-    isConfigLoaded.value = false;
+    configLoadState.value = ConfigLoadState.NotLoaded
+
+    console.log('App mounted')
 
     if (store.getters["auth/isAuthenticated"]) {
         try {
@@ -75,7 +84,7 @@ onMounted(async () => {
 onUnmounted(() => {
     console.log('App unmounted')
     window.removeEventListener('resize', handleResize);
-    isConfigLoaded.value = false;
+    configLoadState.value = ConfigLoadState.NotLoaded
 })
 
 function handleResize() {
@@ -83,11 +92,18 @@ function handleResize() {
 }
 
 async function loadData() {
+    if (configLoadState.value !== ConfigLoadState.Loaded)
+        return;
+
     await syncService.sync(DataSourceType.data)
 }
 
 async function loadConfig() {
+    if (configLoadState.value === ConfigLoadState.Loading)
+        return
+    console.log('LOAD CONFIG')
 
+    configLoadState.value = ConfigLoadState.Loading
     try {
         await db.open(store.getters["auth/account"], store.getters["auth/user"]);
         await dsService.registerConfig();
@@ -100,7 +116,7 @@ async function loadConfig() {
         dsService.registerAll(),
         registerPages()
     ]).then(() => {
-        isConfigLoaded.value = true;
+        configLoadState.value = ConfigLoadState.Loaded
     }).catch(e => {
         console.error(e)
     })

@@ -221,7 +221,6 @@ async function init() {
 }
 
 async function compileAction(action) {
-    console.log(action)
     if (!action || (action.type === 'script' && (!action.script || action.script === '')))
         return null
 

@@ -283,6 +283,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             let item = data[i]
 
             let current_item = await this.getByIdRaw(item.id)
+
             await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
 
             if (!current_item) {
