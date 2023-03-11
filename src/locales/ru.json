@@ -11,6 +11,21 @@
         "desktop": "Desktop",
         "mobile": "Mobile"
     },
+    "fieldConfig": {
+        "title": "Название",
+        "alias": "Alias",
+        "datasource": "Источник",
+        "default": "Значение по умолчанию",
+        "isMultiple": "Мультивыбор",
+        "type": "Тип",
+        "precision": "Точность"
+    },
+    "menuConfig": {
+        "title": "Название",
+        "icon": "Иконка",
+        "path": "Путь (url)",
+        "page": "Страница"
+    },
     "confirmDeleteTitle": "Вы хотите удалить выделенные элементы?",
     "delete": "Удалить",
     "add": "Добавить",

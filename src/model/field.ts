@@ -126,8 +126,6 @@ export function generateEntityWithDefault(fields: FieldConfigInterface[]):Entity
             case "handler": item[f.alias] = {type: 'script', script: ""};break;
             default: item[f.alias] = null;
         }
-
-        console.log(f)
     }
     return item;
 }

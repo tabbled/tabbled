@@ -22,7 +22,7 @@
                          :router="true"
                 >
                     <div v-for="menu in sidebarMenu" :key="menu.id">
-                        <el-sub-menu v-if="menu.items"
+                        <el-sub-menu v-if="menu.items && menu.items.length"
                                      :index="menu.id"
                         >
                             <template #title>

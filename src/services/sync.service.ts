@@ -54,7 +54,6 @@ export class SyncService extends EventEmitter {
     // Need to implement a persistent storage for sync.service,
     // and this method will be removed
     async sync(type: DataSourceType) {
-        console.log("Sync", type)
         let data = []
 
         let targetDs;

@@ -101,7 +101,6 @@ async function loadData() {
 async function loadConfig() {
     if (configLoadState.value === ConfigLoadState.Loading)
         return
-    console.log('LOAD CONFIG')
 
     configLoadState.value = ConfigLoadState.Loading
     try {

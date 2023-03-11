@@ -25,6 +25,12 @@
         "type": "Type",
         "precision": "Precision"
     },
+    "menuConfig": {
+        "title": "Title",
+        "icon": "Icon",
+        "path": "Path",
+        "page": "Page"
+    },
     "fieldTypes": {
         "number": "Number",
         "string": "String",

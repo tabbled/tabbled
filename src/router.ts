@@ -6,6 +6,7 @@ import PageDesigner from "./pages/PageDesigner.vue";
 import Configuration from "./pages/Configuration.vue";
 import FunctionEdit from "./pages/FunctionEdit.vue";
 import DataSourceEdit from "./pages/DataSourceEdit.vue";
+import MenuEdit from "./pages/MenuEdit.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -26,7 +27,7 @@ const routes: RouteRecordRaw[] = [
         },
     },
     {
-        path: "/designer/:id",
+        path: "/configuration/pages/:id",
         component: PageDesigner,
         meta: {
             isSingle: false,
@@ -36,7 +37,7 @@ const routes: RouteRecordRaw[] = [
     },
     {
         name: 'functionEdit',
-        path: "/functions/:id",
+        path: "/configuration/functions/:id",
         component: FunctionEdit,
         meta: {
             isSingle: false,
@@ -46,12 +47,22 @@ const routes: RouteRecordRaw[] = [
     },
     {
         name: 'dataSoruceEdit',
-        path: "/datasources/:id",
+        path: "/configuration/datasources/:id",
         component: DataSourceEdit,
         meta: {
             isSingle: false,
             authRequired: true,
             title: "DataSource"
+        },
+    },
+    {
+        name: 'menuEdit',
+        path: "/configuration/menus/:id",
+        component: MenuEdit,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "Menu"
         },
     },
     {

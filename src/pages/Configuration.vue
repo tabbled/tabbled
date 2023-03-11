@@ -195,35 +195,35 @@ function tabChange(d) {
 }
 
 function addPage() {
-    router.push(`/designer/new`)
+    router.push(`/configuration/pages/new`)
 }
 
 function editPage(ctx) {
-    router.push(`/designer/${ctx.id}`)
+    router.push(`/configuration/pages/${ctx.id}`)
 }
 
 function addFunc() {
-    router.push(`/functions/new`)
+    router.push(`/configuration/functions/new`)
 }
 
 function editFunc(ctx) {
-    router.push(`/functions/${ctx.id}`)
+    router.push(`/configuration/functions/${ctx.id}`)
 }
 
 function addDataSource() {
-    router.push(`/datasources/new`)
+    router.push(`/configuration/datasources/new`)
 }
 
 function editDataSource(ctx) {
-    router.push(`/datasources/${ctx.id}`)
+    router.push(`/configuration/datasources/${ctx.id}`)
 }
 
 function addMenu() {
-    router.push(`/menus/new`)
+    router.push(`/configuration/menus/new`)
 }
 
 function editMenu(ctx) {
-    router.push(`/menus/${ctx.id}`)
+    router.push(`/configuration/menus/${ctx.id}`)
 }
 
 

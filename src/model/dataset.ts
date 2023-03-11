@@ -135,7 +135,6 @@ export class DataSet {
             this._currentId = _id;
             this._isOpen = true;
         }
-        console.log(this.data)
     }
 
     close() {
