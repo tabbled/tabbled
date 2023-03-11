@@ -564,6 +564,8 @@ function dropNewWidget(e:DragEvent) {
             case "bool": val = prop.default ? prop.default : false; break;
             case "string": val = prop.default ? prop.default : ""; break;
             case "number": val = prop.default ? prop.default : 0; break;
+            case "list":
+            case "table": val = []; break;
             default: prop.default ? prop.default : null;
         }
         properties[prop.alias] = val
@@ -587,6 +589,7 @@ function dropNewWidget(e:DragEvent) {
         },
         ...properties
     })
+    isChanged.value = true;
 }
 
 </script>

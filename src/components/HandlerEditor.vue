@@ -2,6 +2,7 @@
     <CodeEditor v-if="type==='script'"
                 :model-value="script"
                 @update:model-value="onCodeUpdate"
+                runnable
                 style="width: 100%;"
     />
 </template>

@@ -23,7 +23,7 @@
 
 
             <component v-for="(element, idx) in elements"
-                       :id="idx"
+                       :id="idx.toString()"
                        :style="getGridElementStyle(element.layout)"
                        class="element"
                        :is="element.name" v-bind="element"

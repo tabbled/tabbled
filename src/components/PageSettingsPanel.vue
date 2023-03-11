@@ -67,6 +67,10 @@
                                   @insert="() => onListInsert(prop.alias, prop)"
                                   @remove="(row) => onListRemove(prop.alias, row)"
                         />
+                        <FieldSelect v-else-if="prop.type === 'field'"
+                                     :data-set="getDataSetConfig()"
+                                     :model-value="getValue(prop, currentElement)"
+                                     @change="(val) => onInput(prop.alias, val)"/>
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
                     </el-form-item>
                 </el-form>
@@ -85,6 +89,8 @@ import _ from 'lodash'
 import {useComponentService} from "../services/component.service";
 import LinkSelect from "./LinkSelect.vue";
 import DataSourceSelect from "./DataSourceSelect.vue";
+import FieldSelect from "./FieldSelect.vue";
+import {DataSetConfigInterface} from "../model/dataset";
 
 
 let componentService = useComponentService()
@@ -223,15 +229,13 @@ function onListInsert(alias:string, field: FieldConfigInterface) {
     let list = _.get(props.pageConfig, path)
     let fields = getFieldsByPath(path)
 
-    if (list === undefined) {
+    if (list === undefined || list === null) {
         list = []
     }
 
     let n = generateEntityWithDefault(fields)
     n[field.keyProp] = `${field.listOf}${list.length + 1}`
     n[field.displayProp] = `${field.listOf}${list.length + 1}`
-
-
 
     list.push(n)
 
@@ -257,6 +261,27 @@ function populateDataSetsList() {
     })
 }
 
+function getDataSetConfig(): DataSetConfigInterface | undefined {
+    let alias = ""
+    for (const i in properties.value) {
+        let f = properties.value[i]
+
+        if (f.type === 'dataset') {
+            alias = _.get(props.pageConfig, _currentPath + '.' + f.alias)
+            break
+        }
+    }
+    if (alias === "")
+        return undefined;
+
+    for(const i in props.pageConfig.dataSets) {
+        if (props.pageConfig.dataSets[i].alias === alias)
+            return props.pageConfig.dataSets[i]
+    }
+
+    return undefined;
+}
+
 onMounted(() => {
     if (divToHeight.value)
         scrollHeight.value = window.innerHeight - divToHeight.value.$el.offsetTop - 60
@@ -265,7 +290,7 @@ onMounted(() => {
 })
 
 function onInput(alias: string, value: any) {
-    console.log(alias, value)
+    //console.log(alias, value)
     emit('update', getPropPath(alias), value)
 }
 

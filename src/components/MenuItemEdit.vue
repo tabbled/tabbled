@@ -9,7 +9,7 @@
             <el-input v-model="modelValue.path"></el-input>
         </el-form-item>
 
-        <el-form-item :label="t('menuConfig.path')" prop="path">
+        <el-form-item :label="t('menuConfig.page')" prop="page">
             <el-input v-model="modelValue.page"></el-input>
         </el-form-item>
 

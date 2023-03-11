@@ -1,7 +1,7 @@
 import {DataSourceConfigInterface, EntityInterface} from "./datasource";
 
 
-export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements'
+export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements' | 'field'
 export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'enum' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
 export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action'
@@ -14,7 +14,7 @@ export function getFieldDataTypes():Array<FieldDataType> {
         'text',
         'list',
         'enum',
-        'status',
+       // 'status',
         'image',
         'datetime',
         'date',

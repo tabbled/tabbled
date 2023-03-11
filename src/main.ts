@@ -1,3 +1,5 @@
+console.log('%cWelcome! This application works on Tabbled low-code platform', 'color: green')
+
 import { createApp, h } from 'vue'
 import App from './App.vue'
 import router from "./router";
@@ -32,13 +34,16 @@ const app = createApp({
 import { Icon } from "@iconify/vue"
 import CodeEditor from "./components/CodeEditor.vue"
 import Table from "./components/Table.vue"
+import Input from "./components/Input.vue";
 import DataSetActionPanel from './components/DataSetActionPanel.vue'
 import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
 import {properties as tableProps} from './components/configuration/table.config'
 import {properties as codeEditorProps} from './components/configuration/codeEditor.config'
+import {properties as inputProps} from './components/configuration/input.config'
 
 app.component('Icon', Icon)
 app.component('Table', Table);
+app.component('Input', Input);
 app.component('CodeEditor', CodeEditor)
 app.component('DataSetActionPanel', DataSetActionPanel)
 
@@ -75,9 +80,22 @@ componentService.registerComponent({
     }
 })
 
+componentService.registerComponent({
+    name: 'Input',
+    title: "Input",
+    icon: "mdi:form-textbox",
+    properties: inputProps(),
+    defaultPosition: {
+        rows: 1,
+        cols: 12
+    }
+})
+
 app.use(router(store));
 app.use(store)
 app.use(ElementPlus)
 app.use(i18n)
 
 app.mount("#app");
+
+

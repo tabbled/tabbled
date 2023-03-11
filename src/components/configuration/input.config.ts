@@ -9,15 +9,6 @@ export function properties():FieldConfigInterface[] {
         title: "Field",
         alias: "field",
         type: "field"
-    },{
-        title: "Format",
-        alias: "format",
-        type: "enum",
-        values: [{ key: 'json', title: 'Json' }, { key: 'javascript', title: "JavaScript" }]
-    },{
-        title: "Runnable",
-        alias: "runnable",
-        type: "bool"
     }
     ]
 }
