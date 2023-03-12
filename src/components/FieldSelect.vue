@@ -7,7 +7,7 @@
         remote-show-suffix
         :remote-method="getData"
         :loading="isLoading"
-        @change="(val) => emit('change', val)"
+        @change="(val) => change(val)"
     >
         <el-option
             v-for="item in data"
@@ -58,6 +58,13 @@ async function getData() {
     }
 
     isLoading.value = false;
+}
+
+function change(key: string) {
+    let ds = dsService.getDataSourceByAlias(props.dataSet.dataSource)
+    let field = ds.getFieldByAlias(key)
+
+    emit('change', key, field)
 }
 
 </script>

@@ -10,6 +10,10 @@ export function properties():FieldConfigInterface[] {
         alias: "field",
         type: "field"
     },{
+        title: "Title",
+        alias: "title",
+        type: "string"
+    },{
         title: "Format",
         alias: "format",
         type: "enum",

@@ -14,22 +14,30 @@
                         {{action.title}}
                     </el-button>
                     <el-button v-if="isEditPage" @click="cancel">Cancel</el-button>
-                    <el-button v-if="isEditPage" @click="save" type="primary">Save</el-button>
+                    <el-button v-if="isEditPage"
+                               @click="save"
+                               type="primary"
+                               :disabled="!editingDataSet || !editingDataSet.isChanged()"
+                    >Save</el-button>
                 </div>
             </template>
         </el-page-header>
 
-        <div  class="grid-wrap">
+        <el-form  class="grid-wrap" :model="editingDataSet" label-position="top">
+
+            <el-form-item v-for="(element, idx) in elements"
+                          :label="getLabelElement(element)"
+                          :style="getGridElementStyle(element.layout)"
+                          class="element">
+
+                <component :id="idx.toString()"
+                           :is="element.name" v-bind="element"
+                />
+
+            </el-form-item>
 
 
-            <component v-for="(element, idx) in elements"
-                       :id="idx.toString()"
-                       :style="getGridElementStyle(element.layout)"
-                       class="element"
-                       :is="element.name" v-bind="element"
-            />
-
-        </div>
+        </el-form>
     </div>
 </template>
 
@@ -62,6 +70,7 @@ let elements = ref<Array<ElementInterface>>([])
 let dataSets = ref<Map<string, DataSet>>(new Map())
 let grid = ref(null)
 let isEditPage = ref(false)
+let editingDataSet = ref<DataSet>(null)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -89,9 +98,8 @@ onMounted(async () => {
 
 async function save() {
     try {
-        dataSets.value.forEach(ds => {
-            ds.commit()
-        })
+        await editingDataSet.value.commit()
+
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -102,20 +110,10 @@ async function save() {
 async function cancel() {
     console.log('cancel')
 
-    let changed = false
-
-    dataSets.value.forEach(ds => {
-        if (ds.isChanged()) {
-            changed = true
-        }
-    })
-
-    if (changed) {
-        console.log("changed")
-        dataSets.value.forEach(ds => {
-            ds.rollback()
-        })
+    if (editingDataSet.value && editingDataSet.value.isChanged()) {
+        editingDataSet.value.rollback()
     }
+
     router.back();
 }
 
@@ -150,6 +148,10 @@ async function init() {
         // @ts-ignore
         dataSets.value.set(ds.alias, ds)
         scriptContext.page.dataSets[ds.alias] = ds
+
+        if (props.pageConfig.isEditPage && props.pageConfig.editingDataSet === ds.alias) {
+            editingDataSet.value = ds
+        }
     })
 
     props.pageConfig.elements.forEach(element => {
@@ -220,6 +222,13 @@ async function init() {
     }
 }
 
+function getLabelElement(el) {
+    if (el['title'] && el['title'] !== "") {
+        return el['title'].toString()
+    }
+    return ""
+}
+
 async function compileAction(action) {
     if (!action || (action.type === 'script' && (!action.script || action.script === '')))
         return null
@@ -288,6 +297,7 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
 .element {
     height: 20px;
     width: 100%;
+    margin-bottom: 0 !important;
 }
 
 </style>

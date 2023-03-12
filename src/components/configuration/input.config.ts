@@ -9,6 +9,10 @@ export function properties():FieldConfigInterface[] {
         title: "Field",
         alias: "field",
         type: "field"
+    },{
+        title: "Title",
+        alias: "title",
+        type: "string"
     }
     ]
 }

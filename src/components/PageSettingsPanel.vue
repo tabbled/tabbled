@@ -68,9 +68,10 @@
                                   @remove="(row) => onListRemove(prop.alias, row)"
                         />
                         <FieldSelect v-else-if="prop.type === 'field'"
+                                     style="width: 100%"
                                      :data-set="getDataSetConfig()"
                                      :model-value="getValue(prop, currentElement)"
-                                     @change="(val) => onInput(prop.alias, val)"/>
+                                     @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
                     </el-form-item>
                 </el-form>
@@ -292,6 +293,15 @@ onMounted(() => {
 function onInput(alias: string, value: any) {
     //console.log(alias, value)
     emit('update', getPropPath(alias), value)
+}
+
+function onFieldSelectInput(alias: string, value: any, field: FieldConfigInterface) {
+    emit('update', getPropPath(alias), value)
+
+    console.log(currentElement.value)
+    if(!currentElement.value['title'] && currentElement.value['title'] === '') {
+        currentElement.value['title'] = field.title
+    }
 }
 
 function getValue(prop: FieldConfigInterface, element: any) {
