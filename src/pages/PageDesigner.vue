@@ -101,13 +101,24 @@
                  @drop="dropNewWidget($event)"
                  @click="gridClicked"
             >
-                <div v-for="(element, idx) in elements"
+                <el-form-item v-for="(element, idx) in elements"
                      :id="String(idx)"
                      :style="getGridElStyle(element)"
-                     :class="{'widget-draggable': true, 'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
+                     :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
                 >
+                    <template #label>
+                        <div class="dragging widget-draggable"
+                             style="width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" @mousedown="initDragMove"
+                             :id="String(idx)">
+                        <span :id="String(idx)">{{getElementTitle(element)}}</span>
+                            <div @click="removeWidget(Number(idx))">
+                                <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                            </div>
+                        </div>
+                    </template>
+
                         <component
-                            style="height: inherit;"
+                            :id="String(idx)"
                             v-bind="getElementProperties(element)"
                             :is="element.name"
                         />
@@ -120,12 +131,9 @@
                             'resizer-bottom': true,
                             'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
                          @mousedown="initDragBottom" :id="String(idx)"></div>
-                    <div class="dragging" @mousedown="initDragMove" :id="String(idx)" />
 
-                    <div @click="removeWidget(Number(idx))">
-                        <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
-                    </div>
-                </div>
+
+                </el-form-item>
             </div>
         </el-form>
     </div>
@@ -429,6 +437,13 @@ function selectWidget(id: string) {
     currentConfigPath.value = id !== "" ? `elements[${id}]` : ``
 }
 
+function getElementTitle(el) {
+    if (!el.title || el.title === '') {
+        return el.name
+    }
+    return el.title
+}
+
 function removeWidget(idx: number) {
     elements.value.splice(idx, 1);
 }
@@ -488,15 +503,15 @@ function onDrag(e: MouseEvent) {
             widget.colTo =  initWidget.colTo + colspan;
         }
 
-        let rowW = 36
+        let rowW = 70
         let rowspan = Math.round((e.clientY - startY)  / rowW)
 
         if ((initWidget.rowFrom + rowspan) >= 1) {
             widget.rowFrom = initWidget.rowFrom + rowspan;
             widget.rowTo = initWidget.rowTo + rowspan;
         }
-
     }
+    isChanged.value = true
 }
 
 function endDrag() {
@@ -508,7 +523,7 @@ function getGridElStyle(element:ElementInterface) {
     let style = {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",
-        height: '100%'
+        height: 'fit-content'
     }
 
     let el = element.layout[selectedSize.value] || element.layout[ScreenSize.desktop]
@@ -600,7 +615,7 @@ function dropNewWidget(e:DragEvent) {
 .grid-wrapper {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(10, 26px) min(26px);
+    grid-template-rows: repeat(10, 64px) min(64px);
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
     padding-right: 16px;
@@ -663,12 +678,19 @@ function dropNewWidget(e:DragEvent) {
     margin: 0 !important;
 }
 
+.grid-wrapper .el-form-item__label {
+    padding: 0 3px 0 0;
+}
+
 
 
 .widget-draggable {
     position: relative;
     z-index: 1;
     border: var(--el-border-color) dashed 1px;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: move;
 }
 
 .new-widget-draggable {
@@ -681,17 +703,6 @@ function dropNewWidget(e:DragEvent) {
     background: var(--el-color-primary-light-9);
     outline: var(--el-color-primary-light-3) solid 1px;
 }
-
-.widget-draggable .dragging {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-    bottom: 5px;
-    right: 5px;
-    cursor: move;
-    z-index: 2;
-}
-
 
 .dragging-icon {
     width: 30px;
@@ -708,31 +719,31 @@ function dropNewWidget(e:DragEvent) {
     position: absolute;
     top:5px;
     right: 5px;
-    z-index: 10;
+    z-index: 101;
+    cursor: default;
 }
 
-.widget-draggable .resizer-right {
+.resizer-right {
     width: 3px;
     background: transparent;
     position: absolute;
-    right: -2px;
-    bottom: 2px;
-    top: 2px;
+    right: 0;
+    bottom: 1px;
+    top: 1px;
     cursor: ew-resize;
-    z-index: 2;
+    z-index: 20;
 }
 
-.widget-draggable .resizer-bottom {
+.resizer-bottom {
     height: 3px;
     background: transparent;
     position: absolute;
-    right: 2px;
-    left: 2px;
-    bottom: -2px;
+    right: 1px;
+    left: 1px;
+    bottom: 0;
     cursor: ns-resize;
-    z-index: 2;
+    z-index: 20;
 }
-
 
 
 .widget-draggable:hover .delete-icon {
@@ -747,19 +758,15 @@ function dropNewWidget(e:DragEvent) {
     background: var(--el-color-primary-light-9);
 }
 
-.widget-draggable .resizer-bottom:hover {
-    background: var(--el-color-primary-light-9);
-}
-
-.widget-draggable .resizer-bottom:hover {
+.resizer-bottom:hover {
     background: var(--el-color-primary-light-3);
 }
 
-.widget-draggable .resizer-right:hover {
+.resizer-right:hover {
     background: var(--el-color-primary-light-3);
 }
 
-.widget-draggable .resizer-activated {
+.resizer-activated {
     background: var(--el-color-primary-light-3);
 }
 
@@ -782,6 +789,7 @@ function dropNewWidget(e:DragEvent) {
     border-left-width: 1px;
     border-left-style: solid;
 }
+
 
 .resizer:hover {
     border-left-color: var(--el-border-color-dark);
