@@ -101,27 +101,34 @@
                  @drop="dropNewWidget($event)"
                  @click="gridClicked"
             >
-                <el-form-item v-for="(element, idx) in elements"
+                <div v-for="(element, idx) in elements"
+                     class="dragging widget-draggable"
                      :id="String(idx)"
                      :style="getGridElStyle(element)"
-                     :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}"
-                >
-                    <template #label>
-                        <div class="dragging widget-draggable"
-                             style="width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" @mousedown="initDragMove"
-                             :id="String(idx)">
-                        <span :id="String(idx)">{{getElementTitle(element)}}</span>
-                            <div @click="removeWidget(Number(idx))">
-                                <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                     :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}">
+
+
+                    <el-form-item
+                        :id="String(idx)"
+
+                    >
+                        <template #label>
+                            <div
+                                 style="cursor: move; width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" @mousedown="initDragMove"
+                                 :id="String(idx)">
+                                <span :id="String(idx)">{{getElementTitle(element)}}</span>
+                                <div @click="removeWidget(Number(idx))">
+                                    <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                                </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
 
                         <component
                             :id="String(idx)"
                             v-bind="getElementProperties(element)"
                             :is="element.name"
                         />
+                    </el-form-item>
 
                     <div :class="{
                             'resizer-right': true,
@@ -131,9 +138,7 @@
                             'resizer-bottom': true,
                             'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
                          @mousedown="initDragBottom" :id="String(idx)"></div>
-
-
-                </el-form-item>
+                </div>
             </div>
         </el-form>
     </div>
@@ -487,7 +492,7 @@ function onDrag(e: MouseEvent) {
     }
 
     if (dragDirection.value == 'bottom') {
-        let rowW = 40
+        let rowW = 70
         let rowspan = Math.round((e.clientY - startY - 20)  / rowW)
         widget.rowTo = initWidget.rowTo + rowspan;
     }
@@ -523,7 +528,7 @@ function getGridElStyle(element:ElementInterface) {
     let style = {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",
-        height: 'fit-content'
+        height: 'auto'
     }
 
     let el = element.layout[selectedSize.value] || element.layout[ScreenSize.desktop]
@@ -653,8 +658,6 @@ function dropNewWidget(e:DragEvent) {
     padding-left: 16px;
 }
 
-
-
 .setting-panel-trans-enter-active {
     transition: all 0.3s
 }
@@ -682,12 +685,12 @@ function dropNewWidget(e:DragEvent) {
     padding: 0 3px 0 0;
 }
 
-
-
 .widget-draggable {
     position: relative;
     z-index: 1;
-    border: var(--el-border-color) dashed 1px;
+    opacity: 1;
+    border: var(--el-border-color-lighter) dashed 1px;
+    border-radius: 4px;
     margin: 0 !important;
     padding: 0 !important;
     cursor: move;
@@ -727,7 +730,7 @@ function dropNewWidget(e:DragEvent) {
     width: 3px;
     background: transparent;
     position: absolute;
-    right: 0;
+    right: -2px;
     bottom: 1px;
     top: 1px;
     cursor: ew-resize;
@@ -740,7 +743,7 @@ function dropNewWidget(e:DragEvent) {
     position: absolute;
     right: 1px;
     left: 1px;
-    bottom: 0;
+    bottom: -2px;
     cursor: ns-resize;
     z-index: 20;
 }
@@ -760,10 +763,12 @@ function dropNewWidget(e:DragEvent) {
 
 .resizer-bottom:hover {
     background: var(--el-color-primary-light-3);
+    opacity: 0.5;
 }
 
 .resizer-right:hover {
     background: var(--el-color-primary-light-3);
+    opacity: 0.5;
 }
 
 .resizer-activated {
