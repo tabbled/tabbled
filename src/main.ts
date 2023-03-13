@@ -35,15 +35,18 @@ import { Icon } from "@iconify/vue"
 import CodeEditor from "./components/CodeEditor.vue"
 import Table from "./components/Table.vue"
 import Input from "./components/Input.vue";
+import LinkSelect from "./components/LinkSelect.vue";
 import DataSetActionPanel from './components/DataSetActionPanel.vue'
 import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
 import {properties as tableProps} from './components/configuration/table.config'
 import {properties as codeEditorProps} from './components/configuration/codeEditor.config'
 import {properties as inputProps} from './components/configuration/input.config'
+import {properties as linkSelectProps} from './components/configuration/link-select.config'
 
 app.component('Icon', Icon)
 app.component('Table', Table);
 app.component('Input', Input);
+app.component('LinkSelect', LinkSelect);
 app.component('CodeEditor', CodeEditor)
 app.component('DataSetActionPanel', DataSetActionPanel)
 
@@ -88,6 +91,17 @@ componentService.registerComponent({
     defaultPosition: {
         rows: 1,
         cols: 12
+    }
+})
+
+componentService.registerComponent({
+    name: 'LinkSelect',
+    title: "Link select",
+    icon: "mdi:form-dropdown",
+    properties: linkSelectProps(),
+    defaultPosition: {
+        rows: 1,
+        cols: 6
     }
 })
 

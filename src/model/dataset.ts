@@ -106,8 +106,6 @@ export class DataSet {
     async openOne(id?: string) {
         this.close()
 
-        console.log('openOne', this)
-
         let _id = id;
 
         let one = undefined
@@ -334,8 +332,6 @@ export class DataSet {
 
         console.log('Commit changes')
         let changes = [...this._changesById.values()]
-
-        console.log(changes)
 
         this._changesById.clear()
         for (let i in changes) {

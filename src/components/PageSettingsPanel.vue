@@ -42,12 +42,12 @@
                                       :options="dataSetOptions"
                                       @change="(val) => onInput(prop.alias, val)"
                         />
-                        <LinkSelect v-else-if="prop.type === 'link'"
-                                    style="width: 100%"
-                                    :config="prop"
-                                    :model-value="getValue(prop, currentElement)"
-                                    @change="(val) => onInput(prop.alias, val)"
-                        />
+<!--                        <LinkSelect v-else-if="prop.type === 'link'"-->
+<!--                                    style="width: 100%"-->
+<!--                                    :field="prop"-->
+<!--                                    :model-value="getValue(prop, currentElement)"-->
+<!--                                    @change="(val) => onInput(prop.alias, val)"-->
+<!--                        />-->
                         <DataSourceSelect v-else-if="prop.type === 'datasource'"
                                     style="width: 100%"
                                     :config="prop"
@@ -88,7 +88,6 @@ import HandlerEditor from "./HandlerEditor.vue";
 import ItemList from "./ItemList.vue";
 import _ from 'lodash'
 import {useComponentService} from "../services/component.service";
-import LinkSelect from "./LinkSelect.vue";
 import DataSourceSelect from "./DataSourceSelect.vue";
 import FieldSelect from "./FieldSelect.vue";
 import {DataSetConfigInterface} from "../model/dataset";

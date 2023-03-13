@@ -125,6 +125,7 @@
 
                         <component
                             :id="String(idx)"
+                            style="width: 100%"
                             v-bind="getElementProperties(element)"
                             :is="element.name"
                         />
