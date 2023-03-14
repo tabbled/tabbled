@@ -1,10 +1,11 @@
 <template>
-    <el-input @input="change" :model-value="value"/>
+    <el-input @input="change" :model-value="value" :type="type"/>
 </template>
 
 <script setup lang="ts">
 import {DataSet} from "../model/dataset";
 import {ref, watch} from "vue";
+import {FieldConfigInterface} from "../model/field";
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
@@ -16,6 +17,8 @@ const props = defineProps<{
 }>()
 
 let value = ref(getValue())
+let _field: FieldConfigInterface = null
+let type: 'text' | 'textarea' = 'text'
 
 function getValue():string {
     if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
@@ -26,6 +29,13 @@ function getValue():string {
 
 watch(() => props.dataSet,
     async () => {
+        _field = props.dataSet.dataSource.getFieldByAlias(props.field)
+
+        switch (_field.type) {
+            case "text": type = 'textarea'; break;
+            default: type = 'text';
+        }
+
         if (props.dataSet.isOpen)
             value.value = getValue()
     },
