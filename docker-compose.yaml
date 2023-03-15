@@ -57,6 +57,22 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_DATABASE}
 
+  s3:
+    container_name: s3
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9090"
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      - MINIO_ACCESS_KEY=${S3_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${S3_SECRET_ACCESS_KEY}
+    volumes:
+      - minio_data:/data
+
+
 volumes:
   pg_data:
     external: true
+  minio_data:
+    external: false

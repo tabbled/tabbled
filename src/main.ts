@@ -38,12 +38,14 @@ import Input from "./components/Input.vue";
 import LinkSelect from "./components/LinkSelect.vue";
 import DateTimeInput from "./components/DateTimeInput.vue";
 import DataSetActionPanel from './components/DataSetActionPanel.vue'
+import ImageField from "./components/ImageField.vue";
 import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
 import {properties as tableProps} from './components/configuration/table.config'
 import {properties as codeEditorProps} from './components/configuration/codeEditor.config'
 import {properties as inputProps} from './components/configuration/input.config'
 import {properties as linkSelectProps} from './components/configuration/link-select.config'
-import {properties as DatetimeInputProps} from './components/configuration/datetime-select.config'
+import {properties as datetimeInputProps} from './components/configuration/datetime-select.config'
+import {properties as imageFieldProps} from './components/configuration/image-field.config'
 
 app.component('Icon', Icon)
 app.component('Table', Table);
@@ -52,6 +54,7 @@ app.component('LinkSelect', LinkSelect);
 app.component('DateTimeInput', DateTimeInput);
 app.component('CodeEditor', CodeEditor)
 app.component('DataSetActionPanel', DataSetActionPanel)
+app.component('ImageField', ImageField)
 
 let componentService = useComponentService()
 componentService.registerComponent({
@@ -101,7 +104,7 @@ componentService.registerComponent({
     name: 'DateTimeInput',
     title: "Datetime input",
     icon: "mdi:calendar",
-    properties: DatetimeInputProps(),
+    properties: datetimeInputProps(),
     defaultPosition: {
         rows: 1,
         cols: 6
@@ -116,6 +119,17 @@ componentService.registerComponent({
     defaultPosition: {
         rows: 1,
         cols: 6
+    }
+})
+
+componentService.registerComponent({
+    name: 'ImageField',
+    title: "Image",
+    icon: "mdi:file-image-box",
+    properties: imageFieldProps(),
+    defaultPosition: {
+        rows: 2,
+        cols: 3
     }
 })
 

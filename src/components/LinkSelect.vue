@@ -85,8 +85,8 @@ function getValue() : string | number {
     return props.dataSet.current[props.field]
 }
 
-async function getData(query?: string) {
-    console.log(query)
+async function getData() {
+    //console.log(query)
 
     if (!source || !_field)
         return;
