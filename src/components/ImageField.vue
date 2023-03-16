@@ -1,4 +1,5 @@
 <template>
+
     <el-upload class="avatar-uploader"
                :show-file-list="false"
                :action="actionUrl"
@@ -6,16 +7,29 @@
                :on-error="handleError"
                :on-remove="handleRemove"
     >
-        <el-image v-if="imageUrl" :src="imageUrl" class="avatar" alt="" fit="cover"/>
+        <div v-if="imageUrl" class="avatar">
+            <el-image  :src="imageUrl" class="" alt="" fit="cover"/>
+
+            <el-icon class="image-field-actions">
+                <div class="image-field-action-icon" @click.stop="preview" >
+                    <Icon  icon="ic:baseline-zoom-in" width="48"/>
+                </div>
+                <div class="image-field-action-icon" @click.stop="remove">
+                    <Icon icon="mdi:delete" width="90"/>
+                </div>
+
+            </el-icon>
+        </div>
+
         <el-icon v-else class="avatar-uploader-icon">
-            <Icon icon="mdi:plus" width="24"/>
+            <Icon  icon="mdi:plus" width="24"/>
         </el-icon>
 
         <el-dialog v-model="dialogVisible">
-
+            <el-image  :src="imageUrl" alt="" fit="cover"/>
         </el-dialog>
-    </el-upload>
 
+    </el-upload>
 
 </template>
 
@@ -100,13 +114,51 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
     console.log(uploadFile, uploadFiles)
 }
 
+function preview() {
+    dialogVisible.value = true
+}
+
+function remove() {
+    imageUrl.value = ""
+    change("")
+}
+
 </script>
 
 <style >
 .avatar-uploader .avatar {
     width: 120px;
     height: 120px;
+    display: flex;
+    justify-content: center;
+}
+
+.image-field-actions {
+    display: flex;
+    position: absolute;
+    align-self: center;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+}
+.image-field-actions:hover {
+    background: rgba(0,0,0,0.4);
+}
+
+.image-field-action-icon {
     display: block;
+    color: var(--el-border-color);
+    font-size: 20px;
+    padding-left: 8px;
+    opacity: 0;
+}
+
+.image-field-actions:hover .image-field-action-icon{
+    opacity: 1;
+}
+
+.image-field-action-icon:hover {
+    color: var(--el-border-color-extra-light);
 }
 
 .avatar-uploader .el-upload {
@@ -120,6 +172,7 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
 
 .avatar-uploader .el-upload:hover {
     border-color: var(--el-color-primary);
+    color: #c45656;
 }
 
 .el-icon.avatar-uploader-icon {
