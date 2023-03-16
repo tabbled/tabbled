@@ -212,7 +212,8 @@ async function init() {
     dataSets.value.forEach(ds => {
         if (ds.autoOpen) {
             if (props.pageConfig.isEditPage) {
-                ds.openOne(<string>route.params.id);
+                let id = <string>route.params.id
+                ds.openOne(id !== 'new' ? id : null);
             } else
                 ds.open()
         }

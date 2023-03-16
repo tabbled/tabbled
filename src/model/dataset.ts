@@ -124,6 +124,7 @@ export class DataSet {
             }
 
         } catch (e) {
+            console.log("Error while open data set ", this.alias, 'with id ', id)
             throw e
         }
 
@@ -132,6 +133,7 @@ export class DataSet {
             this._currentId = _id;
             this._isOpen = true;
         }
+        console.log("dataset opened ", this.alias)
     }
 
     close() {
