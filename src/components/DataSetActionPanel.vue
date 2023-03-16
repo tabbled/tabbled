@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import {DataSet} from "../model/dataset";
 import { ElMessageBox } from 'element-plus'
-import {onMounted, ref, watch} from "vue"
+import {onMounted, ref, UnwrapRef, watch} from "vue"
 import {useI18n} from "vue-i18n";
 import {CompiledFunc, compileScript} from "../services/compiler"
 import {EventHandlerConfigInterface} from "../model/field";
@@ -25,7 +25,7 @@ const { t } = useI18n();
 
 
 interface Props {
-    dataSet: DataSet,
+    dataSet: UnwrapRef<DataSet>,
     context: any,
     allowAdd?: boolean
     allowEdit?: boolean

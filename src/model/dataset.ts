@@ -2,7 +2,6 @@ import {DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from "./field";
 import _ from 'lodash'
 import {useDataSourceService} from "../services/datasource.service";
-import {ref, UnwrapRef} from "vue";
 import { FlakeId } from '../flake-id'
 let flakeId = new FlakeId()
 
@@ -22,13 +21,13 @@ interface RowChange {
     at: Date
 }
 
-export function useDataSet(config: DataSetConfigInterface): UnwrapRef<DataSet> {
+export function useDataSet(config: DataSetConfigInterface): DataSet {
     let ds = dsService.getDataSourceByAlias(config.dataSource);
 
     if (!ds)
         return undefined;
 
-    return ref(new DataSet(config, ds)).value
+    return new DataSet(config, ds)
 }
 
 export class DataSet {

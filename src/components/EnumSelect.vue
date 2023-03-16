@@ -23,7 +23,7 @@ import {onMounted, ref, watch} from "vue";
 import {DataSet} from "../model/dataset";
 
 let isLoading = ref(false)
-let data = ref<Array<object>>([])
+let data = ref<Array<any>>([])
 
 
 const props = defineProps<{

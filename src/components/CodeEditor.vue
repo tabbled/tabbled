@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref, shallowRef, watch} from "vue";
+import {onMounted, ref, shallowRef, UnwrapRef, watch} from "vue";
 import {Codemirror} from 'vue-codemirror'
 import {javascript} from '@codemirror/lang-javascript'
 import {json} from '@codemirror/lang-json'
@@ -43,7 +43,7 @@ import {CompiledFunc, compileScript} from "../services/compiler";
 
 interface Props {
     modelValue?: string,
-    dataSet?: DataSet,
+    dataSet?: UnwrapRef<DataSet>,
     field?: string,
     context?:any,
     format: 'json' | 'javascript',
@@ -56,7 +56,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
-const extensions = ref([javascript()])
+const extensions = ref<Array<any>>([javascript()])
 
 const view = shallowRef()
 let script = ref(getScript())

@@ -94,30 +94,30 @@ const props = defineProps<{
 const route = useRoute()
 const router = useRouter()
 let activeTab = ref('')
-const pagesDataSet = useDataSet({
+const pagesDataSet = ref(useDataSet({
     dataSource: 'page',
     alias: 'pages',
     autoOpen: true,
     autoCommit: false
-})
-const funcDataSet = useDataSet({
+}))
+const funcDataSet = ref(useDataSet({
     dataSource: 'function',
     alias: 'functions',
     autoOpen: true,
     autoCommit: false
-})
-const dsDataSet = useDataSet({
+}))
+const dsDataSet = ref(useDataSet({
     dataSource: 'datasource',
     alias: 'datasources',
     autoOpen: true,
     autoCommit: false
-})
-const menusDataSet = useDataSet({
+}))
+const menusDataSet = ref(useDataSet({
     dataSource: 'menu',
     alias: 'menus',
     autoOpen: true,
     autoCommit: false
-})
+}))
 
 
 const pagesColumns:ColumnConfigInterface[] = [
@@ -180,10 +180,10 @@ const menuColumns:ColumnConfigInterface[] = [
 
 
 onMounted(async () => {
-    await pagesDataSet.open()
-    await funcDataSet.open()
-    await dsDataSet.open()
-    await menusDataSet.open()
+    await pagesDataSet.value.open()
+    await funcDataSet.value.open()
+    await dsDataSet.value.open()
+    await menusDataSet.value.open()
 
     activeTab.value = route.query.activeTab ? <string>route.query.activeTab : 'pages'
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})

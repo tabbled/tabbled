@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref, watch} from 'vue'
+import {onMounted, ref, UnwrapRef, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
 import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
@@ -64,7 +64,7 @@ import {EventHandlerConfigInterface} from "../model/field";
 
 
 interface Props {
-    dataSet: DataSet,
+    dataSet: UnwrapRef<DataSet>,
     columns: ColumnConfigInterface[];
     isRowSelectable?: boolean,
     isInlineEditing?: boolean
