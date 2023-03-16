@@ -37,6 +37,9 @@ services:
       - DB_USER=${DB_USER}
       - DB_DATABASE=${DB_DATABASE}
       - JWT_SECRET=${JWT_SECRET}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_ENDPOINT=${S3_ENDPOINT}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
