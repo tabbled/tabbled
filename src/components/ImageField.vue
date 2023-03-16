@@ -61,7 +61,7 @@ function getValue():string {
 }
 
 onMounted(() => {
-    actionUrl.value = url() + '/pictures/upload'
+    actionUrl.value = url()
 })
 
 function url(port: string = '3000') {
@@ -69,23 +69,23 @@ function url(port: string = '3000') {
     // @ts-ignore
     const env = import.meta.env.MODE || "production";
 
+    console.log(location)
     if (env === "development" || localStorage.dev === "dev") {
         _url = location.protocol + '//' + location.hostname + ":" + port;
     } else {
-        _url = location.protocol + '//' + location.host;
+        _url = location.protocol + '//api.' + location.host;
     }
-    return _url
+    return _url + '/pictures'
 }
 
 function uploaded(res) {
-    console.log(res)
-    change(url('9000') + '/tabbled/' + res.filename)
+    change(`${url()}/${res.filename}`)
 }
 
 watch(() => props.dataSet,
     async () => {
-        console.log("dataset image")
-        //_field = props.dataSet.dataSource.getFieldByAlias(props.field)
+
+           //_field = props.dataSet.dataSource.getFieldByAlias(props.field)
 
         if (props.dataSet.isOpen)
             imageUrl.value = getValue()
