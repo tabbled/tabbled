@@ -34,6 +34,7 @@ const app = createApp({
 import { Icon } from "@iconify/vue"
 import CodeEditor from "./components/CodeEditor.vue"
 import Table from "./components/Table.vue"
+import TableField from "./components/TableField.vue"
 import Input from "./components/Input.vue";
 import LinkSelect from "./components/LinkSelect.vue";
 import DateTimeInput from "./components/DateTimeInput.vue";
@@ -41,6 +42,7 @@ import DataSetActionPanel from './components/DataSetActionPanel.vue'
 import ImageField from "./components/ImageField.vue";
 import {properties as actionPanelProps} from "./components/configuration/dataSetActionPanel.config";
 import {properties as tableProps} from './components/configuration/table.config'
+import {properties as tableFieldProps} from './components/configuration/table-field.config'
 import {properties as codeEditorProps} from './components/configuration/codeEditor.config'
 import {properties as inputProps} from './components/configuration/input.config'
 import {properties as linkSelectProps} from './components/configuration/link-select.config'
@@ -55,6 +57,7 @@ app.component('DateTimeInput', DateTimeInput);
 app.component('CodeEditor', CodeEditor)
 app.component('DataSetActionPanel', DataSetActionPanel)
 app.component('ImageField', ImageField)
+app.component('TableField', TableField)
 
 let componentService = useComponentService()
 componentService.registerComponent({
@@ -73,7 +76,18 @@ componentService.registerComponent({
     icon: "mdi:table",
     properties: tableProps(),
     defaultPosition: {
-        rows: 4,
+        rows: 1,
+        cols: 12
+    }
+})
+
+componentService.registerComponent({
+    name: 'TableField',
+    title: "Table field",
+    icon: "mdi:table",
+    properties: tableFieldProps(),
+    defaultPosition: {
+        rows: 1,
         cols: 12
     }
 })

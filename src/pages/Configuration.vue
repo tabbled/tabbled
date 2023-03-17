@@ -178,6 +178,11 @@ const menuColumns:ColumnConfigInterface[] = [
     }
 ]
 
+function setAppTitle() {
+    // @ts-ignore
+    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
+    document.title = `Configuration | ${ appTitle }`
+}
 
 onMounted(async () => {
     await pagesDataSet.value.open()
@@ -188,10 +193,12 @@ onMounted(async () => {
     activeTab.value = route.query.activeTab ? <string>route.query.activeTab : 'pages'
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
 
+    setAppTitle()
 });
 
 function tabChange(d) {
     router.replace({path: '/configuration', query: {activeTab: d}})
+    setAppTitle()
 }
 
 function addPage() {

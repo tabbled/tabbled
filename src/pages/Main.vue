@@ -7,7 +7,7 @@
                         <div>
                             <el-row align="middle">
                                 <img height="30" src="./../assets/tabbled_icon.svg" alt=""/>
-                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">Tabbled</div>
+                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{appTitle()}}</div>
                             </el-row>
                         </div>
                         <el-tag v-if="!isConnected" effect="light" size="small" type="danger">Offline</el-tag>
@@ -163,6 +163,11 @@ const route = useRoute()
 const dsService = useDataSourceService();
 const { t } = useI18n();
 const pageHeader = usePageHeader()
+const appTitle = () => {
+    // @ts-ignore
+    let title = import.meta.env.VITE_APP_TITLE
+    return !title ? "Tabbled" : title
+}
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)
