@@ -13,6 +13,16 @@ export function properties():FieldConfigInterface[] {
         title: "Title",
         alias: "title",
         type: "string"
+    },{
+        title: "Image width",
+        alias: "width",
+        type: "number",
+        default: 120
+    },{
+        title: "Image height",
+        alias: "height",
+        type: "number",
+        default: 120
     }
     ]
 }

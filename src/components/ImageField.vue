@@ -8,7 +8,11 @@
                :on-remove="handleRemove"
     >
         <div v-if="imageUrl" class="avatar">
-            <el-image  :src="imageUrl" class="" alt="" fit="cover"/>
+            <el-image  :src="imageUrl"
+                       class=""
+                       alt=""
+                       fit="cover"
+                       :style="{ width: width + 'px', height: height + 'px' }"/>
 
             <el-icon class="image-field-actions">
                 <div class="image-field-action-icon" @click.stop="preview" >
@@ -21,7 +25,8 @@
             </el-icon>
         </div>
 
-        <el-icon v-else class="avatar-uploader-icon">
+        <el-icon v-else class="avatar-uploader-icon"
+                 :style="{ width: width + 'px', height: height + 'px' }">
             <Icon  icon="mdi:plus" width="24"/>
         </el-icon>
 
@@ -45,6 +50,8 @@ const props = defineProps<{
     dataSet?: DataSet,
     field?: string,
     context?:any,
+    height?: number,
+    width?: number
 }>()
 
 let imageUrl = ref(getValue())
@@ -127,8 +134,6 @@ function remove() {
 
 <style >
 .avatar-uploader .avatar {
-    width: 120px;
-    height: 120px;
     display: flex;
     justify-content: center;
 }
@@ -178,8 +183,6 @@ function remove() {
 .el-icon.avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
-    width: 120px;
-    height: 120px;
     text-align: center;
 }
 </style>
