@@ -91,7 +91,8 @@ import {useComponentService} from "../services/component.service";
 import DataSourceSelect from "./DataSourceSelect.vue";
 import FieldSelect from "./FieldSelect.vue";
 import {DataSetConfigInterface} from "../model/dataset";
-
+import { FlakeId } from '../flake-id'
+let flakeId = new FlakeId()
 
 let componentService = useComponentService()
 
@@ -224,7 +225,7 @@ function onListEdit(path:string, idx: number) {
     setCurrentElement(`${getPropPath(path)}[${idx}]`)
 }
 
-function onListInsert(alias:string, field: FieldConfigInterface) {
+async function onListInsert(alias:string, field: FieldConfigInterface) {
     let path = _currentPath !== '' ?  _currentPath + '.' + alias : alias;
     let list = _.get(props.pageConfig, path)
     let fields = getFieldsByPath(path)
@@ -236,6 +237,7 @@ function onListInsert(alias:string, field: FieldConfigInterface) {
     let n = generateEntityWithDefault(fields)
     n[field.keyProp] = `${field.listOf}${list.length + 1}`
     n[field.displayProp] = `${field.listOf}${list.length + 1}`
+    n.id = (await flakeId.generateId()).toString()
 
     list.push(n)
 

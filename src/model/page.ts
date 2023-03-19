@@ -39,6 +39,7 @@ export interface PositionElementInterface {
 }
 
 export interface ElementInterface {
+    id: string,
     layout: {
         [key in ScreenSize]: PositionElementInterface
     },

@@ -91,6 +91,7 @@ defineExpose({
 watch(() => props.pageConfig,
     async () => {
         await init()
+        setAppTitle()
     })
 
 onMounted(async () => {

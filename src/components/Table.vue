@@ -52,6 +52,7 @@ import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
+import _ from "lodash";
 
 
 
@@ -148,6 +149,9 @@ function onTableRowDblClick(row) {
 function headerResized(newWidth, oldWidth, column) {
 
     let col = _columns.get(column.rawColumnKey)
+
+    console.log(_columns)
+
     col.width = newWidth
 
     let widths = {}
@@ -159,7 +163,10 @@ function headerResized(newWidth, oldWidth, column) {
 }
 
 function getColumnWidth(id: string) {
-   let col = _columns.get(id)
+    let col = _columns.get(id)
+
+    console.log(id, col)
+
     return col ? col.width : 100;
 }
 
@@ -256,7 +263,7 @@ async function initColumns() {
     let widths = await sync.getValue(configAlias)
 
     for(let i in props.columns) {
-        const col = props.columns[i]
+        const col = _.cloneDeep(props.columns[i])
         col.width = widths && widths[col.id] !== undefined ? widths[col.id] : col.width
         _columns.set(col.id, col)
     }

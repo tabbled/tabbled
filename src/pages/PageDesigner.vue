@@ -555,7 +555,7 @@ function startDragNewElement(e:any, item: ComponentTitle) {
     e.dataTransfer?.setData('item', JSON.stringify(it))
 }
 
-function dropNewWidget(e:DragEvent) {
+async function dropNewWidget(e:DragEvent) {
     let item = <ComponentDropInterface>JSON.parse(e.dataTransfer.getData('item'));
     let comp = componentService.getByName(item.name);
 
@@ -593,6 +593,7 @@ function dropNewWidget(e:DragEvent) {
     })
 
     elements.value.push({
+        id: (await flakeId.generateId()).toString(),
         name: comp.name,
         layout: {
             [ScreenSize.desktop]: {
