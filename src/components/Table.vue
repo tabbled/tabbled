@@ -17,11 +17,11 @@
             @header-dragend="headerResized"
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
-        <el-table-column v-for="element in columns.filter(item => item.visible === undefined || item.visible)"
+        <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
                          :sortable="element.sortable ? 'custom' : false"
                          :key="element.id"
                          :label="element.title"
-                         :width="getColumnWidth(element.id)"
+                         :width="element.width"
                          :prop="element.field"
         >
             <template #default="scope">
@@ -52,14 +52,6 @@ import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
-import _ from "lodash";
-
-
-
-interface Column extends ColumnConfigInterface {
-    type?: any,
-    index: number
-}
 
 interface Props {
     id: string,
@@ -81,7 +73,8 @@ let actions = ref({
 })
 const emit = defineEmits(['rowDblClick', 'rowClick'])
 
-let _columns: Map<string, ColumnConfigInterface> = new Map
+//let columnById: Map<string, ColumnConfigInterface> = new Map
+let _columns = ref<ColumnConfigInterface[]>([])
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)
 
@@ -98,8 +91,9 @@ watch(() => props.columns,
     })
 
 onMounted(async () => {
-    await init();
     await initColumns()
+    await init();
+
 });
 
 async function compileAction(action) {
@@ -148,26 +142,20 @@ function onTableRowDblClick(row) {
 
 function headerResized(newWidth, oldWidth, column) {
 
-    let col = _columns.get(column.rawColumnKey)
-
-    console.log(_columns)
-
-    col.width = newWidth
+    for(let i in _columns.value) {
+        let col = _columns.value[i]
+        if (col.id === column.rawColumnKey) {
+            col.width = newWidth
+        }
+    }
 
     let widths = {}
-    for(let i in props.columns) {
-        widths[props.columns[i].id] = getColumnWidth(props.columns[i].id)
+    for(let i in _columns.value) {
+        let col = _columns.value[i]
+        widths[col.id] = col.width
     }
 
     sync.setValue(configAlias, widths);
-}
-
-function getColumnWidth(id: string) {
-    let col = _columns.get(id)
-
-    console.log(id, col)
-
-    return col ? col.width : 100;
 }
 
 function currentRowChanged(row: any) {
@@ -259,31 +247,22 @@ function getHeaderClass() {
 }
 
 async function initColumns() {
-    _columns.clear()
+    _columns.value = props.columns
     let widths = await sync.getValue(configAlias)
 
-    for(let i in props.columns) {
-        const col = _.cloneDeep(props.columns[i])
-        col.width = widths && widths[col.id] !== undefined ? widths[col.id] : col.width
-        _columns.set(col.id, col)
+    for(let i in _columns.value) {
+        const col = _columns.value[i]
+
+
+        if (widths && widths[col.id]) {
+            col.width = widths[col.id]
+        }
     }
 }
 
 async function init() {
-
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
-
-
-
-
-
-    if (props.dataSet) {
-        //columns.value = props.dataSet.columns
-        //data.value = props.dataSet.data
-
-    } else
-        console.warn(`DataSet parameter for Table component not set`)
 }
 
 

@@ -30,7 +30,7 @@
                           :style="getGridElementStyle(element.layout)"
                           class="element">
 
-                <component :id="idx.toString()"
+                <component :id="element.id || idx.toString()"
                            style="width: 100%"
                            :is="element.name" v-bind="element"
                 />
@@ -140,8 +140,6 @@ async function init() {
     }
 
     isEditPage.value = props.pageConfig.isEditPage;
-
-    console.log('init onOpen', props.pageConfig.onOpen)
 
     actions.value.onOpen = await compileAction(props.pageConfig.onOpen)
 
