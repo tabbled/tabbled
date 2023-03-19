@@ -17,6 +17,7 @@
                                 @edit="editMenu"
             />
             <Table :columns="menuColumns"
+                   id="menu"
                    context=""
                    :data-set="menusDataSet"
                    :is-inline-editing="false"
@@ -33,6 +34,7 @@
                                 @edit="editPage"
             />
             <Table :columns="pagesColumns"
+                   id="pages"
                    context=""
                    :data-set="pagesDataSet"
                    :is-inline-editing="false"
@@ -49,6 +51,7 @@
                                 @edit="editDataSource"
             />
             <Table :columns="dsColumns"
+                   id="ds"
                    context=""
                    :data-set="dsDataSet"
                    :is-inline-editing="false"
@@ -65,6 +68,7 @@
                                 @edit="editFunc"
             />
             <Table :columns="funcColumns"
+                   id="func"
                    context=""
                    :data-set="funcDataSet"
                    :is-inline-editing="false"
@@ -122,12 +126,14 @@ const menusDataSet = ref(useDataSet({
 
 const pagesColumns:ColumnConfigInterface[] = [
     {
+        "id": "1",
         "field": "alias",
         "title": "Page alias",
         "width": 150,
         "sortable": true
     },
     {
+        "id": "2",
         "field": "title",
         "title": "Title",
         "width": 350,
@@ -137,12 +143,14 @@ const pagesColumns:ColumnConfigInterface[] = [
 
 const funcColumns:ColumnConfigInterface[] = [
     {
+        "id": "1",
         "field": "alias",
         "title": "alias",
         "width": 150,
         "sortable": true
     },
     {
+        "id": "2",
         "field": "title",
         "title": "Title",
         "width": 200,
@@ -151,18 +159,21 @@ const funcColumns:ColumnConfigInterface[] = [
 ]
 const dsColumns:ColumnConfigInterface[] = [
     {
+        "id": "1",
         "field": "alias",
         "title": "alias",
         "width": 150,
         "sortable": true
     },
     {
+        "id": "2",
         "field": "title",
         "title": "Title",
         "width": 200,
         "sortable": true
     },
     {
+        "id": "3",
         "field": "Source",
         "title": "source",
         "width": 200,
@@ -171,6 +182,7 @@ const dsColumns:ColumnConfigInterface[] = [
 ]
 const menuColumns:ColumnConfigInterface[] = [
     {
+        "id": "1",
         "field": "title",
         "title": "Title",
         "width": 150,

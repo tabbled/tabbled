@@ -95,7 +95,14 @@ watch(() => props.pageConfig,
 
 onMounted(async () => {
     await init()
+    setAppTitle()
 })
+
+function setAppTitle() {
+    // @ts-ignore
+    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
+    document.title = `${route.meta.title} | ${ appTitle }`
+}
 
 async function save() {
     try {

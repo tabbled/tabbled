@@ -56,7 +56,6 @@ export class Database extends EventEmitter {
             this.database = undefined;
         }
     }
-
 }
 
 const db = ref<Database>(new Database())

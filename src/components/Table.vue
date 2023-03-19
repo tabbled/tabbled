@@ -14,16 +14,15 @@
             @selection-change="selectionChange"
             @row-click="onTableRowClick"
             @rowDblclick="onTableRowDblClick"
-
+            @header-dragend="headerResized"
     >
         <el-table-column v-if="isRowSelectable" type="selection" width="30" />
-        <el-table-column v-for="element in columns"
+        <el-table-column v-for="element in columns.filter(item => item.visible === undefined || item.visible)"
                          :sortable="element.sortable ? 'custom' : false"
-                         :key="element.field"
+                         :key="element.id"
                          :label="element.title"
-                         :width="element.width"
+                         :width="getColumnWidth(element.id)"
                          :prop="element.field"
-
         >
             <template #default="scope">
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
@@ -41,15 +40,6 @@
             </template>
         </el-table-column>
 
-<!--        <el-table-column fixed="right" width="40" :resizable="false" class-name="adv-column">-->
-<!--            <template #header>-->
-<!--                <el-button text style="border-radius: 0; padding: 0; margin: 0 ">-->
-<!--                    <span class="iconify " data-icon="mdi:cog" style="width: 18px; height: 18px; " />-->
-<!--                </el-button>-->
-<!--            </template>-->
-<!--            <template #default>-->
-<!--            </template>-->
-<!--        </el-table-column>-->
     </el-table>
 </template>
 
@@ -61,9 +51,17 @@ import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {EventHandlerConfigInterface} from "../model/field";
+import {useSyncService} from "../services/sync.service";
 
+
+
+interface Column extends ColumnConfigInterface {
+    type?: any,
+    index: number
+}
 
 interface Props {
+    id: string,
     dataSet: UnwrapRef<DataSet>,
     columns: ColumnConfigInterface[];
     isRowSelectable?: boolean,
@@ -82,22 +80,25 @@ let actions = ref({
 })
 const emit = defineEmits(['rowDblClick', 'rowClick'])
 
-//let data = ref<Array<EntityInterface>>([])
-//let columns = ref<Array<Column>>([])
+let _columns: Map<string, ColumnConfigInterface> = new Map
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)
-//let data = ref<Array<EntityInterface>>([])
 
-watch(() => props,
+let sync = useSyncService()
+const configAlias = `config/table-config-${props.id}`
+
+
+watch(() => props.columns,
     async () => {
-        init();
+        await initColumns()
     },
     {
         deep: true
     })
 
-onMounted(() => {
-    init();
+onMounted(async () => {
+    await init();
+    await initColumns()
 });
 
 async function compileAction(action) {
@@ -142,6 +143,24 @@ function onTableRowDblClick(row) {
     if (actions.value.onRowDoubleClick) {
         execAction(actions.value.onRowDoubleClick, { row: row })
     }
+}
+
+function headerResized(newWidth, oldWidth, column) {
+
+    let col = _columns.get(column.rawColumnKey)
+    col.width = newWidth
+
+    let widths = {}
+    for(let i in props.columns) {
+        widths[props.columns[i].id] = getColumnWidth(props.columns[i].id)
+    }
+
+    sync.setValue(configAlias, widths);
+}
+
+function getColumnWidth(id: string) {
+   let col = _columns.get(id)
+    return col ? col.width : 100;
 }
 
 function currentRowChanged(row: any) {
@@ -232,12 +251,24 @@ function getHeaderClass() {
     return "table-header"
 }
 
+async function initColumns() {
+    _columns.clear()
+    let widths = await sync.getValue(configAlias)
+
+    for(let i in props.columns) {
+        const col = props.columns[i]
+        col.width = widths && widths[col.id] !== undefined ? widths[col.id] : col.width
+        _columns.set(col.id, col)
+    }
+}
+
 async function init() {
 
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
 
-    //columns.value = []
+
+
 
 
     if (props.dataSet) {

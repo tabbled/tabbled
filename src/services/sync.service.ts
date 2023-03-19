@@ -159,6 +159,14 @@ export class SyncService extends EventEmitter {
             lastRevision: val.toString()
         })
     }
+
+    async getValue(alias: string):Promise<any> {
+        return (await db.database.ref(alias).get()).val()
+    }
+
+    async setValue(alias: string, value: any):Promise<void> {
+        await db.database.ref(alias).set(value)
+    }
 }
 
 const instance = ref<SyncService>(new SyncService());
