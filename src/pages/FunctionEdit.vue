@@ -50,30 +50,30 @@
 import {ElMessage} from "element-plus";
 import {useDataSet} from "../model/dataset";
 import {useRoute, useRouter} from "vue-router";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
 import Input from "../components/Input.vue";
 
 let router = useRouter();
 let route = useRoute()
 
-let dataSet = useDataSet({
+let dataSet = ref(useDataSet({
     dataSource: 'function',
     alias: 'functions',
     autoOpen: false,
     autoCommit: false
-})
+}))
 
 onMounted(async () => {
     let n = !route.params.id || route.params.id === 'new'
-    await dataSet.openOne( n ? undefined : <string>route.params.id)
+    await dataSet.value.openOne( n ? undefined : <string>route.params.id)
     //@ts-ignore
-    document.title = `Function ${ n ? 'new' : ' ' + dataSet.current.title } | ${import.meta.env.VITE_APP_TITLE}`
+    document.title = `Function ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${import.meta.env.VITE_APP_TITLE}`
 });
 
 async function save() {
     try {
-        await dataSet.commit()
+        await dataSet.value.commit()
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -82,9 +82,9 @@ async function save() {
 }
 
 async function cancel() {
-    if (dataSet.isChanged()) {
+    if (dataSet.value.isChanged()) {
         console.log("changed")
-        dataSet.rollback()
+        dataSet.value.rollback()
     }
 
     router.back()
@@ -92,7 +92,7 @@ async function cancel() {
 
 function context() {
     try {
-        return JSON.parse(dataSet.current.context)
+        return JSON.parse(dataSet.value.current.context)
     }
     catch (e) {
         console.error(e)

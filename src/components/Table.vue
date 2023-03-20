@@ -73,7 +73,6 @@ let actions = ref({
 })
 const emit = defineEmits(['rowDblClick', 'rowClick'])
 
-//let columnById: Map<string, ColumnConfigInterface> = new Map
 let _columns = ref<ColumnConfigInterface[]>([])
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)

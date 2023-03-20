@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref, UnwrapRef, watch} from "vue";
 import {DataSet} from "../model/dataset";
 
 let isLoading = ref(false)
@@ -28,7 +28,7 @@ let data = ref<Array<any>>([])
 
 const props = defineProps<{
     field?: string,
-    dataSet?: DataSet,
+    dataSet?: UnwrapRef<DataSet>,
     modelValue?: string | number
 }>()
 

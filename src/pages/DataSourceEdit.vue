@@ -81,26 +81,26 @@ let currentIndex = -1;
 let fieldEditDialogVisible = ref(false)
 const { t } = useI18n();
 
-let dataSet = useDataSet({
+let dataSet = ref(useDataSet({
     dataSource: 'datasource',
     alias: 'datasources',
     autoOpen: false,
     autoCommit: false
-})
+}))
 
 onMounted(async () => {
     let n = !route.params.id || route.params.id === 'new'
-    await dataSet.openOne( n ? undefined : <string>route.params.id)
+    await dataSet.value.openOne( n ? undefined : <string>route.params.id)
 
-    fields.value = dataSet.current.fields
+    fields.value = dataSet.value.current.fields
     //@ts-ignore
-    document.title = `Data source ${ n ? 'new' : ' ' + dataSet.current.title } | ${import.meta.env.VITE_APP_TITLE}`
+    document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${import.meta.env.VITE_APP_TITLE}`
 });
 
 async function save() {
     try {
-        console.log(dataSet.current)
-        await dataSet.commit()
+        console.log(dataSet.value.current)
+        await dataSet.value.commit()
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -109,9 +109,9 @@ async function save() {
 }
 
 async function cancel() {
-    if (dataSet.isChanged()) {
+    if (dataSet.value.isChanged()) {
         console.log("changed")
-        dataSet.rollback()
+        dataSet.value.rollback()
     }
 
     router.back()
@@ -119,7 +119,7 @@ async function cancel() {
 
 function context() {
     try {
-        return JSON.parse(dataSet.current.context)
+        return JSON.parse(dataSet.value.current.context)
     }
     catch (e) {
         console.error(e)
@@ -136,7 +136,7 @@ function saveField() {
         fields.value[currentIndex] = currentField.value
     }
 
-    dataSet.update('fields', fields.value)
+    dataSet.value.update('fields', fields.value)
 }
 
 function insertField() {
@@ -167,7 +167,7 @@ function removeField(row) {
     )
         .then(() => {
             fields.value.splice(row, 1)
-            dataSet.update('fields', fields.value)
+            dataSet.value.update('fields', fields.value)
         })
 }
 

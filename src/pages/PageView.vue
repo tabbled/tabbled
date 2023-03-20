@@ -163,6 +163,7 @@ async function init() {
 
     props.pageConfig.elements.forEach(element => {
         let el:ElementInterface = {
+            id: element.id,
             layout: element.layout,
             name: element.name,
         }

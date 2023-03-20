@@ -4,14 +4,14 @@
 
 <script setup lang="ts">
 import {DataSet} from "../model/dataset";
-import {ref, watch} from "vue";
+import {onMounted, ref, UnwrapRef, watch} from "vue";
 import {FieldConfigInterface} from "../model/field";
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
     modelValue?: string,
-    dataSet?: DataSet,
+    dataSet?: UnwrapRef<DataSet>,
     field?: string,
     context?:any,
 }>()
@@ -27,21 +27,29 @@ function getValue():string {
     return props.dataSet.current[props.field]
 }
 
+onMounted(() => {
+    init()
+})
+
 watch(() => props.dataSet,
     async () => {
-        _field = props.dataSet.dataSource.getFieldByAlias(props.field)
-
-        switch (_field.type) {
-            case "text": type = 'textarea'; break;
-            default: type = 'text';
-        }
-
-        if (props.dataSet.isOpen)
-            value.value = getValue()
+        init()
     },
     {
         deep: true
     })
+
+function init() {
+    _field = props.dataSet.dataSource.getFieldByAlias(props.field)
+
+    switch (_field.type) {
+        case "text": type = 'textarea'; break;
+        default: type = 'text';
+    }
+
+    if (props.dataSet.isOpen)
+        value.value = getValue()
+}
 
 function change(val) {
     value.value = val
