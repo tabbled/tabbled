@@ -66,7 +66,7 @@ onMounted(() => {
     _field = source.getFieldByAlias(props.field)
 
     if (!_field) {
-        console.warn(`Field "${_field.alias}" not found`)
+        console.warn(`Field "${props.field}" not found`)
         return;
     }
 
