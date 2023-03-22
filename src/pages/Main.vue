@@ -30,7 +30,7 @@
                                     <Icon :icon=menu.icon width="24" color="gray"/>
                                 </el-icon>
 
-                                <span v-if="!isSideBarCollapsed"  style="width: 100%; text-align: left;">{{menu.title}} dfsf</span>
+                                <span v-if="!isSideBarCollapsed"  style="width: 100%; text-align: left;">{{menu.title}}</span>
 
                             </template>
 
@@ -41,7 +41,7 @@
                                     <el-icon v-if="item.icon">
                                         <Icon width="24" :icon=item.icon color="gray" style="min-width: 24px"/>
                                     </el-icon>
-                                    <span  style="width: 100%; text-align: left;">{{ item.title }}</span>
+                                    <span  style="width: 100%; text-align: left; padding-left: 10px">{{ item.title }}</span>
                                     <div @click="$event.stopPropagation(); openInNewWindow(item.path);" class="open_new" style="width: 16px; height: 100%; display: flex">
                                         <Icon icon="mdi:open-in-new" width="16"/>
                                     </div>

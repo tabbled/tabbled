@@ -30,6 +30,7 @@
                        :model-value="getCellData(scope)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
+                       :field="null"
                        @focusout="() => cellFocusedOut()"/>
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text" >
                     {{getCellData(scope)}}

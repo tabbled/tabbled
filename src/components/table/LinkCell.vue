@@ -1,42 +1,5 @@
 <template>
-    <el-input
-        v-if="field && (field.type === 'text' || field.type === 'string')"
-        ref="el"
-        class="table-input"
-        :model-value="modelValue"
-        @mouseenter="handleMouseEnter"
-        @input="handleInput"
-    />
-    <el-input-number
-        v-else-if="field && (field.type === 'number')"
-        :controls="false"
-        :precision="field.precision ? field.precision : 0"
-        ref="el"
-        class="table-input-number"
-        :model-value="modelValue"
-        @mouseenter="handleMouseEnter"
-        @input="handleInput"
-    />
-    <el-select
-        v-else-if="field && (field.type === 'link')"
-        class="table-select"
-        :model-value="modelValue"
-        placeholder="Select"
-        filterable
-        remote
-        clearable
-        remote-show-suffix
-        :remote-method="getLinkData"
-        :loading="isLoading"
-        @change="handleInput"
-    >
-        <el-option
-            v-for="item in linkData"
-            :key="item.id"
-            :label="item[displayProp]"
-            :value="item.id"
-        />
-    </el-select>
+    {{displayValue}}
 </template>
 
 <script setup lang="ts">
@@ -53,43 +16,34 @@ interface Props {
 
 const props = defineProps<Props>()
 
-let emit = defineEmits(['update:modelValue'])
-
-let el = ref(null)
 let isLoading = ref(false)
-let linkData = ref([])
 
 let displayProp = ref('name')
 let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
+let displayValue = ref("")
 
 onMounted(() => {
-    console.log(props.field)
     if (props.field && props.field.type === 'link') {
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
-        getLinkData();
+        getLinkValue();
     }
 })
 
-function handleMouseEnter() {
-    if (el.value)
-        el.value.focus()
-}
-
-function handleInput(value: any) {
-    console.log(value)
-    emit('update:modelValue', value)
-
-}
-
-async function getLinkData() {
+async function getLinkValue() {
     if (!ds) {
+        displayValue.value = ""
         return
     }
 
     isLoading.value = true
-    linkData.value = await ds.getAll()
+
+    let link_entity = await ds.getById(props.modelValue)
+    if (!link_entity)
+        return 'not found'
+
+    displayValue.value = link_entity[props.field.displayProp ? props.field.displayProp : 'name']
     isLoading.value = false
 }
 
@@ -98,9 +52,8 @@ async function getLinkData() {
 <style lang="scss">
 
 .table-select{
-    height: calc(31px - 2px);
+
     margin: 1px;
-    padding: 0 !important;
 
     .el-input__wrapper {
         box-shadow: unset !important;

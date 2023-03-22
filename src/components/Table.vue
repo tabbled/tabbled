@@ -27,11 +27,23 @@
             <template #default="scope">
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
                        :model-value="getCellData(scope)"
+                       :field="getFieldConfig(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
-                       @focusout="() => cellFocusedOut()"/>
+
+
+                />
+<!--                @focusout="() => cellFocusedOut()"-->
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text" >
-                    {{getCellData(scope)}}
+                    <LinkCell v-if="getFieldConfig(element.field).type === 'link'"
+                              :field="getFieldConfig(element.field)"
+                              :model-value="getCellData(scope)"
+
+                    />
+                    <div v-else>
+                        {{getFormattedCellData(scope)}}
+                    </div>
+
                 </div>
 
             </template>
@@ -49,9 +61,11 @@ import {onMounted, ref, UnwrapRef, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
 import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
+import LinkCell from "./table/LinkCell.vue";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
+import {useDataSourceService} from "../services/datasource.service";
 
 interface Props {
     id: string,
@@ -76,6 +90,7 @@ const emit = defineEmits(['rowDblClick', 'rowClick'])
 let _columns = ref<ColumnConfigInterface[]>([])
 let editingCell = ref<{row: number, col: number} | null>(null)
 let editEl = ref(null)
+let dsService = useDataSourceService()
 
 let sync = useSyncService()
 const configAlias = `config/table-config-${props.id}`
@@ -94,6 +109,13 @@ onMounted(async () => {
     await init();
 
 });
+
+function getFieldConfig(field: string) {
+    if (!props.dataSet)
+        return undefined;
+
+    return props.dataSet.dataSource.getFieldByAlias(field)
+}
 
 async function compileAction(action) {
     if (!action || (action.type === 'script' && (!action.script || action.script === '')))
@@ -133,7 +155,11 @@ function onTableRowClick(row) {
 }
 
 function onTableRowDblClick(row) {
+    if (editingCell.value)
+        return;
+
     emit('rowDblClick', { id: row.id })
+
     if (actions.value.onRowDoubleClick) {
         execAction(actions.value.onRowDoubleClick, { row: row })
     }
@@ -219,6 +245,22 @@ let getHeaderTitle = (scope: any) => {
     return col.title
 }
 
+function getFormattedCellData(scope: any) {
+    let val = getCellData(scope)
+    let field = props.dataSet.dataSource.getFieldByAlias(scope.column.property);
+
+    if (!field)
+        return ''
+
+    switch(field.type) {
+        case "text":
+        case "string":
+        case "link": return val
+        case "number": return formatNumber(val, field.precision)
+        default: return 'error'
+    }
+}
+
 let getCellData = (scope: any) => {
     if (!props.dataSet)
         return;
@@ -228,7 +270,14 @@ let getCellData = (scope: any) => {
     if (!entity)
         return ''
 
-    return entity[scope.column.property] ? entity[scope.column.property] : ''
+    return entity[scope.column.property]
+}
+
+function formatNumber(value: any, precision: number) {
+    if (value === undefined || value === null || value === "")
+        return "";
+
+    return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
 }
 
 function getRowClass() {

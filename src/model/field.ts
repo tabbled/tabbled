@@ -1,4 +1,4 @@
-import {DataSourceConfigInterface, EntityInterface} from "./datasource";
+import {EntityInterface} from "./datasource";
 
 
 export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements' | 'field'
@@ -50,7 +50,7 @@ export interface FieldConfigInterface {
     isMultiple?: boolean,
     precision?: number,                  // Only for type numeric
     default?: any,
-    datasource?: DataSourceConfigInterface  // Only for type Table, that can be passed a DataSourceConfig
+    datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
     getValueScript?: string                    // Evaluate when entity changed, result of eval sets to field value
     onValueChangeScript?: string             // Evaluate when value changed manually by user or by another script
 }
@@ -70,7 +70,7 @@ export interface FieldInterface {
     precision?: number,                  // Only for type numeric
     default?: string | number |
         object | object[] | null,
-    datasource?: DataSourceConfigInterface  // Only for type Table, that can be passed a DataSourceConfig
+    datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
 
     getValues(): Promise<object[]>,
     getFormattedValue(value: any) : Promise<any>
@@ -81,7 +81,7 @@ export class Field implements FieldInterface {
         this.alias = config.alias;
         this.title = config.title
         this.type = config.type;
-        this.datasource = undefined;
+        this.datasource = config.datasource;
         this.precision = config.precision;
         this.isMultiple = config.isMultiple;
         this.link = config.link;
@@ -98,7 +98,7 @@ export class Field implements FieldInterface {
     link?: string;
     required: boolean;
     title: string;
-    datasource?: DataSourceConfigInterface;
+    datasource?: string;
     values: EnumValuesInterface[]
 
     async getFormattedValue(value: any): Promise<any> {
