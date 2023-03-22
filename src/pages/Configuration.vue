@@ -174,8 +174,8 @@ const dsColumns:ColumnConfigInterface[] = [
     },
     {
         "id": "3",
-        "field": "Source",
-        "title": "source",
+        "field": "source",
+        "title": "Source",
         "width": 200,
         "sortable": true
     }

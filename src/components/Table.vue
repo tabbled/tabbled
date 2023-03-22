@@ -313,7 +313,6 @@ async function init() {
         padding-bottom: 4px;
         padding-top: 4px;
         white-space: nowrap;
-
     }
 }
 
@@ -324,6 +323,8 @@ async function init() {
 
 .el-table .el-table__cell {
     padding: 0 !important;
+
+
 }
 
 .table-cell:hover {

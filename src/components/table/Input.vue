@@ -37,8 +37,8 @@ function handleInput(value: string | number) {
     height: calc(32px - 2px);
 
     .el-input__wrapper {
-        border-radius: unset;
-        box-shadow: unset;
+        border-radius: unset !important;
+        box-shadow: unset !important;
         margin: 1px;
         padding-left: 7px;
 
