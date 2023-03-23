@@ -7,6 +7,12 @@
 
         <template #extra>
             <div class="page-header-action-panel">
+                <el-button text @click="exportConfig">
+                    <template #icon>
+                        <Icon width="26" icon="mdi:export"></Icon>
+                    </template>
+                    Export
+                </el-button>
                 <el-button @click="cancel">Cancel</el-button>
                 <el-button @click="save" type="primary">Save</el-button>
             </div>
@@ -96,6 +102,23 @@ onMounted(async () => {
     //@ts-ignore
     document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${import.meta.env.VITE_APP_TITLE}`
 });
+
+async function exportConfig() {
+    let data = JSON.stringify(dataSet.value.current, null, 4)
+    let file = new Blob([data]);
+    let a = document.createElement("a"),
+        url = URL.createObjectURL(file)
+
+    a.href = url;
+    a.download = `datasource-${dataSet.value.current.alias}.json`;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 0);
+}
 
 async function save() {
     try {

@@ -288,7 +288,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         } else {
             if (current_item.version === item.version && current_item.rev !== '' && current_item.rev === item.rev) {
                 console.warn(`Item ${item.id} received from remote has the same version ${item.version}`)
-                return true
             } else if (current_item.version !== item.version) {
                 this.emit('updated', item.data)
             }
@@ -297,6 +296,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 this.emit('removed', item.data)
             }
         }
+        return true
     }
 }
 
