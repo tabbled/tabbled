@@ -69,7 +69,7 @@ export interface DataSourceInterface extends EventEmitter{
     removeById(id: string): Promise<void>
 
     // Sync Service use this method when got data from server
-    setRemoteChanges?(data: DataItemInterface[]): Promise<boolean>
+    setRemoteChanges?(item: DataItemInterface): Promise<boolean>
 
     getFieldByAlias(alias: string): FieldInterface | undefined
 }
@@ -275,33 +275,28 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         await syncService.push(this.type, [item]);
     }
 
-    async setRemoteChanges(data: DataItemInterface[]):Promise<boolean> {
+    async setRemoteChanges(item: DataItemInterface):Promise<boolean> {
         if (!db.database)
             return false;
 
-        for(const i in data) {
-            let item = data[i]
+        let current_item = await this.getByIdRaw(item.id)
 
-            let current_item = await this.getByIdRaw(item.id)
+        await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
 
-            await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
+        if (!current_item) {
+            this.emit('inserted', item.data)
+        } else {
+            if (current_item.version === item.version && current_item.rev !== '' && current_item.rev === item.rev) {
+                console.warn(`Item ${item.id} received from remote has the same version ${item.version}`)
+                return true
+            } else if (current_item.version !== item.version) {
+                this.emit('updated', item.data)
+            }
 
-            if (!current_item) {
-                this.emit('inserted', item.data)
-            } else {
-                if (current_item.version === item.version && current_item.rev !== '' && current_item.rev === item.rev) {
-                    console.warn(`Item ${item.id} received from remote has the same version ${item.version}`)
-                    return true
-                } else if (current_item.version !== item.version) {
-                    this.emit('updated', item.data)
-                }
-
-                if (item.deletedAt && !current_item.deletedAt) {
-                    this.emit('removed', item.data)
-                }
+            if (item.deletedAt && !current_item.deletedAt) {
+                this.emit('removed', item.data)
             }
         }
-        return true
     }
 }
 

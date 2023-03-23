@@ -39,34 +39,34 @@ export class DataSet {
         this.autoCommit = config.autoCommit;
         this.keyField = this.dataSource.keyField
 
-        this.dataSource.on('updated', async (value) => {
-            // @ts-ignore
-            // I don't know, but we access the ref<> in emit callback then ref need to get with .value
-            let data = this.data().value
-            console.log(value)
-            for(let i in data) {
-                console.log(value.id, 'updated')
-                let item = data[i]
-                if (item.id === value.id) {
-                    data[i] = value
-
-                }
-            }
-        })
-
-        this.dataSource.on('inserted', async () => {
-            // @ts-ignore
-            this._data = await this.dataSource.getAll();
-            this._changesById.clear();
-            console.log("inserted")
-        })
-
-        this.dataSource.on('removed', async () => {
-            // @ts-ignore
-            this._data = await this.dataSource.getAll();
-            this._changesById.clear();
-            console.log("removed")
-        })
+        // this.dataSource.on('updated', async (value) => {
+        //     // @ts-ignore
+        //     // I don't know, but we access the ref<> in emit callback then ref need to get with .value
+        //     let data = this.data().value
+        //     console.log(value)
+        //     for(let i in data) {
+        //         console.log(value.id, 'updated')
+        //         let item = data[i]
+        //         if (item.id === value.id) {
+        //             data[i] = value
+        //
+        //         }
+        //     }
+        // })
+        //
+        // this.dataSource.on('inserted', async () => {
+        //     // @ts-ignore
+        //     this._data = await this.dataSource.getAll();
+        //     this._changesById.clear();
+        //     console.log("inserted")
+        // })
+        //
+        // this.dataSource.on('removed', async () => {
+        //     // @ts-ignore
+        //     this._data = await this.dataSource.getAll();
+        //     this._changesById.clear();
+        //     console.log("removed")
+        // })
     }
 
     readonly alias: string;

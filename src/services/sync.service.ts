@@ -130,7 +130,7 @@ export class SyncService extends EventEmitter {
                     continue
                 }
 
-                let synced = await ds.setRemoteChanges([item])
+                let synced = await ds.setRemoteChanges(item)
 
                 if (!synced) {
                     console.warn(`Item ${item.id} not synced by dataSource`)
@@ -155,6 +155,7 @@ export class SyncService extends EventEmitter {
     }
 
     async setLastRevision(type: DataSourceType, val:BigInt):Promise<void> {
+        console.log("setLastRevision", val)
         await db.database.ref(`/${type}`).update({
             lastRevision: val.toString()
         })
