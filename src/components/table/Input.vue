@@ -64,7 +64,6 @@ let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
 
 onMounted(() => {
-    console.log(props.field)
     if (props.field && props.field.type === 'link') {
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
@@ -78,9 +77,7 @@ function handleMouseEnter() {
 }
 
 function handleInput(value: any) {
-    console.log(value)
     emit('update:modelValue', value)
-
 }
 
 async function getLinkData() {

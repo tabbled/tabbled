@@ -232,8 +232,6 @@ export class DataSet {
         if (!ent)
             return false;
 
-        console.log(ent)
-
         let oldEnt = _.cloneDeep(ent)
         let change = this._changesById.get(ent.id);
 

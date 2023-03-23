@@ -9,7 +9,7 @@
             :header-row-class-name="getHeaderClass"
             :cell-class-name="getCellClass"
             :row-class-name="getRowClass"
-            @mouseleave="onMouseLeave"
+            @mouseleave="save"
             @current-change="currentRowChanged"
             @selection-change="selectionChange"
             @row-click="onTableRowClick"
@@ -33,7 +33,6 @@
 
 
                 />
-<!--                @focusout="() => cellFocusedOut()"-->
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text" >
                     <LinkCell v-if="getFieldConfig(element.field).type === 'link'"
                               :field="getFieldConfig(element.field)"
@@ -67,6 +66,7 @@ import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 
+
 interface Props {
     id: string,
     dataSet: UnwrapRef<DataSet>,
@@ -87,8 +87,10 @@ let actions = ref({
 })
 const emit = defineEmits(['rowDblClick', 'rowClick'])
 
+interface Cell {row: number, col: number}
+
 let _columns = ref<ColumnConfigInterface[]>([])
-let editingCell = ref<{row: number, col: number} | null>(null)
+let editingCell = ref<Cell | null>(null)
 let editEl = ref(null)
 let dsService = useDataSourceService()
 
@@ -109,6 +111,24 @@ onMounted(async () => {
     await init();
 
 });
+
+function save() {
+    if (props.dataSet && props.dataSet.autoCommit && props.dataSet.isChanged()) {
+        props.dataSet.commit()
+    }
+}
+
+function setCurrentCell(cell: Cell) {
+
+    if (editingCell.value !== cell) {
+        editingCell.value = cell
+    }
+
+    console.log(cell)
+
+    editingCell.value = cell
+    save()
+}
 
 function getFieldConfig(field: string) {
     if (!props.dataSet)
@@ -200,10 +220,10 @@ function onCellInput(scope: any, value: any) {
 
 function handleCellClick(scope:any) {
     if (props.isInlineEditing)
-        editingCell.value = {
+        setCurrentCell({
             row: scope.$index,
             col: scope.cellIndex
-        }
+        })
 }
 
 function inputKeyDown(e:KeyboardEvent) {
@@ -213,10 +233,7 @@ function inputKeyDown(e:KeyboardEvent) {
 }
 
 function cellFocusedOut() {
-    editingCell.value = null
-
-    if (props.dataSet)
-        props.dataSet.commit();
+    setCurrentCell(null)
 }
 
 let getCellClass = (scope: any) => {
@@ -282,12 +299,6 @@ function formatNumber(value: any, precision: number) {
 
 function getRowClass() {
     return "table-row"
-}
-
-function onMouseLeave() {
-    if (props.dataSet && !editingCell.value && props.dataSet.autoCommit && props.dataSet.isChanged()) {
-        props.dataSet.commit()
-    }
 }
 
 function getHeaderClass() {
