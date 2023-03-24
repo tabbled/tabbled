@@ -23,7 +23,8 @@
         "default": "Default",
         "isMultiple": "Multiple",
         "type": "Type",
-        "precision": "Precision"
+        "precision": "Precision",
+        "values": "Values"
     },
     "menuConfig": {
         "title": "Title",

@@ -48,8 +48,20 @@
             <el-input v-model="modelValue.default"></el-input>
         </el-form-item>
 
-        <el-form-item v-if="modelValue.type !== 'enum'" :label="t('fieldConfig.enum')">
-            <el-input v-model="modelValue.values"></el-input>
+        <el-form-item v-if="modelValue.type === 'enum'" :label="t('fieldConfig.values')">
+            <ItemList key-prop="alias"
+                      title-prop="title"
+                      :list="modelValue.values"
+                      @remove="removeEnumItem"
+                      @insert="addEnumItem"
+            >
+                <template #default="{item}">
+                    <div style="display: flex; width: 90%" >
+                        <el-input size="small" style="padding-right: 4px" v-model="item['key']" placeholder="Key"></el-input>
+                        <el-input size="small" v-model="item['title']" placeholder="Label"></el-input>
+                    </div>
+                </template>
+            </ItemList>
         </el-form-item>
     </el-form>
 
@@ -61,6 +73,7 @@ import {FieldConfigInterface, getFieldDataTypes} from "../model/field";
 import {useI18n} from "vue-i18n";
 import {onMounted, ref} from "vue";
 import {useDataSourceService} from "../services/datasource.service";
+import ItemList from "../components/ItemList.vue";
 
 const { t } = useI18n();
 
@@ -94,7 +107,22 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
+function addEnumItem() {
+    let newItem = {key: "", title: ""}
+    let m = props.modelValue;
+    if (!props.modelValue.values) {
+        m.values = [newItem]
+    } else {
+        m.values.push(newItem)
+    }
+    emit('update:modelValue', m)
+}
 
+function removeEnumItem(idx) {
+    let m = props.modelValue.values;
+    m.splice(idx, 1)
+    emit('update:modelValue', m)
+}
 
 </script>
 

@@ -35,9 +35,7 @@
         </el-form-item>
 
         <el-form-item label="Fields">
-            <ItemList :data-set="dataSet"
-                      field="fields"
-                      key-prop="alias"
+            <ItemList key-prop="alias"
                       title-prop="title"
                       :list="fields"
                       @edit="editField"
