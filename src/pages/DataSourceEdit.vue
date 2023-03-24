@@ -43,7 +43,14 @@
                       @edit="editField"
                       @remove="removeField"
                       @insert="insertField"
-            />
+            >
+                <template #default="{item}">
+                    <el-tag style="width: 60px">{{item['type']}}</el-tag>
+                    <div style="margin-left: 16px">
+                        {{item['title']}}
+                    </div>
+                </template>
+            </ItemList>
         </el-form-item>
 
     </el-form>
@@ -99,8 +106,9 @@ onMounted(async () => {
     await dataSet.value.openOne( n ? undefined : <string>route.params.id)
 
     fields.value = dataSet.value.current.fields
-    //@ts-ignore
-    document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${import.meta.env.VITE_APP_TITLE}`
+    // @ts-ignore
+    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
+    document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${ appTitle }`
 });
 
 async function exportConfig() {

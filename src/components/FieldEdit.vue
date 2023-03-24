@@ -47,6 +47,10 @@
         <el-form-item v-if="modelValue.type !== 'table'" :label="t('fieldConfig.default')">
             <el-input v-model="modelValue.default"></el-input>
         </el-form-item>
+
+        <el-form-item v-if="modelValue.type !== 'enum'" :label="t('fieldConfig.enum')">
+            <el-input v-model="modelValue.values"></el-input>
+        </el-form-item>
     </el-form>
 
 </template>

@@ -2,12 +2,13 @@
     <el-card shadow="never" body-style="padding: 0" style="width: 100%">
         <div v-for="(item, idx)  in list" :id="item[keyProp]"
              class="list-item"
-
         >
             <div class="list-item-title" @click="emit('edit', idx)">
                 <Icon icon="ic:baseline-drag-indicator"
                       style="padding-right: 4px; color: var(--el-border-color); cursor: move" width="16"/>
-                {{item[titleProp]}}
+                <slot :item="item">
+                    {{item[titleProp]}}
+                </slot>
             </div>
             <div class="list-item-actions">
                 <el-button link
