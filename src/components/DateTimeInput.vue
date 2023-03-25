@@ -20,7 +20,7 @@ let value = ref(getValue())
 
 interface Props {
     field: string,
-    modelValue: string | number,
+    modelValue?: string | number,
     dataSet: DataSet
 }
 

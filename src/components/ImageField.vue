@@ -76,7 +76,6 @@ function url(port: string = '3000') {
     // @ts-ignore
     const env = import.meta.env.MODE || "production";
 
-    console.log(location)
     if (env === "development" || localStorage.dev === "dev") {
         _url = location.protocol + '//' + location.hostname + ":" + port;
     } else {

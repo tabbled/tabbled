@@ -1,7 +1,8 @@
 <template>
-    <el-select
+    <el-select v-if="_field && _field.type === 'link'"
                   filterable
                   :model-value="value"
+                  :disabled="isDisabled"
                   remote
                   clearable
                   remote-show-suffix
@@ -16,6 +17,20 @@
             :value="item[keyProp]"
         />
     </el-select>
+    <el-select v-else-if="_field && _field.type === 'enum'"
+               filterable
+               :model-value="value"
+               :disabled="isDisabled"
+               clearable
+               @change="(val) => change(val)"
+    >
+        <el-option
+            v-for="item in _field.values"
+            :key="item.key"
+            :label="item.title"
+            :value="item.key"
+        />
+    </el-select>
 </template>
 
 <script setup lang="ts">
@@ -27,15 +42,16 @@ import {DataSet} from "../model/dataset";
 let isLoading = ref(false)
 let data = ref<Array<object>>([])
 let source: DataSourceInterface = null
-let _field: FieldConfigInterface = null
+let _field = ref<FieldConfigInterface>(null)
 let value = ref(getValue())
+let isDisabled = ref(true)
 
 interface Props {
     field: string,
-    modelValue: string | number,
+    modelValue?: string | number,
     dataSet: DataSet,
-    keyProp: string,
-    displayProp: string
+    keyProp?: string,
+    displayProp?: string
 }
 
 
@@ -48,8 +64,11 @@ const emit = defineEmits(['change'])
 
 watch(() => props.dataSet,
     async () => {
-        if (props.dataSet.isOpen)
+        if (props.dataSet.isOpen) {
             value.value = getValue()
+            isDisabled.value = false
+        }
+
     },
     {
         deep: true
@@ -63,19 +82,28 @@ onMounted(() => {
         return;
     }
 
-    _field = source.getFieldByAlias(props.field)
+    _field.value = source.getFieldByAlias(props.field)
 
     if (!_field) {
         console.warn(`Field "${props.field}" not found`)
         return;
     }
 
-    if (_field.type !== 'link') {
-        console.warn(`Field "${_field.alias}" is not a link type`)
-        return
+    if (_field.value.type == 'link') {
+        isDisabled.value = false
+        getData()
     }
 
-    getData()
+    if (_field.value.type == 'enum') {
+        isDisabled.value = false
+
+        data.value = _field.value.values;
+
+    }
+
+    console.log('mounted', props.field)
+
+
 })
 
 function getValue() : string | number {

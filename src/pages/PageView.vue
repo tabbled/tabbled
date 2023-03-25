@@ -34,7 +34,6 @@
                            style="width: 100%"
                            :is="element.name" v-bind="element"
                 />
-
             </el-form-item>
 
 

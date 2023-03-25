@@ -34,7 +34,7 @@
 
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text" >
-                    <LinkCell v-if="getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum'"
+                    <LinkCell v-if="getFieldConfig(element.field) && (getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum')"
                               :field="getFieldConfig(element.field)"
                               :model-value="getCellData(scope)"
 
@@ -123,8 +123,6 @@ function setCurrentCell(cell: Cell) {
     if (editingCell.value !== cell) {
         editingCell.value = cell
     }
-
-    console.log(cell)
 
     editingCell.value = cell
     save()
