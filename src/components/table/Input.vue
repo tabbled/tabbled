@@ -37,6 +37,24 @@
             :value="item.id"
         />
     </el-select>
+    <el-select
+        v-else-if="field && (field.type === 'enum')"
+        class="table-select"
+        :model-value="modelValue"
+        placeholder="Select"
+        filterable
+        remote
+        clearable
+        :loading="isLoading"
+        @change="handleInput"
+    >
+        <el-option
+            v-for="item in field.values"
+            :key="item.key"
+            :label="item.title"
+            :value="item.key"
+        />
+    </el-select>
 </template>
 
 <script setup lang="ts">

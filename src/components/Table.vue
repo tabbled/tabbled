@@ -34,7 +34,7 @@
 
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text" >
-                    <LinkCell v-if="getFieldConfig(element.field).type === 'link'"
+                    <LinkCell v-if="getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum'"
                               :field="getFieldConfig(element.field)"
                               :model-value="getCellData(scope)"
 
@@ -272,6 +272,7 @@ function getFormattedCellData(scope: any) {
     switch(field.type) {
         case "text":
         case "string":
+        case "enum":
         case "link": return val
         case "number": return formatNumber(val, field.precision)
         default: return 'error'

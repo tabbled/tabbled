@@ -193,7 +193,7 @@ const dsColumns:ColumnConfigInterface[] = [
         "field": "source",
         "title": "Source",
         "width": 200,
-        "sortable": true
+        "sortable": true,
     }
 ]
 const menuColumns:ColumnConfigInterface[] = [

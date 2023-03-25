@@ -24,10 +24,16 @@ let ds:DataSourceInterface = null
 let displayValue = ref("")
 
 onMounted(() => {
-    if (props.field && props.field.type === 'link') {
+    if (!props.field || !props.modelValue) {
+        return
+    }
+
+    if (props.field.type === 'link') {
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
         getLinkValue();
+    } else if (props.field.type === 'enum') {
+        getEnumValue();
     }
 })
 
@@ -45,6 +51,17 @@ async function getLinkValue() {
 
     displayValue.value = link_entity[props.field.displayProp ? props.field.displayProp : 'name']
     isLoading.value = false
+}
+
+function getEnumValue() {
+    const items = props.field.values;
+    for(const i in items) {
+        if (items[i].key === props.modelValue) {
+            displayValue.value = items[i].title
+            return
+        }
+    }
+    displayValue.value = 'Not found'
 }
 
 </script>
