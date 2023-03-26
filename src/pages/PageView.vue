@@ -174,7 +174,7 @@ async function init() {
                     // @ts-ignore
                     if (!dataSets.value.has(element.dataSet)) {
                         // @ts-ignore
-                        console.warn(`DataSet "${element.dataSet}" does not exist!`)
+                        console.warn(`DataSet "${element.dataSet}" does not exist! For element ${element.name}`)
                     } else {
                         // @ts-ignore
                         el.dataSet = dataSets.value.get(element.dataSet)

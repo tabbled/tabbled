@@ -1,10 +1,11 @@
 import {ref, UnwrapRef} from 'vue'
 import {
+    CustomDataSource,
     DataSource,
     DataSourceConfigDataSource,
     DataSourceConfigInterface,
-    DataSourceInterface,
-    DataSourceType, FunctionsConfigDataSource,
+    DataSourceInterface, DataSourceSource,
+    DataSourceType, FieldDataSource, FunctionsConfigDataSource,
     MenuConfigDataSource,
     PageConfigDataSource
 } from "../model/datasource";
@@ -25,7 +26,22 @@ export class DataSourceService {
     private configDataSources: Map<string, DataSourceInterface> = new Map()
 
     registerDataSource(config: DataSourceConfigInterface): DataSourceInterface | undefined {
-        let ds = new DataSource(config)
+        let ds: DataSourceInterface = null
+        switch (config.source) {
+            case DataSourceSource.internal:
+                ds = new DataSource(config)
+                break;
+            case DataSourceSource.custom:
+                ds = new CustomDataSource(config)
+                break;
+            case DataSourceSource.field:
+                ds = new FieldDataSource(config)
+                break;
+            default:
+                console.log(`DataSource source ${config.source} "${config.alias}" is not implemented yet`)
+                return;
+        }
+
         this.addDataSource(ds);
         return ds;
     }

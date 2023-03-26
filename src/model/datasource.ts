@@ -1,7 +1,6 @@
 import {Field, FieldConfigInterface, FieldInterface} from "./field";
 import _ from 'lodash'
 import { useDatabase } from '../services/database.service'
-import {EventEmitter} from "events";
 import {DataItemInterface, useSyncService} from "../services/sync.service";
 
 const db = useDatabase()
@@ -16,7 +15,8 @@ export enum DataSourceSource {
     internal = 'internal',
     custom = 'custom',
     restapi = 'restapi',
-    sql = 'sql'
+    sql = 'sql',
+    field = 'field'
 }
 
 export interface EntityInterface {
@@ -30,7 +30,7 @@ export interface FilterItemInterface {
     compare?: any
 }
 
-export interface DataSourceInterface extends EventEmitter{
+export interface DataSourceInterface {
     readonly: boolean,
     alias: string,
     isTree?: boolean,
@@ -85,9 +85,8 @@ export interface DataSourceConfigInterface {
     source?: DataSourceSource
 }
 
-export class DataSource extends EventEmitter implements DataSourceInterface {
+export class DataSource implements DataSourceInterface {
     constructor(config: DataSourceConfigInterface) {
-        super()
         this.fieldByAlias = new Map()
         this.alias = config.alias
         this.keyField = config.keyField
@@ -284,21 +283,138 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
 
         if (!current_item) {
-            this.emit('inserted', item.data)
+            //this.emit('inserted', item.data)
         } else {
             if (current_item.version === item.version && current_item.rev !== '' && current_item.rev === item.rev) {
                 console.warn(`Item ${item.id} received from remote has the same version ${item.version}`)
             } else if (current_item.version !== item.version) {
-                this.emit('updated', item.data)
+                //this.emit('updated', item.data)
             }
 
             if (item.deletedAt && !current_item.deletedAt) {
-                this.emit('removed', item.data)
+                //this.emit('removed', item.data)
             }
         }
         return true
     }
 }
+
+export class CustomDataSource implements DataSourceInterface {
+    alias: string;
+    cached: boolean;
+    fields: FieldInterface[];
+    isTree: boolean;
+    keyField: string;
+    readonly: boolean;
+    source: DataSourceSource;
+    type: DataSourceType;
+
+    constructor(config: DataSourceConfigInterface) {
+        console.log(config)
+    }
+
+    getAll(): Promise<EntityInterface[]> {
+        return Promise.resolve([]);
+    }
+
+    getById(id: string | number): Promise<EntityInterface | undefined> {
+        return Promise.resolve(undefined);
+    }
+
+    getByKey(key: string | number): Promise<EntityInterface | undefined> {
+        return Promise.resolve(undefined);
+    }
+
+    getFieldByAlias(alias: string): FieldInterface | undefined {
+        return undefined;
+    }
+
+    getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {
+        return Promise.resolve([]);
+    }
+
+    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
+        return Promise.resolve([]);
+    }
+
+    insert(id: string, value: any): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
+    removeById(id: string): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
+    updateById(id: string, value: object): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+}
+
+export class FieldDataSource implements DataSourceInterface {
+    alias: string;
+    cached: boolean;
+    fields: FieldInterface[];
+    isTree: boolean;
+    keyField: string;
+    readonly: boolean;
+    source: DataSourceSource.field;
+    type: DataSourceType = DataSourceType.data;
+
+    private fieldByAlias: Map<string, FieldInterface>
+    private config: DataSourceConfigInterface
+
+    constructor(config: DataSourceConfigInterface) {
+        console.log(config)
+        this.alias = config.alias
+        this.fieldByAlias = new Map()
+        this.keyField = config.keyField
+        this.config = config
+        this.fields = []
+
+        config.fields.forEach(conf => {
+            this.fieldByAlias.set(conf.alias, new Field(conf))
+        })
+        if (this.fieldByAlias.size > 0)
+            this.fields = [...this.fieldByAlias.values()]
+    }
+
+    getAll(): Promise<EntityInterface[]> {
+        return Promise.resolve([]);
+    }
+
+    getById(id: string | number): Promise<EntityInterface | undefined> {
+        return Promise.resolve(undefined);
+    }
+
+    getByKey(key: string | number): Promise<EntityInterface | undefined> {
+        return Promise.resolve(undefined);
+    }
+
+    getFieldByAlias(alias: string): FieldInterface | undefined {
+        return undefined;
+    }
+
+    getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {
+        return Promise.resolve([]);
+    }
+
+    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
+        return Promise.resolve([]);
+    }
+
+    insert(id: string, value: any): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
+    removeById(id: string): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
+    updateById(id: string, value: object): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+}
+
 
 export class PageConfigDataSource extends DataSource {
     constructor() {
@@ -427,6 +543,9 @@ export class DataSourceConfigDataSource extends DataSource {
                     values: [{
                         key: 'internal',
                         title: "Internal"
+                    },{
+                        key: 'field',
+                        title: "Field"
                     },{
                         key: 'custom',
                         title: "Custom"
