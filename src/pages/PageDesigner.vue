@@ -696,6 +696,7 @@ async function dropNewWidget(e:DragEvent) {
     margin: 0 !important;
     padding: 0 !important;
     cursor: move;
+    overflow: hidden;
 }
 
 .new-widget-draggable {

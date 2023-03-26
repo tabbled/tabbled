@@ -53,6 +53,7 @@ export interface FieldConfigInterface {
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
     getValueScript?: string                    // Evaluate when entity changed, result of eval sets to field value
     onValueChangeScript?: string             // Evaluate when value changed manually by user or by another script
+    dataSetField?: string               // For 'field' type that used for looking fields list in set dataset on PageSettingPanel
 }
 
 export interface FieldInterface {

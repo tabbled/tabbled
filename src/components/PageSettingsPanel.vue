@@ -69,7 +69,7 @@
                         />
                         <FieldSelect v-else-if="prop.type === 'field'"
                                      style="width: 100%"
-                                     :data-set="getDataSetConfig()"
+                                     :data-set="getDataSetConfig(prop)"
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
@@ -263,16 +263,25 @@ function populateDataSetsList() {
     })
 }
 
-function getDataSetConfig(): DataSetConfigInterface | undefined {
+function getDataSetConfig(prop: FieldConfigInterface): DataSetConfigInterface | undefined {
     let alias = ""
-    for (const i in properties.value) {
-        let f = properties.value[i]
 
-        if (f.type === 'dataset') {
-            alias = _.get(props.pageConfig, _currentPath + '.' + f.alias)
-            break
+    // If prop.dataSetField not set, find first field with dataset type
+    if (!prop.dataSetField) {
+        for (const i in properties.value) {
+            let f = properties.value[i]
+
+            if (f.type === 'dataset') {
+                alias = _.get(props.pageConfig, _currentPath + '.' + f.alias)
+                break
+            }
         }
+    } else {
+        alias = alias = _.get(props.pageConfig, _currentPath + '.' + prop.dataSetField)
     }
+
+    console.log(alias)
+
     if (alias === "")
         return undefined;
 

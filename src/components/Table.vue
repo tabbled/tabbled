@@ -16,7 +16,7 @@
             @rowDblclick="onTableRowDblClick"
             @header-dragend="headerResized"
     >
-        <el-table-column v-if="isRowSelectable" type="selection" width="30" />
+        <el-table-column type="selection" width="30" />
         <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
                          :sortable="element.sortable ? 'custom' : false"
                          :key="element.id"
@@ -71,15 +71,13 @@ interface Props {
     id: string,
     dataSet: UnwrapRef<DataSet>,
     columns: ColumnConfigInterface[];
-    isRowSelectable?: boolean,
-    isInlineEditing?: boolean
+    isReadonly?: boolean
     context: any,
     onRowClick?: EventHandlerConfigInterface
     onRowDoubleClick?: EventHandlerConfigInterface
 }
 const props = withDefaults(defineProps<Props>(), {
-    isRowSelectable: true,
-    isInlineEditing: true
+    isReadonly: true
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -217,7 +215,7 @@ function onCellInput(scope: any, value: any) {
 }
 
 function handleCellClick(scope:any) {
-    if (props.isInlineEditing)
+    if (!props.isReadonly)
         setCurrentCell({
             row: scope.$index,
             col: scope.cellIndex
@@ -252,7 +250,7 @@ let getHeaderCellClass = (column: any) => {
 }
 
 let getHeaderTitle = (scope: any) => {
-    let idx = props.isRowSelectable ? scope.$index -1 : scope.$index
+    let idx = scope.$index -1
     let col = props.columns[idx];
     if (!col)
         return "error"

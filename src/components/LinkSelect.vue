@@ -75,6 +75,8 @@ watch(() => props.dataSet,
     })
 
 onMounted(() => {
+    if (!props.dataSet)
+        return;
 
     source = props.dataSet.dataSource
     if (!source) {

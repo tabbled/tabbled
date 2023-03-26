@@ -1,5 +1,5 @@
 <template>
-    <el-input @input="change" :model-value="value" :type="type"/>
+    <el-input :disabled="isDisabled" @input="change" :model-value="value" :type="type"/>
 </template>
 
 <script setup lang="ts">
@@ -19,6 +19,7 @@ const props = defineProps<{
 let value = ref(getValue())
 let _field: FieldConfigInterface = null
 let type: 'text' | 'textarea' = 'text'
+let isDisabled = ref(true)
 
 function getValue():string {
     if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
@@ -40,6 +41,9 @@ watch(() => props.dataSet,
     })
 
 function init() {
+    if (!props.dataSet)
+        return;
+
     _field = props.dataSet.dataSource.getFieldByAlias(props.field)
 
     switch (_field.type) {
@@ -47,8 +51,13 @@ function init() {
         default: type = 'text';
     }
 
-    if (props.dataSet.isOpen)
+    if (props.dataSet.isOpen) {
         value.value = getValue()
+        isDisabled.value = false
+    }
+
+
+
 }
 
 function change(val) {

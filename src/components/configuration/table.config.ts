@@ -6,13 +6,17 @@ export function properties():FieldConfigInterface[] {
         alias: "dataSet",
         type: 'dataset'
     },{
-        title: "Row selectable",
-        alias: "isRowSelectable",
-        type: 'bool',
-        default: true
+        title: "Field dataSet",
+        alias: "fieldDataSet",
+        type: 'dataset'
     },{
-        title: "Inline editing",
-        alias: "isInlineEditing",
+        title: "Field",
+        alias: "field",
+        type: 'field',
+        dataSetField: "fieldDataSet"
+    },{
+        title: "Readonly",
+        alias: "readonly",
         type: 'bool',
         default: true
     },{

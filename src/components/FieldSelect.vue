@@ -39,6 +39,8 @@ onMounted(() => {
 })
 
 async function getData() {
+    if(!props.dataSet)
+        return;
 
     isLoading.value = true;
     data.value = []
