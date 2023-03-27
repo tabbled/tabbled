@@ -309,6 +309,9 @@ export class CustomDataSource implements DataSourceInterface {
     source: DataSourceSource;
     type: DataSourceType;
 
+    private fieldByAlias: Map<string, FieldInterface>
+    //private config: DataSourceConfigInterface
+
     constructor(config: DataSourceConfigInterface) {
         console.log(config)
     }
@@ -326,7 +329,7 @@ export class CustomDataSource implements DataSourceInterface {
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
-        return undefined;
+        return this.fieldByAlias.get(alias)
     }
 
     getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {
@@ -391,7 +394,7 @@ export class FieldDataSource implements DataSourceInterface {
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
-        return undefined;
+        return this.fieldByAlias.get(alias)
     }
 
     getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {

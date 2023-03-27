@@ -3,6 +3,7 @@ import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from ".
 import _ from 'lodash'
 import {useDataSourceService} from "../services/datasource.service";
 import { FlakeId } from '../flake-id'
+import {EventEmitter} from "events";
 let flakeId = new FlakeId()
 
 let dsService = useDataSourceService()
@@ -30,14 +31,17 @@ export function useDataSet(config: DataSetConfigInterface): DataSet {
     return new DataSet(config, ds)
 }
 
-export class DataSet {
+export class DataSet extends  EventEmitter {
 
     constructor(config: DataSetConfigInterface, dataSource: DataSourceInterface) {
+        super()
         this.dataSource = dataSource;
         this.alias = config.alias;
         this.autoOpen = config.autoOpen;
         this.autoCommit = config.autoCommit;
         this.keyField = this.dataSource.keyField
+
+        //console.log('DataSet created', config)
 
         // this.dataSource.on('updated', async (value) => {
         //     // @ts-ignore
@@ -91,15 +95,20 @@ export class DataSet {
         return this._data
     }
 
+    set data(data: Array<EntityInterface>) {
+        this._data = data;
+    }
+
     async open() {
-        console.log("dataset opened ", this.alias)
         this.close()
         try {
             await this.load()
             this._isOpen = true;
+            this.emit('open')
         } catch (e) {
             throw e
         }
+        console.log("dataset opened ", this.isOpen)
     }
 
     async openOne(id?: string) {
@@ -132,8 +141,10 @@ export class DataSet {
             this.data.push(one)
             this._currentId = _id;
             this._isOpen = true;
+
         }
-        console.log("dataset opened ", this.alias)
+        console.log("dataset opened one ", this.alias)
+        this.emit('open')
     }
 
     close() {
@@ -141,6 +152,7 @@ export class DataSet {
         this._changesById.clear();
         this._isOpen = false;
         this._currentId = null;
+        this.emit('close')
     }
 
     selectedIds: string[] = []
@@ -187,6 +199,7 @@ export class DataSet {
     }
 
     async insertRow(row?: number): Promise<string> {
+        console.log(this)
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
@@ -213,6 +226,7 @@ export class DataSet {
             type: 'insert'
         })
 
+        this.emit('update')
         return this.currentId
     }
 
@@ -223,7 +237,12 @@ export class DataSet {
 
         let row = this.getRowById(this._currentId)
 
-        return this.updateDataRow(row, field, data);
+        let res = this.updateDataRow(row, field, data);
+
+        if (res)
+            this.emit('update')
+
+        return res
     }
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
@@ -254,6 +273,7 @@ export class DataSet {
         this._data.splice(row, 1, ent)
         this._changesById.set(ent.id, change)
 
+        this.emit('update')
         return true;
     }
 
@@ -284,7 +304,10 @@ export class DataSet {
 
         this._data.splice(row, 1)
 
-        return false
+        this.emit('remove')
+        this.emit('dataUpdate')
+
+        return true
     }
 
     removeByCurrentId() : boolean {
@@ -317,6 +340,7 @@ export class DataSet {
                 this.removeRow(row)
             }
         })
+        this.emit('update')
         return true
     }
 

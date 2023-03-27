@@ -52,6 +52,7 @@ import {DataSet, useDataSet} from "../model/dataset";
 import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {ElMessage} from "element-plus";
+import {useComponentService} from "../services/component.service";
 
 let store = useStore();
 let router = useRouter();
@@ -71,6 +72,7 @@ let dataSets = ref<Map<string, DataSet>>(new Map())
 let grid = ref(null)
 let isEditPage = ref(false)
 let editingDataSet = ref<DataSet>(null)
+let componentService = useComponentService()
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -151,7 +153,7 @@ async function init() {
 
     props.pageConfig.dataSets.forEach(config => {
         let ds = useDataSet(config)
-        // @ts-ignore
+
         dataSets.value.set(ds.alias, ds)
         scriptContext.page.dataSets[ds.alias] = ds
 
@@ -167,21 +169,28 @@ async function init() {
             name: element.name,
         }
 
-        Object.keys(element).forEach(key => {
-            if (key === 'dataSet') {
-                // @ts-ignore
-                if (element.dataSet && element.dataSet !== "") {
-                    // @ts-ignore
-                    if (!dataSets.value.has(element.dataSet)) {
-                        // @ts-ignore
-                        console.warn(`DataSet "${element.dataSet}" does not exist! For element ${element.name}`)
+
+
+        let elProps = componentService.getByName(el.name)
+        if (!elProps) {
+            console.warn(`Component "${el.name}" not registered`)
+            return;
+        }
+
+
+
+        elProps.properties.forEach(item => {
+            if (item.type === 'dataset') {
+                if (element[item.alias] && element[item.alias] !== "") {
+
+                    if (!dataSets.value.has(element[item.alias])) {
+                        console.warn(`DataSet "${element[item.alias]}" does not exist! For element ${element.name}`)
                     } else {
-                        // @ts-ignore
-                        el.dataSet = dataSets.value.get(element.dataSet)
+                        el[item.alias] = dataSets.value.get(element[item.alias])
                     }
                 }
             } else {
-                el[key] = _.cloneDeep(element[key])
+                el[item.alias] = _.cloneDeep(element[item.alias])
             }
         })
         el['context'] = scriptContext
@@ -215,9 +224,11 @@ async function init() {
         }
     }
 
+
     dataSets.value.forEach(ds => {
+        console.log(props.pageConfig.editingDataSet)
         if (ds.autoOpen) {
-            if (props.pageConfig.isEditPage) {
+            if (props.pageConfig.isEditPage && props.pageConfig.editingDataSet === ds.alias ) {
                 let id = <string>route.params.id
                 ds.openOne(id !== 'new' ? id : null);
             } else

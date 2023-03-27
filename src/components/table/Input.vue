@@ -18,6 +18,7 @@
         @input="handleInput"
     />
     <el-select
+        ref="el"
         v-else-if="field && (field.type === 'link')"
         class="table-select"
         :model-value="modelValue"
@@ -38,6 +39,7 @@
         />
     </el-select>
     <el-select
+        ref="el"
         v-else-if="field && (field.type === 'enum')"
         class="table-select"
         :model-value="modelValue"
@@ -71,7 +73,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-let emit = defineEmits(['update:modelValue'])
+let emit = defineEmits(['update:modelValue', 'leave'])
 
 let el = ref(null)
 let isLoading = ref(false)
@@ -113,7 +115,8 @@ async function getLinkData() {
 <style lang="scss">
 
 .table-select{
-    height: calc(31px - 2px);
+    height: calc(31px - 1px);
+    width: 100%;
     margin: 1px;
     padding: 0 !important;
 

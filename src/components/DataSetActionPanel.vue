@@ -33,7 +33,7 @@ interface Props {
     onEdit?: EventHandlerConfigInterface
     onAdd?: EventHandlerConfigInterface
     onRemove?: EventHandlerConfigInterface
-    isPure: boolean // onEdit, onAdd, onRemove, and data set actions will not use
+    isPure?: boolean // onEdit, onAdd, onRemove, and data set actions will not use
 }
 
 const props = withDefaults(defineProps<Props>(), {

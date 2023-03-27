@@ -1,5 +1,6 @@
 <template>
     <el-table
+            ref="table"
             border
             :data="props.dataSet ? props.dataSet.data : []"
             :fit="true"
@@ -9,7 +10,6 @@
             :header-row-class-name="getHeaderClass"
             :cell-class-name="getCellClass"
             :row-class-name="getRowClass"
-            @mouseleave="save"
             @current-change="currentRowChanged"
             @selection-change="selectionChange"
             @row-click="onTableRowClick"
@@ -30,10 +30,9 @@
                        :field="getFieldConfig(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
-
-
+                       @leave="setCurrentCell(null)"
                 />
-                <div v-else @click="() => handleCellClick(scope)" class="table-cell-text" >
+                <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <LinkCell v-if="getFieldConfig(element.field) && (getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum')"
                               :field="getFieldConfig(element.field)"
                               :model-value="getCellData(scope)"
@@ -56,7 +55,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref, UnwrapRef, watch} from 'vue'
+import {onMounted, onUnmounted, ref, UnwrapRef, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
 import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
@@ -66,10 +65,11 @@ import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 
-
 interface Props {
     id: string,
     dataSet: UnwrapRef<DataSet>,
+    field?: string,
+    fieldDataSet?: UnwrapRef<DataSet>,
     columns: ColumnConfigInterface[];
     isReadonly?: boolean
     context: any,
@@ -90,6 +90,7 @@ interface Cell {row: number, col: number}
 let _columns = ref<ColumnConfigInterface[]>([])
 let editingCell = ref<Cell | null>(null)
 let editEl = ref(null)
+let table = ref(null)
 let dsService = useDataSourceService()
 
 let sync = useSyncService()
@@ -107,8 +108,12 @@ watch(() => props.columns,
 onMounted(async () => {
     await initColumns()
     await init();
-
 });
+
+onUnmounted(() => {
+    if (props.fieldDataSet)
+        props.fieldDataSet.removeListener('open', getFieldData)
+})
 
 function save() {
     if (props.dataSet && props.dataSet.autoCommit && props.dataSet.isChanged()) {
@@ -123,14 +128,21 @@ function setCurrentCell(cell: Cell) {
     }
 
     editingCell.value = cell
+
     save()
+
 }
 
 function getFieldConfig(field: string) {
     if (!props.dataSet)
         return undefined;
 
-    return props.dataSet.dataSource.getFieldByAlias(field)
+    let f = props.dataSet.dataSource.getFieldByAlias(field)
+
+    if (!f)
+        console.warn(`Field "${field}" doesn't exists in data source "${props.dataSet.dataSource.alias}"`)
+
+    return f
 }
 
 async function compileAction(action) {
@@ -215,6 +227,7 @@ function onCellInput(scope: any, value: any) {
 }
 
 function handleCellClick(scope:any) {
+    console.log(props.isReadonly)
     if (!props.isReadonly)
         setCurrentCell({
             row: scope.$index,
@@ -319,6 +332,37 @@ async function initColumns() {
 async function init() {
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
+
+    // If props.fieldDataSet is set than it is a field table we should get/set data from props.fieldDataSet
+    if(props.fieldDataSet) {
+
+        if (!props.field) {
+            console.error(`Field for field table not set`)
+            return
+        }
+
+        let field = props.fieldDataSet.dataSource.getFieldByAlias(props.field)
+
+        if (!field) {
+            console.error(`DataSource "${props.fieldDataSet.dataSource.alias}" of field for field "${props.field}" table doesn't exist`)
+            return
+        }
+
+        props.fieldDataSet.on('open', getFieldData)
+
+        if (props.fieldDataSet.isOpen && props.fieldDataSet.current) {
+            getFieldData()
+        }
+    }
+}
+
+function getFieldData(){
+    //let data = props.fieldDataSet.current[props.field]
+
+    console.log(props.fieldDataSet.current)
+
+    console.log(props.dataSet)
+    console.log(props.fieldDataSet)
 }
 
 

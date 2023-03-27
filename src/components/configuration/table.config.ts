@@ -15,8 +15,12 @@ export function properties():FieldConfigInterface[] {
         type: 'field',
         dataSetField: "fieldDataSet"
     },{
+        title: "Title",
+        alias: "title",
+        type: "string"
+    },{
         title: "Readonly",
-        alias: "readonly",
+        alias: "isReadonly",
         type: 'bool',
         default: true
     },{
