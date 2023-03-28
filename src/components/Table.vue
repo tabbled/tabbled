@@ -30,7 +30,6 @@
                        :field="getFieldConfig(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
-                       @leave="setCurrentCell(null)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <LinkCell v-if="getFieldConfig(element.field) && (getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum')"
@@ -105,6 +104,14 @@ watch(() => props.columns,
         deep: true
     })
 
+watch(() => props.dataSet,
+    async () => {
+        await init()
+    },
+    {
+        deep: false
+    })
+
 onMounted(async () => {
     await initColumns()
     await init();
@@ -113,6 +120,8 @@ onMounted(async () => {
 onUnmounted(() => {
     if (props.fieldDataSet)
         props.fieldDataSet.removeListener('open', getFieldData)
+
+    props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
 
 function save() {
@@ -130,7 +139,6 @@ function setCurrentCell(cell: Cell) {
     editingCell.value = cell
 
     save()
-
 }
 
 function getFieldConfig(field: string) {
@@ -227,7 +235,6 @@ function onCellInput(scope: any, value: any) {
 }
 
 function handleCellClick(scope:any) {
-    console.log(props.isReadonly)
     if (!props.isReadonly)
         setCurrentCell({
             row: scope.$index,
@@ -330,6 +337,8 @@ async function initColumns() {
 }
 
 async function init() {
+    setCurrentCell(null)
+
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
 
@@ -349,6 +358,7 @@ async function init() {
         }
 
         props.fieldDataSet.on('open', getFieldData)
+        props.dataSet.on('update', setDataToFieldDataSet)
 
         if (props.fieldDataSet.isOpen && props.fieldDataSet.current) {
             getFieldData()
@@ -357,12 +367,21 @@ async function init() {
 }
 
 function getFieldData(){
-    //let data = props.fieldDataSet.current[props.field]
+    console.log('getFieldData')
+    if (!props.fieldDataSet.current || !props.fieldDataSet.current[props.field]) {
+        props.dataSet.data = []
+        return;
+    }
 
-    console.log(props.fieldDataSet.current)
+    props.dataSet.data = props.fieldDataSet.current[props.field]
+}
 
-    console.log(props.dataSet)
-    console.log(props.fieldDataSet)
+function setDataToFieldDataSet() {
+    if (!props.fieldDataSet.current) {
+        return
+    }
+
+    props.fieldDataSet.update(props.field, props.dataSet.data)
 }
 
 

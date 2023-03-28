@@ -73,10 +73,10 @@ interface Props {
 
 const props = defineProps<Props>()
 
-let emit = defineEmits(['update:modelValue', 'leave'])
+let emit = defineEmits(['update:modelValue'])
 
 let el = ref(null)
-let isLoading = ref(false)
+let isLoading = ref(true)
 let linkData = ref([])
 
 let displayProp = ref('name')
