@@ -80,9 +80,10 @@ export interface DataSourceConfigInterface {
     title?: string,
     alias: string,
     readonly?: boolean,
-    keyField: string,
+    keyField?: string,
     isTree?: boolean,
-    source?: DataSourceSource
+    source?: DataSourceSource,
+    script?: string
 }
 
 export class DataSource implements DataSourceInterface {
@@ -301,19 +302,33 @@ export class DataSource implements DataSourceInterface {
 
 export class CustomDataSource implements DataSourceInterface {
     alias: string;
-    cached: boolean;
+    cached: boolean = false;
     fields: FieldInterface[];
     isTree: boolean;
     keyField: string;
-    readonly: boolean;
-    source: DataSourceSource;
-    type: DataSourceType;
+    readonly: boolean = false;
+    source: DataSourceSource = DataSourceSource.custom;
+    type: DataSourceType = DataSourceType.data;
 
     private fieldByAlias: Map<string, FieldInterface>
-    //private config: DataSourceConfigInterface
+    private config: DataSourceConfigInterface
 
     constructor(config: DataSourceConfigInterface) {
+
         console.log(config)
+
+        this.alias = config.alias
+        this.keyField = config.keyField
+        this.config = config
+        this.fields = []
+        this.fieldByAlias = new Map()
+        this.isTree = !!config.isTree
+
+        config.fields.forEach(conf => {
+            this.fieldByAlias.set(conf.alias, new Field(conf))
+        })
+        if (this.fieldByAlias.size > 0)
+            this.fields = [...this.fieldByAlias.values()]
     }
 
     getAll(): Promise<EntityInterface[]> {
@@ -367,7 +382,6 @@ export class FieldDataSource implements DataSourceInterface {
     private config: DataSourceConfigInterface
 
     constructor(config: DataSourceConfigInterface) {
-        console.log(config)
         this.alias = config.alias
         this.fieldByAlias = new Map()
         this.keyField = config.keyField
@@ -559,6 +573,20 @@ export class DataSourceConfigDataSource extends DataSource {
                         key: 'sql',
                         title: "SQL"
                     }]
+                },
+                {
+                    title: "Context",
+                    alias: "context",
+                    type: "text",
+                    required: false,
+                    default: "{}"
+                },
+                {
+                    title: "Script",
+                    alias: "script",
+                    type: "text",
+                    required: false,
+                    default: "{}"
                 }
             ]});
     }

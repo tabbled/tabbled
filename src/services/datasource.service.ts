@@ -64,7 +64,8 @@ export class DataSourceService {
                 target = this.dataSources
                 break;
             default:
-                console.warn(`Can't register datasource ${dataSource.alias} with type ${dataSource.type}`)
+                console.error(`Can't register datasource ${dataSource.alias} with type ${dataSource.type}`)
+                console.error(dataSource)
                 return;
         }
 

@@ -233,6 +233,7 @@ let pageHeader = usePageHeader()
 onMounted(async () => {
     try {
         await init()
+        setAppTitle()
     } catch (e) {
         console.error(e)
     }
@@ -242,6 +243,12 @@ onUnmounted(() => {
     // pageHeader.actions = []
     // pageHeader.title = ""
 })
+
+function setAppTitle() {
+    // @ts-ignore
+    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
+    document.title = `${route.meta.title} | ${ appTitle }`
+}
 
 function setPathIdx(idx: number) {
     let path = ''

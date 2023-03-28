@@ -14,6 +14,7 @@
         :indent-with-tab="true"
         :tab-size="4"
         :extensions="extensions"
+        :style="{'max-height': maxHeight + 'px'}"
 
         @ready="handleReady"
         @change="change($event)"
@@ -47,12 +48,14 @@ interface Props {
     field?: string,
     context?:any,
     format: 'json' | 'javascript',
-    runnable: boolean
+    runnable: boolean,
+    maxHeight: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
     format: "javascript",
-    runnable: false
+    runnable: false,
+    maxHeight: 400
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -150,6 +153,7 @@ async function runScript() {
 .editor {
     text-align: left;
     width: 100%;
+
     .el-card__body {
         padding: 0;
     }

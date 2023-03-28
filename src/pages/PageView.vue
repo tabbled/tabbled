@@ -154,6 +154,11 @@ async function init() {
     props.pageConfig.dataSets.forEach(config => {
         let ds = useDataSet(config)
 
+        if (!ds) {
+            console.warn(`DataSet "${config.alias}" hasn't created`)
+            return
+        }
+
         dataSets.value.set(ds.alias, ds)
         scriptContext.page.dataSets[ds.alias] = ds
 

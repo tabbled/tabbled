@@ -19,8 +19,8 @@
         </template>
     </el-page-header>
 
-    <el-form label-position="top">
-        <div style="display: flex; flex-direction: row; width: 100%">
+    <el-form label-position="top" :style="{ 'height': availableHeight }" ref="main">
+        <div style="display: flex; flex-direction: row; width: 100%;">
             <el-form-item label="Title" style="width: 50%; padding-right: 8px">
                 <Input :data-set="dataSet" field="title" />
             </el-form-item>
@@ -28,28 +28,87 @@
             <el-form-item label="Alias" style="width: 50%">
                 <Input :data-set="dataSet" field="alias" />
             </el-form-item>
+
+            <el-form-item label="Source" style="padding-left: 8px">
+                <EnumSelect :data-set="dataSet" field="source" />
+            </el-form-item>
+
+            <el-form-item label="Is tree" style="padding-left: 8px; width: 100px">
+                <CheckboxField :data-set="dataSet" field="isTree" />
+            </el-form-item>
         </div>
 
-        <el-form-item label="Source">
-            <EnumSelect :data-set="dataSet" field="source" />
-        </el-form-item>
+        <el-tabs v-model="activeTab" class="demo-tabs">
+            <el-tab-pane label="Fields" name="fields">
 
-        <el-form-item label="Fields">
-            <ItemList key-prop="alias"
-                      title-prop="title"
-                      :list="fields"
-                      @edit="editField"
-                      @remove="removeField"
-                      @insert="insertField"
+                <el-form-item >
+                    <ItemList key-prop="alias"
+                              title-prop="title"
+                              :list="fields"
+                              @edit="editField"
+                              @remove="removeField"
+                              @insert="insertField"
+                    >
+                        <template #default="{item}">
+                            <el-tag style="width: 60px">{{item['type']}}</el-tag>
+                            <div style="margin-left: 16px">
+                                {{item['title']}}
+                            </div>
+                        </template>
+                    </ItemList>
+                </el-form-item>
+
+            </el-tab-pane>
+            <el-tab-pane label="Data" name="data">
+                <DataSetActionPanel context=""
+                                    :data-set="testDataSet"
+                                    style="padding-bottom: 16px"
+                />
+                <Table :columns="testTableColumn"
+                       id="testDataSourceTable"
+                       context=""
+                       :data-set="testDataSet"
+                       :is-inline-editing="true"
+                />
+            </el-tab-pane>
+
+            <el-tab-pane v-if="dataSet && dataSet.current && dataSet.current['source'] === 'custom'"
+                         label="Script"
+                         name="script"
+                         style="padding-right: 2px;"
             >
-                <template #default="{item}">
-                    <el-tag style="width: 60px">{{item['type']}}</el-tag>
-                    <div style="margin-left: 16px">
-                        {{item['title']}}
-                    </div>
-                </template>
-            </ItemList>
-        </el-form-item>
+                <div>
+                    <el-button text type="primary" style="margin-bottom: 8px"  @click="tryBuildDataSource">
+                        <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
+                        Run
+                    </el-button>
+                    <CodeEditor :data-set="dataSet"
+                                field="script"
+                                format="javascript"
+                                :runnable="false"
+                                :max-height="availableHeight"
+                    />
+                </div>
+
+            </el-tab-pane>
+
+            <el-tab-pane v-if="dataSet && dataSet.current && dataSet.current['source'] === 'custom'"
+                         label="Context"
+                         name="context"
+                         style="padding-right: 2px"
+            >
+                <CodeEditor :data-set="dataSet"
+                            field="context"
+                            format="json"
+                            :runnable="false"
+                            :max-height="availableHeight"
+
+                />
+            </el-tab-pane>
+        </el-tabs>
+
+
+
 
     </el-form>
 
@@ -73,7 +132,7 @@
 <script setup lang="ts">
 
 import {ElMessage, ElMessageBox} from "element-plus";
-import {useDataSet} from "../model/dataset";
+import {DataSet, useDataSet} from "../model/dataset";
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import Input from "../components/Input.vue";
@@ -83,6 +142,9 @@ import {useI18n} from "vue-i18n";
 import FieldEdit from "../components/FieldEdit.vue";
 import {FieldConfigInterface} from "../model/field";
 import _ from 'lodash'
+import {CustomDataSource, DataSourceInterface, DataSourceType} from "../model/datasource";
+import CheckboxField from "../components/CheckboxField.vue";
+import {ColumnConfigInterface} from "../model/column";
 
 let router = useRouter();
 let route = useRoute()
@@ -91,6 +153,8 @@ let currentField = ref<FieldConfigInterface>(null)
 let currentIndex = -1;
 let fieldEditDialogVisible = ref(false)
 const { t } = useI18n();
+let activeTab = ref('fields')
+let availableHeight = ref(0)
 
 let dataSet = ref(useDataSet({
     dataSource: 'datasource',
@@ -98,6 +162,10 @@ let dataSet = ref(useDataSet({
     autoOpen: false,
     autoCommit: false
 }))
+
+let testDataSet = ref<DataSet>(null)
+let testDataSource = ref<DataSourceInterface>(null)
+let testTableColumn = ref<ColumnConfigInterface[]>([])
 
 onMounted(async () => {
     let n = !route.params.id || route.params.id === 'new'
@@ -107,6 +175,8 @@ onMounted(async () => {
     // @ts-ignore
     let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
     document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${ appTitle }`
+
+    availableHeight.value = window.innerHeight - 260
 });
 
 async function exportConfig() {
@@ -156,6 +226,42 @@ function context() {
     }
 }
 
+function tryBuildDataSource() {
+
+    testDataSource.value = new CustomDataSource({
+        alias: dataSet.value.current['alias'],
+        type: DataSourceType.data,
+        fields: dataSet.value.current['fields'],
+        script: dataSet.value.current['script'],
+        isTree: dataSet.value.current['isTree'],
+    })
+
+    testDataSet.value = new DataSet({
+        alias: "test",
+        dataSource: "",
+        autoCommit: false,
+        autoOpen: false
+    },
+        testDataSource.value)
+
+    openTestDataSet()
+}
+
+function openTestDataSet() {
+    if (!testDataSet.value)
+        return;
+
+    testDataSource.value.fields.forEach((field => {
+        testTableColumn.value.push({
+            id: field.alias,
+            field: field.alias,
+            width: 100,
+            title: field.title
+        })
+    }))
+
+}
+
 function saveField() {
     fieldEditDialogVisible.value = false;
 
@@ -203,5 +309,9 @@ function removeField(row) {
 </script>
 
 <style scoped>
+
+.demo-tabs {
+    max-height: 300px;
+}
 
 </style>
