@@ -15,6 +15,8 @@
             @row-click="onTableRowClick"
             @rowDblclick="onTableRowDblClick"
             @header-dragend="headerResized"
+            lazy
+            :load="loadData"
     >
         <el-table-column type="selection" width="30" />
         <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
@@ -30,6 +32,7 @@
                        :field="getFieldConfig(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
+                       style="display: inline-flex; width: calc(100% - 24px)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <LinkCell v-if="getFieldConfig(element.field) && (getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum')"
@@ -123,6 +126,12 @@ onUnmounted(() => {
 
     props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
+
+async function loadData(row, treeNode, resolve) {
+
+    console.log('loadData', row, treeNode)
+    resolve(await props.dataSet.dataSource.getChildren(row.id))
+}
 
 function save() {
     if (props.dataSet && props.dataSet.autoCommit && props.dataSet.isChanged()) {
@@ -430,6 +439,7 @@ function setDataToFieldDataSet() {
 
 .table-cell {
     .cell {
+        display: flex;
         padding-left: 8px !important;
         padding-right: 8px !important;
         padding-bottom: 4px;
@@ -441,13 +451,13 @@ function setDataToFieldDataSet() {
 .table-cell-text {
     min-height: 22px;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .el-table .el-table__cell {
     padding: 0 !important;
-
-
 }
+
 
 .table-cell:hover {
     box-shadow:0 0 0 1px var(--el-color-primary-light-5) inset;

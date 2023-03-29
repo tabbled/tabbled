@@ -228,6 +228,12 @@ export class DataSet extends  EventEmitter {
         })
 
         this.emit('update')
+
+        //If datasourse is CustomDataSource than the source should take a value without committing
+        if (this.dataSource instanceof CustomDataSource) {
+            this.dataSource.insert(item.id, item)
+        }
+
         return this.currentId
     }
 
@@ -238,12 +244,7 @@ export class DataSet extends  EventEmitter {
 
         let row = this.getRowById(this._currentId)
 
-        let res = this.updateDataRow(row, field, data);
-
-        if (res)
-            this.emit('update')
-
-        return res
+        return this.updateDataRow(row, field, data);
     }
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
@@ -309,10 +310,17 @@ export class DataSet extends  EventEmitter {
 
         this._changesById.set(id, change)
 
-        this._data.splice(row, 1)
+
 
         this.emit('remove')
-        this.emit('dataUpdate')
+        this.emit('update')
+
+        //If datasourse is CustomDataSource than the source should take a value without committing
+        if (this.dataSource instanceof CustomDataSource) {
+            this.dataSource.removeById(id)
+        } else {
+            this._data.splice(row, 1)
+        }
 
         return true
     }
@@ -329,7 +337,7 @@ export class DataSet extends  EventEmitter {
         if (!row)
             return false;
 
-        this._data.splice(row, 1)
+        this.removeRow(row)
         return true
     }
 
@@ -347,11 +355,14 @@ export class DataSet extends  EventEmitter {
                 this.removeRow(row)
             }
         })
-        this.emit('update')
         return true
     }
 
     async commit() {
+        if (this.dataSource instanceof CustomDataSource) {
+            return
+        }
+
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }

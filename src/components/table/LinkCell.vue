@@ -1,5 +1,5 @@
 <template>
-    {{displayValue}}
+    {{displayValue ? displayValue : '--'}}
 </template>
 
 <script setup lang="ts">

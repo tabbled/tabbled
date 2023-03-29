@@ -69,7 +69,6 @@ export interface DataSourceInterface {
     updateById(id: string, value: object): Promise<void>
     removeById(id: string): Promise<void>
 
-    hasChildren(id: string) : Promise<boolean>
     getChildren(id: string) : Promise<EntityInterface | undefined>
 
     // Sync Service use this method when got data from server
@@ -124,10 +123,6 @@ export class DataSource implements DataSourceInterface {
     readonly = false
     type: DataSourceType
     source: DataSourceSource
-
-    async hasChildren(id: string) : Promise<boolean> {
-        return false
-    }
 
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
         return undefined
@@ -350,12 +345,11 @@ export class CustomDataSource implements DataSourceInterface {
             this.fields = [...this.fieldByAlias.values()]
     }
 
-    async hasChildren(id: string) : Promise<boolean> {
-        return true
-    }
-
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
-        return undefined
+        if (!this.model)
+            return
+
+        return await this.model.getChildren(id)
     }
 
     async getAll(): Promise<EntityInterface[]> {
@@ -366,8 +360,6 @@ export class CustomDataSource implements DataSourceInterface {
     }
 
     async setData(items: EntityInterface[]):Promise<void> {
-        console.log('Custom dataset')
-        console.log(items)
         if (!this.model)
             return
 
@@ -392,8 +384,11 @@ export class CustomDataSource implements DataSourceInterface {
         }
     }
 
-    getById(id: string | number): Promise<EntityInterface | undefined> {
-        return Promise.resolve(undefined);
+    async getById(id: string | number): Promise<EntityInterface | undefined> {
+        if (!this.model)
+            return;
+
+        return await this.model.getById(id)
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
@@ -402,9 +397,8 @@ export class CustomDataSource implements DataSourceInterface {
 
     async getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {
         if (!this.model)
-            return;
+            return [];
 
-        console.warn('CustomDataSource.getManyRaw not implemented')
         return await this.getAll()
     }
 
@@ -416,16 +410,25 @@ export class CustomDataSource implements DataSourceInterface {
         return Promise.resolve([]);
     }
 
-    insert(id: string, value: any): Promise<void> {
-        return Promise.resolve(undefined);
+    async insert(id: string, value: any, parentId?: string): Promise<void> {
+        if (!this.model)
+            return;
+
+        return await this.model.insert(id, value, parentId)
     }
 
-    removeById(id: string): Promise<void> {
-        return Promise.resolve(undefined);
+    async removeById(id: string): Promise<void> {
+        if (!this.model)
+            return;
+
+        return await this.model.removeById(id)
     }
 
-    updateById(id: string, value: object): Promise<void> {
-        return Promise.resolve(undefined);
+    async updateById(id: string, value: object): Promise<void> {
+        if (!this.model)
+            return;
+
+        return await this.model.updateById(id, value)
     }
 
     async setValue(id: string, field: string, value: any) {
@@ -461,10 +464,6 @@ export class FieldDataSource implements DataSourceInterface {
         })
         if (this.fieldByAlias.size > 0)
             this.fields = [...this.fieldByAlias.values()]
-    }
-
-    async hasChildren(id: string) : Promise<boolean> {
-        return false
     }
 
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
