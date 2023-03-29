@@ -1,4 +1,4 @@
-import {DataSourceInterface, EntityInterface} from "./datasource";
+import {CustomDataSource, DataSourceInterface, EntityInterface} from "./datasource";
 import {FieldConfigInterface, FieldInterface, generateEntityWithDefault} from "./field";
 import _ from 'lodash'
 import {useDataSourceService} from "../services/datasource.service";
@@ -97,6 +97,7 @@ export class DataSet extends  EventEmitter {
 
     set data(data: Array<EntityInterface>) {
         this._data = data;
+        this.dataSource.setData(data).then()
     }
 
     async open() {
@@ -256,7 +257,7 @@ export class DataSet extends  EventEmitter {
 
          ent[field] = cellData
 
-        console.log(change)
+        //console.log(change)
 
         if (change) {
             change.new = _.cloneDeep(ent)
@@ -270,8 +271,14 @@ export class DataSet extends  EventEmitter {
             }
         }
 
-        this._data.splice(row, 1, ent)
+        //this._data.splice(row, 1, ent)
+        this._data[row][field] = cellData
         this._changesById.set(ent.id, change)
+
+        //If datasourse is CustomDataSource than the source should take a value without committing
+        if (this.dataSource instanceof CustomDataSource) {
+            this.dataSource.setValue(ent.id, field, cellData)
+        }
 
         this.emit('update')
         return true;

@@ -138,6 +138,8 @@ function setCurrentCell(cell: Cell) {
 
     editingCell.value = cell
 
+    console.log(editingCell.value)
+
     save()
 }
 

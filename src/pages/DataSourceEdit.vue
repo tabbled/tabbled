@@ -69,6 +69,7 @@
                        context=""
                        :data-set="testDataSet"
                        :is-inline-editing="true"
+                       :is-readonly="false"
                 />
             </el-tab-pane>
 
@@ -226,15 +227,29 @@ function context() {
     }
 }
 
-function tryBuildDataSource() {
+async function tryBuildDataSource() {
 
-    testDataSource.value = new CustomDataSource({
+    let dataSource = new CustomDataSource({
         alias: dataSet.value.current['alias'],
         type: DataSourceType.data,
         fields: dataSet.value.current['fields'],
         script: dataSet.value.current['script'],
         isTree: dataSet.value.current['isTree'],
+        readonly: false
     })
+
+    dataSource.setContext(context())
+    dataSource.setScript(dataSet.value.current['script'])
+
+    try {
+        await dataSource.compile()
+        console.log(dataSource.model)
+    } catch (e) {
+        console.error(e)
+    }
+
+
+    testDataSource.value = dataSource
 
     testDataSet.value = new DataSet({
         alias: "test",
@@ -251,6 +266,7 @@ function openTestDataSet() {
     if (!testDataSet.value)
         return;
 
+    testTableColumn.value = []
     testDataSource.value.fields.forEach((field => {
         testTableColumn.value.push({
             id: field.alias,
@@ -259,6 +275,8 @@ function openTestDataSet() {
             title: field.title
         })
     }))
+
+    testDataSet.value.open()
 
 }
 
