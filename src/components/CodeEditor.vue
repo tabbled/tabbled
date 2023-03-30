@@ -70,7 +70,7 @@ const handleReady = (payload) => {
 
 function getScript():string {
     if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
-        return props.modelValue
+        return props.modelValue ? props.modelValue : ''
 
     return props.dataSet.current[props.field]
 }
@@ -89,6 +89,7 @@ watch(() => props.dataSet,
     })
 
 onMounted(async () => {
+    script.value = getScript()
     setExtensions()
 });
 
@@ -97,6 +98,11 @@ watch(() => props.format,
     async () => {
         await setExtensions()
     })
+
+watch(() => props.modelValue,
+    async () => {
+        script.value = getScript()
+    }, {deep: true})
 
 function setExtensions() {
     let arr = []
@@ -127,6 +133,7 @@ function setExtensions() {
 function change(event: any) {
     script.value = event
     emit('update:modelValue', event)
+    console.log(event)
 
     if (!props.dataSet || !props.field || props.field == '') {
         console.warn(`DataSet or field haven't set`)

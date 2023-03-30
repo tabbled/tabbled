@@ -116,7 +116,7 @@
     <el-dialog
         v-model="fieldEditDialogVisible"
         title="Edit field"
-        width="400px"
+        width="500px"
     >
         <field-edit :model-value="currentField"/>
         <template #footer>
@@ -282,6 +282,8 @@ function openTestDataSet() {
 
 function saveField() {
     fieldEditDialogVisible.value = false;
+
+    console.log(currentField.value)
 
     if (currentIndex == -1) {
         fields.value.push(currentField.value)

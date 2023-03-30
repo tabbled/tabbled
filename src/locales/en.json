@@ -24,7 +24,10 @@
         "isMultiple": "Multiple",
         "type": "Type",
         "precision": "Precision",
-        "values": "Values"
+        "values": "Values",
+        "getListValues": "Get list",
+        "getValue": "Get value",
+        "setValue": "Set value"
     },
     "menuConfig": {
         "title": "Title",

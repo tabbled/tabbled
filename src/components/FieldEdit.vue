@@ -1,68 +1,105 @@
 <template>
     <el-form ref="formRef" :model="modelValue" label-width="100px">
-        <el-form-item :label="t('fieldConfig.title')" prop="title">
-            <el-input v-model="modelValue.title"/>
-        </el-form-item>
 
-        <el-form-item :label="t('fieldConfig.alias')" prop="alias">
-            <el-input v-model="modelValue.alias"></el-input>
-        </el-form-item>
+        <el-tabs>
 
-        <el-form-item :label="t('fieldConfig.type')">
-            <el-select v-model="modelValue.type" >
-                <el-option
-                    v-for="item in fieldTypes"
-                    :key="item.key"
-                    :label="item.label"
-                    :value="item.key"
-                >
-                </el-option>
-            </el-select>
-        </el-form-item>
+            <el-tab-pane label="Setting">
+                <el-form-item :label="t('fieldConfig.title')" prop="title">
+                    <el-input v-model="modelValue.title"/>
+                </el-form-item>
 
+                <el-form-item :label="t('fieldConfig.alias')" prop="alias">
+                    <el-input v-model="modelValue.alias"></el-input>
+                </el-form-item>
 
-        <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'table'"
-                      :label="t('fieldConfig.datasource')">
-            <el-select v-model="modelValue.datasource" >
-                <el-option
-                    v-for="item in dataSources"
-                    :key="item.key"
-                    :label="item.label"
-                    :value="item.key"
-                >
-                </el-option>
-            </el-select>
-        </el-form-item>
+                <el-form-item :label="t('fieldConfig.type')">
+                    <el-select v-model="modelValue.type" >
+                        <el-option
+                            v-for="item in fieldTypes"
+                            :key="item.key"
+                            :label="item.label"
+                            :value="item.key"
+                        >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
 
 
+                <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'table'"
+                              :label="t('fieldConfig.datasource')">
+                    <el-select v-model="modelValue.datasource" >
+                        <el-option
+                            v-for="item in dataSources"
+                            :key="item.key"
+                            :label="item.label"
+                            :value="item.key"
+                        >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
 
-        <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.precision')">
-            <el-input-number v-model="modelValue.precision" controls-position="right" :min="0" :max="9" style="text-align: start"></el-input-number>
-        </el-form-item>
 
-        <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'list'" :label="t('fieldConfig.isMultiple')">
-            <el-checkbox v-model="modelValue.isMultiple"></el-checkbox>
-        </el-form-item>
 
-        <el-form-item v-if="modelValue.type !== 'table'" :label="t('fieldConfig.default')">
-            <el-input v-model="modelValue.default"></el-input>
-        </el-form-item>
+                <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.precision')">
+                    <el-input-number v-model="modelValue.precision" controls-position="right" :min="0" :max="9" style="text-align: start"></el-input-number>
+                </el-form-item>
 
-        <el-form-item v-if="modelValue.type === 'enum'" :label="t('fieldConfig.values')">
-            <ItemList key-prop="alias"
-                      title-prop="title"
-                      :list="modelValue.values"
-                      @remove="removeEnumItem"
-                      @insert="addEnumItem"
-            >
-                <template #default="{item}">
-                    <div style="display: flex; width: 90%" >
-                        <el-input size="small" style="padding-right: 4px" v-model="item['key']" placeholder="Key"></el-input>
-                        <el-input size="small" v-model="item['title']" placeholder="Label"></el-input>
-                    </div>
-                </template>
-            </ItemList>
-        </el-form-item>
+                <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'list'" :label="t('fieldConfig.isMultiple')">
+                    <el-checkbox v-model="modelValue.isMultiple"></el-checkbox>
+                </el-form-item>
+
+                <el-form-item v-if="modelValue.type !== 'table'" :label="t('fieldConfig.default')">
+                    <el-input v-model="modelValue.default"></el-input>
+                </el-form-item>
+
+                <el-form-item v-if="modelValue.type === 'enum'" :label="t('fieldConfig.values')">
+                    <ItemList key-prop="alias"
+                              title-prop="title"
+                              :list="modelValue.values"
+                              @remove="removeEnumItem"
+                              @insert="addEnumItem"
+                    >
+                        <template #default="{item}">
+                            <div style="display: flex; width: 90%" >
+                                <el-input size="small" style="padding-right: 4px" v-model="item['key']" placeholder="Key"></el-input>
+                                <el-input size="small" v-model="item['title']" placeholder="Label"></el-input>
+                            </div>
+                        </template>
+                    </ItemList>
+                </el-form-item>
+            </el-tab-pane>
+
+            <el-tab-pane label="Customizing">
+
+                <el-form-item :label="t('fieldConfig.getValue')">
+                    <CodeEditor v-model="modelValue.getValue"
+                                field="script"
+                                format="javascript"
+                                runnable
+                    />
+                </el-form-item>
+
+                <el-form-item :label="t('fieldConfig.setValue')">
+                    <CodeEditor v-model="modelValue.setValue"
+                                field="script"
+                                format="javascript"
+                                runnable
+                    />
+                </el-form-item>
+
+                <el-form-item :label="t('fieldConfig.getListValues')">
+                    <CodeEditor v-model="modelValue.getListValues"
+                                field="script"
+                                format="javascript"
+                                runnable
+                    />
+                </el-form-item>
+
+            </el-tab-pane>
+
+        </el-tabs>
+
+
     </el-form>
 
 </template>

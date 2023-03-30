@@ -402,12 +402,8 @@ export class CustomDataSource implements DataSourceInterface {
         return await this.getAll()
     }
 
-    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
-        if (!this.model)
-            return;
-
-        console.warn('CustomDataSource.getManyRaw not implemented')
-        return Promise.resolve([]);
+    async getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
+        return [];
     }
 
     async insert(id: string, value: any, parentId?: string): Promise<void> {

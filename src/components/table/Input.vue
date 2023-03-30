@@ -76,7 +76,7 @@ const props = defineProps<Props>()
 let emit = defineEmits(['update:modelValue'])
 
 let el = ref(null)
-let isLoading = ref(true)
+let isLoading = ref(false)
 let linkData = ref([])
 
 let displayProp = ref('name')
