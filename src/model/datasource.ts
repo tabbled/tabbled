@@ -499,7 +499,6 @@ export class FieldDataSource implements DataSourceInterface {
     }
 }
 
-
 export class PageConfigDataSource extends DataSource {
     constructor() {
         super({

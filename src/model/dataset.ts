@@ -104,6 +104,7 @@ export class DataSet extends  EventEmitter {
         this.close()
         try {
             await this.load()
+
             this._isOpen = true;
             this.emit('open')
         } catch (e) {
@@ -145,6 +146,9 @@ export class DataSet extends  EventEmitter {
 
         }
         console.log("dataset opened one ", this.alias)
+
+
+
         this.emit('open')
     }
 
@@ -197,6 +201,33 @@ export class DataSet extends  EventEmitter {
 
     getColumnByAlias(alias: string): FieldInterface | undefined {
         return this.dataSource.getFieldByAlias(alias);
+    }
+
+    async getValue(field: string, row: number): Promise<any> {
+        if (!field || row < 0) {
+            return null
+        }
+
+        //console.log('getValue data set')
+
+        let rowData = this._data[row]
+        let f = this.dataSource.getFieldByAlias(field)
+
+        let getValueFunc = await f.getValueFunc()
+
+
+
+        if (getValueFunc) {
+            console.log(getValueFunc)
+            try {
+                return await getValueFunc.exec(rowData)
+            } catch (e) {
+                console.error(`Error while evaluating field ${f.alias} function setValue of data set ${this.alias}`)
+                console.error(e)
+                return 'Error'
+            }
+        } else
+            return rowData[field]
     }
 
     async insertRow(row?: number): Promise<string> {

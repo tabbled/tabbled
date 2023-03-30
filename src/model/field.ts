@@ -1,4 +1,5 @@
 import {EntityInterface} from "./datasource";
+import {CompiledFunc, compileScript} from "../services/compiler";
 
 
 export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements' | 'field'
@@ -74,8 +75,9 @@ export interface FieldInterface {
         object | object[] | null,
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
 
-    getValues(): Promise<object[]>,
-    getFormattedValue(value: any) : Promise<any>
+    getValueFunc(): Promise<CompiledFunc | undefined>,
+    setValueFunc(): Promise<CompiledFunc | undefined>,
+    getListFunc() : Promise<CompiledFunc | undefined>
 }
 
 export class Field implements FieldInterface {
@@ -90,8 +92,17 @@ export class Field implements FieldInterface {
         this.required = config.required;
         this.values = config.values
         this.default = config.default
+        this.config = config
 
+        console.log('create field', config)
     }
+
+    private _getValueFunc: CompiledFunc = null
+    private _setValueFunc: CompiledFunc = null
+    private _getListFunc: CompiledFunc = null
+    private config: FieldConfigInterface
+
+
     alias: string;
     type: FieldType;
     precision?: number;
@@ -103,12 +114,45 @@ export class Field implements FieldInterface {
     datasource?: string;
     values: EnumValuesInterface[]
 
-    async getFormattedValue(value: any): Promise<any> {
-        return []
+    async getValueFunc(): Promise<CompiledFunc | undefined> {
+        if (this.config.getValue && !this._getValueFunc) {
+            try {
+                this._getValueFunc = await compileScript(this.config.getValue, 'ctx')
+            } catch (e) {
+                this._getValueFunc = null
+                console.error(`Error while compile field ${this.alias} function getValue`)
+                console.error(e)
+            }
+        }
+
+        return this._getValueFunc
     }
 
-    async getValues(): Promise<object[]> {
-        return []
+    async setValueFunc(): Promise<CompiledFunc | undefined> {
+        if (this.config.setValue && !this._setValueFunc) {
+            try {
+                this._setValueFunc = await compileScript(this.config.setValue, 'ctx')
+            } catch (e) {
+                this._setValueFunc = null
+                console.error(`Error while compiling field ${this.alias} function setValue`)
+                console.error(e)
+            }
+        }
+
+        return this._setValueFunc
+    }
+    async getListFunc() : Promise<CompiledFunc | undefined> {
+        if (this.config.getListValues && !this._getListFunc) {
+            try {
+                this._getListFunc = await compileScript(this.config.getListValues, 'ctx')
+            } catch (e) {
+                this._getListFunc = null
+                console.error(`Error while compile field ${this.alias} function getListValues`)
+                console.error(e)
+            }
+        }
+
+        return this._getListFunc
     }
 }
 

@@ -3,7 +3,7 @@
         v-if="field && (field.type === 'text' || field.type === 'string')"
         ref="el"
         class="table-input"
-        :model-value="modelValue"
+        :model-value="value"
         @mouseenter="handleMouseEnter"
         @input="handleInput"
     />
@@ -13,7 +13,7 @@
         :precision="field.precision ? field.precision : 0"
         ref="el"
         class="table-input-number"
-        :model-value="modelValue"
+        :model-value="Number(value)"
         @mouseenter="handleMouseEnter"
         @input="handleInput"
     />
@@ -21,7 +21,7 @@
         ref="el"
         v-else-if="field && (field.type === 'link')"
         class="table-select"
-        :model-value="modelValue"
+        :model-value="value"
         placeholder="Select"
         filterable
         remote
@@ -42,7 +42,7 @@
         ref="el"
         v-else-if="field && (field.type === 'enum')"
         class="table-select"
-        :model-value="modelValue"
+        :model-value="value"
         placeholder="Select"
         filterable
         remote
@@ -67,7 +67,7 @@ import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
-    modelValue: any,
+    modelValue: Promise<any>,
     field: FieldConfigInterface
 }
 
@@ -78,16 +78,20 @@ let emit = defineEmits(['update:modelValue'])
 let el = ref(null)
 let isLoading = ref(false)
 let linkData = ref([])
+let value = ref('')
 
 let displayProp = ref('name')
 let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
 
-onMounted(() => {
+onMounted(async () => {
+
+    value.value = await props.modelValue
+
     if (props.field && props.field.type === 'link') {
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
-        getLinkData();
+        await getLinkData();
     }
 })
 
@@ -96,8 +100,9 @@ function handleMouseEnter() {
         el.value.focus()
 }
 
-function handleInput(value: any) {
-    emit('update:modelValue', value)
+function handleInput(val: any) {
+    value.value = val
+    emit('update:modelValue', val)
 }
 
 async function getLinkData() {

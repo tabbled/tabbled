@@ -136,7 +136,7 @@ function change(event: any) {
     console.log(event)
 
     if (!props.dataSet || !props.field || props.field == '') {
-        console.warn(`DataSet or field haven't set`)
+        //console.warn(`DataSet or field haven't set`)
         return;
     }
 

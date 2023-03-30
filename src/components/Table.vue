@@ -40,10 +40,9 @@
                               :model-value="getCellData(scope)"
 
                     />
-                    <div v-else>
-                        {{getFormattedCellData(scope)}}
-                    </div>
-
+                    <Cell v-else
+                          :model-value="dataSet.getValue(scope.column.property, scope.$index)"
+                          :field="getFieldConfig(element.field)" />
                 </div>
 
             </template>
@@ -66,6 +65,7 @@ import {CompiledFunc, compileScript} from "../services/compiler";
 import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
+import Cell from "./table/Cell.vue";
 
 interface Props {
     id: string,
@@ -87,10 +87,10 @@ let actions = ref({
 })
 const emit = defineEmits(['rowDblClick', 'rowClick'])
 
-interface Cell {row: number, col: number}
+interface CellRef {row: number, col: number}
 
 let _columns = ref<ColumnConfigInterface[]>([])
-let editingCell = ref<Cell | null>(null)
+let editingCell = ref<CellRef | null>(null)
 let editEl = ref(null)
 let table = ref(null)
 let dsService = useDataSourceService()
@@ -139,16 +139,13 @@ function save() {
     }
 }
 
-function setCurrentCell(cell: Cell) {
+function setCurrentCell(cell: CellRef) {
 
     if (editingCell.value !== cell) {
         editingCell.value = cell
     }
 
     editingCell.value = cell
-
-    console.log(editingCell.value)
-
     save()
 }
 
@@ -289,40 +286,11 @@ let getHeaderTitle = (scope: any) => {
     return col.title
 }
 
-function getFormattedCellData(scope: any) {
-    let val = getCellData(scope)
-    let field = props.dataSet.dataSource.getFieldByAlias(scope.column.property);
-
-    if (!field)
-        return ''
-
-    switch(field.type) {
-        case "text":
-        case "string":
-        case "enum":
-        case "link": return val
-        case "number": return formatNumber(val, field.precision)
-        default: return 'error'
-    }
-}
-
-let getCellData = (scope: any) => {
+let getCellData = async (scope: any) => {
     if (!props.dataSet)
         return;
 
-    const entity: object | undefined = props.dataSet.getByRow(scope.$index);
-
-    if (!entity)
-        return ''
-
-    return entity[scope.column.property]
-}
-
-function formatNumber(value: any, precision: number) {
-    if (value === undefined || value === null || value === "")
-        return "";
-
-    return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
+    return await props.dataSet.getValue(scope.column.property, scope.$index)
 }
 
 function getRowClass() {
