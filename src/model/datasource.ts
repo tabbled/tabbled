@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { useDatabase } from '../services/database.service'
 import {DataItemInterface, useSyncService} from "../services/sync.service";
 import {compileScript} from "../services/compiler";
+import {EventEmitter} from "events";
 
 const db = useDatabase()
 const syncService = useSyncService()
@@ -31,7 +32,7 @@ export interface FilterItemInterface {
     compare?: any
 }
 
-export interface DataSourceInterface {
+export interface DataSourceInterface extends EventEmitter {
     readonly: boolean,
     alias: string,
     isTree?: boolean,
@@ -92,8 +93,9 @@ export interface DataSourceConfigInterface {
     script?: string
 }
 
-export class DataSource implements DataSourceInterface {
+export class DataSource extends EventEmitter implements DataSourceInterface {
     constructor(config: DataSourceConfigInterface) {
+        super()
         this.fieldByAlias = new Map()
         this.alias = config.alias
         this.keyField = config.keyField
@@ -294,23 +296,23 @@ export class DataSource implements DataSourceInterface {
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
 
         if (!current_item) {
-            //this.emit('inserted', item.data)
+            this.emit('insert', item.data)
         } else {
             if (current_item.version === item.version && current_item.rev !== '' && current_item.rev === item.rev) {
                 console.warn(`Item ${item.id} received from remote has the same version ${item.version}`)
             } else if (current_item.version !== item.version) {
-                //this.emit('updated', item.data)
+                this.emit('update', item.data)
             }
 
             if (item.deletedAt && !current_item.deletedAt) {
-                //this.emit('removed', item.data)
+                this.emit('remove', item.data)
             }
         }
         return true
     }
 }
 
-export class CustomDataSource implements DataSourceInterface {
+export class CustomDataSource extends EventEmitter implements DataSourceInterface {
     alias: string;
     cached: boolean = false;
     fields: FieldInterface[];
@@ -322,14 +324,13 @@ export class CustomDataSource implements DataSourceInterface {
     context: any = {}
     model: any = null
     script: string = ""
+    _emitHandler = this.emitHandler.bind(this)
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
 
     constructor(config: DataSourceConfigInterface) {
-
-        console.log(config)
-
+        super()
         this.alias = config.alias
         this.keyField = config.keyField
         this.config = config
@@ -374,12 +375,28 @@ export class CustomDataSource implements DataSourceInterface {
         this.script = script
     }
 
+    emitHandler(event: string, value: any) {
+        console.log('update', value)
+        if (event === 'update') {
+            this.emit('updated', value)
+        }
+    }
+
+    async init() {
+        await this.setScript(this.script)
+        await this.compile()
+
+        if (this.model)
+            await this.model.init()
+    }
+
     async compile() {
-        let func = await compileScript(this.script, 'ctx')
+        let func = await compileScript(this.script, 'ctx', 'emit')
 
         try {
-            this.model = func.exec(this.context)
+            this.model = func.exec(this.context, this._emitHandler)
         } catch (e) {
+            this.model = null
             throw e
         }
     }
@@ -435,7 +452,7 @@ export class CustomDataSource implements DataSourceInterface {
     }
 }
 
-export class FieldDataSource implements DataSourceInterface {
+export class FieldDataSource extends EventEmitter implements DataSourceInterface {
     alias: string;
     cached: boolean;
     fields: FieldInterface[];
@@ -449,6 +466,7 @@ export class FieldDataSource implements DataSourceInterface {
     private config: DataSourceConfigInterface
 
     constructor(config: DataSourceConfigInterface) {
+        super()
         this.alias = config.alias
         this.fieldByAlias = new Map()
         this.keyField = config.keyField

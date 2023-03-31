@@ -25,7 +25,7 @@ export class DataSourceService {
     private dataSources: Map<string, DataSourceInterface> = new Map()
     private configDataSources: Map<string, DataSourceInterface> = new Map()
 
-    registerDataSource(config: DataSourceConfigInterface): DataSourceInterface | undefined {
+    async registerDataSource(config: DataSourceConfigInterface): Promise<DataSourceInterface | undefined> {
         let ds: DataSourceInterface = null
         switch (config.source) {
             case DataSourceSource.internal:
@@ -40,6 +40,10 @@ export class DataSourceService {
             default:
                 console.log(`DataSource source ${config.source} "${config.alias}" is not implemented yet`)
                 return;
+        }
+
+        if (ds instanceof  CustomDataSource) {
+            await ds.init()
         }
 
         this.addDataSource(ds);

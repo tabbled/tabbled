@@ -240,6 +240,7 @@ async function tryBuildDataSource() {
 
     dataSource.setContext(context())
     dataSource.setScript(dataSet.value.current['script'])
+    await dataSource.init()
 
     try {
         await dataSource.compile()
@@ -276,8 +277,9 @@ function openTestDataSet() {
         })
     }))
 
+    testDataSet.value.setContext(context())
     testDataSet.value.open()
-
+    testDataSet.value.data = []
 }
 
 function saveField() {

@@ -93,8 +93,6 @@ export class Field implements FieldInterface {
         this.values = config.values
         this.default = config.default
         this.config = config
-
-        console.log('create field', config)
     }
 
     private _getValueFunc: CompiledFunc = null

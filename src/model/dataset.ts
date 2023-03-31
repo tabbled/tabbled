@@ -43,20 +43,21 @@ export class DataSet extends  EventEmitter {
 
         //console.log('DataSet created', config)
 
-        // this.dataSource.on('updated', async (value) => {
-        //     // @ts-ignore
-        //     // I don't know, but we access the ref<> in emit callback then ref need to get with .value
-        //     let data = this.data().value
-        //     console.log(value)
-        //     for(let i in data) {
-        //         console.log(value.id, 'updated')
-        //         let item = data[i]
-        //         if (item.id === value.id) {
-        //             data[i] = value
-        //
-        //         }
-        //     }
-        // })
+        this.dataSource.on('update', async (value) => {
+            // @ts-ignore
+            // I don't know, but we access the ref<> in emit callback then ref need to get with .value
+            let data = this.data().value
+            console.log(this)
+            console.log(value)
+            for(let i in data) {
+                console.log(value.id, 'updated')
+                let item = data[i]
+                if (item.id === value.id) {
+                    data[i] = value
+
+                }
+            }
+        })
         //
         // this.dataSource.on('inserted', async () => {
         //     // @ts-ignore
@@ -80,6 +81,17 @@ export class DataSet extends  EventEmitter {
     autoOpen: boolean = true;
     private _data = new Array<EntityInterface>()
     private _isOpen = false
+    private context: any = {}
+
+    setContext(ctx: any) {
+        this.context = ctx
+
+        if (!this.context)
+            this.context = {}
+
+        if (this.dataSource instanceof CustomDataSource)
+            this.dataSource.setContext(this.context)
+    }
 
     get isOpen() {
         return this._isOpen;
@@ -208,26 +220,24 @@ export class DataSet extends  EventEmitter {
             return null
         }
 
-        //console.log('getValue data set')
 
-        let rowData = this._data[row]
         let f = this.dataSource.getFieldByAlias(field)
+        let ctx = _.cloneDeep(this.context)
+        ctx.row = this._data[row]
 
         let getValueFunc = await f.getValueFunc()
 
-
-
         if (getValueFunc) {
-            console.log(getValueFunc)
+            console.log(row, ctx.row)
             try {
-                return await getValueFunc.exec(rowData)
+                return await getValueFunc.exec(ctx)
             } catch (e) {
                 console.error(`Error while evaluating field ${f.alias} function setValue of data set ${this.alias}`)
                 console.error(e)
                 return 'Error'
             }
         } else
-            return rowData[field]
+            return this._data[row][field]
     }
 
     async insertRow(row?: number): Promise<string> {
