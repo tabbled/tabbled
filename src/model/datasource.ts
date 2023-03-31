@@ -378,7 +378,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     emitHandler(event: string, value: any) {
         console.log('update', value)
         if (event === 'update') {
-            this.emit('updated', value)
+            this.emit('update', value)
         }
     }
 

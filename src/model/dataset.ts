@@ -41,37 +41,10 @@ export class DataSet extends  EventEmitter {
         this.autoCommit = config.autoCommit;
         this.keyField = this.dataSource.keyField
 
-        //console.log('DataSet created', config)
 
-        this.dataSource.on('update', async (value) => {
-            // @ts-ignore
-            // I don't know, but we access the ref<> in emit callback then ref need to get with .value
-            let data = this.data().value
-            console.log(this)
-            console.log(value)
-            for(let i in data) {
-                console.log(value.id, 'updated')
-                let item = data[i]
-                if (item.id === value.id) {
-                    data[i] = value
 
-                }
-            }
-        })
-        //
-        // this.dataSource.on('inserted', async () => {
-        //     // @ts-ignore
-        //     this._data = await this.dataSource.getAll();
-        //     this._changesById.clear();
-        //     console.log("inserted")
-        // })
-        //
-        // this.dataSource.on('removed', async () => {
-        //     // @ts-ignore
-        //     this._data = await this.dataSource.getAll();
-        //     this._changesById.clear();
-        //     console.log("removed")
-        // })
+
+        this.dataSource.on('update', this.dataSourceUpdateHandler)
     }
 
     readonly alias: string;
@@ -82,6 +55,7 @@ export class DataSet extends  EventEmitter {
     private _data = new Array<EntityInterface>()
     private _isOpen = false
     private context: any = {}
+    private dataSourceUpdateHandler = this.onDataSourceUpdate.bind(this)
 
     setContext(ctx: any) {
         this.context = ctx
@@ -95,6 +69,10 @@ export class DataSet extends  EventEmitter {
 
     get isOpen() {
         return this._isOpen;
+    }
+
+    async onDataSourceUpdate() {
+        await this.load()
     }
 
     private _changesById: Map<string, RowChange> = new Map<string, RowChange>()
@@ -228,7 +206,6 @@ export class DataSet extends  EventEmitter {
         let getValueFunc = await f.getValueFunc()
 
         if (getValueFunc) {
-            console.log(row, ctx.row)
             try {
                 return await getValueFunc.exec(ctx)
             } catch (e) {
