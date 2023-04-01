@@ -5,13 +5,14 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-import {FieldConfigInterface} from "../../model/field";
+import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
     modelValue: Promise<any>,
-    field: FieldConfigInterface
+    field: FieldInterface
+
 }
 
 const props = defineProps<Props>()
@@ -60,12 +61,19 @@ function formatNumber(value: any, precision: number) {
 }
 
 async function getLinkValue() {
+
+    let fGetValue = await props.field.getValueFunc()
+    if (fGetValue) {
+        displayValue.value = await props.modelValue
+        return;
+    }
+
     displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
     ds = dsService.getDataSourceByAlias(props.field.datasource);
 
     if (!ds) {
         displayValue.value = ""
-        return
+        return;
     }
 
     isLoading.value = true

@@ -29,14 +29,15 @@
             <template #default="scope">
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
                        :model-value="getCellData(scope)"
-                       :field="getFieldConfig(element.field)"
+                       :field="getField(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
                        style="display: inline-flex; width: calc(100% - 24px)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <Cell :model-value="dataSet.getValue(scope.column.property, scope.$index)"
-                          :field="getFieldConfig(element.field)" />
+                          :field="getField(element.field)"
+                    />
                 </div>
 
             </template>
@@ -142,7 +143,7 @@ function setCurrentCell(cell: CellRef) {
     save()
 }
 
-function getFieldConfig(field: string) {
+function getField(field: string) {
     if (!props.dataSet)
         return undefined;
 

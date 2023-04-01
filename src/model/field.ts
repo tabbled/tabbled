@@ -74,6 +74,7 @@ export interface FieldInterface {
     default?: string | number |
         object | object[] | null,
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
+    config: FieldConfigInterface
 
     getValueFunc(): Promise<CompiledFunc | undefined>,
     setValueFunc(): Promise<CompiledFunc | undefined>,
@@ -98,7 +99,7 @@ export class Field implements FieldInterface {
     private _getValueFunc: CompiledFunc = null
     private _setValueFunc: CompiledFunc = null
     private _getListFunc: CompiledFunc = null
-    private config: FieldConfigInterface
+
 
 
     alias: string;
@@ -111,6 +112,7 @@ export class Field implements FieldInterface {
     title: string;
     datasource?: string;
     values: EnumValuesInterface[]
+    config: FieldConfigInterface
 
     async getValueFunc(): Promise<CompiledFunc | undefined> {
         if (this.config.getValue && !this._getValueFunc) {
