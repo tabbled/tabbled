@@ -41,12 +41,13 @@ onMounted(async () => {
 
     switch(props.field.type) {
         case "text":
-        case "string":
-        case "enum":
-        case "link": displayValue.value = val; break;
+        case "string": displayValue.value = val; break;
+        case "enum": await getEnumValue(); break;
+        case "link": await getLinkValue(); break;
         case "number": displayValue.value = formatNumber(val, props.field.precision); break;
         default: displayValue.value = 'Error'
     }
+
     isLoading.value = false
 
 })
@@ -56,6 +57,37 @@ function formatNumber(value: any, precision: number) {
         return "";
 
     return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
+}
+
+async function getLinkValue() {
+    displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
+    ds = dsService.getDataSourceByAlias(props.field.datasource);
+
+    if (!ds) {
+        displayValue.value = ""
+        return
+    }
+
+    isLoading.value = true
+    let val = await props.modelValue
+    let link_entity = await ds.getById(val)
+    if (!link_entity)
+        return 'not found'
+
+    displayValue.value = link_entity[props.field.displayProp ? props.field.displayProp : 'name']
+    isLoading.value = false
+}
+
+async function getEnumValue() {
+    const items = props.field.values;
+    let val = await props.modelValue
+    for(const i in items) {
+        if (items[i].key === val) {
+            displayValue.value = items[i].title
+            return
+        }
+    }
+    displayValue.value = 'Not found'
 }
 
 </script>

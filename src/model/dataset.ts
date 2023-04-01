@@ -218,7 +218,6 @@ export class DataSet extends  EventEmitter {
     }
 
     async insertRow(row?: number): Promise<string> {
-        console.log(this)
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }

@@ -35,13 +35,7 @@
                        style="display: inline-flex; width: calc(100% - 24px)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
-                    <LinkCell v-if="getFieldConfig(element.field) && (getFieldConfig(element.field).type === 'link' || getFieldConfig(element.field).type === 'enum')"
-                              :field="getFieldConfig(element.field)"
-                              :model-value="getCellData(scope)"
-
-                    />
-                    <Cell v-else
-                          :model-value="dataSet.getValue(scope.column.property, scope.$index)"
+                    <Cell :model-value="dataSet.getValue(scope.column.property, scope.$index)"
                           :field="getFieldConfig(element.field)" />
                 </div>
 
@@ -60,7 +54,6 @@ import {onMounted, onUnmounted, ref, UnwrapRef, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
 import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
-import LinkCell from "./table/LinkCell.vue";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
@@ -420,6 +413,7 @@ function setDataToFieldDataSet() {
     min-height: 22px;
     text-overflow: ellipsis;
     width: 100%;
+    white-space: nowrap;
 }
 
 .el-table .el-table__cell {
