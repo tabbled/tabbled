@@ -1,9 +1,9 @@
 <template>
     <el-card shadow="never" body-style="padding: 0" style="width: 100%">
         <div v-for="(item, idx)  in list" :id="item[keyProp]"
-             :class="{'list-item': true, 'list-item-selected': currentIndex === idx}"
+             :class="{'list-item': true, 'list-item-selected': currentIdx === idx}"
         >
-            <div class="list-item-title" @click="emit('edit', idx); currentIndex = idx">
+            <div class="list-item-title" @click="emit('edit', idx); setCurrentIndex(idx)">
                 <Icon icon="ic:baseline-drag-indicator"
                       style="padding-right: 4px; color: var(--el-border-color); cursor: move" width="16"/>
                 <slot :item="item">
@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import {Icon} from "@iconify/vue";
 
 interface Props {
@@ -48,17 +48,25 @@ interface Props {
     currentIndex?: number
 }
 
+let currentIdx = ref(null)
+
 const props = withDefaults(defineProps<Props>(), {
     sortable: true,
     removable: true,
     insertable: true,
+    currentIndex: null,
     list: () => []
 })
 const emit = defineEmits(['edit', 'remove', 'insert', 'update:currentIndex'])
 
 onMounted(() => {
-   // console.log(props)
+   currentIdx.value = props.currentIndex
 })
+
+function setCurrentIndex(idx: number) {
+    currentIdx.value = idx
+    emit('update:currentIndex', idx)
+}
 
 </script>
 
@@ -97,7 +105,7 @@ onMounted(() => {
 }
 
 .list-item-selected {
-    background: var(--el-color-primary-light-7);
+    background: var(--el-color-primary-light-8);
 }
 
 .list-item:hover .list-item-actions {
