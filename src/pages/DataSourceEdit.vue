@@ -66,7 +66,7 @@
                 />
                 <Table :columns="testTableColumn"
                        id="testDataSourceTable"
-                       context=""
+                       :context="context"
                        :data-set="testDataSet"
                        :is-inline-editing="true"
                        :is-readonly="false"
@@ -157,6 +157,7 @@ const { t } = useI18n();
 let activeTab = ref('fields')
 let availableHeight = ref(0)
 
+
 let dataSet = ref(useDataSet({
     dataSource: 'datasource',
     alias: 'datasources',
@@ -164,6 +165,7 @@ let dataSet = ref(useDataSet({
     autoCommit: false
 }))
 
+let context = ref<any>(getContext())
 let testDataSet = ref<DataSet>(null)
 let testDataSource = ref<DataSourceInterface>(null)
 let testTableColumn = ref<ColumnConfigInterface[]>([])
@@ -173,11 +175,15 @@ onMounted(async () => {
     await dataSet.value.openOne( n ? undefined : <string>route.params.id)
 
     fields.value = dataSet.value.current.fields
+
     // @ts-ignore
     let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
     document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${ appTitle }`
 
     availableHeight.value = window.innerHeight - 260
+
+    if (dataSet.value.current['source'] === 'custom')
+        await tryBuildDataSource()
 });
 
 async function exportConfig() {
@@ -217,7 +223,9 @@ async function cancel() {
     router.back()
 }
 
-function context() {
+function getContext() {
+    if (!dataSet.value || !dataSet.value.isOpen)
+        return {}
     try {
         return JSON.parse(dataSet.value.current.context)
     }
@@ -238,7 +246,9 @@ async function tryBuildDataSource() {
         readonly: false
     })
 
-    dataSource.setContext(context())
+    context.value = getContext();
+
+    dataSource.setContext(context.value)
     dataSource.setScript(dataSet.value.current['script'])
     await dataSource.init()
 
@@ -277,9 +287,11 @@ function openTestDataSet() {
         })
     }))
 
-    testDataSet.value.setContext(context())
+    testDataSet.value.setContext(context.value)
     testDataSet.value.open()
     testDataSet.value.data = []
+
+    console.log(context.value)
 }
 
 function saveField() {

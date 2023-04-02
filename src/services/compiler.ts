@@ -1,16 +1,21 @@
+import {useDataSourceScriptHelper} from "./datasource.service";
+
+
+
 export class CompiledFunc {
+    private dsService = useDataSourceScriptHelper()
     private source: string = ""
     private func: Function | undefined = undefined
 
     exec(...args: any[]) {
         if (!this.func)
             return;
-        return this.func(...args)
+        return this.func(this.dsService, ...args)
     }
 
     compile(source: string, ...args: string[]) : boolean  {
         this.source = source;
-        this.func = new Function(...args,
+        this.func = new Function('dataSources', ...args,
             ` ${source} `)
         return true
     }

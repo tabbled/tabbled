@@ -62,13 +62,14 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-import {FieldConfigInterface} from "../../model/field";
+import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
     modelValue: Promise<any>,
-    field: FieldConfigInterface
+    field: FieldInterface
+    context: any
 }
 
 const props = defineProps<Props>()
@@ -89,9 +90,19 @@ onMounted(async () => {
     value.value = await props.modelValue
 
     if (props.field && props.field.type === 'link') {
+
+        let fGetList = await props.field.getListFunc()
+        if (fGetList) {
+            linkData.value = await fGetList.exec(props.context)
+            return;
+        }
+
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
         await getLinkData();
+
+
+
     }
 })
 

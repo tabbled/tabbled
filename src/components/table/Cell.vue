@@ -12,7 +12,6 @@ import {DataSourceInterface} from "../../model/datasource";
 interface Props {
     modelValue: Promise<any>,
     field: FieldInterface
-
 }
 
 const props = defineProps<Props>()

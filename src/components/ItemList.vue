@@ -1,9 +1,9 @@
 <template>
     <el-card shadow="never" body-style="padding: 0" style="width: 100%">
         <div v-for="(item, idx)  in list" :id="item[keyProp]"
-             class="list-item"
+             :class="{'list-item': true, 'list-item-selected': currentIndex === idx}"
         >
-            <div class="list-item-title" @click="emit('edit', idx)">
+            <div class="list-item-title" @click="emit('edit', idx); currentIndex = idx">
                 <Icon icon="ic:baseline-drag-indicator"
                       style="padding-right: 4px; color: var(--el-border-color); cursor: move" width="16"/>
                 <slot :item="item">
@@ -44,7 +44,8 @@ interface Props {
     subtitle?: string,
     sortable?: boolean,
     removable?: boolean,
-    insertable?:boolean
+    insertable?:boolean,
+    currentIndex?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -53,7 +54,7 @@ const props = withDefaults(defineProps<Props>(), {
     insertable: true,
     list: () => []
 })
-const emit = defineEmits(['edit', 'remove', 'insert'])
+const emit = defineEmits(['edit', 'remove', 'insert', 'update:currentIndex'])
 
 onMounted(() => {
    // console.log(props)
@@ -93,6 +94,10 @@ onMounted(() => {
 
 .list-item:hover  {
     background: var(--el-color-primary-light-9);
+}
+
+.list-item-selected {
+    background: var(--el-color-primary-light-7);
 }
 
 .list-item:hover .list-item-actions {

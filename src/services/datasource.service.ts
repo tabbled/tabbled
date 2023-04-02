@@ -115,8 +115,22 @@ export class DataSourceService {
     }
 }
 
+export class DataSourceScriptHelper {
+    constructor() {
+    }
+
+    getByAlias(alias: string) {
+        return dsService.value.getDataSourceByAlias(alias)
+    }
+}
+
 let dsService = ref<DataSourceService>(new DataSourceService())
+let dsScriptHelper = ref<DataSourceScriptHelper>(new DataSourceScriptHelper())
 
 export function useDataSourceService(): UnwrapRef<DataSourceService> {
     return dsService.value
+}
+
+export function useDataSourceScriptHelper(): UnwrapRef<any> {
+    return dsScriptHelper.value
 }

@@ -33,6 +33,7 @@
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
                        style="display: inline-flex; width: calc(100% - 24px)"
+                       :context="getRowContext(scope)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <Cell :model-value="dataSet.getValue(scope.column.property, scope.$index)"
@@ -60,6 +61,7 @@ import {EventHandlerConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
+import _ from "lodash";
 
 interface Props {
     id: string,
@@ -120,6 +122,12 @@ onUnmounted(() => {
 
     props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
+
+function getRowContext(scope) {
+    let ctx = props.context ? _.cloneDeep(props.context) : {}
+    ctx.row = scope.row
+    return ctx
+}
 
 async function loadData(row, treeNode, resolve) {
 
