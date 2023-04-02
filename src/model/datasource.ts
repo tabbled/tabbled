@@ -298,11 +298,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         if (!current_item) {
             this.emit('insert', item.data)
         } else {
-            if (current_item.version === item.version && current_item.rev !== '' && current_item.rev === item.rev) {
-                console.warn(`Item ${item.id} received from remote has the same version ${item.version}`)
-            } else if (current_item.version !== item.version) {
-                this.emit('update', item.data)
-            }
+            this.emit('update', item.id)
 
             if (item.deletedAt && !current_item.deletedAt) {
                 this.emit('remove', item.data)
@@ -376,7 +372,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     emitHandler(event: string, value: any) {
-        console.log('update', value)
+        //console.log('update', value)
         if (event === 'update') {
             this.emit('update', value)
         }

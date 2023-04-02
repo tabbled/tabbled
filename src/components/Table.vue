@@ -38,6 +38,7 @@
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <Cell :model-value="dataSet.getValue(scope.column.property, scope.$index)"
                           :field="getField(element.field)"
+                          :updateKey='updateKey'
                     />
                 </div>
 
@@ -82,6 +83,7 @@ let actions = ref({
     onRowClick: null
 })
 const emit = defineEmits(['rowDblClick', 'rowClick'])
+let updateKey = ref(0)
 
 interface CellRef {row: number, col: number}
 
@@ -117,8 +119,11 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-    if (props.fieldDataSet)
+    if (props.fieldDataSet) {
         props.fieldDataSet.removeListener('open', getFieldData)
+        props.fieldDataSet.removeListener('update', getFieldData)
+    }
+
 
     props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
@@ -130,8 +135,6 @@ function getRowContext(scope) {
 }
 
 async function loadData(row, treeNode, resolve) {
-
-    console.log('loadData', row, treeNode)
     resolve(await props.dataSet.dataSource.getChildren(row.id))
 }
 
@@ -323,6 +326,16 @@ async function init() {
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
 
+
+
+    if (props.dataSet) {
+        //data.value = props.dataSet.data
+        props.dataSet.on('update', () => {
+            updateKey.value += 1
+        })
+    }
+
+
     // If props.fieldDataSet is set than it is a field table we should get/set data from props.fieldDataSet
     if(props.fieldDataSet) {
 
@@ -338,7 +351,9 @@ async function init() {
             return
         }
 
+        console.log('emits')
         props.fieldDataSet.on('open', getFieldData)
+        props.fieldDataSet.on('update', getFieldData)
         props.dataSet.on('update', setDataToFieldDataSet)
 
         if (props.fieldDataSet.isOpen && props.fieldDataSet.current) {
@@ -354,10 +369,12 @@ function getFieldData(){
         return;
     }
 
+
     props.dataSet.data = props.fieldDataSet.current[props.field]
 }
 
 function setDataToFieldDataSet() {
+    console.log('update')
     if (!props.fieldDataSet.current) {
         return
     }
@@ -415,6 +432,7 @@ function setDataToFieldDataSet() {
         padding-bottom: 4px;
         padding-top: 4px;
         white-space: nowrap;
+        align-items: center;
     }
 }
 

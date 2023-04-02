@@ -4,14 +4,15 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
     modelValue: Promise<any>,
-    field: FieldInterface
+    field: FieldInterface,
+    updateKey: number
 }
 
 const props = defineProps<Props>()
@@ -24,6 +25,18 @@ let ds:DataSourceInterface = null
 let displayValue = ref("")
 
 onMounted(async () => {
+    await getData()
+})
+
+watch(() => props.updateKey,
+    async () => {
+        await getData()
+    },
+    {
+        deep: true
+    })
+
+async function getData() {
     if (!props.field || !props.modelValue) {
         return
     }
@@ -49,8 +62,7 @@ onMounted(async () => {
     }
 
     isLoading.value = false
-
-})
+}
 
 function formatNumber(value: any, precision: number) {
     if (value === undefined || value === null || value === "")

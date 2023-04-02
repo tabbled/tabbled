@@ -41,9 +41,6 @@ export class DataSet extends  EventEmitter {
         this.autoCommit = config.autoCommit;
         this.keyField = this.dataSource.keyField
 
-
-
-
         this.dataSource.on('update', this.dataSourceUpdateHandler)
     }
 
@@ -52,7 +49,7 @@ export class DataSet extends  EventEmitter {
     readonly keyField: string;
     autoCommit: boolean = true;
     autoOpen: boolean = true;
-    private _data = new Array<EntityInterface>()
+    private _data = Array<EntityInterface>([])
     private _isOpen = false
     private context: any = {}
     private dataSourceUpdateHandler = this.onDataSourceUpdate.bind(this)
@@ -71,8 +68,32 @@ export class DataSet extends  EventEmitter {
         return this._isOpen;
     }
 
-    async onDataSourceUpdate() {
-        await this.load()
+    async onDataSourceUpdate(id: string | Array<any>, field: string, value: any) {
+        //console.log('update', id, field, value)
+        if (!id || id instanceof Array) {
+            await this.load()
+            this.emit('update')
+            return
+        }
+
+        let row = this.getRowById(id)
+
+        if (!row)
+            return;
+
+        let item = this.data[row]
+        if (!item) {
+            console.warn(`Can't find row in dataset "${this.alias}" by id "${id}"`)
+            return
+        }
+
+
+        if (field) {
+            item[field] = value
+        } else {
+            this.data[row] = await this.dataSource.getById(id)
+        }
+        this.emit('update')
     }
 
     private _changesById: Map<string, RowChange> = new Map<string, RowChange>()
@@ -87,7 +108,10 @@ export class DataSet extends  EventEmitter {
 
     set data(data: Array<EntityInterface>) {
         this._data = data;
-        this.dataSource.setData(data).then()
+
+        if (this.dataSource instanceof CustomDataSource) {
+            this.dataSource.setData(data).then()
+        }
     }
 
     async open() {
@@ -137,13 +161,11 @@ export class DataSet extends  EventEmitter {
         }
         console.log("dataset opened one ", this.alias)
 
-
-
         this.emit('open')
     }
 
     close() {
-        this._data = []
+        this.data = []
         this._changesById.clear();
         this._isOpen = false;
         this._currentId = null;
@@ -164,7 +186,7 @@ export class DataSet extends  EventEmitter {
     get current() : EntityInterface {
         if (this._isOpen) {
             let row = this.getRowById(this.currentId)
-            return this._data[row]
+            return this.data[row]
         }
         return undefined;
     }
@@ -180,7 +202,7 @@ export class DataSet extends  EventEmitter {
     }
 
     async load() {
-        this._data = await this.dataSource.getAll();
+        this.data = await this.dataSource.getAll();
         this._changesById.clear();
     }
 
@@ -201,7 +223,7 @@ export class DataSet extends  EventEmitter {
 
         let f = this.dataSource.getFieldByAlias(field)
         let ctx = _.cloneDeep(this.context)
-        ctx.row = this._data[row]
+        ctx.row = this.data[row]
 
         let getValueFunc = await f.getValueFunc()
 
@@ -214,7 +236,7 @@ export class DataSet extends  EventEmitter {
                 return 'Error'
             }
         } else
-            return this._data[row][field]
+            return this.data[row][field]
     }
 
     async insertRow(row?: number): Promise<string> {
@@ -235,7 +257,7 @@ export class DataSet extends  EventEmitter {
         item.id = id.toString()
 
 
-        this._data.splice(r ? r : 0, 0, item);
+        this.data.splice(r ? r : 0, 0, item);
 
         this._changesById.set(id, {
             new: item,
@@ -266,7 +288,7 @@ export class DataSet extends  EventEmitter {
 
     updateDataRow(row: number, field: string, cellData: any): boolean {
 
-        let ent = this._data[row]
+        let ent = this.data[row]
         if (!ent)
             return false;
 
@@ -289,8 +311,7 @@ export class DataSet extends  EventEmitter {
             }
         }
 
-        //this._data.splice(row, 1, ent)
-        this._data[row][field] = cellData
+        this.data[row][field] = cellData
         this._changesById.set(ent.id, change)
 
         //If datasourse is CustomDataSource than the source should take a value without committing
@@ -306,7 +327,7 @@ export class DataSet extends  EventEmitter {
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
-        let id = this._data[row].id;
+        let id = this.data[row].id;
         let change = this._changesById.get(id);
 
         if (change) {
@@ -319,7 +340,7 @@ export class DataSet extends  EventEmitter {
         } else {
             change = {
                 new: null,
-                old: _.cloneDeep(this._data[row]),
+                old: _.cloneDeep(this.data[row]),
                 type: "remove",
                 at: new Date()
             }
@@ -336,7 +357,7 @@ export class DataSet extends  EventEmitter {
         if (this.dataSource instanceof CustomDataSource) {
             this.dataSource.removeById(id)
         } else {
-            this._data.splice(row, 1)
+            this.data.splice(row, 1)
         }
 
         return true
@@ -410,8 +431,8 @@ export class DataSet extends  EventEmitter {
     }
 
     private getRowById(id: string): number | undefined {
-        for (let i in this._data) {
-            if (this._data[i].id === id) {
+        for (let i in this.data) {
+            if (this.data[i].id === id) {
                 return Number(i)
             }
         }

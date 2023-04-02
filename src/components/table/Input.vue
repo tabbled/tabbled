@@ -100,9 +100,6 @@ onMounted(async () => {
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
         await getLinkData();
-
-
-
     }
 })
 

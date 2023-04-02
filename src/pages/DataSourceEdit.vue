@@ -290,8 +290,6 @@ function openTestDataSet() {
     testDataSet.value.setContext(context.value)
     testDataSet.value.open()
     testDataSet.value.data = []
-
-    console.log(context.value)
 }
 
 function saveField() {

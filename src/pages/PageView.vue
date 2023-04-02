@@ -231,7 +231,6 @@ async function init() {
 
 
     dataSets.value.forEach(ds => {
-        console.log(props.pageConfig.editingDataSet)
         if (ds.autoOpen) {
             if (props.pageConfig.isEditPage && props.pageConfig.editingDataSet === ds.alias ) {
                 let id = <string>route.params.id
