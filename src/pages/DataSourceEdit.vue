@@ -79,7 +79,7 @@
                          style="padding-right: 2px;"
             >
                 <div>
-                    <el-button text type="primary" style="margin-bottom: 8px"  @click="tryBuildDataSource">
+                    <el-button text type="primary" style="margin-bottom: 8px"  @click="tryBuildDataSource(); save()">
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
                         Run
                     </el-button>

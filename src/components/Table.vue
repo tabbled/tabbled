@@ -36,7 +36,7 @@
                        :context="getRowContext(scope)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
-                    <Cell :model-value="dataSet.getValue(scope.column.property, scope.$index)"
+                    <Cell :model-value="getCellValue(scope)"
                           :field="getField(element.field)"
                           :updateKey='updateKey'
                     />
@@ -135,7 +135,7 @@ function getRowContext(scope) {
 }
 
 async function loadData(row, treeNode, resolve) {
-    resolve(await props.dataSet.dataSource.getChildren(row.id))
+    resolve(await props.dataSet.getChildren(row.id))
 }
 
 function save() {
@@ -296,6 +296,16 @@ let getCellData = async (scope: any) => {
         return;
 
     return await props.dataSet.getValue(scope.column.property, scope.$index)
+}
+
+function getCellValue(scope: any) {
+    //console.log(scope)
+    if (scope.$index < 0)
+        return undefined
+
+    console.log(scope.row.id)
+
+    return props.dataSet.getValue(scope.column.property, scope.$index)
 }
 
 function getRowClass() {

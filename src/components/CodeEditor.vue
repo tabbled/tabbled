@@ -79,7 +79,7 @@ watch(() => props.dataSet,
     async () => {
         if (props.dataSet && props.field && props.field !== '') {
             header.value = props.dataSet.dataSource.getFieldByAlias(props.field).title
-            console.log(header.value)
+            //console.log(header.value)
         }
 
         if (props.dataSet.isOpen)
@@ -133,7 +133,7 @@ function setExtensions() {
 function change(event: any) {
     script.value = event
     emit('update:modelValue', event)
-    console.log(event)
+    //console.log(event)
 
     if (!props.dataSet || !props.field || props.field == '') {
         //console.warn(`DataSet or field haven't set`)

@@ -68,6 +68,17 @@ export class DataSet extends  EventEmitter {
         return this._isOpen;
     }
 
+    async getChildren(id: string) {
+        let row = this.getRowById(id)
+
+        if (!row)
+            return [];
+
+        let item = this._data[row]
+        item.children = await this.dataSource.getChildren(id)
+        return item.children
+    }
+
     async onDataSourceUpdate(id: string | Array<any>, field: string, value: any) {
         //console.log('update', id, field, value)
         if (!id || id instanceof Array) {
@@ -235,8 +246,16 @@ export class DataSet extends  EventEmitter {
                 console.error(e)
                 return 'Error'
             }
-        } else
-            return this.data[row][field]
+        } else {
+            try {
+                return this.data[row][field]
+            } catch (e) {
+                console.error(e)
+                console.log(field, row)
+            }
+
+        }
+
     }
 
     async insertRow(row?: number): Promise<string> {
@@ -256,9 +275,23 @@ export class DataSet extends  EventEmitter {
         let item = generateEntityWithDefault(this.dataSource.fields)
         item.id = id.toString()
 
+        if (this.dataSource.isTree) {
+            let parent = this.getByRow(r)
+            if (!parent) {
+                console.warn(`parent not found`)
+                return
+            }
 
-        this.data.splice(r ? r : 0, 0, item);
+            console.log(parent)
 
+            //if (!parent.children) parent.children = []
+            //parent.children.splice(0, 0, item);
+        } else {
+            this.data.splice(r ? r : 0, 0, item);
+        }
+
+
+        console.log(this._data)
         this._changesById.set(id, {
             new: item,
             old: undefined,
@@ -270,8 +303,10 @@ export class DataSet extends  EventEmitter {
 
         //If datasourse is CustomDataSource than the source should take a value without committing
         if (this.dataSource instanceof CustomDataSource) {
-            this.dataSource.insert(item.id, item)
+            await this.dataSource.insert(item.id, item, this.dataSource.isTree ? this._currentId : undefined)
         }
+
+        console.log(this._data)
 
         return this.currentId
     }
