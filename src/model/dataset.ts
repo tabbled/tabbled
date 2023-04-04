@@ -73,7 +73,7 @@ export class DataSet extends  EventEmitter {
     }
 
     async onDataSourceUpdate(id: string | Array<any>, field: string, value: any) {
-        console.log('onDataSourceUpdate', id, field, value)
+        //console.log('onDataSourceUpdate', id, field, value)
         // if (!id || id instanceof Array) {
         //     await this.load()
         //     this.emit('update')
@@ -260,7 +260,20 @@ export class DataSet extends  EventEmitter {
         let item = generateEntityWithDefault(this.dataSource.fields)
         item.id = (await flakeId.generateId()).toString()
 
-        await this.dataSource.insert(item.id, item, this.dataSource.isTree ? this._currentId : undefined)
+        item = await this.dataSource.insert(item.id, item, this.dataSource.isTree ? this._currentId : undefined)
+        if (!item) {
+            return undefined
+        }
+
+        if (this.dataSource.isTree) {
+            let row = this.getRowById(this._currentId)
+            let parent = this.data[row]
+            parent.hasChildren = true
+            if (!parent.children) parent.children = []
+            parent.children.push(item)
+        } else {
+            this.data.push(item)
+        }
 
         return this.currentId
     }
@@ -288,7 +301,12 @@ export class DataSet extends  EventEmitter {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
 
-        await this.dataSource.removeById(id)
+        let path = await this.getTreePath(id)
+
+        if (_.unset(this._data, path)) {
+            await this.dataSource.removeById(id)
+        }
+
     }
 
     async removeByCurrentId() {
@@ -302,7 +320,7 @@ export class DataSet extends  EventEmitter {
         return true
     }
 
-    removeBySelectedId() : boolean {
+    async removeBySelectedId() : Promise<boolean> {
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
@@ -310,9 +328,10 @@ export class DataSet extends  EventEmitter {
         if (!this.selectedIds.length)
             return false;
 
-        this.selectedIds.forEach((id) => {
-            this.remove(id)
-        })
+        for(let i in this.selectedIds) {
+            await this.remove(this.selectedIds[i])
+        }
+
         return true
     }
 
@@ -323,6 +342,32 @@ export class DataSet extends  EventEmitter {
             }
         }
         return undefined
+    }
+
+    private async getTreePath(id:string) : Promise<any> {
+
+        let item = await this.dataSource.getById(id)
+        let pathA = [id]
+        while (item.parentId) {
+            pathA.unshift(item.parentId)
+            item = await this.dataSource.getById(item.parentId)
+        }
+
+        let data = this._data
+        let path = ""
+        pathA.forEach(item => {
+
+            let index = _.findIndex(data, (o:any) => { return o && o.id == item; });
+            data = data[index].children
+
+            if (path === "") {
+                path = `[${index}]`
+            } else {
+                path += `.children[${index}]`
+            }
+        })
+
+        return path
     }
 }
 

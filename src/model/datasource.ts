@@ -66,9 +66,9 @@ export interface DataSourceInterface extends EventEmitter {
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
     onChange?: (id: string, newValue: any) => void;
 
-    insert(id: string, value: any, parentId?: string): Promise<void>
+    insert(id: string, value: any, parentId?: string): Promise<any>
     updateById(id: string, value: object): Promise<void>
-    removeById(id: string): Promise<void>
+    removeById(id: string): Promise<boolean>
 
     getChildren(id: string) : Promise<EntityInterface | undefined>
 
@@ -273,15 +273,15 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         }
     }
 
-    async removeById(id: string): Promise<void> {
+    async removeById(id: string): Promise<boolean> {
         if (!db.database)
-            return
+            return false
 
         let item = await this.getByIdRaw(id);
 
         if (!item) {
             console.error(`Item with id ${id} in "${this.alias}" not found`)
-            return;
+            return false;
         }
 
         item.deletedAt = new Date();
@@ -290,6 +290,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
         await syncService.push(this.type, [item]);
+        return true;
     }
 
     async setRemoteChanges(item: DataItemInterface):Promise<boolean> {
@@ -390,7 +391,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     emitHandler(event: string, value: any) {
-        console.log('emitHandler', event, value)
+        //console.log('emitHandler', event, value)
         if (event === 'update') {
             this.emit('update', value)
         }
@@ -437,14 +438,14 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         return [];
     }
 
-    async insert(id: string, value: any, parentId?: string): Promise<void> {
+    async insert(id: string, value: any, parentId?: string): Promise<any> {
         if (!this.model)
             return;
 
         return await this.model.insert(id, value, parentId)
     }
 
-    async removeById(id: string): Promise<void> {
+    async removeById(id: string): Promise<boolean> {
         if (!this.model)
             return;
 
@@ -522,8 +523,8 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         return Promise.resolve(undefined);
     }
 
-    removeById(id: string): Promise<void> {
-        return Promise.resolve(undefined);
+    removeById(id: string): Promise<boolean> {
+        return Promise.resolve(false);
     }
 
     updateById(id: string, value: object): Promise<void> {
