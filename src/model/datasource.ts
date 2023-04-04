@@ -77,6 +77,7 @@ export interface DataSourceInterface extends EventEmitter {
 
     // Set items
     setData?(items: EntityInterface[]): Promise<void>
+    setValue(id: string, field: string, value: any): Promise<void>
 
     getFieldByAlias(alias: string): FieldInterface | undefined
 }
@@ -180,7 +181,11 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     }
 
     async getById(id: string): Promise<EntityInterface | undefined> {
+        if (!id)
+            return undefined
+
         try {
+            console.log(id)
             let item = await this.getByIdRaw(id)
             return item.data;
         } catch (e) {
@@ -306,6 +311,18 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         }
         return true
     }
+
+    async setValue(id: string, field: string, value: any) {
+        if (!db.database)
+            return
+
+        let item = await this.getById(id)
+        if (!item)
+            return
+
+        item[field] = value
+        await this.updateById(id, item)
+    }
 }
 
 export class CustomDataSource extends EventEmitter implements DataSourceInterface {
@@ -351,16 +368,17 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
     async getAll(): Promise<EntityInterface[]> {
         if (!this.model)
-            return
+            return []
 
-        return await this.model.getAll()
+        let data = await this.model.getAll()
+        return _.cloneDeep(data)
     }
 
     async setData(items: EntityInterface[]):Promise<void> {
         if (!this.model)
             return
 
-        this.model.setData(items)
+        await this.model.setData(_.cloneDeep(items))
     }
 
     setContext(ctx: any) {
@@ -510,6 +528,10 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 
     updateById(id: string, value: object): Promise<void> {
         return Promise.resolve(undefined);
+    }
+
+    setValue(id: string, field: string, value: any): Promise<void> {
+        return
     }
 }
 

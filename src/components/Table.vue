@@ -138,12 +138,6 @@ async function loadData(row, treeNode, resolve) {
     resolve(await props.dataSet.getChildren(row.id))
 }
 
-function save() {
-    if (props.dataSet && props.dataSet.autoCommit && props.dataSet.isChanged()) {
-        props.dataSet.commit()
-    }
-}
-
 function setCurrentCell(cell: CellRef) {
 
     if (editingCell.value !== cell) {
@@ -151,7 +145,6 @@ function setCurrentCell(cell: CellRef) {
     }
 
     editingCell.value = cell
-    save()
 }
 
 function getField(field: string) {
@@ -244,7 +237,7 @@ function currentRowChanged(row: any) {
 
 function onCellInput(scope: any, value: any) {
     let fieldAlias = scope.column.property;
-    props.dataSet.updateDataRow(scope.$index, fieldAlias, value)
+    props.dataSet.setValue(scope.row.id, fieldAlias, value)
 }
 
 function handleCellClick(scope:any) {
@@ -295,7 +288,7 @@ let getCellData = async (scope: any) => {
     if (!props.dataSet)
         return;
 
-    return await props.dataSet.getValue(scope.column.property, scope.$index)
+    return await props.dataSet.getValue(scope.row.id, scope.column.property)
 }
 
 function getCellValue(scope: any) {
@@ -303,9 +296,9 @@ function getCellValue(scope: any) {
     if (scope.$index < 0)
         return undefined
 
-    console.log(scope.row.id)
+    //console.log(scope.row.id)
 
-    return props.dataSet.getValue(scope.column.property, scope.$index)
+    return props.dataSet.getValue(scope.row.id, scope.column.property)
 }
 
 function getRowClass() {

@@ -15,13 +15,6 @@ export interface DataSetConfigInterface {
     autoOpen: boolean
 }
 
-interface RowChange {
-    old: any,
-    new: any,
-    type: 'insert' | 'update' | 'remove',
-    at: Date
-}
-
 export function useDataSet(config: DataSetConfigInterface): DataSet {
     let ds = dsService.getDataSourceByAlias(config.dataSource);
 
@@ -71,8 +64,10 @@ export class DataSet extends  EventEmitter {
     async getChildren(id: string) {
         let row = this.getRowById(id)
 
-        if (!row)
+        if (row === undefined)
             return [];
+
+        console.log('getChildren', id)
 
         let item = this._data[row]
         item.children = await this.dataSource.getChildren(id)
@@ -107,10 +102,8 @@ export class DataSet extends  EventEmitter {
         this.emit('update')
     }
 
-    private _changesById: Map<string, RowChange> = new Map<string, RowChange>()
-
-    isChanged():boolean {
-        return this._changesById.size > 0
+    isChanged() : boolean {
+        return true
     }
 
     get data(): Array<EntityInterface> {
@@ -151,12 +144,6 @@ export class DataSet extends  EventEmitter {
                 _id = (await flakeId.generateId()).toString()
                 one = generateEntityWithDefault(this.dataSource.fields)
                 one.id = _id
-                this._changesById.set(_id, {
-                    new: one,
-                    old: undefined,
-                    at: new Date(),
-                    type: 'insert'
-                })
             }
 
         } catch (e) {
@@ -177,7 +164,6 @@ export class DataSet extends  EventEmitter {
 
     close() {
         this.data = []
-        this._changesById.clear();
         this._isOpen = false;
         this._currentId = null;
         this.emit('close')
@@ -207,14 +193,12 @@ export class DataSet extends  EventEmitter {
             this.isChanged() &&
             this._currentId !== null &&
             this._currentId !== id) {
-            await this.commit()
         }
         this._currentId = id
     }
 
     async load() {
-        this.data = await this.dataSource.getAll();
-        this._changesById.clear();
+        this.data = _.cloneDeep(await this.dataSource.getAll());
     }
 
 
@@ -226,15 +210,30 @@ export class DataSet extends  EventEmitter {
         return this.dataSource.getFieldByAlias(alias);
     }
 
-    async getValue(field: string, row: number): Promise<any> {
-        if (!field || row < 0) {
+    async getValue(id: string, field: string): Promise<any> {
+        if (!field || !id) {
             return null
         }
+
+        let item = undefined
+        if (this.dataSource.isTree) {
+            item = await this.dataSource.getById(id)
+        } else {
+            let row = this.getRowById(id)
+
+            if (row === undefined) {
+                //console.log(`Row by id ${id} not found`)
+                //console.log(this._data)
+                return null
+            }
+            item = this.data[row]
+        }
+
 
 
         let f = this.dataSource.getFieldByAlias(field)
         let ctx = _.cloneDeep(this.context)
-        ctx.row = this.data[row]
+        ctx.row = item
 
         let getValueFunc = await f.getValueFunc()
 
@@ -248,10 +247,9 @@ export class DataSet extends  EventEmitter {
             }
         } else {
             try {
-                return this.data[row][field]
+                return item[field]
             } catch (e) {
                 console.error(e)
-                console.log(field, row)
             }
 
         }
@@ -290,127 +288,61 @@ export class DataSet extends  EventEmitter {
             this.data.splice(r ? r : 0, 0, item);
         }
 
+        // this._changesById.set(id, {
+        //     new: item,
+        //     old: undefined,
+        //     at: new Date(),
+        //     type: 'insert'
+        // })
 
-        console.log(this._data)
-        this._changesById.set(id, {
-            new: item,
-            old: undefined,
-            at: new Date(),
-            type: 'insert'
-        })
+        await this.dataSource.insert(item.id, item, this.dataSource.isTree ? this._currentId : undefined)
 
         this.emit('update')
 
         //If datasourse is CustomDataSource than the source should take a value without committing
-        if (this.dataSource instanceof CustomDataSource) {
-            await this.dataSource.insert(item.id, item, this.dataSource.isTree ? this._currentId : undefined)
-        }
+        // if (this.dataSource instanceof CustomDataSource) {
+        //
+        // }
 
-        console.log(this._data)
+        //console.log(this._data)
 
         return this.currentId
     }
 
-    update(field: string, data: any):boolean {
+    async update(field: string, data: any) {
         if (!this.isOpen  || !this._currentId) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
 
-        let row = this.getRowById(this._currentId)
+        //let row = this.getRowById(this._currentId)
 
-        return this.updateDataRow(row, field, data);
+        await this.setValue(this._currentId, field, data);
     }
 
-    updateDataRow(row: number, field: string, cellData: any): boolean {
+    async setValue(id: string, field: string, cellData: any) {
 
-        let ent = this.data[row]
-        if (!ent)
-            return false;
+        await this.dataSource.setValue(id, field, cellData)
+        //this.emit('update')
 
-        let oldEnt = _.cloneDeep(ent)
-        let change = this._changesById.get(ent.id);
-
-         ent[field] = cellData
-
-        //console.log(change)
-
-        if (change) {
-            change.new = _.cloneDeep(ent)
-            change.at = new Date()
-        } else {
-            change = {
-                new: _.cloneDeep(ent),
-                old: oldEnt,
-                type: 'update',
-                at: new Date()
-            }
-        }
-
-        this.data[row][field] = cellData
-        this._changesById.set(ent.id, change)
-
-        //If datasourse is CustomDataSource than the source should take a value without committing
-        if (this.dataSource instanceof CustomDataSource) {
-            this.dataSource.setValue(ent.id, field, cellData)
-        }
-
-        this.emit('update')
         return true;
     }
 
-    removeRow(row: number) : boolean {
+    async remove(id: string) {
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
-        let id = this.data[row].id;
-        let change = this._changesById.get(id);
 
-        if (change) {
-            if (change.type === 'insert') {
-                this._changesById.delete(id)
-            } else {
-                change.new = null;
-                change.at = new Date()
-            }
-        } else {
-            change = {
-                new: null,
-                old: _.cloneDeep(this.data[row]),
-                type: "remove",
-                at: new Date()
-            }
-        }
-
-        this._changesById.set(id, change)
-
-
-
-        this.emit('remove')
-        this.emit('update')
-
-        //If datasourse is CustomDataSource than the source should take a value without committing
-        if (this.dataSource instanceof CustomDataSource) {
-            this.dataSource.removeById(id)
-        } else {
-            this.data.splice(row, 1)
-        }
-
-        return true
+        await this.dataSource.removeById(id)
     }
 
-    removeByCurrentId() : boolean {
+    async removeByCurrentId() {
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
         if (!this._currentId)
             return false;
 
-        let row = this.getRowById(this._currentId)
-
-        if (!row)
-            return false;
-
-        this.removeRow(row)
+        await this.dataSource.removeById(this._currentId)
         return true
     }
 
@@ -423,46 +355,9 @@ export class DataSet extends  EventEmitter {
             return false;
 
         this.selectedIds.forEach((id) => {
-            let row = this.getRowById(id)
-            if (row !== undefined) {
-                this.removeRow(row)
-            }
+            this.remove(id)
         })
         return true
-    }
-
-    async commit() {
-        if (this.dataSource instanceof CustomDataSource) {
-            return
-        }
-
-        if (!this.isOpen) {
-            throw new Error(`DataSet ${this.alias} is not open`)
-        }
-        if (!this._changesById.size)
-            return;
-
-
-
-        console.log('Commit changes')
-        let changes = [...this._changesById.values()]
-
-        this._changesById.clear()
-        for (let i in changes) {
-            let item:any = changes[i]
-            switch (item.type) {
-                case "insert": await this.dataSource.insert(item.new.id, item.new); break;
-                case "update": await this.dataSource.updateById(item.new.id, item.new); break;
-                case "remove": await this.dataSource.removeById(item.old.id); break;
-                default: console.warn("Unknown type of operation in DataSet Commit")
-            }
-        }
-    }
-
-    rollback() {
-        if (!this.isOpen  || !this._currentId) {
-            throw new Error(`DataSet ${this.alias} is not open`)
-        }
     }
 
     private getRowById(id: string): number | undefined {

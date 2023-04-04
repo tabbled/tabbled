@@ -182,8 +182,8 @@ onMounted(async () => {
 
     availableHeight.value = window.innerHeight - 260
 
-    if (dataSet.value.current['source'] === 'custom')
-        await tryBuildDataSource()
+    // if (dataSet.value.current['source'] === 'custom')
+    //     await tryBuildDataSource()
 });
 
 async function exportConfig() {
@@ -206,7 +206,6 @@ async function exportConfig() {
 async function save() {
     try {
         console.log(dataSet.value.current)
-        await dataSet.value.commit()
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -217,7 +216,6 @@ async function save() {
 async function cancel() {
     if (dataSet.value.isChanged()) {
         console.log("changed")
-        dataSet.value.rollback()
     }
 
     router.back()
