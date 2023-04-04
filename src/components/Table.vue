@@ -333,7 +333,9 @@ async function init() {
 
     if (props.dataSet) {
         //data.value = props.dataSet.data
+
         props.dataSet.on('update', () => {
+            console.log('update dataset')
             updateKey.value += 1
         })
     }

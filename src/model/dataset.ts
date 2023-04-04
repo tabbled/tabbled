@@ -67,38 +67,36 @@ export class DataSet extends  EventEmitter {
         if (row === undefined)
             return [];
 
-        console.log('getChildren', id)
-
         let item = this._data[row]
         item.children = await this.dataSource.getChildren(id)
         return item.children
     }
 
     async onDataSourceUpdate(id: string | Array<any>, field: string, value: any) {
-        //console.log('update', id, field, value)
-        if (!id || id instanceof Array) {
-            await this.load()
-            this.emit('update')
-            return
-        }
-
-        let row = this.getRowById(id)
-
-        if (!row)
-            return;
-
-        let item = this.data[row]
-        if (!item) {
-            console.warn(`Can't find row in dataset "${this.alias}" by id "${id}"`)
-            return
-        }
-
-
-        if (field) {
-            item[field] = value
-        } else {
-            this.data[row] = await this.dataSource.getById(id)
-        }
+        console.log('onDataSourceUpdate', id, field, value)
+        // if (!id || id instanceof Array) {
+        //     await this.load()
+        //     this.emit('update')
+        //     return
+        // }
+        //
+        // let row = this.getRowById(id)
+        //
+        // if (!row)
+        //     return;
+        //
+        // let item = this.data[row]
+        // if (!item) {
+        //     console.warn(`Can't find row in dataset "${this.alias}" by id "${id}"`)
+        //     return
+        // }
+        //
+        //
+        // if (field) {
+        //     item[field] = value
+        // } else {
+        //     this.data[row] = await this.dataSource.getById(id)
+        // }
         this.emit('update')
     }
 
@@ -229,8 +227,6 @@ export class DataSet extends  EventEmitter {
             item = this.data[row]
         }
 
-
-
         let f = this.dataSource.getFieldByAlias(field)
         let ctx = _.cloneDeep(this.context)
         ctx.row = item
@@ -256,55 +252,15 @@ export class DataSet extends  EventEmitter {
 
     }
 
-    async insertRow(row?: number): Promise<string> {
+    async insertRow(): Promise<string> {
         if (!this.isOpen) {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
 
-        let r:number | undefined;
-        if (!row && this._currentId) {
-            r = this.getRowById(this._currentId)
-            if (!r) r = 0
-        } else
-            r = row;
-
-        let id = (await flakeId.generateId()).toString()
-
         let item = generateEntityWithDefault(this.dataSource.fields)
-        item.id = id.toString()
-
-        if (this.dataSource.isTree) {
-            let parent = this.getByRow(r)
-            if (!parent) {
-                console.warn(`parent not found`)
-                return
-            }
-
-            console.log(parent)
-
-            //if (!parent.children) parent.children = []
-            //parent.children.splice(0, 0, item);
-        } else {
-            this.data.splice(r ? r : 0, 0, item);
-        }
-
-        // this._changesById.set(id, {
-        //     new: item,
-        //     old: undefined,
-        //     at: new Date(),
-        //     type: 'insert'
-        // })
+        item.id = (await flakeId.generateId()).toString()
 
         await this.dataSource.insert(item.id, item, this.dataSource.isTree ? this._currentId : undefined)
-
-        this.emit('update')
-
-        //If datasourse is CustomDataSource than the source should take a value without committing
-        // if (this.dataSource instanceof CustomDataSource) {
-        //
-        // }
-
-        //console.log(this._data)
 
         return this.currentId
     }
