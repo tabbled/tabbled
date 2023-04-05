@@ -55,6 +55,7 @@ export interface FieldConfigInterface {
     getValue?: string                    // Evaluate when entity changed, result of eval sets to field value
     getListValues?: string             // Evaluate when list or enum field gets values for dropdown menu
     setValue?: string             // Evaluate when value changed manually by user or by another script
+    getReadonly?: string
     dataSetField?: string               // For 'field' type that used for looking fields list in set dataset on PageSettingPanel
 }
 
@@ -79,6 +80,7 @@ export interface FieldInterface {
     getValueFunc(): Promise<CompiledFunc | undefined>,
     setValueFunc(): Promise<CompiledFunc | undefined>,
     getListFunc() : Promise<CompiledFunc | undefined>
+    getReadonlyFunc() : Promise<CompiledFunc | undefined>
 }
 
 export class Field implements FieldInterface {
@@ -99,7 +101,7 @@ export class Field implements FieldInterface {
     private _getValueFunc: CompiledFunc = null
     private _setValueFunc: CompiledFunc = null
     private _getListFunc: CompiledFunc = null
-
+    private _getReadonlyFunc: CompiledFunc = null
 
 
     alias: string;
@@ -153,6 +155,19 @@ export class Field implements FieldInterface {
         }
 
         return this._getListFunc
+    }
+    async getReadonlyFunc() : Promise<CompiledFunc | undefined> {
+        if (this.config.getReadonly && !this._getReadonlyFunc) {
+            try {
+                this._getReadonlyFunc = await compileScript(this.config.getReadonly, 'ctx')
+            } catch (e) {
+                this._getReadonlyFunc = null
+                console.error(`Error while compile field ${this.alias} function getReadonly`)
+                console.error(e)
+            }
+        }
+
+        return this._getReadonlyFunc
     }
 }
 

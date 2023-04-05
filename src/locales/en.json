@@ -27,7 +27,8 @@
         "values": "Values",
         "getListValues": "Get list",
         "getValue": "Get value",
-        "setValue": "Set value"
+        "setValue": "Set value",
+        "getReadonly": "Readonly"
     },
     "menuConfig": {
         "title": "Title",

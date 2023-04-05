@@ -70,13 +70,13 @@ interface Props {
     field?: string,
     fieldDataSet?: UnwrapRef<DataSet>,
     columns: ColumnConfigInterface[];
-    isReadonly?: boolean
+    readonly ?: boolean
     context: any,
     onRowClick?: EventHandlerConfigInterface
     onRowDoubleClick?: EventHandlerConfigInterface
 }
 const props = withDefaults(defineProps<Props>(), {
-    isReadonly: true
+    readonly: false
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -240,8 +240,17 @@ function onCellInput(scope: any, value: any) {
     props.dataSet.setValue(scope.row.id, fieldAlias, value)
 }
 
-function handleCellClick(scope:any) {
-    if (!props.isReadonly)
+async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
+    let fGetReadonly = await props.dataSet.dataSource.getFieldByAlias(field).getReadonlyFunc()
+    if (fGetReadonly) {
+        return await fGetReadonly.exec(getRowContext(scope))
+    }
+    return false
+}
+
+async function handleCellClick(scope:any) {
+    console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
+    if (!props.dataSet.dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
         setCurrentCell({
             row: scope.$index,
             col: scope.cellIndex

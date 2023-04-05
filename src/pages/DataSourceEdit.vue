@@ -36,6 +36,10 @@
             <el-form-item label="Is tree" style="padding-left: 8px; width: 100px">
                 <CheckboxField :data-set="dataSet" field="isTree" />
             </el-form-item>
+
+            <el-form-item label="Readonly" style="padding-left: 8px; width: 100px">
+                <CheckboxField :data-set="dataSet" field="readonly" />
+            </el-form-item>
         </div>
 
         <el-tabs v-model="activeTab" class="demo-tabs">
@@ -241,7 +245,7 @@ async function tryBuildDataSource() {
         fields: dataSet.value.current['fields'],
         script: dataSet.value.current['script'],
         isTree: dataSet.value.current['isTree'],
-        readonly: false
+        readonly: dataSet.value.current['readonly'],
     })
 
     context.value = getContext();

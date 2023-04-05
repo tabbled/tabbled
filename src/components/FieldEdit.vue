@@ -95,6 +95,14 @@
                     />
                 </el-form-item>
 
+                <el-form-item :label="t('fieldConfig.getReadonly')">
+                    <CodeEditor v-model="modelValue.getReadonly"
+                                field="script"
+                                format="javascript"
+                                runnable
+                    />
+                </el-form-item>
+
             </el-tab-pane>
 
         </el-tabs>

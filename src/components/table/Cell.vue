@@ -45,8 +45,6 @@ async function getData() {
 
     let val = null
 
-    //console.log(await props.modelValue)
-
     try {
         val = await props.modelValue
     } catch (e) {

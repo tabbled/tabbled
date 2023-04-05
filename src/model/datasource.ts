@@ -104,9 +104,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.config = config
         this.source = DataSourceSource.internal
         this.fields = []
-
-
-
+        this.readonly = !!config.readonly ? config.readonly : false
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -351,7 +349,10 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         this.fields = []
         this.fieldByAlias = new Map()
         this.isTree = !!config.isTree
+        this.readonly = !!config.readonly
         this.script = config.script
+
+        console.log(config)
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -486,6 +487,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         this.fieldByAlias = new Map()
         this.keyField = config.keyField
         this.config = config
+        this.readonly = !!config.readonly ? config.readonly : false
         this.fields = []
 
         config.fields.forEach(conf => {
@@ -690,6 +692,18 @@ export class DataSourceConfigDataSource extends DataSource {
                     type: "text",
                     required: false,
                     default: "{}"
+                },{
+                    title: "Readonly",
+                    alias: "readonly",
+                    type: "bool",
+                    required: false,
+                    default: false
+                }, {
+                    title: "Is tree",
+                    alias: "isTree",
+                    type: "bool",
+                    required: false,
+                    default: false
                 }
             ]});
     }
