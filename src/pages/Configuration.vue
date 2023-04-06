@@ -36,6 +36,7 @@
                    :data-set="menusDataSet"
                    :is-inline-editing="false"
                    @row-dbl-click="editMenu"
+                   :readonly="true"
             />
         </el-tab-pane>
 
@@ -53,6 +54,7 @@
                    :data-set="pagesDataSet"
                    :is-inline-editing="false"
                    @row-dbl-click="editPage"
+                   :readonly="true"
             />
         </el-tab-pane>
 
@@ -69,6 +71,7 @@
                    context=""
                    :data-set="dsDataSet"
                    :is-inline-editing="false"
+                   :readonly="true"
                    @row-dbl-click="editDataSource"
             />
         </el-tab-pane>
@@ -87,6 +90,7 @@
                    :data-set="funcDataSet"
                    :is-inline-editing="false"
                    @row-dbl-click="editFunc"
+                   :readonly="true"
             />
         </el-tab-pane>
 

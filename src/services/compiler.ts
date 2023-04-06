@@ -1,21 +1,31 @@
 import {useDataSourceScriptHelper} from "./datasource.service";
+import { FlakeId } from '../flake-id'
+let flakeId = new FlakeId()
 
+class Utils {
+    async generateId() {
+        return (await flakeId.generateId()).toString()
+    }
+}
 
 
 export class CompiledFunc {
     private dsService = useDataSourceScriptHelper()
     private source: string = ""
     private func: Function | undefined = undefined
+    private utils = new Utils()
 
     exec(...args: any[]) {
         if (!this.func)
             return;
-        return this.func(this.dsService, ...args)
+        console.log('exec')
+        return this.func(this.dsService, this.utils, ...args)
     }
 
     compile(source: string, ...args: string[]) : boolean  {
+        console.log('compile')
         this.source = source;
-        this.func = new Function('dataSources', ...args,
+        this.func = new Function('dataSources', 'utils', ...args,
             ` ${source} `)
         return true
     }

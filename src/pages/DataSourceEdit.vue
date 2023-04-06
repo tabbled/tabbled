@@ -238,7 +238,7 @@ function getContext() {
 }
 
 async function tryBuildDataSource() {
-
+console.log('tryBuildDataSource')
     let dataSource = new CustomDataSource({
         alias: dataSet.value.current['alias'],
         type: DataSourceType.data,

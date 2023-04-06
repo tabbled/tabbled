@@ -32,7 +32,7 @@
                        :field="getField(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
-                       style="display: inline-flex; width: calc(100% - 24px)"
+                       :style="getInputCellStyle(scope)"
                        :context="getRowContext(scope)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
@@ -127,6 +127,17 @@ onUnmounted(() => {
 
     props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
+
+
+function getInputCellStyle() {
+    let style:any = {}
+    //display: inline-flex; width:
+    if (props.dataSet.dataSource.isTree && editingCell.value.col === 1) {
+        style.display = 'inline-flex'
+        style.width = 'calc(100% - 40px)'
+    }
+    return style
+}
 
 function getRowContext(scope) {
     let ctx = props.context ? _.cloneDeep(props.context) : {}
@@ -249,7 +260,7 @@ async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
 }
 
 async function handleCellClick(scope:any) {
-    console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
+    //console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
     if (!props.dataSet.dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
         setCurrentCell({
             row: scope.$index,
