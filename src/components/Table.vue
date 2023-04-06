@@ -32,7 +32,7 @@
                        :field="getField(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
-                       :style="getInputCellStyle(scope)"
+                       :style="getInputCellStyle()"
                        :context="getRowContext(scope)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">

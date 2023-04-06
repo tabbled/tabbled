@@ -88,7 +88,7 @@ onMounted(async () => {
 
 async function save() {
     try {
-        await dataSet.commit()
+        //await dataSet.commit()
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -99,7 +99,7 @@ async function save() {
 async function cancel() {
     if (dataSet.isChanged()) {
         console.log("changed")
-        dataSet.rollback()
+        //dataSet.rollback()
     }
 
     router.back()

@@ -108,7 +108,7 @@ function setAppTitle() {
 
 async function save() {
     try {
-        await editingDataSet.value.commit()
+        //await editingDataSet.value.commit()
 
         ElMessage.success('Saved successfully')
     }catch (e) {
@@ -119,10 +119,10 @@ async function save() {
 
 async function cancel() {
     console.log('cancel')
-
-    if (editingDataSet.value && editingDataSet.value.isChanged()) {
-        editingDataSet.value.rollback()
-    }
+    //
+    // if (editingDataSet.value && editingDataSet.value.isChanged()) {
+    //     editingDataSet.value.rollback()
+    // }
 
     router.back();
 }

@@ -137,7 +137,7 @@ function remove() {
             } else {
                 props.dataSet.removeBySelectedId()
                 props.dataSet.selectedIds = []
-                props.dataSet.commit()
+                //props.dataSet.commit()
             }
         }).catch(() => {})
 }
