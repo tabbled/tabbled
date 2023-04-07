@@ -183,7 +183,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             return undefined
 
         try {
-            console.log(id)
             let item = await this.getByIdRaw(id)
             return item.data;
         } catch (e) {
@@ -321,6 +320,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         item[field] = value
         await this.updateById(id, item)
+        this.emit('update', item.id)
     }
 }
 

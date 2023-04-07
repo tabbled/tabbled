@@ -360,6 +360,10 @@ async function init() {
         props.dataSet.on('update', () => {
             updateKey.value += 1
             data.value = props.dataSet.data
+            console.log('update')
+        })
+        props.dataSet.on('open', () => {
+            data.value = props.dataSet.data
         })
     }
 
