@@ -20,7 +20,7 @@ export function properties():FieldConfigInterface[] {
         type: "string"
     },{
         title: "Readonly",
-        alias: "isReadonly",
+        alias: "readonly",
         type: 'bool',
         default: true
     },{

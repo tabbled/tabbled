@@ -62,23 +62,33 @@ export class DataSet extends  EventEmitter {
     }
 
     async getChildren(id: string) {
-        let row = this.getRowById(id)
+        let row = this.findItemById(this._data, id)
+        row.children = await this.dataSource.getChildren(id)
+        return row.children
+    }
 
-        if (row === undefined)
-            return [];
+    findItemById(items, id) {
 
-        let item = this._data[row]
-        item.children = await this.dataSource.getChildren(id)
-        return item.children
+        for(let i in items) {
+            if (items[i].id === id) {
+                return items[i]
+            } else if (items[i].children && items[i].children.length) {
+                let it = this.findItemById(items[i].children, id)
+
+                if (it)
+                    return it;
+            }
+        }
+        return null;
     }
 
     async onDataSourceUpdate(id: string | Array<any>, field: string, value: any) {
-        //console.log('onDataSourceUpdate', id, field, value)
-        // if (!id || id instanceof Array) {
-        //     await this.load()
-        //     this.emit('update')
-        //     return
-        // }
+        console.log('onDataSourceUpdate', id, field, value)
+        if (!id || id instanceof Array) {
+            await this.load()
+            this.emit('update')
+            return
+        }
         //
         // let row = this.getRowById(id)
         //
@@ -196,7 +206,7 @@ export class DataSet extends  EventEmitter {
     }
 
     async load() {
-        this.data = _.cloneDeep(await this.dataSource.getAll());
+        this._data = _.cloneDeep(await this.dataSource.getAll());
     }
 
 
@@ -216,6 +226,10 @@ export class DataSet extends  EventEmitter {
         let item = undefined
         if (this.dataSource.isTree) {
             item = await this.dataSource.getById(id)
+
+            if (!item)
+                return null
+
         } else {
             let row = this.getRowById(id)
 

@@ -18,12 +18,10 @@ export class CompiledFunc {
     exec(...args: any[]) {
         if (!this.func)
             return;
-        console.log('exec')
         return this.func(this.dsService, this.utils, ...args)
     }
 
     compile(source: string, ...args: string[]) : boolean  {
-        console.log('compile')
         this.source = source;
         this.func = new Function('dataSources', 'utils', ...args,
             ` ${source} `)

@@ -352,7 +352,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         this.readonly = !!config.readonly
         this.script = config.script
 
-        console.log(config)
+        //console.log(config)
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))

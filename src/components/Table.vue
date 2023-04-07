@@ -2,7 +2,7 @@
     <el-table
             ref="table"
             border
-            :data="props.dataSet ? props.dataSet.data : []"
+            :data="data"
             :fit="true"
             row-key="id"
             highlight-current-row
@@ -93,6 +93,8 @@ let editEl = ref(null)
 let table = ref(null)
 let dsService = useDataSourceService()
 
+let data = ref<Array<any>>([])
+
 let sync = useSyncService()
 const configAlias = `config/table-config-${props.id}`
 
@@ -146,7 +148,8 @@ function getRowContext(scope) {
 }
 
 async function loadData(row, treeNode, resolve) {
-    resolve(await props.dataSet.getChildren(row.id))
+    let data = await props.dataSet.getChildren(row.id)
+    resolve(data)
 }
 
 function setCurrentCell(cell: CellRef) {
@@ -260,7 +263,7 @@ async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
 }
 
 async function handleCellClick(scope:any) {
-    //console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
+    console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
     if (!props.dataSet.dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
         setCurrentCell({
             row: scope.$index,
@@ -355,9 +358,8 @@ async function init() {
         //data.value = props.dataSet.data
 
         props.dataSet.on('update', () => {
-            //console.log('update dataset')
             updateKey.value += 1
-
+            data.value = props.dataSet.data
         })
     }
 

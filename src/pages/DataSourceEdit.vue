@@ -209,7 +209,7 @@ async function exportConfig() {
 
 async function save() {
     try {
-        console.log(dataSet.value.current)
+        // console.log(dataSet.value.current)
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -219,7 +219,7 @@ async function save() {
 
 async function cancel() {
     if (dataSet.value.isChanged()) {
-        console.log("changed")
+        //console.log("changed")
     }
 
     router.back()
