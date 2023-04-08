@@ -3,73 +3,59 @@
 </template>
 
 <script setup lang="ts">
-import {DataSet} from "../model/dataset";
-import {onMounted, ref, UnwrapRef, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {FieldConfigInterface} from "../model/field";
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
-    modelValue?: string,
-    dataSet?: UnwrapRef<DataSet>,
-    field?: string,
+    modelValue?: Promise<any>,
+    field: string,
+    fieldConfig: FieldConfigInterface,
     context?:any,
+    update?: number
 }>()
 
-let value = ref(getValue())
-let _field: FieldConfigInterface = null
+let value = ref('')
 let type: 'text' | 'textarea' = 'text'
-let isDisabled = ref(true)
+let isDisabled = ref(false)
 
-function getValue():string {
-    if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
-        return props.modelValue
-
-    return props.dataSet.current[props.field]
-}
 
 onMounted(() => {
     init()
 })
 
-watch(() => props.dataSet,
+watch(() => props.modelValue,
     async () => {
         init()
-    },
-    {
-        deep: true
+        await getValue()
     })
 
+watch(() => props.update,
+    async () => {
+        await getValue()
+    })
+
+
+async function getValue() {
+    value.value = await props.modelValue
+}
+
 function init() {
-    if (!props.dataSet)
-        return;
-
-    _field = props.dataSet.dataSource.getFieldByAlias(props.field)
-
-    switch (_field.type) {
-        case "text": type = 'textarea'; break;
-        default: type = 'text';
+    if (props.fieldConfig) {
+        switch (props.fieldConfig.type) {
+            case "text": type = 'textarea'; break;
+            default: type = 'text';
+        }
     }
-
-    if (props.dataSet.isOpen) {
-        value.value = getValue()
-        isDisabled.value = false
-    }
-
-
+    isDisabled.value = !(!!props.fieldConfig)
 
 }
 
 function change(val) {
     value.value = val
     emit('update:modelValue', val)
-
-    if (!props.dataSet || !props.field || props.field == '') {
-        console.warn(`DataSet or field haven't set`)
-        return;
-    }
-
-    props.dataSet.update(props.field, val)
+    emit('change', val)
 }
 
 </script>

@@ -1,5 +1,8 @@
 <template>
-    <el-select v-if="_field && _field.type === 'link'"
+    <el-select v-if="!fieldConfig"
+               :disabled="isDisabled"
+    />
+    <el-select v-if="fieldConfig && fieldConfig.type === 'link'"
                   filterable
                   :model-value="value"
                   :disabled="isDisabled"
@@ -17,7 +20,7 @@
             :value="item[keyProp]"
         />
     </el-select>
-    <el-select v-else-if="_field && _field.type === 'enum'"
+    <el-select v-else-if="fieldConfig && fieldConfig.type === 'enum'"
                filterable
                :model-value="value"
                :disabled="isDisabled"
@@ -25,7 +28,7 @@
                @change="(val) => change(val)"
     >
         <el-option
-            v-for="item in _field.values"
+            v-for="item in fieldConfig.values"
             :key="item.key"
             :label="item.title"
             :value="item.key"
@@ -37,24 +40,23 @@
 import {FieldConfigInterface} from "../model/field";
 import {onMounted, ref, watch} from "vue";
 import {DataSourceInterface} from "../model/datasource";
-import {DataSet} from "../model/dataset";
 import {useDataSourceService} from "../services/datasource.service";
 
 let isLoading = ref(false)
 let data = ref<Array<object>>([])
 let source: DataSourceInterface = null
-let _field = ref<FieldConfigInterface>(null)
-let value = ref(getValue())
+let value = ref(null)
 let isDisabled = ref(true)
 let dsService = useDataSourceService()
-let linkSource:DataSourceInterface = null
+let dataSource:DataSourceInterface = null
 
 interface Props {
     field: string,
-    modelValue?: string | number,
-    dataSet: DataSet,
+    fieldConfig: FieldConfigInterface,
+    modelValue?: Promise<any>
     keyProp?: string,
-    displayProp?: string
+    displayProp?: string,
+    update?:number
 }
 
 
@@ -63,82 +65,58 @@ const props = withDefaults(defineProps<Props>(), {
     displayProp: "name"
 })
 
-const emit = defineEmits(['change'])
-
-watch(() => props.dataSet,
-    async () => {
-        if (props.dataSet.isOpen) {
-            value.value = getValue()
-            isDisabled.value = false
-        }
-
-    },
-    {
-        deep: true
-    })
+const emit = defineEmits(['update:modelValue', 'change'])
 
 onMounted(() => {
-    if (!props.dataSet)
-        return;
+    init()
+})
 
-    source = props.dataSet.dataSource
-    if (!source) {
-        console.warn(`DataSource "${props.field}" is not found`)
-        return;
-    }
+watch(() => props.modelValue,
+    async () => {
+        init()
+        await getValue()
+    })
 
-    _field.value = source.getFieldByAlias(props.field)
+watch(() => props.update,
+    async () => {
+        await getValue()
+    })
 
-    if (!_field) {
-        console.warn(`Field "${props.field}" not found`)
-        return;
-    }
-    linkSource = dsService.getDataSourceByAlias(_field.value.datasource)
+function init() {
+    isDisabled.value = true
 
-    if (!linkSource) {
-        console.warn(`Link source "${_field.value.datasource}" for field "${props.field}" not found`)
+    if (!props.fieldConfig) {
         return
     }
 
-    if (_field.value.type == 'link') {
-        isDisabled.value = false
+
+    if (props.fieldConfig.type == 'link') {
+        dataSource = dsService.getDataSourceByAlias(props.fieldConfig.datasource)
+
+        if (!dataSource) {
+            console.warn(`Link source "${props.fieldConfig.datasource}" for field "${props.fieldConfig.alias}" not found`)
+            return
+        }
         getData()
     }
 
-    if (_field.value.type == 'enum') {
-        isDisabled.value = false
-        data.value = _field.value.values;
-    }
-})
+    isDisabled.value = false
+}
 
-function getValue() : string | number {
-    if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
-        return props.modelValue
-
-    return props.dataSet.current[props.field]
+async function getValue() {
+    value.value = await props.modelValue
 }
 
 async function getData() {
-    if (!linkSource || !_field)
-        return;
-
     isLoading.value = true;
-    data.value = await linkSource.getAll()
-
+    data.value = await dataSource.getAll()
     isLoading.value = false;
 }
 
 function change(val: string) {
-    emit('change', val)
-
     value.value = val
-
-    if (!props.dataSet || props.field == '' || !_field) {
-        console.warn(`DataSet or field haven't set`)
-        return;
-    }
-
-    props.dataSet.update(props.field, val)
+    emit('update:modelValue', val)
+    emit('change', val)
 }
 
 </script>

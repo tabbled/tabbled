@@ -1,4 +1,3 @@
-import {DataSetConfigInterface, dataSetProperties} from "./dataset";
 import {EventHandlerConfigInterface, FieldConfigInterface, FieldListOfType} from "./field";
 import {columnProperties} from "./column";
 
@@ -44,10 +43,7 @@ export interface ElementInterface {
         [key in ScreenSize]: PositionElementInterface
     },
     name: string,
-    // properties: {
-    //     [name: string]: any | undefined
-    // }
-    //[name: string]: any | undefined
+    field: string
 }
 
 export interface ComponentInterface {
@@ -66,12 +62,11 @@ export interface PageConfigInterface {
     alias: string,
     path: string,
     title: string,
-    dataSets: DataSetConfigInterface[],
     elements: ElementInterface[]
     onOpen: EventHandlerConfigInterface,
     headerActions: PageActionConfigInterface[],
     isEditPage: boolean
-    editingDataSet?: string
+    datasource?: string
 }
 
 interface PageListItemTypeInterface {
@@ -83,11 +78,6 @@ interface PageListItemTypeInterface {
 export class PageTypesProperties {
     constructor() {
         this._types = new Map<FieldListOfType, PageListItemTypeInterface>()
-        this._types.set('dataset', {
-            alias: 'dataset',
-            propPath: '',
-            fields: dataSetProperties
-        })
         this._types.set('column', {
             alias: 'column',
             propPath: '',
@@ -154,19 +144,11 @@ export const pageProperties:FieldConfigInterface[] = [
         default: false
     },
     {
-        title: "Editing dataSet",
-        alias: "editingDataSet",
-        type: 'dataset',
-        tooltip: 'DataSet that will be controlled with form validating',
+        title: "Editing data source",
+        alias: "datasource",
+        type: 'datasource',
+        tooltip: 'DataSource that will be controlled with form validating',
         default: null
-    },
-    {
-        title: 'DataSets',
-        alias: 'dataSets',
-        type: 'list',
-        listOf: "dataset",
-        keyProp: 'alias',
-        displayProp: 'alias',
     },
     {
         title: 'Elements',

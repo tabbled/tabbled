@@ -15,8 +15,6 @@
             @row-click="onTableRowClick"
             @rowDblclick="onTableRowDblClick"
             @header-dragend="headerResized"
-            lazy
-            :load="loadData"
     >
         <el-table-column type="selection" width="30" />
         <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
@@ -36,7 +34,7 @@
                        :context="getRowContext(scope)"
                 />
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
-                    <Cell :model-value="getCellValue(scope)"
+                    <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
                           :updateKey='updateKey'
                     />
@@ -53,27 +51,29 @@
 
 <script setup lang="ts">
 
-import {onMounted, onUnmounted, ref, UnwrapRef, watch} from 'vue'
+import {onMounted, onUnmounted, ref, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
-import {DataSet} from "../model/dataset";
 import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
-import {EventHandlerConfigInterface} from "../model/field";
+import {EventHandlerConfigInterface, FieldConfigInterface} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
 import _ from "lodash";
+import {DataSourceInterface} from "../model/datasource";
 
 interface Props {
     id: string,
-    dataSet: UnwrapRef<DataSet>,
+    modelValue?: Promise<any>
     field?: string,
-    fieldDataSet?: UnwrapRef<DataSet>,
-    columns: ColumnConfigInterface[];
-    readonly ?: boolean
+    datasource: string,
+    fieldConfig?: FieldConfigInterface,
+    columns: ColumnConfigInterface[],
+    readonly ?: boolean,
     context: any,
     onRowClick?: EventHandlerConfigInterface
     onRowDoubleClick?: EventHandlerConfigInterface
+    update?: number
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false
@@ -82,7 +82,7 @@ let actions = ref({
     onRowDoubleClick: null,
     onRowClick: null
 })
-const emit = defineEmits(['rowDblClick', 'rowClick'])
+const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue'])
 let updateKey = ref(0)
 
 interface CellRef {row: number, col: number}
@@ -92,6 +92,7 @@ let editingCell = ref<CellRef | null>(null)
 let editEl = ref(null)
 let table = ref(null)
 let dsService = useDataSourceService()
+let dataSource:DataSourceInterface = null
 
 let data = ref<Array<any>>([])
 
@@ -99,42 +100,93 @@ let sync = useSyncService()
 const configAlias = `config/table-config-${props.id}`
 
 
-watch(() => props.columns,
+watch(() => props.field,
     async () => {
-        await initColumns()
-    },
-    {
-        deep: true
+        await init();
+        await initColumns();
+        await getData();
     })
 
-watch(() => props.dataSet,
+watch(() => props.datasource,
     async () => {
-        await init()
-    },
-    {
-        deep: false
+        await init();
+        await initColumns();
+        await getData();
+    })
+
+watch(() => props.update,
+    async () => {
+    console.log('props.modelValue', await props.modelValue)
+        if (props.field)
+            await getData();
     })
 
 onMounted(async () => {
-    await initColumns()
     await init();
+    await initColumns();
+    await getData();
 });
 
 onUnmounted(() => {
-    if (props.fieldDataSet) {
-        props.fieldDataSet.removeListener('open', getFieldData)
-        props.fieldDataSet.removeListener('update', getFieldData)
+    // if (props.fieldDataSet) {
+    //     props.fieldDataSet.removeListener('open', getFieldData)
+    //     props.fieldDataSet.removeListener('update', getFieldData)
+    // }
+    //
+    //
+    // props.dataSet.removeListener('update', setDataToFieldDataSet)
+})
+
+async function getTreePath(id:string) : Promise<any> {
+
+    let item = await this.dataSource.getById(id)
+    let pathA = [id]
+    while (item.parentId) {
+        pathA.unshift(item.parentId)
+        item = await this.dataSource.getById(item.parentId)
+    }
+
+    let data = this._data
+    let path = ""
+    pathA.forEach(item => {
+
+        let index = _.findIndex(data, (o:any) => { return o && o.id == item; });
+        data = data[index].children
+
+        if (path === "") {
+            path = `[${index}]`
+        } else {
+            path += `.children[${index}]`
+        }
+    })
+
+    return path
+}
+
+async function getData() {
+    data.value = []
+    if (!dataSource) {
+
+        console.warn(`Datasource for Table doesn't set`)
+        console.log(props)
+        return;
     }
 
 
-    props.dataSet.removeListener('update', setDataToFieldDataSet)
-})
+    if (props.field) {
+        data.value = await props.modelValue
+    } else {
+        data.value = await dataSource.getAll();
+    }
+
+    console.log(await dataSource.getAll())
+}
 
 
 function getInputCellStyle() {
     let style:any = {}
     //display: inline-flex; width:
-    if (props.dataSet.dataSource.isTree && editingCell.value.col === 1) {
+    if (dataSource.isTree && editingCell.value.col === 1) {
         style.display = 'inline-flex'
         style.width = 'calc(100% - 40px)'
     }
@@ -147,11 +199,6 @@ function getRowContext(scope) {
     return ctx
 }
 
-async function loadData(row, treeNode, resolve) {
-    let data = await props.dataSet.getChildren(row.id)
-    resolve(data)
-}
-
 function setCurrentCell(cell: CellRef) {
 
     if (editingCell.value !== cell) {
@@ -162,13 +209,13 @@ function setCurrentCell(cell: CellRef) {
 }
 
 function getField(field: string) {
-    if (!props.dataSet)
+    if (!dataSource)
         return undefined;
 
-    let f = props.dataSet.dataSource.getFieldByAlias(field)
+    let f = dataSource.getFieldByAlias(field)
 
     if (!f)
-        console.warn(`Field "${field}" doesn't exists in data source "${props.dataSet.dataSource.alias}"`)
+        console.warn(`Field "${field}" doesn't exists in data source "${dataSource.alias}"`)
 
     return f
 }
@@ -200,7 +247,7 @@ function selectionChange(rows: Array<any>) {
     rows.forEach(row => {
         ids.push(row.id)
     })
-    props.dataSet.selectedIds = ids;
+    console.log(ids)
 }
 
 function onTableRowClick(row) {
@@ -240,22 +287,15 @@ function headerResized(newWidth, oldWidth, column) {
 }
 
 function currentRowChanged(row: any) {
-    if (!row) {
-        props.dataSet.setCurrentId(null)
-        return;
-    }
-
-    if (props.dataSet)
-        props.dataSet.setCurrentId(row['id'])
+console.log(row)
 }
 
 function onCellInput(scope: any, value: any) {
-    let fieldAlias = scope.column.property;
-    props.dataSet.setValue(scope.row.id, fieldAlias, value)
+    dataSource.setValue(scope.row.id, scope.column.property, value)
 }
 
 async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
-    let fGetReadonly = await props.dataSet.dataSource.getFieldByAlias(field).getReadonlyFunc()
+    let fGetReadonly = await dataSource.getFieldByAlias(field).getReadonlyFunc()
     if (fGetReadonly) {
         return await fGetReadonly.exec(getRowContext(scope))
     }
@@ -264,7 +304,7 @@ async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
 
 async function handleCellClick(scope:any) {
     //console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
-    if (!props.dataSet.dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
+    if (!dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
         setCurrentCell({
             row: scope.$index,
             col: scope.cellIndex
@@ -308,20 +348,45 @@ let getHeaderTitle = (scope: any) => {
 }
 
 let getCellData = async (scope: any) => {
-    if (!props.dataSet)
+    if (!dataSource)
         return;
 
-    return await props.dataSet.getValue(scope.row.id, scope.column.property)
-}
+    // return await props.dataSet.getValue(scope.row.id, scope.column.property)
 
-function getCellValue(scope: any) {
-    //console.log(scope)
-    if (scope.$index < 0)
-        return undefined
 
-    //console.log(scope.row.id)
+    let id = scope.row.id
+    if (!id) return
 
-    return props.dataSet.getValue(scope.row.id, scope.column.property)
+    let field = scope.column.property
+    let item = await dataSource.getById(id)
+
+    if (!item) {
+        console.error(`Entity by id ${id} not found`)
+        return
+    }
+
+    let f = dataSource.getFieldByAlias(field)
+    let ctx = _.cloneDeep(!props.context ? {} : props.context)
+    ctx.row = item
+
+    let getValueFunc = await f.getValueFunc()
+
+    if (getValueFunc) {
+        try {
+            return await getValueFunc.exec(ctx)
+        } catch (e) {
+            console.error(`Error while evaluating field ${f.alias} function setValue of datasource ${dataSource.alias}`)
+            console.error(e)
+            return 'Error'
+        }
+    } else {
+        try {
+            return item[field]
+        } catch (e) {
+            console.error(e)
+        }
+
+    }
 }
 
 function getRowClass() {
@@ -348,72 +413,61 @@ async function initColumns() {
 
 async function init() {
     setCurrentCell(null)
+    data.value = []
 
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
 
-
-
-    if (props.dataSet) {
-        //data.value = props.dataSet.data
-
-        props.dataSet.on('update', () => {
-            updateKey.value += 1
-            data.value = props.dataSet.data
-            //console.log('update')
-        })
-        props.dataSet.on('open', () => {
-            data.value = props.dataSet.data
-        })
+    if (props.datasource) {
+        dataSource = dsService.getDataSourceByAlias(props.datasource)
     }
+
+
+
+
+
+    // console.log('init', dataSource)
+    // if (props.dataSet) {
+    //
+    //     data.value = props.dataSet.data
+    //
+    //     props.dataSet.on('update', () => {
+    //         updateKey.value += 1
+    //         data.value = props.dataSet.data
+    //         console.log('update')
+    //     })
+    //     props.dataSet.on('open', () => {
+    //         console.log('open')
+    //         data.value = props.dataSet.data
+    //     })
+    // }
 
 
     // If props.fieldDataSet is set than it is a field table we should get/set data from props.fieldDataSet
-    if(props.fieldDataSet) {
-
-        if (!props.field) {
-            console.error(`Field for field table not set`)
-            return
-        }
-
-        let field = props.fieldDataSet.dataSource.getFieldByAlias(props.field)
-
-        if (!field) {
-            console.error(`DataSource "${props.fieldDataSet.dataSource.alias}" of field for field "${props.field}" table doesn't exist`)
-            return
-        }
-
-        console.log('emits')
-        props.fieldDataSet.on('open', getFieldData)
-        props.fieldDataSet.on('update', getFieldData)
-        props.dataSet.on('update', setDataToFieldDataSet)
-
-        if (props.fieldDataSet.isOpen && props.fieldDataSet.current) {
-            getFieldData()
-        }
-    }
+    // if(props.fieldDataSet) {
+    //
+    //     if (!props.field) {
+    //         console.error(`Field for field table not set`)
+    //         return
+    //     }
+    //
+    //     let field = props.fieldDataSet.dataSource.getFieldByAlias(props.field)
+    //
+    //     if (!field) {
+    //         console.error(`DataSource "${props.fieldDataSet.dataSource.alias}" of field for field "${props.field}" table doesn't exist`)
+    //         return
+    //     }
+    //
+    //     console.log('emits')
+    //     props.fieldDataSet.on('open', getFieldData)
+    //     props.fieldDataSet.on('update', getFieldData)
+    //     props.dataSet.on('update', setDataToFieldDataSet)
+    //
+    //     if (props.fieldDataSet.isOpen && props.fieldDataSet.current) {
+    //         getFieldData()
+    //     }
+    // }
 }
-
-function getFieldData(){
-    console.log('getFieldData')
-    if (!props.fieldDataSet.current || !props.fieldDataSet.current[props.field]) {
-        props.dataSet.data = []
-        return;
-    }
-
-
-    props.dataSet.data = props.fieldDataSet.current[props.field]
-}
-
-function setDataToFieldDataSet() {
-    console.log('update')
-    if (!props.fieldDataSet.current) {
-        return
-    }
-
-    props.fieldDataSet.update(props.field, props.dataSet.data)
-}
-
 
 </script>
 

@@ -1,69 +1,58 @@
 <template>
-    <el-checkbox :label="label" :disabled="isDisabled" :model-value="value" @click="change"/>
+    <el-checkbox :label="label" :disabled="isDisabled" :model-value="value" @change="change"/>
 </template>
 
 <script setup lang="ts">
-import {DataSet} from "../model/dataset";
-import {onMounted, ref, UnwrapRef, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
+import {FieldConfigInterface} from "../model/field";
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
-    modelValue?: boolean,
-    dataSet?: UnwrapRef<DataSet>,
+    modelValue?: Promise<boolean>,
+    fieldConfig: FieldConfigInterface,
     field?: string,
     context?:any,
-    label?: string
+    label?: string,
+    update?: number
 }>()
 
-let value = ref(getValue())
-let isDisabled = ref(true)
+let value = ref(false)
+let isDisabled = ref(false)
 
-function getValue():boolean {
-    if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
-        return props.modelValue
-
-    let d = props.dataSet.current[props.field]
-
-    return d === undefined || d === null ? false : props.dataSet.current[props.field]
+async function getValue() {
+    value.value = await props.modelValue
 }
 
 onMounted(() => {
     init()
 })
 
-watch(() => props.dataSet,
+watch(() => props.modelValue,
     async () => {
         init()
-    },
-    {
-        deep: true
+        await getValue()
+    })
+
+watch(() => props.update,
+    async () => {
+        await getValue()
     })
 
 function init() {
-    if (!props.dataSet)
-        return;
+    isDisabled.value = true
 
-    if (props.dataSet.isOpen) {
-        value.value = getValue()
-        isDisabled.value = false
+    if (!props.fieldConfig || props.fieldConfig.type !== 'bool') {
+        return
     }
-
-
+    isDisabled.value = false
 
 }
 
 function change() {
-
     value.value = !value.value
     emit('update:modelValue', value.value)
-
-    if (!props.dataSet || !props.field || props.field == '') {
-        console.warn(`DataSet or field haven't set`)
-        return;
-    }
-
-    props.dataSet.update(props.field, value.value)
+    emit('change', value.value)
 }
 
 </script>

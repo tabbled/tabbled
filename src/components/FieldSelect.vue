@@ -20,39 +20,45 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {DataSetConfigInterface} from "../model/dataset";
 import {useDataSourceService} from "../services/datasource.service";
+import {DataSourceInterface} from "../model/datasource";
 
 let isLoading = ref(false)
 let data = ref<Array<{key: string, title: string}>>([])
 let dsService = useDataSourceService()
+let dataSource:DataSourceInterface = null
 
 const props = defineProps<{
-    dataSet?: DataSetConfigInterface,
+    dataSource?: string,
     modelValue?: string
 }>()
 
 const emit = defineEmits(['change'])
 
-onMounted(() => {
-    getData()
+onMounted(async () => {
+    await init();
+    await getData()
+
 })
 
-async function getData() {
-    if(!props.dataSet)
+function init() {
+    if(!props.dataSource)
         return;
 
+    dataSource = dsService.getDataSourceByAlias(props.dataSource)
+    if (!dataSource) {
+        console.warn(`No dataSource with alias "${props.dataSource}"`)
+    }
+}
+
+async function getData() {
     isLoading.value = true;
     data.value = []
 
-    let ds = dsService.getDataSourceByAlias(props.dataSet.dataSource)
 
-    if (!ds) {
-        console.warn(`No dataSource with alias "${props.dataSet.dataSource}"`)
-    }
 
-    for(const i in ds.fields) {
-        const f = ds.fields[i]
+    for(const i in dataSource.fields) {
+        const f = dataSource.fields[i]
         data.value.push({
             key: f.alias,
             title: `${f.title} (${f.alias})`
@@ -63,7 +69,7 @@ async function getData() {
 }
 
 function change(key: string) {
-    let ds = dsService.getDataSourceByAlias(props.dataSet.dataSource)
+    let ds = dsService.getDataSourceByAlias(props.dataSource)
     let field = ds.getFieldByAlias(key)
 
     emit('change', key, field)

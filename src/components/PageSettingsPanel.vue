@@ -35,13 +35,6 @@
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val) => onInput(prop.alias, val)"
                         />
-                        <el-select-v2 v-else-if="prop.type === 'dataset'"
-                                      style="width: 100%"
-                                      filterable
-                                      :model-value="getValue(prop, currentElement)"
-                                      :options="dataSetOptions"
-                                      @change="(val) => onInput(prop.alias, val)"
-                        />
 <!--                        <LinkSelect v-else-if="prop.type === 'link'"-->
 <!--                                    style="width: 100%"-->
 <!--                                    :field="prop"-->
@@ -69,7 +62,7 @@
                         />
                         <FieldSelect v-else-if="prop.type === 'field'"
                                      style="width: 100%"
-                                     :data-set="getDataSetConfig(prop)"
+                                     :data-source="pageConfig.datasource"
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
@@ -90,7 +83,6 @@ import _ from 'lodash'
 import {useComponentService} from "../services/component.service";
 import DataSourceSelect from "./DataSourceSelect.vue";
 import FieldSelect from "./FieldSelect.vue";
-import {DataSetConfigInterface} from "../model/dataset";
 import { FlakeId } from '../flake-id'
 let flakeId = new FlakeId()
 
@@ -118,7 +110,6 @@ const props = defineProps<{
 
 watch(() => props,
     async () => {
-        populateDataSetsList()
         setCurrentElement(props.currentPath ? props.currentPath : '')
     },
     {
@@ -251,52 +242,56 @@ function onListRemove(alias:string, idx: number) {
     emit('update', path, lst)
 }
 
-function populateDataSetsList() {
-    if (!props.pageConfig)
-        return;
+// function populateDataSetsList() {
+//     if (!props.pageConfig)
+//         return;
+//
+//     dataSetOptions.value = props.pageConfig.dataSets.map(item => {
+//         return {
+//             value: item.alias,
+//             label: item.alias
+//         }
+//     })
+//}
 
-    dataSetOptions.value = props.pageConfig.dataSets.map(item => {
-        return {
-            value: item.alias,
-            label: item.alias
-        }
-    })
-}
+//function getDataSourceConfig(prop: FieldConfigInterface): DataSetConfigInterface | undefined {
 
-function getDataSetConfig(prop: FieldConfigInterface): DataSetConfigInterface | undefined {
-    let alias = ""
+
+    //props.pageConfig
+
+    //let alias = ""
 
     // If prop.dataSetField not set, find first field with dataset type
-    if (!prop.dataSetField) {
-        for (const i in properties.value) {
-            let f = properties.value[i]
+    // if (!prop.dataSetField) {
+    //     for (const i in properties.value) {
+    //         let f = properties.value[i]
+    //
+    //         if (f.type === 'dataset') {
+    //             alias = _.get(props.pageConfig, _currentPath + '.' + f.alias)
+    //             break
+    //         }
+    //     }
+    // } else {
+    //     alias = alias = _.get(props.pageConfig, _currentPath + '.' + prop.dataSetField)
+    // }
+    //
+    // console.log(alias)
+    //
+    // if (alias === "")
+    //     return undefined;
+    //
+    // for(const i in props.pageConfig.dataSets) {
+    //     if (props.pageConfig.dataSets[i].alias === alias)
+    //         return props.pageConfig.dataSets[i]
+    // }
 
-            if (f.type === 'dataset') {
-                alias = _.get(props.pageConfig, _currentPath + '.' + f.alias)
-                break
-            }
-        }
-    } else {
-        alias = alias = _.get(props.pageConfig, _currentPath + '.' + prop.dataSetField)
-    }
-
-    console.log(alias)
-
-    if (alias === "")
-        return undefined;
-
-    for(const i in props.pageConfig.dataSets) {
-        if (props.pageConfig.dataSets[i].alias === alias)
-            return props.pageConfig.dataSets[i]
-    }
-
-    return undefined;
-}
+//    return undefined;
+//}
 
 onMounted(() => {
     if (divToHeight.value)
         scrollHeight.value = window.innerHeight - divToHeight.value.$el.offsetTop - 60
-    populateDataSetsList()
+
     setCurrentElement('')
 })
 

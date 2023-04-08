@@ -35,21 +35,22 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref, shallowRef, UnwrapRef, watch} from "vue";
+import {onMounted, ref, shallowRef, watch} from "vue";
 import {Codemirror} from 'vue-codemirror'
 import {javascript} from '@codemirror/lang-javascript'
 import {json} from '@codemirror/lang-json'
-import {DataSet} from "../model/dataset";
 import {CompiledFunc, compileScript} from "../services/compiler";
+import {FieldConfigInterface} from "../model/field";
 
 interface Props {
-    modelValue?: string,
-    dataSet?: UnwrapRef<DataSet>,
+    modelValue?: Promise<any>,
     field?: string,
+    fieldConfig: FieldConfigInterface,
     context?:any,
     format: 'json' | 'javascript',
     runnable: boolean,
     maxHeight: number
+    update?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -62,34 +63,25 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const extensions = ref<Array<any>>([javascript()])
 
 const view = shallowRef()
-let script = ref(getScript())
+let script = ref("")
 let header = ref('')
 const handleReady = (payload) => {
     view.value = payload.view
 }
 
-function getScript():string {
-    if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
-        return props.modelValue ? props.modelValue : ''
-
-    return props.dataSet.current[props.field]
+async function getScript() {
+    script.value = await props.modelValue
 }
 
-watch(() => props.dataSet,
+watch(() => props.update,
     async () => {
-        if (props.dataSet && props.field && props.field !== '') {
-            header.value = props.dataSet.dataSource.getFieldByAlias(props.field).title
-            //console.log(header.value)
-        }
-
-        if (props.dataSet.isOpen)
-            script.value = getScript()
+        await getScript()
     }, {
         deep: true
     })
 
 onMounted(async () => {
-    script.value = getScript()
+    await getScript()
     setExtensions()
 });
 
@@ -101,7 +93,7 @@ watch(() => props.format,
 
 watch(() => props.modelValue,
     async () => {
-        script.value = getScript()
+        await getScript()
     }, {deep: true})
 
 function setExtensions() {
@@ -114,33 +106,10 @@ function setExtensions() {
     extensions.value = arr
 }
 
-// console.log(props.dataSet)
-// console.log(props.field)
-
-
-// Status is available at all times via Codemirror EditorView
-// function getCodemirrorStates() {
-//     const state = view.value.state
-//     const ranges = state.selection.ranges
-//     const selected = ranges.reduce((r, range) => r + range.to - range.from, 0)
-//     const cursor = ranges[0].anchor
-//     const length = state.doc.length
-//     const lines = state.doc.lines
-//     // more state info ...
-//     // return ...
-// }
-
 function change(event: any) {
     script.value = event
     emit('update:modelValue', event)
-    //console.log(event)
-
-    if (!props.dataSet || !props.field || props.field == '') {
-        //console.warn(`DataSet or field haven't set`)
-        return;
-    }
-
-    props.dataSet.update(props.field, event)
+    emit('change', event)
 }
 
 async function runScript() {

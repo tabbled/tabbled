@@ -33,10 +33,14 @@
                 <component :id="element.id || idx.toString()"
                            style="width: 100%"
                            :is="element.name" v-bind="element"
+                           :fieldConfig="getField(element)"
+                           :modelValue="getValue(element)"
+                           @change="(value) => setValue(element, value)"
+                           :context="scriptContext"
+                           :update="update"
+
                 />
             </el-form-item>
-
-
         </el-form>
     </div>
 </template>
@@ -48,31 +52,37 @@ import {useStore} from "vuex"
 import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
 import {useRouter, useRoute} from 'vue-router';
-import {DataSet, useDataSet} from "../model/dataset";
+import {DataSet} from "../model/dataset";
 import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {ElMessage} from "element-plus";
 import {useComponentService} from "../services/component.service";
+import {DataSourceInterface, EntityInterface} from "../model/datasource";
+import {useDataSourceService} from "../services/datasource.service";
 
 let store = useStore();
 let router = useRouter();
 let route = useRoute();
 const pageService = usePageScriptHelper(router)
-const scriptContext = {
+const scriptContext = ref({
     pages: pageService,
     page: {
-        dataSets: {},
         params: {}
     }
-}
+})
+
 const pageHeader = usePageHeader()
 
 let elements = ref<Array<ElementInterface>>([])
-let dataSets = ref<Map<string, DataSet>>(new Map())
 let grid = ref(null)
 let isEditPage = ref(false)
 let editingDataSet = ref<DataSet>(null)
 let componentService = useComponentService()
+let dsService = useDataSourceService()
+
+let editEntity = ref<EntityInterface>(null)
+let editDataSource = ref<DataSourceInterface>(null)
+let update = ref(0)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -117,6 +127,35 @@ async function save() {
     }
 }
 
+async function getValue(el: ElementInterface) {
+    console.log('getValue', el)
+    if (!editEntity.value) {
+        return null
+    }
+    return editEntity.value[el.field]
+}
+
+async function setValue(el:ElementInterface, value: any) {
+    console.log('setValue', el, value)
+    if (!editEntity.value) {
+        return false
+    }
+    editEntity.value[el.field] = value
+}
+
+function getField(el:ElementInterface) {
+    if (!editDataSource.value) {
+        return undefined
+    }
+    let f = editDataSource.value.getFieldByAlias(el.field)
+
+    if (!f) {
+        console.error(`Field ${el.field} for page element ${el.name} not found in datasource ${props.pageConfig.datasource}`)
+    }
+    return f
+}
+
+
 async function cancel() {
     console.log('cancel')
     //
@@ -145,33 +184,17 @@ async function init() {
     actions.value.onOpen = await compileAction(props.pageConfig.onOpen)
 
     elements.value = []
-    dataSets.value.clear();
+    editDataSource.value = null
+    editEntity.value = null
 
-    scriptContext.page.params = route.params
-
-
-
-    props.pageConfig.dataSets.forEach(config => {
-        let ds = useDataSet(config)
-
-        if (!ds) {
-            console.warn(`DataSet "${config.alias}" hasn't created`)
-            return
-        }
-
-        dataSets.value.set(ds.alias, ds)
-        scriptContext.page.dataSets[ds.alias] = ds
-
-        if (props.pageConfig.isEditPage && props.pageConfig.editingDataSet === ds.alias) {
-            editingDataSet.value = ds
-        }
-    })
+    scriptContext.value.page.params = route.params
 
     props.pageConfig.elements.forEach(element => {
         let el:ElementInterface = {
             id: element.id,
             layout: element.layout,
             name: element.name,
+            field: element.field
         }
 
 
@@ -182,23 +205,10 @@ async function init() {
             return;
         }
 
-
-
         elProps.properties.forEach(item => {
-            if (item.type === 'dataset') {
-                if (element[item.alias] && element[item.alias] !== "") {
-
-                    if (!dataSets.value.has(element[item.alias])) {
-                        console.warn(`DataSet "${element[item.alias]}" does not exist! For element ${element.name}`)
-                    } else {
-                        el[item.alias] = dataSets.value.get(element[item.alias])
-                    }
-                }
-            } else {
-                el[item.alias] = _.cloneDeep(element[item.alias])
-            }
+            el[item.alias] = _.cloneDeep(element[item.alias])
         })
-        el['context'] = scriptContext
+        //el['context'] = scriptContext.value
         elements.value.push(el)
     })
     pageHeader.actions = []
@@ -229,16 +239,23 @@ async function init() {
         }
     }
 
-
-    dataSets.value.forEach(ds => {
-        if (ds.autoOpen) {
-            if (props.pageConfig.isEditPage && props.pageConfig.editingDataSet === ds.alias ) {
-                let id = <string>route.params.id
-                ds.openOne(id !== 'new' ? id : null);
-            } else
-                ds.open()
+    if (props.pageConfig.isEditPage && props.pageConfig.datasource) {
+        editDataSource.value = dsService.getDataSourceByAlias(props.pageConfig.datasource)
+        if (!editDataSource.value) {
+            console.warn(`DataSource ${props.pageConfig.datasource} for editing page ${props.pageConfig.alias} not found`)
+            return;
         }
-    })
+        let id = <string>route.params.id
+        if (id) {
+            editEntity.value = await editDataSource.value.getById(id)
+        } else {
+            editEntity.value = {}
+        }
+    }
+
+    update.value += 1
+
+    console.log('editEntity', editEntity.value)
 
     if (actions.value.onOpen) {
         await execAction(actions.value.onOpen)
@@ -266,7 +283,7 @@ async function compileAction(action) {
 
 async function execAction(action: CompiledFunc, additionalContext?: object) {
     try {
-        let ctx = Object.assign(scriptContext, additionalContext)
+        let ctx = Object.assign(scriptContext.value, additionalContext)
         action.exec(ctx)
     } catch (e) {
         console.error(`Execution error in action`)

@@ -325,7 +325,6 @@ async function init() {
             alias: '',
             path: '',
             title: '',
-            dataSets: [],
             elements: [],
             onOpen: null,
             headerActions: [],

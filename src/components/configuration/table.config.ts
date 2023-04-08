@@ -1,20 +1,17 @@
 import {FieldConfigInterface} from "../../model/field";
 
 export function properties():FieldConfigInterface[] {
-    return [{
-        title: "DataSet",
-        alias: "dataSet",
-        type: 'dataset'
-    },{
-        title: "Field dataSet",
-        alias: "fieldDataSet",
-        type: 'dataset'
+    return [
+    {
+        title: "Data source",
+        alias: "datasource",
+        type: 'datasource'
     },{
         title: "Field",
         alias: "field",
-        type: 'field',
-        dataSetField: "fieldDataSet"
-    },{
+        type: 'field'
+    }
+    ,{
         title: "Title",
         alias: "title",
         type: "string"

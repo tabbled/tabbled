@@ -62,6 +62,7 @@ export class DataSet extends  EventEmitter {
     }
 
     async getChildren(id: string) {
+        console.log(id, this._data)
         let row = this.findItemById(this._data, id)
         row.children = await this.dataSource.getChildren(id)
         return row.children
@@ -122,7 +123,10 @@ export class DataSet extends  EventEmitter {
         this._data = data;
 
         if (this.dataSource instanceof CustomDataSource) {
-            this.dataSource.setData(data).then()
+            this.dataSource.setData(data).then(async () => {
+                console.log('setData finished', await this.dataSource.getAll())
+
+            })
         }
     }
 
@@ -133,10 +137,11 @@ export class DataSet extends  EventEmitter {
 
             this._isOpen = true;
             this.emit('open')
+            console.log("dataset opened ", this.isOpen)
         } catch (e) {
             throw e
         }
-        console.log("dataset opened ", this.isOpen)
+
     }
 
     async openOne(id?: string) {
@@ -348,31 +353,7 @@ export class DataSet extends  EventEmitter {
         return undefined
     }
 
-    private async getTreePath(id:string) : Promise<any> {
 
-        let item = await this.dataSource.getById(id)
-        let pathA = [id]
-        while (item.parentId) {
-            pathA.unshift(item.parentId)
-            item = await this.dataSource.getById(item.parentId)
-        }
-
-        let data = this._data
-        let path = ""
-        pathA.forEach(item => {
-
-            let index = _.findIndex(data, (o:any) => { return o && o.id == item; });
-            data = data[index].children
-
-            if (path === "") {
-                path = `[${index}]`
-            } else {
-                path += `.children[${index}]`
-            }
-        })
-
-        return path
-    }
 }
 
 export const dataSetProperties:FieldConfigInterface[] = [

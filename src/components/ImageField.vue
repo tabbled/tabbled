@@ -39,35 +39,34 @@
 </template>
 
 <script setup lang="ts">
-import {DataSet} from "../model/dataset";
 import {onMounted, ref, watch} from "vue";
 import {ElMessage, UploadProps} from "element-plus";
+import {FieldConfigInterface} from "../model/field";
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
-    modelValue?: string,
-    dataSet?: DataSet,
+    modelValue: Promise<any>,
+    fieldConfig?: FieldConfigInterface,
     field?: string,
     context?:any,
     height?: number,
-    width?: number
+    width?: number,
+    update: number
 }>()
 
-let imageUrl = ref(getValue())
+let imageUrl = ref(null)
 let actionUrl = ref("")
 let type: 'text' | 'textarea' = 'text'
 let dialogVisible = ref(false)
 
-function getValue():string {
-    if (!props.dataSet || !props.field || props.field === '' || !props.dataSet.current)
-        return props.modelValue
 
-
-    return props.dataSet.current[props.field]
+async function getValue() {
+    imageUrl.value = await props.modelValue
 }
 
-onMounted(() => {
+onMounted(async () => {
+    await getValue()
     actionUrl.value = url()
 })
 
@@ -88,28 +87,20 @@ function uploaded(res) {
     change(`${url()}/${res.filename}`)
 }
 
-watch(() => props.dataSet,
+watch(() => props.modelValue,
     async () => {
+        await getValue()
+    })
 
-           //_field = props.dataSet.dataSource.getFieldByAlias(props.field)
-
-        if (props.dataSet.isOpen)
-            imageUrl.value = getValue()
-    },
-    {
-        deep: true
+watch(() => props.update,
+    async () => {
+        await getValue()
     })
 
 function change(val) {
     imageUrl.value = val
     emit('update:modelValue', val)
-
-    if (!props.dataSet || !props.field || props.field == '') {
-        console.warn(`DataSet or field haven't set`)
-        return;
-    }
-
-    props.dataSet.update(props.field, val)
+    emit('change', val)
 }
 
 const handleError: UploadProps['onError'] = (res) => {
