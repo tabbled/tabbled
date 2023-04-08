@@ -459,6 +459,7 @@ function getElementTitle(el) {
 
 function removeWidget(idx: number) {
     elements.value.splice(idx, 1);
+    isChanged.value = true
 }
 
 function initDrag(e:MouseEvent) {

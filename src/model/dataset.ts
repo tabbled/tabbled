@@ -292,11 +292,7 @@ export class DataSet extends  EventEmitter {
     }
 
     async setValue(id: string, field: string, cellData: any) {
-
         await this.dataSource.setValue(id, field, cellData)
-        console.log(id, field, cellData)
-        //this.emit('update')
-
         return true;
     }
 
@@ -305,9 +301,13 @@ export class DataSet extends  EventEmitter {
             throw new Error(`DataSet ${this.alias} is not open`)
         }
 
-        let path = await this.getTreePath(id)
+        if (this.dataSource.isTree) {
+            let path = await this.getTreePath(id)
 
-        if (_.unset(this._data, path)) {
+            if (_.unset(this._data, path)) {
+                await this.dataSource.removeById(id)
+            }
+        } else {
             await this.dataSource.removeById(id)
         }
 

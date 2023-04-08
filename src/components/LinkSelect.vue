@@ -38,6 +38,7 @@ import {FieldConfigInterface} from "../model/field";
 import {onMounted, ref, watch} from "vue";
 import {DataSourceInterface} from "../model/datasource";
 import {DataSet} from "../model/dataset";
+import {useDataSourceService} from "../services/datasource.service";
 
 let isLoading = ref(false)
 let data = ref<Array<object>>([])
@@ -45,6 +46,8 @@ let source: DataSourceInterface = null
 let _field = ref<FieldConfigInterface>(null)
 let value = ref(getValue())
 let isDisabled = ref(true)
+let dsService = useDataSourceService()
+let linkSource:DataSourceInterface = null
 
 interface Props {
     field: string,
@@ -90,6 +93,12 @@ onMounted(() => {
         console.warn(`Field "${props.field}" not found`)
         return;
     }
+    linkSource = dsService.getDataSourceByAlias(_field.value.datasource)
+
+    if (!linkSource) {
+        console.warn(`Link source "${_field.value.datasource}" for field "${props.field}" not found`)
+        return
+    }
 
     if (_field.value.type == 'link') {
         isDisabled.value = false
@@ -98,14 +107,8 @@ onMounted(() => {
 
     if (_field.value.type == 'enum') {
         isDisabled.value = false
-
         data.value = _field.value.values;
-
     }
-
-    console.log('mounted', props.field)
-
-
 })
 
 function getValue() : string | number {
@@ -116,19 +119,16 @@ function getValue() : string | number {
 }
 
 async function getData() {
-    //console.log(query)
-
-    if (!source || !_field)
+    if (!linkSource || !_field)
         return;
 
     isLoading.value = true;
-    data.value = await source.getAll()
+    data.value = await linkSource.getAll()
 
     isLoading.value = false;
 }
 
 function change(val: string) {
-    console.log(val)
     emit('change', val)
 
     value.value = val

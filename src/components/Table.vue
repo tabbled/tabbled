@@ -263,7 +263,7 @@ async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
 }
 
 async function handleCellClick(scope:any) {
-    console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
+    //console.log(props.dataSet.dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
     if (!props.dataSet.dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
         setCurrentCell({
             row: scope.$index,
@@ -360,7 +360,7 @@ async function init() {
         props.dataSet.on('update', () => {
             updateKey.value += 1
             data.value = props.dataSet.data
-            console.log('update')
+            //console.log('update')
         })
         props.dataSet.on('open', () => {
             data.value = props.dataSet.data

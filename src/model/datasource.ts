@@ -239,6 +239,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
             await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
             await syncService.push(this.type, [item]);
+            this.emit('update')
         } catch (e) {
             throw e
         }
@@ -265,6 +266,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             item.data =  _.cloneDeep(value)
             await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
             await syncService.push(this.type, [item]);
+            this.emit('update')
         } catch (e) {
             console.error(e)
         }
@@ -287,6 +289,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
         await syncService.push(this.type, [item]);
+        this.emit('update')
         return true;
     }
 
