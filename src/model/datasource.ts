@@ -398,10 +398,14 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         this.script = script
     }
 
-    emitHandler(event: string, value: any) {
-        //console.log('emitHandler', event, value)
-        if (event === 'update') {
-            this.emit('update', value)
+    emitHandler(event: string, ...args) {
+        console.log('emitHandler', event, ...args)
+
+        switch (event) {
+            case 'update': this.emit('update', ...args); break;
+            case 'item-inserted': this.emit('item-inserted', ...args);break;
+            case 'item-updated': this.emit('item-updated', ...args);break;
+            case 'item-removed': this.emit('item-removed', ...args);break;
         }
     }
 
@@ -415,6 +419,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
     async compile() {
         let func = await compileScript(this.script, 'ctx', 'emit')
+        this.model = null
 
         try {
             this.model = func.exec(this.context, this._emitHandler)
@@ -456,6 +461,8 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     async removeById(id: string): Promise<boolean> {
         if (!this.model)
             return;
+
+        console.log('remove', id)
 
         return await this.model.removeById(id)
     }

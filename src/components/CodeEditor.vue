@@ -45,7 +45,7 @@ import {FieldConfigInterface} from "../model/field";
 interface Props {
     modelValue?: Promise<any>,
     field?: string,
-    fieldConfig: FieldConfigInterface,
+    fieldConfig?: FieldConfigInterface,
     context?:any,
     format: 'json' | 'javascript',
     runnable: boolean,

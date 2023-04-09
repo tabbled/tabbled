@@ -201,7 +201,7 @@ onMounted(async () => {
 
     // @ts-ignore
     let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `Data source ${ isNew.value ? 'new' : ' ' + dataSourceEntity.title } | ${ appTitle }`
+    document.title = `Data source ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ appTitle }`
 
     availableHeight.value = window.innerHeight - 260
 

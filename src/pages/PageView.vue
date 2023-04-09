@@ -17,13 +17,12 @@
                     <el-button v-if="isEditPage"
                                @click="save"
                                type="primary"
-                               :disabled="!editingDataSet || !editingDataSet.isChanged()"
                     >Save</el-button>
                 </div>
             </template>
         </el-page-header>
 
-        <el-form  class="grid-wrap" :model="editingDataSet" label-position="top">
+        <el-form  class="grid-wrap" :model="editEntity" label-position="top">
 
             <el-form-item v-for="(element, idx) in elements"
                           :label="getLabelElement(element)"
@@ -126,7 +125,7 @@ async function save() {
 }
 
 async function getValue(el: ElementInterface) {
-    console.log('getValue', el)
+    //console.log('getValue', el)
     if (!editEntity.value) {
         return null
     }
@@ -134,7 +133,7 @@ async function getValue(el: ElementInterface) {
 }
 
 async function setValue(el:ElementInterface, value: any) {
-    console.log('setValue', el, value)
+    //console.log('setValue', el, value)
     if (!editEntity.value) {
         return false
     }

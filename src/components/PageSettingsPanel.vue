@@ -225,7 +225,7 @@ async function onListInsert(alias:string, field: FieldConfigInterface) {
         list = []
     }
 
-    let n = generateEntityWithDefault(fields)
+    let n = await generateEntityWithDefault(fields)
     n[field.keyProp] = `${field.listOf}${list.length + 1}`
     n[field.displayProp] = `${field.listOf}${list.length + 1}`
     n.id = (await flakeId.generateId()).toString()

@@ -1,6 +1,6 @@
 <template>
     <CodeEditor v-if="type==='script'"
-                :model-value="script"
+                :model-value="getScript()"
                 @update:model-value="onCodeUpdate"
                 runnable
                 style="width: 100%;"
@@ -28,6 +28,10 @@ function onCodeUpdate(code: string) {
         type: props.type ? props.type : 'script',
         script: code
     })
+}
+
+async function getScript() {
+    return props.script
 }
 
 </script>

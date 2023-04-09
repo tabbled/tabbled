@@ -86,7 +86,7 @@ let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
 
 onMounted(async () => {
-    console.log('Input mounted', props.field)
+    //console.log('Input mounted', props.field)
 
     value.value = await props.modelValue
 
