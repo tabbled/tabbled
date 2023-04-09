@@ -57,6 +57,7 @@ import {ElMessage} from "element-plus";
 import {useComponentService} from "../services/component.service";
 import {DataSourceInterface, EntityInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
+import {generateEntityWithDefault} from "../model/field";
 
 let store = useStore();
 let router = useRouter();
@@ -66,7 +67,8 @@ const scriptContext = ref({
     pages: pageService,
     page: {
         params: {}
-    }
+    },
+    item: null
 })
 
 const pageHeader = usePageHeader()
@@ -78,8 +80,9 @@ let componentService = useComponentService()
 let dsService = useDataSourceService()
 
 let editEntity = ref<EntityInterface>(null)
-let editDataSource = ref<DataSourceInterface>(null)
+let editDataSource: DataSourceInterface = null
 let update = ref(0)
+let isNew = ref(false)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -115,7 +118,11 @@ function setAppTitle() {
 
 async function save() {
     try {
-        //await editingDataSet.value.commit()
+        if (isNew.value) {
+            await editDataSource.insert(editEntity.value.id, editEntity.value)
+        } else {
+            await editDataSource.updateById(editEntity.value.id, editEntity.value)
+        }
 
         ElMessage.success('Saved successfully')
     }catch (e) {
@@ -138,13 +145,19 @@ async function setValue(el:ElementInterface, value: any) {
         return false
     }
     editEntity.value[el.field] = value
+    update.value++
+
+    let fSetValue = await editDataSource.getFieldByAlias(el.field).setValueFunc()
+    if (fSetValue) {
+        return await fSetValue.exec(scriptContext.value)
+    }
 }
 
 function getField(el:ElementInterface) {
-    if (!editDataSource.value) {
+    if (!editDataSource) {
         return undefined
     }
-    let f = editDataSource.value.getFieldByAlias(el.field)
+    let f = editDataSource.getFieldByAlias(el.field)
 
     if (!f) {
         console.error(`Field ${el.field} for page element ${el.name} not found in datasource ${props.pageConfig.datasource}`)
@@ -181,7 +194,7 @@ async function init() {
     actions.value.onOpen = await compileAction(props.pageConfig.onOpen)
 
     elements.value = []
-    editDataSource.value = null
+    editDataSource = null
     editEntity.value = null
 
     scriptContext.value.page.params = route.params
@@ -237,20 +250,25 @@ async function init() {
     }
 
     if (props.pageConfig.isEditPage && props.pageConfig.datasource) {
-        editDataSource.value = dsService.getDataSourceByAlias(props.pageConfig.datasource)
-        if (!editDataSource.value) {
+        editDataSource= dsService.getDataSourceByAlias(props.pageConfig.datasource)
+        if (!editDataSource) {
             console.warn(`DataSource ${props.pageConfig.datasource} for editing page ${props.pageConfig.alias} not found`)
             return;
         }
         let id = <string>route.params.id
-        if (id) {
-            editEntity.value = await editDataSource.value.getById(id)
+
+        if (id && id !== 'new') {
+            editEntity.value = await editDataSource.getById(id)
+            isNew.value = false
         } else {
-            editEntity.value = {}
+            editEntity.value = await generateEntityWithDefault(editDataSource.fields)
+            isNew.value = true
         }
     }
 
-    update.value += 1
+    scriptContext.value.item = editEntity.value
+
+    update.value++
 
     console.log('editEntity', editEntity.value)
 

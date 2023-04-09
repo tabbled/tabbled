@@ -143,8 +143,22 @@ watch(() => props.datasource,
 watch(() => props.update,
     async () => {
     console.log('props.modelValue', await props.modelValue)
-        if (props.field)
-            await getData();
+        // if (props.field)
+        //     await getData();
+    })
+
+watch(() => props.modelValue,
+    async () => {
+        //console.log('props.modelValue', await props.modelValue)
+
+        if (props.field && dataSource) {
+            let data = await props.modelValue
+            console.log(data)
+
+            if (data)
+                await dataSource.setData(data)
+        }
+
     })
 
 onMounted(async () => {
@@ -511,6 +525,12 @@ async function init() {
     }
 
     if (dataSource) {
+        dataSource.on('update', async (data) => {
+            //data.value = data
+            console.log('update', data)
+            emit('update:modelValue', data)
+            emit('change', data)
+        })
         dataSource.on('item-updated', async (id, item) => {
             console.log('item-updated', id, item)
 
