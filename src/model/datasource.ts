@@ -240,6 +240,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
             await syncService.push(this.type, [item]);
             this.emit('update')
+            this.emit('item-inserted', id, value)
         } catch (e) {
             throw e
         }
@@ -266,7 +267,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             item.data =  _.cloneDeep(value)
             await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
             await syncService.push(this.type, [item]);
-            this.emit('update')
+            this.emit('updated')
+            this.emit('item-updated', id, item.data)
         } catch (e) {
             console.error(e)
         }
@@ -289,7 +291,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
         await syncService.push(this.type, [item]);
-        this.emit('update')
+        this.emit('updated')
+        this.emit('item-removed', id, item.data)
         return true;
     }
 
@@ -300,14 +303,15 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         let current_item = await this.getByIdRaw(item.id)
 
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
+        this.emit('update', item.id)
 
         if (!current_item) {
-            this.emit('insert', item.data)
+            this.emit('item-inserted', item.id, item.data)
         } else {
-            this.emit('update', item.id)
+            this.emit('item-updated', item.id, item.data)
 
             if (item.deletedAt && !current_item.deletedAt) {
-                this.emit('remove', item.data)
+                this.emit('item-removed', item.id, item.data)
             }
         }
         return true

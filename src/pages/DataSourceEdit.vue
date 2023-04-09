@@ -84,10 +84,10 @@
 
             </el-tab-pane>
             <el-tab-pane label="Data" name="data">
-                <Table :columns="testTableColumn"
+                <Table :columns="columns"
                        id="testDataSourceTable"
                        :context="context"
-                       datasource="testDataSource"
+                       :datasource="dataSourceEntity ? dataSourceEntity.alias : ''"
                        :is-inline-editing="true"
                        :is-readonly="false"
                 />
@@ -166,7 +166,7 @@ import {useI18n} from "vue-i18n";
 import FieldEdit from "../components/FieldEdit.vue";
 import {FieldConfigInterface, generateEntityWithDefault} from "../model/field";
 import _ from 'lodash'
-import {DataSourceInterface} from "../model/datasource";
+import {CustomDataSource, DataSourceInterface, DataSourceType} from "../model/datasource";
 import CheckboxField from "../components/CheckboxField.vue";
 import {ColumnConfigInterface} from "../model/column";
 import {useDataSourceService} from "../services/datasource.service";
@@ -184,11 +184,11 @@ let dataSourceEntity = ref(null)
 let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
+let testDataSource: DataSourceInterface = null
 
 
 let context = ref<any>(getContext())
-let testDataSource = ref<DataSourceInterface>(null)
-let testTableColumn = ref<ColumnConfigInterface[]>([])
+let columns = ref<ColumnConfigInterface[]>([])
 
 onMounted(async () => {
     datasource = dsService.getDataSourceByAlias('datasource')
@@ -196,7 +196,8 @@ onMounted(async () => {
         console.warn(`Function datasource doesn't exist`)
     }
 
-    await  load()
+    await load()
+    await initTestDataSource()
 
     // @ts-ignore
     let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
@@ -221,21 +222,48 @@ async function load() {
     }
 }
 
+async  function initTestDataSource() {
+    if (!datasource || isNew.value) {
+        return;
+    }
+
+    testDataSource = await dsService.getDataSourceByAlias(dataSourceEntity.value.alias)
+
+    if (!testDataSource) {
+        console.warn(`Test datasource "${dataSourceEntity.value.alias}" not found`)
+        return;
+    }
+
+    if (testDataSource instanceof CustomDataSource) {
+        testDataSource.setContext(context.value)
+    }
+
+    testDataSource.fields.forEach(field => {
+        columns.value.push({
+            id: field.alias,
+            field: field.alias,
+            width: 100,
+            title: field.title
+        })
+    })
+
+}
+
 async function exportConfig() {
-    // let data = JSON.stringify(dataSet.value.current, null, 4)
-    // let file = new Blob([data]);
-    // let a = document.createElement("a"),
-    //     url = URL.createObjectURL(file)
-    //
-    // a.href = url;
-    // a.download = `datasource-${dataSet.value.current.alias}.json`;
-    // document.body.appendChild(a);
-    // a.click();
-    //
-    // setTimeout(function() {
-    //     document.body.removeChild(a);
-    //     window.URL.revokeObjectURL(url);
-    // }, 0);
+    let data = JSON.stringify(dataSourceEntity.value, null, 4)
+    let file = new Blob([data]);
+    let a = document.createElement("a"),
+        url = URL.createObjectURL(file)
+
+    a.href = url;
+    a.download = `datasource-${dataSourceEntity.value.alias}.json`;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 0);
 }
 
 function getField(alias) {
@@ -290,61 +318,32 @@ function getContext() {
 }
 
 async function tryBuildDataSource() {
-// console.log('tryBuildDataSource')
-//     let dataSource = new CustomDataSource({
-//         alias: dataSet.value.current['alias'],
-//         type: DataSourceType.data,
-//         fields: dataSet.value.current['fields'],
-//         script: dataSet.value.current['script'],
-//         isTree: dataSet.value.current['isTree'],
-//         readonly: dataSet.value.current['readonly'],
-//     })
-//
-//     context.value = getContext();
-//
-//     dataSource.setContext(context.value)
-//     dataSource.setScript(dataSet.value.current['script'])
-//     await dataSource.init()
-//
-//     try {
-//         await dataSource.compile()
-//         console.log(dataSource.model)
-//     } catch (e) {
-//         console.error(e)
-//     }
-//
-//
-//     testDataSource.value = dataSource
-//
-//     testDataSet.value = new DataSet({
-//         alias: "test",
-//         dataSource: "",
-//         autoCommit: false,
-//         autoOpen: false
-//     },
-//         testDataSource.value)
-//
-//     openTestDataSet()
-}
 
-// function openTestDataSet() {
-//     if (!testDataSet.value)
-//         return;
-//
-//     testTableColumn.value = []
-//     testDataSource.value.fields.forEach((field => {
-//         testTableColumn.value.push({
-//             id: field.alias,
-//             field: field.alias,
-//             width: 100,
-//             title: field.title
-//         })
-//     }))
-//
-//     testDataSet.value.setContext(context.value)
-//     testDataSet.value.open()
-//     testDataSet.value.data = []
-// }
+    let dataSource = new CustomDataSource({
+        alias: dataSourceEntity.value.alias,
+        type: DataSourceType.data,
+        fields: dataSourceEntity.value.fields,
+        script: dataSourceEntity.value.script,
+        isTree: dataSourceEntity.value.isTree,
+        readonly: dataSourceEntity.value.readonly,
+    })
+
+    context.value = getContext();
+
+    dataSource.setContext(context.value)
+    dataSource.setScript(dataSourceEntity.value.script)
+    await dataSource.init()
+
+    try {
+        await dataSource.compile()
+        console.log(dataSource.model)
+    } catch (e) {
+        console.error(e)
+    }
+
+
+    testDataSource = dataSource
+}
 
 function saveField() {
     fieldEditDialogVisible.value = false;

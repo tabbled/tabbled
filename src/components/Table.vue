@@ -66,7 +66,7 @@ import {onMounted, onUnmounted, ref, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
 import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
-import {EventHandlerConfigInterface, FieldConfigInterface} from "../model/field";
+import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
@@ -114,6 +114,8 @@ let table = ref(null)
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
 const { t } = useI18n();
+let selectedIds = ref<string[]>([])
+let currentId = ref(null)
 
 let data = ref<Array<any>>([])
 
@@ -146,6 +148,8 @@ onMounted(async () => {
     await init();
     await initColumns();
     await getData();
+
+
 });
 
 onUnmounted(() => {
@@ -158,11 +162,13 @@ onUnmounted(() => {
     // props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
 
-function add() {
+async function add() {
     if (actions.value.onAdd) {
-        execAction(actions.value.onAdd)
-    } else
-        data.value.push({})
+        await execAction(actions.value.onAdd)
+    } else {
+        let item = await generateEntityWithDefault(dataSource.fields)
+        await dataSource.insert(item.id, item)
+    }
 }
 
 function edit() {
@@ -189,9 +195,14 @@ function remove(row) {
             if (actions.value.onRemove) {
                 execAction(actions.value.onRemove)
             } else {
-                // props.dataSet.removeBySelectedId()
-                // props.dataSet.selectedIds = []
-                //props.dataSet.commit()
+                if (selectedIds.value.length) {
+                    selectedIds.value.forEach(id => {
+                        dataSource.removeById(id)
+                    })
+                } else if (currentId.value) {
+                    dataSource.removeById(currentId.value)
+                }
+
             }
         }).catch(() => {})
 }
@@ -306,7 +317,7 @@ function selectionChange(rows: Array<any>) {
     rows.forEach(row => {
         ids.push(row.id)
     })
-    console.log(ids)
+    selectedIds.value = ids;
 }
 
 function onTableRowClick(row) {
@@ -346,7 +357,7 @@ function headerResized(newWidth, oldWidth, column) {
 }
 
 function currentRowChanged(row: any) {
-console.log(row)
+    currentId.value = row ? row.id : undefined
 }
 
 function onCellInput(scope: any, value: any) {
@@ -444,7 +455,6 @@ let getCellData = async (scope: any) => {
         } catch (e) {
             console.error(e)
         }
-
     }
 }
 
@@ -484,7 +494,27 @@ async function init() {
         dataSource = dsService.getDataSourceByAlias(props.datasource)
     }
 
+    if (dataSource) {
+        dataSource.on('item-updated', (id, item) => {
+            console.log('item-updated', id, item)
 
+            let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
+            if (idx >= 0)
+                data.value[idx] = item
+
+        })
+        dataSource.on('item-inserted', (id, item) => {
+            console.log('item-inserted', id, item)
+            data.value.push(item)
+        })
+        dataSource.on('item-removed',(id, item) => {
+            console.log('item-removed', id, item)
+
+            let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
+            if (idx >= 0)
+                data.value.splice(idx, 1)
+        })
+    }
 
 
 
