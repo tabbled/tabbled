@@ -37,7 +37,6 @@ import Table from "./components/Table.vue"
 import Input from "./components/Input.vue";
 import LinkSelect from "./components/LinkSelect.vue";
 import DateTimeInput from "./components/DateTimeInput.vue";
-import DataSetActionPanel from './components/DataSetActionPanel.vue'
 import ImageField from "./components/ImageField.vue";
 import CheckboxField from "./components/CheckboxField.vue";
 import {properties as tableProps} from './components/configuration/table.config'
@@ -54,7 +53,6 @@ app.component('Input', Input);
 app.component('LinkSelect', LinkSelect);
 app.component('DateTimeInput', DateTimeInput);
 app.component('CodeEditor', CodeEditor)
-app.component('DataSetActionPanel', DataSetActionPanel)
 app.component('ImageField', ImageField)
 app.component('CheckboxField', CheckboxField)
 

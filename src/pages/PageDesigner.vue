@@ -183,7 +183,6 @@ import {useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePageHeader} from "../services/page.service";
 import _ from 'lodash'
-import {DataSet, useDataSet} from "../model/dataset";
 import {ComponentTitle, useComponentService} from "../services/component.service";
 import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
@@ -206,7 +205,6 @@ let dsService = useDataSourceService()
 let componentService = useComponentService()
 
 let elements = ref<ElementInterface[]>([])
-let dataSets = ref<Map<string, DataSet>>(new Map())
 let pageConfig = ref<PageConfigInterface>(null)
 
 let startX = 0
@@ -303,10 +301,6 @@ function getElementProperties(element: ElementInterface) {
         if(props[prop.alias] === undefined) {
             props[prop.alias] = _.cloneDeep(prop.default)
         }
-
-        if (prop.type === 'dataset') {
-            props[prop.alias] = dataSets.value.get(element[prop.alias])
-        }
     })
     return props;
 
@@ -356,17 +350,6 @@ async function init() {
     // })
 
     elements.value = []
-    dataSets.value.clear();
-
-    pageConfig.value.dataSets.forEach(config => {
-        let ds = useDataSet(config)
-
-        if (ds)
-            // @ts-ignore
-            dataSets.value.set(ds.alias, ds)
-        else
-            console.error(`DataSet "${config.alias}" not created`)
-    })
 
     elements.value = pageConfig.value.elements
     currentConfigPath.value = ''
@@ -588,7 +571,6 @@ async function dropNewWidget(e:DragEvent) {
     comp.properties.forEach(prop => {
         let val:any = null
         switch (prop.type) {
-            case "dataset":  val = dataSets.value.size > 0 ? [...dataSets.value.keys()][0] : "";  break;
             case "bool": val = prop.default ? prop.default : false; break;
             case "string": val = prop.default ? prop.default : ""; break;
             case "number": val = prop.default ? prop.default : 0; break;
@@ -602,6 +584,7 @@ async function dropNewWidget(e:DragEvent) {
     elements.value.push({
         id: (await flakeId.generateId()).toString(),
         name: comp.name,
+        field: '',
         layout: {
             [ScreenSize.desktop]: {
                 colFrom: startCol,

@@ -52,7 +52,6 @@ import {useStore} from "vuex"
 import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
 import {useRouter, useRoute} from 'vue-router';
-import {DataSet} from "../model/dataset";
 import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {ElMessage} from "element-plus";
@@ -76,7 +75,6 @@ const pageHeader = usePageHeader()
 let elements = ref<Array<ElementInterface>>([])
 let grid = ref(null)
 let isEditPage = ref(false)
-let editingDataSet = ref<DataSet>(null)
 let componentService = useComponentService()
 let dsService = useDataSourceService()
 

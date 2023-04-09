@@ -61,7 +61,7 @@ function change() {
 }
 
 interface Props {
-    data: Array<object>
+    data: any[]
     keyProp?: string,
     titleProp?: string,
     sortable?: boolean,

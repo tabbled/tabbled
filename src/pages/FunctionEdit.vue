@@ -16,28 +16,40 @@
     <el-form label-position="top">
         <div style="display: flex; flex-direction: row; width: 100%">
             <el-form-item label="Title" style="width: 50%; padding-right: 8px">
-                <Input :data-set="dataSet" field="title" />
+                <Input :field-config="getField('title')"
+                       field="title"
+                       :model-value="getValue('title')"
+                       @change="(val) => setValue('title', val)"
+                />
             </el-form-item>
 
             <el-form-item label="Alias" style="width: 50%">
-                <Input :data-set="dataSet" field="alias" />
+                <Input :field-config="getField('alias')"
+                       field="alias"
+                       :model-value="getValue('alias')"
+                       @change="(val) => setValue('alias', val)"
+                />
             </el-form-item>
         </div>
 
         <el-form-item label="Context">
-            <CodeEditor :data-set="dataSet"
+            <CodeEditor :field-config="getField('context')"
                         field="context"
                         format="json"
                         :runnable="false"
+                        :model-value="getValue('context')"
+                        @change="(val) => setValue('context', val)"
             />
         </el-form-item>
 
         <el-form-item label="Script">
             <CodeEditor :context="context()"
-                        :data-set="dataSet"
+                        :field-config="getField('script')"
                         field="script"
                         format="javascript"
                         runnable
+                        :model-value="getValue('script')"
+                        @change="(val) => setValue('script', val)"
             />
         </el-form-item>
     </el-form>
@@ -48,32 +60,60 @@
 <script setup lang="ts">
 
 import {ElMessage} from "element-plus";
-import {useDataSet} from "../model/dataset";
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
 import Input from "../components/Input.vue";
+import {generateEntityWithDefault} from "../model/field";
+import {DataSourceInterface} from "../model/datasource";
+import {useDataSourceService} from "../services/datasource.service";
 
 let router = useRouter();
 let route = useRoute()
+let functionEntity = ref(null)
+let datasource: DataSourceInterface = null
+let dsService = useDataSourceService()
+let isNew = ref(false)
 
-let dataSet = ref(useDataSet({
-    dataSource: 'function',
-    alias: 'functions',
-    autoOpen: false,
-    autoCommit: false
-}))
 
 onMounted(async () => {
-    let n = !route.params.id || route.params.id === 'new'
-    await dataSet.value.openOne( n ? undefined : <string>route.params.id)
+    datasource = dsService.getDataSourceByAlias('function')
+    if (!datasource) {
+        console.warn(`Function datasource doesn't exist`)
+    }
+
+    await load()
     //@ts-ignore
-    document.title = `Function ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${import.meta.env.VITE_APP_TITLE}`
+    document.title = `Function ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${import.meta.env.VITE_APP_TITLE}`
 });
+
+function getField(alias) {
+    if (!datasource)
+        return undefined;
+    return datasource.getFieldByAlias(alias)
+}
+
+async function load() {
+    if (!datasource)
+        return;
+
+    if (!route.params.id || route.params.id === 'new') {
+        functionEntity.value = await generateEntityWithDefault(datasource.fields)
+        isNew.value = true
+    } else {
+        functionEntity.value = await datasource.getById(<string>route.params.id)
+        isNew.value = false
+    }
+}
 
 async function save() {
     try {
-        //await dataSet.value.commit()
+        if (isNew.value) {
+            await datasource.insert(functionEntity.value.id, functionEntity.value)
+        } else {
+            await datasource.updateById(functionEntity.value.id, functionEntity.value)
+        }
+
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -81,24 +121,35 @@ async function save() {
     }
 }
 
-async function cancel() {
-    if (dataSet.value.isChanged()) {
-        console.log("changed")
-        //dataSet.value.rollback()
-    }
+async function getValue(alias) {
+    if (!functionEntity.value)
+        return undefined;
 
+    return functionEntity.value[alias]
+}
+
+function setValue(alias, val) {
+    if (!functionEntity.value)
+        return undefined;
+
+    functionEntity.value[alias] = val
+}
+
+async function cancel() {
     router.back()
 }
 
 function context() {
+    if (!functionEntity.value || functionEntity.value.context)
+        return {}
+
     try {
-        return JSON.parse(dataSet.value.current.context)
+        return JSON.parse(functionEntity.value.context)
     }
     catch (e) {
         console.error(e)
         return {}
     }
-
 }
 
 </script>

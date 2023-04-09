@@ -22,23 +22,43 @@
     <el-form label-position="top" :style="{ 'height': availableHeight }" ref="main">
         <div style="display: flex; flex-direction: row; width: 100%;">
             <el-form-item label="Title" style="width: 50%; padding-right: 8px">
-                <Input :data-set="dataSet" field="title" />
+                <Input field="title"
+                       :field-config="getField('title')"
+                       :model-value="getValue('title')"
+                       @change="(val) => setValue('title', val)"
+                />
             </el-form-item>
 
             <el-form-item label="Alias" style="width: 50%">
-                <Input :data-set="dataSet" field="alias" />
+                <Input field="alias"
+                       :field-config="getField('alias')"
+                       :model-value="getValue('alias')"
+                       @change="(val) => setValue('alias', val)"
+                />
             </el-form-item>
 
             <el-form-item label="Source" style="padding-left: 8px">
-                <EnumSelect :data-set="dataSet" field="source" />
+                <LinkSelect field="source"
+                            :field-config="getField('source')"
+                            :model-value="getValue('source')"
+                            @change="(val) => setValue('source', val)"
+                />
             </el-form-item>
 
             <el-form-item label="Is tree" style="padding-left: 8px; width: 100px">
-                <CheckboxField :data-set="dataSet" field="isTree" />
+                <CheckboxField field="isTree"
+                               :field-config="getField('isTree')"
+                               :model-value="getValue('isTree')"
+                               @change="(val) => setValue('isTree', val)"
+                />
             </el-form-item>
 
             <el-form-item label="Readonly" style="padding-left: 8px; width: 100px">
-                <CheckboxField :data-set="dataSet" field="readonly" />
+                <CheckboxField field="readonly"
+                               :field-config="getField('readonly')"
+                               :model-value="getValue('readonly')"
+                               @change="(val) => setValue('readonly', val)"
+                />
             </el-form-item>
         </div>
 
@@ -48,7 +68,7 @@
                 <el-form-item >
                     <ItemList key-prop="alias"
                               title-prop="title"
-                              :list="fields"
+                              :list="dataSourceEntity ? dataSourceEntity.fields : []"
                               @edit="editField"
                               @remove="removeField"
                               @insert="insertField"
@@ -64,20 +84,16 @@
 
             </el-tab-pane>
             <el-tab-pane label="Data" name="data">
-                <DataSetActionPanel context=""
-                                    :data-set="testDataSet"
-                                    style="padding-bottom: 16px"
-                />
                 <Table :columns="testTableColumn"
                        id="testDataSourceTable"
                        :context="context"
-                       :data-set="testDataSet"
+                       datasource="testDataSource"
                        :is-inline-editing="true"
                        :is-readonly="false"
                 />
             </el-tab-pane>
 
-            <el-tab-pane v-if="dataSet && dataSet.current && dataSet.current['source'] === 'custom'"
+            <el-tab-pane v-if="dataSourceEntity && dataSourceEntity.source === 'custom'"
                          label="Script"
                          name="script"
                          style="padding-right: 2px;"
@@ -87,26 +103,31 @@
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
                         Run
                     </el-button>
-                    <CodeEditor :data-set="dataSet"
+                    <CodeEditor
                                 field="script"
                                 format="javascript"
                                 :runnable="false"
                                 :max-height="availableHeight"
+                                :field-config="getField('script')"
+                                :model-value="getValue('script')"
+                                @change="(val) => setValue('script', val)"
                     />
                 </div>
 
             </el-tab-pane>
 
-            <el-tab-pane v-if="dataSet && dataSet.current && dataSet.current['source'] === 'custom'"
+            <el-tab-pane v-if="dataSourceEntity && dataSourceEntity.source === 'custom'"
                          label="Context"
                          name="context"
                          style="padding-right: 2px"
             >
-                <CodeEditor :data-set="dataSet"
-                            field="context"
+                <CodeEditor field="context"
                             format="json"
                             :runnable="false"
                             :max-height="availableHeight"
+                            :field-config="getField('context')"
+                            :model-value="getValue('context')"
+                            @change="(val) => setValue('context', val)"
 
                 />
             </el-tab-pane>
@@ -137,52 +158,49 @@
 <script setup lang="ts">
 
 import {ElMessage, ElMessageBox} from "element-plus";
-import {DataSet, useDataSet} from "../model/dataset";
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import Input from "../components/Input.vue";
-import EnumSelect from "../components/EnumSelect.vue";
 import ItemList from "../components/ItemList.vue";
 import {useI18n} from "vue-i18n";
 import FieldEdit from "../components/FieldEdit.vue";
-import {FieldConfigInterface} from "../model/field";
+import {FieldConfigInterface, generateEntityWithDefault} from "../model/field";
 import _ from 'lodash'
-import {CustomDataSource, DataSourceInterface, DataSourceType} from "../model/datasource";
+import {DataSourceInterface} from "../model/datasource";
 import CheckboxField from "../components/CheckboxField.vue";
 import {ColumnConfigInterface} from "../model/column";
+import {useDataSourceService} from "../services/datasource.service";
+import LinkSelect from "../components/LinkSelect.vue";
 
 let router = useRouter();
 let route = useRoute()
-let fields = ref([])
 let currentField = ref<FieldConfigInterface>(null)
 let currentIndex = -1;
 let fieldEditDialogVisible = ref(false)
 const { t } = useI18n();
 let activeTab = ref('fields')
 let availableHeight = ref(0)
+let dataSourceEntity = ref(null)
+let datasource: DataSourceInterface = null
+let dsService = useDataSourceService()
+let isNew = ref(false)
 
-
-let dataSet = ref(useDataSet({
-    dataSource: 'datasource',
-    alias: 'datasources',
-    autoOpen: false,
-    autoCommit: false
-}))
 
 let context = ref<any>(getContext())
-let testDataSet = ref<DataSet>(null)
 let testDataSource = ref<DataSourceInterface>(null)
 let testTableColumn = ref<ColumnConfigInterface[]>([])
 
 onMounted(async () => {
-    let n = !route.params.id || route.params.id === 'new'
-    await dataSet.value.openOne( n ? undefined : <string>route.params.id)
+    datasource = dsService.getDataSourceByAlias('datasource')
+    if (!datasource) {
+        console.warn(`Function datasource doesn't exist`)
+    }
 
-    fields.value = dataSet.value.current.fields
+    await  load()
 
     // @ts-ignore
     let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `Data source ${ n ? 'new' : ' ' + dataSet.value.current.title } | ${ appTitle }`
+    document.title = `Data source ${ isNew.value ? 'new' : ' ' + dataSourceEntity.title } | ${ appTitle }`
 
     availableHeight.value = window.innerHeight - 260
 
@@ -190,26 +208,63 @@ onMounted(async () => {
     //     await tryBuildDataSource()
 });
 
+async function load() {
+    if (!datasource)
+        return;
+
+    if (!route.params.id || route.params.id === 'new') {
+        dataSourceEntity.value = await generateEntityWithDefault(datasource.fields)
+        isNew.value = true
+    } else {
+        dataSourceEntity.value = await datasource.getById(<string>route.params.id)
+        isNew.value = false
+    }
+}
+
 async function exportConfig() {
-    let data = JSON.stringify(dataSet.value.current, null, 4)
-    let file = new Blob([data]);
-    let a = document.createElement("a"),
-        url = URL.createObjectURL(file)
+    // let data = JSON.stringify(dataSet.value.current, null, 4)
+    // let file = new Blob([data]);
+    // let a = document.createElement("a"),
+    //     url = URL.createObjectURL(file)
+    //
+    // a.href = url;
+    // a.download = `datasource-${dataSet.value.current.alias}.json`;
+    // document.body.appendChild(a);
+    // a.click();
+    //
+    // setTimeout(function() {
+    //     document.body.removeChild(a);
+    //     window.URL.revokeObjectURL(url);
+    // }, 0);
+}
 
-    a.href = url;
-    a.download = `datasource-${dataSet.value.current.alias}.json`;
-    document.body.appendChild(a);
-    a.click();
+function getField(alias) {
+    if (!datasource)
+        return undefined;
+    return datasource.getFieldByAlias(alias)
+}
 
-    setTimeout(function() {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-    }, 0);
+async function getValue(alias) {
+    if (!dataSourceEntity.value)
+        return undefined;
+
+    return dataSourceEntity.value[alias]
+}
+
+function setValue(alias, val) {
+    if (!dataSourceEntity.value)
+        return undefined;
+
+    dataSourceEntity.value[alias] = val
 }
 
 async function save() {
     try {
-        // console.log(dataSet.value.current)
+        if (isNew.value) {
+            await datasource.insert(dataSourceEntity.value.id, dataSourceEntity.value)
+        } else {
+            await datasource.updateById(dataSourceEntity.value.id, dataSourceEntity.value)
+        }
         ElMessage.success('Saved successfully')
     }catch (e) {
         ElMessage.error(e.toString())
@@ -218,18 +273,15 @@ async function save() {
 }
 
 async function cancel() {
-    if (dataSet.value.isChanged()) {
-        //console.log("changed")
-    }
-
     router.back()
 }
 
 function getContext() {
-    if (!dataSet.value || !dataSet.value.isOpen)
+    if (!dataSourceEntity.value || dataSourceEntity.value.context)
         return {}
+
     try {
-        return JSON.parse(dataSet.value.current.context)
+        return JSON.parse(dataSourceEntity.value.context)
     }
     catch (e) {
         console.error(e)
@@ -238,61 +290,61 @@ function getContext() {
 }
 
 async function tryBuildDataSource() {
-console.log('tryBuildDataSource')
-    let dataSource = new CustomDataSource({
-        alias: dataSet.value.current['alias'],
-        type: DataSourceType.data,
-        fields: dataSet.value.current['fields'],
-        script: dataSet.value.current['script'],
-        isTree: dataSet.value.current['isTree'],
-        readonly: dataSet.value.current['readonly'],
-    })
-
-    context.value = getContext();
-
-    dataSource.setContext(context.value)
-    dataSource.setScript(dataSet.value.current['script'])
-    await dataSource.init()
-
-    try {
-        await dataSource.compile()
-        console.log(dataSource.model)
-    } catch (e) {
-        console.error(e)
-    }
-
-
-    testDataSource.value = dataSource
-
-    testDataSet.value = new DataSet({
-        alias: "test",
-        dataSource: "",
-        autoCommit: false,
-        autoOpen: false
-    },
-        testDataSource.value)
-
-    openTestDataSet()
+// console.log('tryBuildDataSource')
+//     let dataSource = new CustomDataSource({
+//         alias: dataSet.value.current['alias'],
+//         type: DataSourceType.data,
+//         fields: dataSet.value.current['fields'],
+//         script: dataSet.value.current['script'],
+//         isTree: dataSet.value.current['isTree'],
+//         readonly: dataSet.value.current['readonly'],
+//     })
+//
+//     context.value = getContext();
+//
+//     dataSource.setContext(context.value)
+//     dataSource.setScript(dataSet.value.current['script'])
+//     await dataSource.init()
+//
+//     try {
+//         await dataSource.compile()
+//         console.log(dataSource.model)
+//     } catch (e) {
+//         console.error(e)
+//     }
+//
+//
+//     testDataSource.value = dataSource
+//
+//     testDataSet.value = new DataSet({
+//         alias: "test",
+//         dataSource: "",
+//         autoCommit: false,
+//         autoOpen: false
+//     },
+//         testDataSource.value)
+//
+//     openTestDataSet()
 }
 
-function openTestDataSet() {
-    if (!testDataSet.value)
-        return;
-
-    testTableColumn.value = []
-    testDataSource.value.fields.forEach((field => {
-        testTableColumn.value.push({
-            id: field.alias,
-            field: field.alias,
-            width: 100,
-            title: field.title
-        })
-    }))
-
-    testDataSet.value.setContext(context.value)
-    testDataSet.value.open()
-    testDataSet.value.data = []
-}
+// function openTestDataSet() {
+//     if (!testDataSet.value)
+//         return;
+//
+//     testTableColumn.value = []
+//     testDataSource.value.fields.forEach((field => {
+//         testTableColumn.value.push({
+//             id: field.alias,
+//             field: field.alias,
+//             width: 100,
+//             title: field.title
+//         })
+//     }))
+//
+//     testDataSet.value.setContext(context.value)
+//     testDataSet.value.open()
+//     testDataSet.value.data = []
+// }
 
 function saveField() {
     fieldEditDialogVisible.value = false;
@@ -300,12 +352,10 @@ function saveField() {
     console.log(currentField.value)
 
     if (currentIndex == -1) {
-        fields.value.push(currentField.value)
+        dataSourceEntity.value.fields.push(currentField.value)
     } else {
-        fields.value[currentIndex] = currentField.value
+        dataSourceEntity.value.fields[currentIndex] = currentField.value
     }
-
-    dataSet.value.update('fields', fields.value)
 }
 
 function insertField() {
@@ -319,7 +369,7 @@ function insertField() {
 }
 
 function editField(row) {
-    currentField.value = _.cloneDeep(fields.value[row])
+    currentField.value = _.cloneDeep(dataSourceEntity.value.fields[row])
     currentIndex = row;
     fieldEditDialogVisible.value = true
 }
@@ -335,8 +385,7 @@ function removeField(row) {
         }
     )
         .then(() => {
-            fields.value.splice(row, 1)
-            dataSet.value.update('fields', fields.value)
+            dataSourceEntity.value.fields.splice(row, 1)
         })
 }
 

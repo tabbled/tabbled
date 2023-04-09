@@ -1,5 +1,7 @@
 import {EntityInterface} from "./datasource";
 import {CompiledFunc, compileScript} from "../services/compiler";
+import { FlakeId } from '../flake-id'
+let flakeId = new FlakeId()
 
 
 export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements' | 'field'
@@ -171,8 +173,10 @@ export class Field implements FieldInterface {
     }
 }
 
-export function generateEntityWithDefault(fields: FieldConfigInterface[]):EntityInterface {
-    let item = {}
+export async function generateEntityWithDefault(fields: FieldConfigInterface[]): Promise<EntityInterface> {
+    let item = {
+        id: (await flakeId.generateId()).toString()
+    }
     for (let i in fields) {
         const f = fields[i]
 

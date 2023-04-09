@@ -1,4 +1,15 @@
 <template>
+    <div style="padding-bottom: 16px">
+        <el-button type="primary" @click="add" size="small">
+            {{t('add')}}
+        </el-button>
+        <el-button @click="edit" size="small">
+            {{t('edit')}}
+        </el-button>
+        <el-button @click="remove" size="small">
+            {{t('delete')}}
+        </el-button>
+    </div>
     <el-table
             ref="table"
             border
@@ -61,6 +72,8 @@ import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
 import _ from "lodash";
 import {DataSourceInterface} from "../model/datasource";
+import {useI18n} from "vue-i18n";
+import {ElMessageBox} from "element-plus";
 
 interface Props {
     id: string,
@@ -73,6 +86,9 @@ interface Props {
     context: any,
     onRowClick?: EventHandlerConfigInterface
     onRowDoubleClick?: EventHandlerConfigInterface
+    onEdit?: EventHandlerConfigInterface
+    onAdd?: EventHandlerConfigInterface
+    onRemove?: EventHandlerConfigInterface
     update?: number
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -80,8 +96,12 @@ const props = withDefaults(defineProps<Props>(), {
 })
 let actions = ref({
     onRowDoubleClick: null,
-    onRowClick: null
+    onRowClick: null,
+    onEdit: null,
+    onAdd: null,
+    onRemove: null
 })
+
 const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue'])
 let updateKey = ref(0)
 
@@ -93,6 +113,7 @@ let editEl = ref(null)
 let table = ref(null)
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
+const { t } = useI18n();
 
 let data = ref<Array<any>>([])
 
@@ -136,6 +157,44 @@ onUnmounted(() => {
     //
     // props.dataSet.removeListener('update', setDataToFieldDataSet)
 })
+
+function add() {
+    if (actions.value.onAdd) {
+        execAction(actions.value.onAdd)
+    } else
+        data.value.push({})
+}
+
+function edit() {
+    if (actions.value.onEdit) {
+        execAction(actions.value.onEdit)
+    } else {
+        console.log("No action for edit button")
+    }
+}
+
+function remove(row) {
+    console.log('remove', row)
+    ElMessageBox.confirm(
+        t('confirmDeleteTitle'),
+        t('delete'),
+        {
+            confirmButtonText: t('delete'),
+            cancelButtonText: t('cancel'),
+            type: 'warning',
+        }
+    )
+        .then(() => {
+
+            if (actions.value.onRemove) {
+                execAction(actions.value.onRemove)
+            } else {
+                // props.dataSet.removeBySelectedId()
+                // props.dataSet.selectedIds = []
+                //props.dataSet.commit()
+            }
+        }).catch(() => {})
+}
 
 async function getTreePath(id:string) : Promise<any> {
 
@@ -417,6 +476,9 @@ async function init() {
 
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
+    actions.value.onAdd = await compileAction(props.onAdd)
+    actions.value.onEdit = await compileAction(props.onEdit)
+    actions.value.onRemove = await compileAction(props.onRemove)
 
     if (props.datasource) {
         dataSource = dsService.getDataSourceByAlias(props.datasource)
