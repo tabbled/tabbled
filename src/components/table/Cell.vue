@@ -30,6 +30,7 @@ onMounted(async () => {
 
 watch(() => props.updateKey,
     async () => {
+        console.log('update', props.updateKey)
         await getData()
     },
     {

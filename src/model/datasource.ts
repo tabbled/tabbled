@@ -271,6 +271,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             this.emit('item-updated', id, item.data)
         } catch (e) {
             console.error(e)
+            throw e
         }
     }
 

@@ -80,7 +80,7 @@ import {ElMessageBox} from "element-plus";
 
 interface Props {
     id: string,
-    modelValue?: Promise<any>
+    modelValue?: any[]
     field?: string,
     datasource: string,
     fieldConfig?: FieldConfigInterface,
@@ -93,6 +93,7 @@ interface Props {
     onAdd?: EventHandlerConfigInterface
     onRemove?: EventHandlerConfigInterface
     update?: number
+    load?: Promise<any>
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false
@@ -142,30 +143,16 @@ watch(() => props.datasource,
 
 watch(() => props.update,
     async () => {
-    console.log('props.modelValue', await props.modelValue)
-        // if (props.field)
-        //     await getData();
+    console.log('props.modelValue')
+        if (props.field)
+            await getData();
     })
 
-watch(() => props.modelValue,
-    async () => {
-        //console.log('props.modelValue', await props.modelValue)
-
-        if (props.field && dataSource) {
-            let data = await props.modelValue
-            console.log(data)
-
-            if (data)
-                await dataSource.setData(data)
-        }
-
-    })
 
 onMounted(async () => {
     await init();
     await initColumns();
     await getData();
-
 });
 
 onUnmounted(() => {
@@ -183,6 +170,7 @@ async function add() {
         await execAction(actions.value.onAdd)
     } else {
         let item = await generateEntityWithDefault(dataSource.fields)
+        console.log(item.id, item, currentId.value)
         await dataSource.insert(item.id, item, currentId.value)
     }
 }
@@ -264,17 +252,16 @@ async function getTreePath(id:string) : Promise<any> {
 }
 
 async function getData() {
-    data.value = []
     if (!dataSource) {
-
         console.warn(`Datasource for Table doesn't set`)
         console.log(props)
         return;
     }
 
-
-    if (props.field) {
-        data.value = await props.modelValue
+    if (props.field && (!data.value || !data.value.length)) {
+        ///.value = await props.load
+        console.log('loadData', data.value)
+        await dataSource.setData(data.value)
     } else {
         data.value = await dataSource.getAll();
     }
@@ -528,8 +515,8 @@ async function init() {
         dataSource.on('update', async (data) => {
             //data.value = data
             console.log('update', data)
-            emit('update:modelValue', data)
-            emit('change', data)
+            //emit('update:modelValue', data)
+            //emit('change', data)
         })
         dataSource.on('item-updated', async (id, item) => {
             console.log('item-updated', id, item)
@@ -546,6 +533,7 @@ async function init() {
 
 
             emit('update:modelValue', data.value)
+            emit('change', data.value)
 
         })
         dataSource.on('item-inserted', async (id, item) => {
@@ -553,6 +541,8 @@ async function init() {
             if (dataSource.isTree && item.parentId) {
                 let path = await getTreePath(item.parentId)
                 let parentItem = _.get(data.value, path)
+
+                console.log(path, parentItem)
 
                 if (!parentItem.children) parentItem.children = []
 
@@ -564,6 +554,7 @@ async function init() {
 
             updateKey.value++
             emit('update:modelValue', data.value)
+            emit('change', data.value)
         })
         dataSource.on('item-removed',async (id, item) => {
             console.log('item-removed', id, item)
@@ -586,6 +577,7 @@ async function init() {
                     data.value.splice(idx, 1)
             }
             emit('update:modelValue', data.value)
+            emit('change', data.value)
         })
     }
 

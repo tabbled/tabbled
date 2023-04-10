@@ -19,11 +19,12 @@ let value = ref(null)
 let isDisabled = ref(true)
 
 interface Props {
-    modelValue?: Promise<any>,
+    modelValue?: any,
     field: string,
     fieldConfig: FieldConfigInterface,
     context?:any,
-    update?: number
+    update?: number,
+    load?: Promise<any>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -52,7 +53,7 @@ function init() {
 }
 
 async function getValue() {
-    value.value = await props.modelValue
+    value.value = await props.load
 }
 
 function change(val) {

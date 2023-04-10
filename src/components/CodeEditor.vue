@@ -43,7 +43,7 @@ import {CompiledFunc, compileScript} from "../services/compiler";
 import {FieldConfigInterface} from "../model/field";
 
 interface Props {
-    modelValue?: Promise<any>,
+    modelValue?: any,
     field?: string,
     fieldConfig?: FieldConfigInterface,
     context?:any,
@@ -51,6 +51,7 @@ interface Props {
     runnable: boolean,
     maxHeight: number
     update?: number
+    load?: Promise<any>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -70,12 +71,16 @@ const handleReady = (payload) => {
 }
 
 async function getScript() {
-    script.value = await props.modelValue
+console.log(props)
+    script.value = props.modelValue
+    //console.log()
 }
 
 watch(() => props.update,
     async () => {
-        await getScript()
+        console.log('update')
+        if (props.load)
+            script.value = await props.load
     }, {
         deep: true
     })
@@ -93,6 +98,7 @@ watch(() => props.format,
 
 watch(() => props.modelValue,
     async () => {
+    console.log(props.modelValue)
         await getScript()
     }, {deep: true})
 

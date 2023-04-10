@@ -18,16 +18,18 @@
             <el-form-item label="Title" style="width: 50%; padding-right: 8px">
                 <Input :field-config="getField('title')"
                        field="title"
-                       :model-value="getValue('title')"
+                       :load="getValue('title')"
                        @change="(val) => setValue('title', val)"
+                       :update="updateKey"
                 />
             </el-form-item>
 
             <el-form-item label="Alias" style="width: 50%">
                 <Input :field-config="getField('alias')"
                        field="alias"
-                       :model-value="getValue('alias')"
+                       :load="getValue('alias')"
                        @change="(val) => setValue('alias', val)"
+                       :update="updateKey"
                 />
             </el-form-item>
         </div>
@@ -37,8 +39,9 @@
                         field="context"
                         format="json"
                         :runnable="false"
-                        :model-value="getValue('context')"
+                        :load="getValue('context')"
                         @change="(val) => setValue('context', val)"
+                        :update="updateKey"
             />
         </el-form-item>
 
@@ -48,8 +51,9 @@
                         field="script"
                         format="javascript"
                         runnable
-                        :model-value="getValue('script')"
+                        :load="getValue('script')"
                         @change="(val) => setValue('script', val)"
+                        :update="updateKey"
             />
         </el-form-item>
     </el-form>
@@ -74,6 +78,7 @@ let functionEntity = ref(null)
 let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
+let updateKey = ref(0)
 
 
 onMounted(async () => {
@@ -104,6 +109,7 @@ async function load() {
         functionEntity.value = await datasource.getById(<string>route.params.id)
         isNew.value = false
     }
+    updateKey.value++
 }
 
 async function save() {
@@ -122,6 +128,7 @@ async function save() {
 }
 
 async function getValue(alias) {
+    console.log(alias, functionEntity.value)
     if (!functionEntity.value)
         return undefined;
 

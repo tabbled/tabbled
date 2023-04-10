@@ -46,13 +46,14 @@ import {FieldConfigInterface} from "../model/field";
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
-    modelValue: Promise<any>,
+    modelValue: any,
     fieldConfig?: FieldConfigInterface,
     field?: string,
     context?:any,
     height?: number,
     width?: number,
-    update: number
+    update: number,
+    load?: Promise<any>
 }>()
 
 let imageUrl = ref(null)
@@ -62,7 +63,7 @@ let dialogVisible = ref(false)
 
 
 async function getValue() {
-    imageUrl.value = await props.modelValue
+    imageUrl.value = await props.load
 }
 
 onMounted(async () => {

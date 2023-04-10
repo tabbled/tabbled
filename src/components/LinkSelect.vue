@@ -53,10 +53,11 @@ let dataSource:DataSourceInterface = null
 interface Props {
     field: string,
     fieldConfig: FieldConfigInterface,
-    modelValue?: Promise<any>
+    modelValue?: any
     keyProp?: string,
     displayProp?: string,
-    update?:number
+    update?:number,
+    load?: Promise<any>
 }
 
 
@@ -104,7 +105,7 @@ function init() {
 }
 
 async function getValue() {
-    value.value = await props.modelValue
+    value.value = await props.load
 }
 
 async function getData() {

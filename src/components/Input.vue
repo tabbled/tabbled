@@ -9,11 +9,12 @@ import {FieldConfigInterface} from "../model/field";
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
-    modelValue?: Promise<any>,
+    modelValue?: any,
     field: string,
     fieldConfig: FieldConfigInterface,
     context?:any,
-    update?: number
+    update?: number,
+    load?: Promise<any>
 }>()
 
 let value = ref('')
@@ -38,7 +39,7 @@ watch(() => props.update,
 
 
 async function getValue() {
-    value.value = await props.modelValue
+    value.value = await props.load
 }
 
 function init() {

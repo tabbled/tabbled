@@ -37,6 +37,7 @@
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
                            :update="update"
+                           :load="loadValue(element.field)"
 
                 />
             </el-form-item>
@@ -118,6 +119,7 @@ function setAppTitle() {
 
 async function save() {
     try {
+        console.log(editEntity.value)
         if (isNew.value) {
             await editDataSource.insert(editEntity.value.id, editEntity.value)
         } else {
@@ -131,16 +133,19 @@ async function save() {
     }
 }
 
-async function getValue(el: ElementInterface) {
-    //console.log('getValue', el)
+async function loadValue(field) {
     if (!editEntity.value) {
         return null
     }
-    return editEntity.value[el.field]
+    return editEntity.value[field]
+}
+
+function getValue(el: ElementInterface) {
+    return editEntity[el.field]
 }
 
 async function setValue(el:ElementInterface, value: any) {
-    //console.log('setValue', el, value)
+    console.log('setValue', el, value)
     if (!editEntity.value) {
         return false
     }
