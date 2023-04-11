@@ -10,9 +10,9 @@ import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
-    modelValue: Promise<any>,
+    modelValue: any | Promise<any>,
     field: FieldInterface,
-    updateKey: number
+    //updateKey: number
 }
 
 const props = defineProps<Props>()
@@ -28,9 +28,9 @@ onMounted(async () => {
     await getData()
 })
 
-watch(() => props.updateKey,
+watch(() => props.modelValue,
     async () => {
-        console.log('update', props.updateKey)
+        //console.log('update', props.modelValue)
         await getData()
     },
     {
@@ -42,12 +42,17 @@ async function getData() {
         return
     }
 
-    isLoading.value = true
+    //isLoading.value = true
 
     let val = null
 
     try {
-        val = await props.modelValue
+        if (props.modelValue instanceof Promise) {
+            val = await props.modelValue
+        } else {
+            val = props.modelValue
+        }
+
     } catch (e) {
         displayValue.value = 'Error'
         console.error(e)
@@ -62,7 +67,7 @@ async function getData() {
         default: displayValue.value = 'Error'
     }
 
-    isLoading.value = false
+    //isLoading.value = false
 }
 
 function formatNumber(value: any, precision: number) {

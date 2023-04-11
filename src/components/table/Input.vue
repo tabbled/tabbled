@@ -67,7 +67,7 @@ import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
-    modelValue: Promise<any>,
+    modelValue: any | Promise<any>,
     field: FieldInterface
     context: any
 }
@@ -88,7 +88,12 @@ let ds:DataSourceInterface = null
 onMounted(async () => {
     //console.log('Input mounted', props.field)
 
-    value.value = await props.modelValue
+    if (props.modelValue instanceof Promise) {
+        value.value = await props.modelValue
+    } else {
+        value.value = props.modelValue
+    }
+
 
     if (props.field && props.field.type === 'link') {
 

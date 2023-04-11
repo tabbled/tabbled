@@ -18,7 +18,7 @@
             <el-form-item label="Title" style="width: 50%; padding-right: 8px">
                 <Input :field-config="getField('title')"
                        field="title"
-                       :load="getValue('title')"
+                       :model-value="getValue('title')"
                        @change="(val) => setValue('title', val)"
                        :update="updateKey"
                 />
@@ -27,7 +27,7 @@
             <el-form-item label="Alias" style="width: 50%">
                 <Input :field-config="getField('alias')"
                        field="alias"
-                       :load="getValue('alias')"
+                       :model-value="getValue('alias')"
                        @change="(val) => setValue('alias', val)"
                        :update="updateKey"
                 />
@@ -39,7 +39,7 @@
                         field="context"
                         format="json"
                         :runnable="false"
-                        :load="getValue('context')"
+                        :model-value="getValue('context')"
                         @change="(val) => setValue('context', val)"
                         :update="updateKey"
             />
@@ -51,7 +51,7 @@
                         field="script"
                         format="javascript"
                         runnable
-                        :load="getValue('script')"
+                        :model-value="getValue('script')"
                         @change="(val) => setValue('script', val)"
                         :update="updateKey"
             />
@@ -127,7 +127,7 @@ async function save() {
     }
 }
 
-async function getValue(alias) {
+function getValue(alias) {
     console.log(alias, functionEntity.value)
     if (!functionEntity.value)
         return undefined;

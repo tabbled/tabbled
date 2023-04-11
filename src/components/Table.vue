@@ -69,7 +69,12 @@ import {onMounted, onUnmounted, ref, watch} from 'vue'
 import {ColumnConfigInterface} from "../model/column";
 import Input from "./table/Input.vue"
 import {CompiledFunc, compileScript} from "../services/compiler";
-import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
+import {
+    EventHandlerConfigInterface,
+    FieldConfigInterface,
+    FieldInterface,
+    generateEntityWithDefault
+} from "../model/field";
 import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
@@ -92,8 +97,8 @@ interface Props {
     onEdit?: EventHandlerConfigInterface
     onAdd?: EventHandlerConfigInterface
     onRemove?: EventHandlerConfigInterface
-    update?: number
-    load?: Promise<any>
+    //update?: number
+    //load?: Promise<any>
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false
@@ -134,20 +139,17 @@ watch(() => props.field,
         await getData();
     })
 
+watch(() => props.modelValue,
+    async () => {
+        await getData();
+    })
+
 watch(() => props.datasource,
     async () => {
         await init();
         await initColumns();
         await getData();
     })
-
-watch(() => props.update,
-    async () => {
-    console.log('props.modelValue')
-        if (props.field)
-            await getData();
-    })
-
 
 onMounted(async () => {
     await init();
@@ -156,13 +158,12 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-    // if (props.fieldDataSet) {
-    //     props.fieldDataSet.removeListener('open', getFieldData)
-    //     props.fieldDataSet.removeListener('update', getFieldData)
-    // }
-    //
-    //
-    // props.dataSet.removeListener('update', setDataToFieldDataSet)
+    if (dataSource) {
+        dataSource.removeListener('item-inserted', onItemInserted)
+        dataSource.removeListener('item-updated', onItemUpdated)
+        dataSource.removeListener('item-removed', onItemRemoved)
+        dataSource.removeListener('update', onDataSourceUpdate)
+    }
 })
 
 async function add() {
@@ -215,15 +216,12 @@ function remove() {
 }
 
 function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
-    console.log(item)
     resolve([])
 }
 
 async function getTreePath(id:string) : Promise<any> {
 
     let item = await dataSource.getById(id)
-
-    console.log(id, item)
 
     if (!item)
         return undefined
@@ -258,15 +256,13 @@ async function getData() {
         return;
     }
 
-    if (props.field && (!data.value || !data.value.length)) {
-        ///.value = await props.load
-        console.log('loadData', data.value)
-        await dataSource.setData(data.value)
+    if (props.field) {
+        console.log('loadData', props.modelValue)
+        data.value = props.modelValue
+        await dataSource.setData(props.modelValue)
     } else {
         data.value = await dataSource.getAll();
     }
-
-    console.log(data.value)
 }
 
 
@@ -434,44 +430,35 @@ let getHeaderTitle = (scope: any) => {
     return col.title
 }
 
-let getCellData = async (scope: any) => {
+let getCellData = (scope: any) => {
     if (!dataSource)
         return;
 
-    // return await props.dataSet.getValue(scope.row.id, scope.column.property)
-
-
-    let id = scope.row.id
-    if (!id) return
-
-    let field = scope.column.property
-    let item = await dataSource.getById(id)
-
-    if (!item) {
-        console.error(`Entity by id ${id} not found`)
-        return
+    let field = dataSource.getFieldByAlias(scope.column.property)
+    if (field.config.getValue) {
+        return getValueFunc(scope, field)
+    } else {
+        return scope.row[scope.column.property]
     }
+}
 
-    let f = dataSource.getFieldByAlias(field)
+async function getValueFunc(scope, field:FieldInterface) {
+
     let ctx = _.cloneDeep(!props.context ? {} : props.context)
-    ctx.row = item
+    ctx.row = scope.row
 
-    let getValueFunc = await f.getValueFunc()
+    let getValueFunc = await field.getValueFunc()
 
     if (getValueFunc) {
         try {
             return await getValueFunc.exec(ctx)
         } catch (e) {
-            console.error(`Error while evaluating field ${f.alias} function setValue of datasource ${dataSource.alias}`)
+            console.error(`Error while evaluating field ${field.alias} function setValue of datasource ${dataSource.alias}`)
             console.error(e)
             return 'Error'
         }
     } else {
-        try {
-            return item[field]
-        } catch (e) {
-            console.error(e)
-        }
+        return scope.row[field.alias]
     }
 }
 
@@ -497,6 +484,73 @@ async function initColumns() {
     }
 }
 
+let onItemUpdated = async (id, item) => {
+    console.log('item-updated', id, item)
+
+    if (dataSource.isTree) {
+        let path = await getTreePath(id)
+        _.set(data.value, path, item)
+    } else {
+        let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
+        if (idx >= 0)
+            data.value[idx] = item
+    }
+
+
+    emit('update:modelValue', data.value)
+    emit('change', data.value)
+}
+
+let onItemInserted = async (id, item) => {
+    console.log('item-inserted', id, item)
+    if (dataSource.isTree && item.parentId) {
+        let path = await getTreePath(item.parentId)
+        let parentItem = _.get(data.value, path)
+
+        console.log(path, parentItem)
+
+        if (!parentItem.children) parentItem.children = []
+
+        parentItem.children.push(item)
+
+    } else {
+        data.value.push(item)
+    }
+    emit('update:modelValue', data.value)
+    emit('change', data.value)
+}
+
+let onItemRemoved = async (id, item) => {
+    console.log('item-removed', id, item)
+    if (dataSource.isTree) {
+        let path = await getTreePath(item.parentId)
+        let parentItem = _.get(data.value, path)
+
+        console.log(path)
+
+        for(let i in parentItem.children) {
+            if (parentItem.children[i].id === id) {
+                parentItem.children.splice(i, 1)
+            }
+        }
+    } else {
+        let idx = _.findIndex(data.value, (o: any) => {
+            return o && o.id == id;
+        })
+        if (idx >= 0)
+            data.value.splice(idx, 1)
+    }
+    emit('update:modelValue', data.value)
+    emit('change', data.value)
+}
+
+let onDataSourceUpdate = async (data) => {
+    //data.value = data
+    console.log('update', data)
+    emit('update:modelValue', data)
+    emit('change', data)
+}
+
 async function init() {
     setCurrentCell(null)
     data.value = []
@@ -512,73 +566,11 @@ async function init() {
     }
 
     if (dataSource) {
-        dataSource.on('update', async (data) => {
-            //data.value = data
-            console.log('update', data)
-            //emit('update:modelValue', data)
-            //emit('change', data)
-        })
-        dataSource.on('item-updated', async (id, item) => {
-            console.log('item-updated', id, item)
 
-            if (dataSource.isTree) {
-                let path = await getTreePath(id)
-                _.update(data.value, path, item)
-                updateKey.value++
-            } else {
-                let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
-                if (idx >= 0)
-                    data.value[idx] = item
-            }
-
-
-            emit('update:modelValue', data.value)
-            emit('change', data.value)
-
-        })
-        dataSource.on('item-inserted', async (id, item) => {
-            console.log('item-inserted', id, item)
-            if (dataSource.isTree && item.parentId) {
-                let path = await getTreePath(item.parentId)
-                let parentItem = _.get(data.value, path)
-
-                console.log(path, parentItem)
-
-                if (!parentItem.children) parentItem.children = []
-
-                parentItem.children.push(item)
-
-            } else {
-                data.value.push(item)
-            }
-
-            updateKey.value++
-            emit('update:modelValue', data.value)
-            emit('change', data.value)
-        })
-        dataSource.on('item-removed',async (id, item) => {
-            console.log('item-removed', id, item)
-            if (dataSource.isTree) {
-                let path = await getTreePath(item.parentId)
-                let parentItem = _.get(data.value, path)
-
-                console.log(path)
-
-                for(let i in parentItem.children) {
-                    if (parentItem.children[i].id === id) {
-                        parentItem.children.splice(i, 1)
-                    }
-                }
-            } else {
-                let idx = _.findIndex(data.value, (o: any) => {
-                    return o && o.id == id;
-                })
-                if (idx >= 0)
-                    data.value.splice(idx, 1)
-            }
-            emit('update:modelValue', data.value)
-            emit('change', data.value)
-        })
+        dataSource.on('item-updated', onItemUpdated)
+        dataSource.on('item-inserted', onItemInserted)
+        dataSource.on('item-removed', onItemRemoved)
+        dataSource.on('update', onDataSourceUpdate)
     }
 
 

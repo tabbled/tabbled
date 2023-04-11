@@ -33,7 +33,7 @@
                            style="width: 100%"
                            :is="element.name" v-bind="element"
                            :fieldConfig="getField(element)"
-                           :modelValue="getValue(element)"
+                           :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
                            :update="update"
@@ -141,11 +141,15 @@ async function loadValue(field) {
 }
 
 function getValue(el: ElementInterface) {
-    return editEntity[el.field]
+    //console.log('getValue', el.field, editEntity.value[el.field])
+    if (editEntity.value)
+        return editEntity.value[el.field]
+
+    return undefined
 }
 
 async function setValue(el:ElementInterface, value: any) {
-    console.log('setValue', el, value)
+    //console.log('setValue', el, value)
     if (!editEntity.value) {
         return false
     }
@@ -273,7 +277,7 @@ async function init() {
 
     scriptContext.value.item = editEntity.value
 
-    update.value++
+    //update.value++
 
     console.log('editEntity', editEntity.value)
 

@@ -272,7 +272,7 @@ function getField(alias) {
     return datasource.getFieldByAlias(alias)
 }
 
-async function getValue(alias) {
+function getValue(alias) {
     if (!dataSourceEntity.value)
         return undefined;
 

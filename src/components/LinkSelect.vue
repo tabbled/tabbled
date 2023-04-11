@@ -57,7 +57,7 @@ interface Props {
     keyProp?: string,
     displayProp?: string,
     update?:number,
-    load?: Promise<any>
+    //load?: Promise<any>
 }
 
 
@@ -105,7 +105,7 @@ function init() {
 }
 
 async function getValue() {
-    value.value = await props.load
+    value.value = props.modelValue
 }
 
 async function getData() {
