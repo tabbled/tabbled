@@ -19,7 +19,7 @@
     />
     <el-select
         ref="el"
-        v-else-if="field && (field.type === 'link')"
+        v-else-if="field && (field.type === 'link')  && !isTree"
         class="table-select"
         :model-value="value"
         placeholder="Select"
@@ -38,6 +38,20 @@
             :value="item.id"
         />
     </el-select>
+    <el-tree-select
+        ref="el"
+        v-else-if="field && (field.type === 'link') && isTree"
+        class="table-select"
+        :model-value="value"
+        :data="linkData"
+        :render-after-expand="false"
+        show-checkbox
+        @check="checkChanged"
+        check-strictly
+        style="order: 0; height: 100%; width: calc(100% - 2px); margin: 1px "
+    >
+
+    </el-tree-select>
     <el-select
         ref="el"
         v-else-if="field && (field.type === 'enum')"
@@ -80,6 +94,7 @@ let el = ref(null)
 let isLoading = ref(false)
 let linkData = ref([])
 let value = ref('')
+let isTree = ref(true)
 
 let displayProp = ref('name')
 let dsService = useDataSourceService()
@@ -127,6 +142,12 @@ async function getLinkData() {
     isLoading.value = true
     linkData.value = await ds.getAll()
     isLoading.value = false
+}
+
+function checkChanged(node,params) {
+    console.log(params.checkedKeys)
+    value.value = params.checkedKeys
+    emit('update:modelValue', value.value)
 }
 
 </script>

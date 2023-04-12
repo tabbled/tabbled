@@ -106,6 +106,11 @@ watch(() => props.pageConfig,
         setAppTitle()
     })
 
+watch(() => editEntity.value,
+    async () => {
+        console.log('update entity', editEntity.value)
+    }, {deep: true})
+
 onMounted(async () => {
     await init()
     setAppTitle()

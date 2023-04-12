@@ -12,9 +12,7 @@ const props = defineProps<{
     modelValue?: any,
     field: string,
     fieldConfig: FieldConfigInterface,
-    context?:any,
-    //update?: number,
-   // load?: Promise<any>
+    context?:any
 }>()
 
 let value = ref('')
@@ -28,15 +26,9 @@ onMounted(() => {
 
 watch(() => props.modelValue,
     async () => {
-        //console.log(props.field, props.modelValue)
         init()
         await getValue()
     })
-
-// watch(() => props.update,
-//     async () => {
-//         await getValue()
-//     })
 
 
 async function getValue() {
