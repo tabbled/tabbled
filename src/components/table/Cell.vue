@@ -1,5 +1,16 @@
 <template>
-    {{displayValue}}
+    <div v-if="field">
+
+        <div v-if="field.isMultiple">
+            <el-tag v-for="item in displayValue" style="margin-right: 4px">
+                {{item}}
+            </el-tag>
+        </div>
+        <div v-else>
+            {{displayValue}}
+        </div>
+    </div>
+
 </template>
 
 <script setup lang="ts">
@@ -42,8 +53,6 @@ async function getData() {
         return
     }
 
-    //isLoading.value = true
-
     let val = null
 
     try {
@@ -66,8 +75,6 @@ async function getData() {
         case "number": displayValue.value = formatNumber(val, props.field.precision); break;
         default: displayValue.value = 'Error'
     }
-
-    //isLoading.value = false
 }
 
 function formatNumber(value: any, precision: number) {
@@ -79,9 +86,10 @@ function formatNumber(value: any, precision: number) {
 
 async function getLinkValue() {
 
-    let fGetValue = await props.field.getValueFunc()
-    if (fGetValue) {
+
+    if (props.field.config.getValue) {
         displayValue.value = await props.modelValue
+        console.log(displayValue.value)
         return;
     }
 
@@ -89,17 +97,24 @@ async function getLinkValue() {
     ds = dsService.getDataSourceByAlias(props.field.datasource);
 
     if (!ds) {
+        console.warn(`DataSource for link data for field "${props.field.alias}" doesn't set`)
         displayValue.value = ""
         return;
     }
 
     isLoading.value = true
-    let val = await props.modelValue
-    let link_entity = await ds.getById(val)
-    if (!link_entity)
-        return 'not found'
 
-    displayValue.value = link_entity[props.field.displayProp ? props.field.displayProp : 'name']
+    if (props.field.isMultiple) {
+        displayValue.value = props.modelValue
+    } else {
+        let val = props.modelValue
+        let link_entity = await ds.getById(val)
+        if (!link_entity)
+            return 'not found'
+
+        displayValue.value = link_entity[props.field.displayProp ? props.field.displayProp : 'name']
+    }
+
     isLoading.value = false
 }
 

@@ -22,6 +22,7 @@
         "datasource": "Data source",
         "default": "Default",
         "isMultiple": "Multiple",
+        "isTree": "Tree",
         "type": "Type",
         "precision": "Precision",
         "values": "Values",

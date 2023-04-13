@@ -141,7 +141,7 @@
     <el-dialog
         v-model="fieldEditDialogVisible"
         title="Edit field"
-        width="500px"
+        width="70%"
     >
         <field-edit :model-value="currentField"/>
         <template #footer>

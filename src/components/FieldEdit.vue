@@ -27,7 +27,7 @@
 
                 <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'table'"
                               :label="t('fieldConfig.datasource')">
-                    <el-select v-model="modelValue.datasource" >
+                    <el-select v-model="modelValue.datasource" clearable @change="dataSourceChange">
                         <el-option
                             v-for="item in dataSources"
                             :key="item.key"
@@ -36,6 +36,10 @@
                         >
                         </el-option>
                     </el-select>
+                </el-form-item>
+
+                <el-form-item v-if="modelValue.type === 'link'" :label="t('fieldConfig.isTree')">
+                    <el-checkbox :disabled="!!modelValue.datasource" v-model="modelValue.isTree"></el-checkbox>
                 </el-form-item>
 
 
@@ -166,6 +170,12 @@ function addEnumItem() {
 function removeEnumItem(idx) {
     let m = props.modelValue.values;
     m.splice(idx, 1)
+    emit('update:modelValue', m)
+}
+
+function dataSourceChange() {
+    let m = props.modelValue;
+    m.isTree = dsService.getDataSourceByAlias(props.modelValue.datasource)?.isTree
     emit('update:modelValue', m)
 }
 

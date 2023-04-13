@@ -51,6 +51,7 @@ export interface FieldConfigInterface {
     link?: string,                      // Data source alias
     values?: EnumValuesInterface[],       // Only for types
     isMultiple?: boolean,
+    isTree?:boolean,
     precision?: number,                  // Only for type numeric
     default?: any,
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
@@ -73,6 +74,7 @@ export interface FieldInterface {
     link?: string,                      // Data source alias
     values?: EnumValuesInterface[],       // Only for types
     isMultiple?: boolean,
+    isTree?:boolean,
     precision?: number,                  // Only for type numeric
     default?: string | number |
         object | object[] | null,
@@ -97,6 +99,7 @@ export class Field implements FieldInterface {
         this.required = config.required;
         this.values = config.values
         this.default = config.default
+        this.isTree = config.isTree
         this.config = config
     }
 
@@ -111,6 +114,7 @@ export class Field implements FieldInterface {
     precision?: number;
     default?: string | number | object | object[] | null;
     isMultiple?: boolean;
+    isTree?:boolean;
     link?: string;
     required: boolean;
     title: string;

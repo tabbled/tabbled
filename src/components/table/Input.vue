@@ -19,7 +19,7 @@
     />
     <el-select
         ref="el"
-        v-else-if="field && (field.type === 'link')  && !isTree"
+        v-else-if="field && (field.type === 'link')  && !field.isTree"
         class="table-select"
         :model-value="value"
         placeholder="Select"
@@ -40,27 +40,30 @@
     </el-select>
     <el-tree-select
         ref="el"
-        v-else-if="field && (field.type === 'link') && isTree"
+        v-else-if="field && (field.type === 'link') && field.isTree"
         class="table-select"
         :model-value="value"
         :data="linkData"
         :render-after-expand="false"
-        show-checkbox
         @check="checkChanged"
         check-strictly
+        show-checkbox
+        :multiple="field.isMultiple"
         style="order: 0; height: 100%; width: calc(100% - 2px); margin: 1px "
+        @change="treeChange"
     >
 
     </el-tree-select>
     <el-select
         ref="el"
-        v-else-if="field && (field.type === 'enum')"
+        v-else-if="field && (field.type === 'enum') "
         class="table-select"
         :model-value="value"
         placeholder="Select"
         filterable
         remote
         clearable
+        :multiple="field.isMultiple"
         :loading="isLoading"
         @change="handleInput"
     >
@@ -75,7 +78,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
@@ -95,6 +98,7 @@ let isLoading = ref(false)
 let linkData = ref([])
 let value = ref('')
 let isTree = ref(true)
+let treeValue = ref()
 
 let displayProp = ref('name')
 let dsService = useDataSourceService()
@@ -124,6 +128,17 @@ onMounted(async () => {
     }
 })
 
+
+
+watch(() => value,
+    async () => {
+        console.log('update', value.value)
+        emit('update:modelValue', value.value)
+    },
+    {
+        deep: true
+    })
+
 function handleMouseEnter() {
     if (el.value)
         el.value.focus()
@@ -131,7 +146,7 @@ function handleMouseEnter() {
 
 function handleInput(val: any) {
     value.value = val
-    emit('update:modelValue', val)
+
 }
 
 async function getLinkData() {
@@ -145,9 +160,16 @@ async function getLinkData() {
 }
 
 function checkChanged(node,params) {
-    console.log(params.checkedKeys)
     value.value = params.checkedKeys
     emit('update:modelValue', value.value)
+}
+
+function treeChange(a) {
+    if (!props.field.isMultiple) {
+        console.log('treeChange', a)
+        value.value = a
+        emit('update:modelValue', value.value)
+    }
 }
 
 </script>
