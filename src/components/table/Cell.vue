@@ -23,7 +23,7 @@ import {DataSourceInterface} from "../../model/datasource";
 interface Props {
     modelValue: any | Promise<any>,
     field: FieldInterface,
-    //updateKey: number
+    context?:any
 }
 
 const props = defineProps<Props>()
@@ -49,30 +49,29 @@ watch(() => props.modelValue,
     })
 
 async function getData() {
-    if (!props.field || !props.modelValue) {
+    displayValue.value = ""
+    if (!props.field) {
         return
     }
 
-    let val = null
 
-    try {
-        if (props.modelValue instanceof Promise) {
-            val = await props.modelValue
-        } else {
-            val = props.modelValue
+    if (props.field.config.getValue) {
+        try {
+            displayValue.value  = await getValueFunc()
+            return;
+        } catch (e) {
+            displayValue.value = 'Error'
+            console.error(e)
+            return;
         }
-
-    } catch (e) {
-        displayValue.value = 'Error'
-        console.error(e)
     }
 
     switch(props.field.type) {
         case "text":
-        case "string": displayValue.value = val; break;
+        case "string": displayValue.value = props.modelValue; break;
         case "enum": await getEnumValue(); break;
         case "link": await getLinkValue(); break;
-        case "number": displayValue.value = formatNumber(val, props.field.precision); break;
+        case "number": displayValue.value = formatNumber(props.modelValue, props.field.precision); break;
         default: displayValue.value = 'Error'
     }
 }
@@ -86,10 +85,8 @@ function formatNumber(value: any, precision: number) {
 
 async function getLinkValue() {
 
-
     if (props.field.config.getValue) {
         displayValue.value = await props.modelValue
-        console.log(displayValue.value)
         return;
     }
 
@@ -128,6 +125,26 @@ async function getEnumValue() {
         }
     }
     displayValue.value = 'Not found'
+}
+
+
+
+async function getValueFunc() {
+
+    let getValueFunc = await props.field.getValueFunc()
+
+    console.log(props.field.alias, props.context)
+
+    if (getValueFunc) {
+        try {
+            return await getValueFunc.exec(props.context)
+        } catch (e) {
+            console.error(`Error while evaluating field ${props.field.alias} getValue function `)
+            console.error(e)
+            return null
+        }
+    }
+    return null;
 }
 
 </script>

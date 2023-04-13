@@ -184,7 +184,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         try {
             let item = await this.getByIdRaw(id)
-            return item.data;
+            return item?.data;
         } catch (e) {
             throw e
         }

@@ -51,6 +51,7 @@
                     <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
                           :updateKey='updateKey'
+                          :context="getCellContext(scope)"
                     />
                 </div>
 
@@ -72,7 +73,6 @@ import {CompiledFunc, compileScript} from "../services/compiler";
 import {
     EventHandlerConfigInterface,
     FieldConfigInterface,
-    FieldInterface,
     generateEntityWithDefault
 } from "../model/field";
 import {useSyncService} from "../services/sync.service";
@@ -434,33 +434,16 @@ let getCellData = (scope: any) => {
     if (!dataSource)
         return;
 
-    let field = dataSource.getFieldByAlias(scope.column.property)
-    if (field.config.getValue) {
-        return getValueFunc(scope, field)
-    } else {
-        return scope.row[scope.column.property]
-    }
+    return scope.row[scope.column.property]
 }
 
-async function getValueFunc(scope, field:FieldInterface) {
-
+function getCellContext(scope) {
     let ctx = _.cloneDeep(!props.context ? {} : props.context)
     ctx.row = scope.row
-
-    let getValueFunc = await field.getValueFunc()
-
-    if (getValueFunc) {
-        try {
-            return await getValueFunc.exec(ctx)
-        } catch (e) {
-            console.error(`Error while evaluating field ${field.alias} function setValue of datasource ${dataSource.alias}`)
-            console.error(e)
-            return 'Error'
-        }
-    } else {
-        return scope.row[field.alias]
-    }
+    return ctx;
 }
+
+
 
 function getRowClass() {
     return "table-row"
