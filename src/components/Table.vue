@@ -26,9 +26,6 @@
             @row-click="onTableRowClick"
             @rowDblclick="onTableRowDblClick"
             @header-dragend="headerResized"
-            :load="loadChildren"
-            lazy
-            :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
         <el-table-column type="selection" width="30" />
         <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
@@ -50,8 +47,7 @@
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
-                          :updateKey='updateKey'
-                          :context="getCellContext(scope)"
+                          :context="getRowContext(scope)"
                     />
                 </div>
 
@@ -97,8 +93,6 @@ interface Props {
     onEdit?: EventHandlerConfigInterface
     onAdd?: EventHandlerConfigInterface
     onRemove?: EventHandlerConfigInterface
-    //update?: number
-    //load?: Promise<any>
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false
@@ -436,14 +430,6 @@ let getCellData = (scope: any) => {
 
     return scope.row[scope.column.property]
 }
-
-function getCellContext(scope) {
-    let ctx = _.cloneDeep(!props.context ? {} : props.context)
-    ctx.row = scope.row
-    return ctx;
-}
-
-
 
 function getRowClass() {
     return "table-row"

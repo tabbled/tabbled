@@ -133,8 +133,6 @@ async function getValueFunc() {
 
     let getValueFunc = await props.field.getValueFunc()
 
-    console.log(props.field.alias, props.context)
-
     if (getValueFunc) {
         try {
             return await getValueFunc.exec(props.context)
