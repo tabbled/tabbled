@@ -6,7 +6,7 @@
         <el-dropdown v-else
                      split-button
                      type="primary"
-                     @click="addChild"
+                     @click="add"
                      size="small"
                      style="margin-right: 8px"
         >
@@ -14,7 +14,7 @@
             <template #dropdown>
                 <el-dropdown-menu>
                     <el-dropdown-item @click="addSibling">Add sibling</el-dropdown-item>
-                    <el-dropdown-item @click="addChild">Add child</el-dropdown-item>
+                    <el-dropdown-item @click="add">Add child</el-dropdown-item>
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
@@ -151,6 +151,7 @@ watch(() => props.field,
 
 watch(() => props.modelValue,
     async () => {
+
         await getData();
     })
 
@@ -176,16 +177,21 @@ onUnmounted(() => {
     }
 })
 
-async function addChild() {
-    console.log('add child')
-}
-
 async function addSibling() {
     console.log('addSibling')
 
     let item = await generateEntityWithDefault(dataSource.fields)
     console.log(item.id, item, currentId.value)
-    await dataSource.insert(item.id, item, currentId.value)
+
+    let parentId = null
+    if (currentId.value) {
+        let current = await dataSource.getById(currentId.value)
+        if (current && current.parentId) {
+            parentId = current.parentId
+        }
+    }
+
+    await dataSource.insert(item.id, item, parentId)
 
 }
 
@@ -552,6 +558,8 @@ let onDataSourceUpdate = async (data) => {
 async function init() {
     setCurrentCell(null)
     data.value = []
+
+    console.log(props)
 
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
