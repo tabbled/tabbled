@@ -105,6 +105,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.source = DataSourceSource.internal
         this.fields = []
         this.readonly = !!config.readonly ? config.readonly : false
+        this.isTree = config.isTree
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -124,6 +125,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     readonly = false
     type: DataSourceType
     source: DataSourceSource
+    isTree: boolean
 
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
         return undefined

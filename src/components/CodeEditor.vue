@@ -71,7 +71,6 @@ const handleReady = (payload) => {
 }
 
 async function getScript() {
-console.log(props)
     script.value = props.modelValue
     //console.log()
 }
@@ -98,7 +97,6 @@ watch(() => props.format,
 
 watch(() => props.modelValue,
     async () => {
-    console.log(props.modelValue)
         await getScript()
     }, {deep: true})
 

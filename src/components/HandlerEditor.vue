@@ -30,7 +30,7 @@ function onCodeUpdate(code: string) {
     })
 }
 
-async function getScript() {
+function getScript() {
     return props.script
 }
 

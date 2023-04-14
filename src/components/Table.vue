@@ -1,12 +1,27 @@
 <template>
-    <div style="padding-bottom: 16px">
-        <el-button type="primary" @click="add" size="small">
+    <div v-if="dataSource" style="padding-bottom: 16px; display: flex;">
+        <el-button v-if="actions.onAdd || (!actions.onAdd && !isTree)" type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
-        <el-button @click="edit" size="small">
+        <el-dropdown v-else
+                     split-button
+                     type="primary"
+                     @click="addChild"
+                     size="small"
+                     style="margin-right: 8px"
+        >
+            Add
+            <template #dropdown>
+                <el-dropdown-menu>
+                    <el-dropdown-item @click="addSibling">Add sibling</el-dropdown-item>
+                    <el-dropdown-item @click="addChild">Add child</el-dropdown-item>
+                </el-dropdown-menu>
+            </template>
+        </el-dropdown>
+        <el-button v-if="dataSource && actions.onEdit" @click="edit" size="small">
             {{t('edit')}}
         </el-button>
-        <el-button @click="remove" size="small">
+        <el-button v-if="dataSource" @click="remove" size="small">
             {{t('delete')}}
         </el-button>
     </div>
@@ -119,6 +134,7 @@ let dataSource:DataSourceInterface = null
 const { t } = useI18n();
 let selectedIds = ref<string[]>([])
 let currentId = ref(null)
+let isTree = ref(false)
 
 let data = ref<Array<any>>([])
 
@@ -159,6 +175,19 @@ onUnmounted(() => {
         dataSource.removeListener('update', onDataSourceUpdate)
     }
 })
+
+async function addChild() {
+    console.log('add child')
+}
+
+async function addSibling() {
+    console.log('addSibling')
+
+    let item = await generateEntityWithDefault(dataSource.fields)
+    console.log(item.id, item, currentId.value)
+    await dataSource.insert(item.id, item, currentId.value)
+
+}
 
 async function add() {
     if (actions.value.onAdd) {
@@ -535,14 +564,12 @@ async function init() {
     }
 
     if (dataSource) {
-
+        isTree.value = dataSource.isTree
         dataSource.on('item-updated', onItemUpdated)
         dataSource.on('item-inserted', onItemInserted)
         dataSource.on('item-removed', onItemRemoved)
         dataSource.on('update', onDataSourceUpdate)
     }
-
-
 
     // console.log('init', dataSource)
     // if (props.dataSet) {
