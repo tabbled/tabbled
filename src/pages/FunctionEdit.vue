@@ -20,7 +20,6 @@
                        field="title"
                        :model-value="getValue('title')"
                        @change="(val) => setValue('title', val)"
-                       :update="updateKey"
                 />
             </el-form-item>
 
@@ -29,7 +28,6 @@
                        field="alias"
                        :model-value="getValue('alias')"
                        @change="(val) => setValue('alias', val)"
-                       :update="updateKey"
                 />
             </el-form-item>
         </div>
@@ -41,19 +39,17 @@
                         :runnable="false"
                         :model-value="getValue('context')"
                         @change="(val) => setValue('context', val)"
-                        :update="updateKey"
             />
         </el-form-item>
 
         <el-form-item label="Script">
-            <CodeEditor :context="context()"
+            <CodeEditor :context="context"
                         :field-config="getField('script')"
                         field="script"
                         format="javascript"
                         runnable
                         :model-value="getValue('script')"
                         @change="(val) => setValue('script', val)"
-                        :update="updateKey"
             />
         </el-form-item>
     </el-form>
@@ -65,7 +61,7 @@
 
 import {ElMessage} from "element-plus";
 import {useRoute, useRouter} from "vue-router";
-import {onMounted, ref} from "vue";
+import {computed, ComputedRef, onMounted, ref} from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
 import Input from "../components/Input.vue";
 import {generateEntityWithDefault} from "../model/field";
@@ -146,8 +142,8 @@ async function cancel() {
     router.back()
 }
 
-function context() {
-    if (!functionEntity.value || functionEntity.value.context)
+const context: ComputedRef<any> = computed((): any =>  {
+    if (!functionEntity.value || !functionEntity.value.context)
         return {}
 
     try {
@@ -157,7 +153,8 @@ function context() {
         console.error(e)
         return {}
     }
-}
+})
+
 
 </script>
 

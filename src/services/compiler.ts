@@ -1,5 +1,6 @@
 import {useDataSourceScriptHelper} from "./datasource.service";
 import { FlakeId } from '../flake-id'
+import {useFunctionScriptHelper} from "./function.service";
 let flakeId = new FlakeId()
 
 class Utils {
@@ -14,16 +15,17 @@ export class CompiledFunc {
     private source: string = ""
     private func: Function | undefined = undefined
     private utils = new Utils()
+    private funcService = useFunctionScriptHelper()
 
     exec(...args: any[]) {
         if (!this.func)
             return;
-        return this.func(this.dsService, this.utils, ...args)
+        return this.func(this.dsService, this.utils, this.funcService, ...args)
     }
 
     compile(source: string, ...args: string[]) : boolean  {
         this.source = source;
-        this.func = new Function('dataSources', 'utils', ...args,
+        this.func = new Function('dataSources', 'utils', 'functions', ...args,
             ` ${source} `)
         return true
     }

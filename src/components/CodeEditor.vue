@@ -77,7 +77,6 @@ async function getScript() {
 
 watch(() => props.update,
     async () => {
-        console.log('update')
         if (props.load)
             script.value = await props.load
     }, {

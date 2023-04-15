@@ -361,7 +361,9 @@ function insertField() {
     currentField.value = {
         alias: "",
         title: "",
-        type: "string"
+        type: "string",
+        isTree: false,
+        isMultiple: false
     }
     currentIndex = -1;
     fieldEditDialogVisible.value = true

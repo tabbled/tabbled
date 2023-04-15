@@ -39,7 +39,7 @@
                 </el-form-item>
 
                 <el-form-item v-if="modelValue.type === 'link'" :label="t('fieldConfig.isTree')">
-                    <el-checkbox :disabled="!!modelValue.datasource" v-model="modelValue.isTree"></el-checkbox>
+                    <el-checkbox :disabled="!!modelValue.datasource" v-model="modelValue.isTree"/>
                 </el-form-item>
 
 
@@ -175,7 +175,9 @@ function removeEnumItem(idx) {
 
 function dataSourceChange() {
     let m = props.modelValue;
-    m.isTree = dsService.getDataSourceByAlias(props.modelValue.datasource)?.isTree
+    let ds = dsService.getDataSourceByAlias(props.modelValue.datasource)
+    m.isTree = ds && !!ds.isTree
+
     emit('update:modelValue', m)
 }
 
