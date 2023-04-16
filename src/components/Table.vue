@@ -90,7 +90,7 @@ import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
 import _ from "lodash";
-import {DataSourceInterface} from "../model/datasource";
+import {CustomDataSource, DataSourceInterface} from "../model/datasource";
 import {useI18n} from "vue-i18n";
 import {ElMessageBox} from "element-plus";
 
@@ -380,6 +380,15 @@ function onTableRowDblClick(row) {
     }
 }
 
+function getColumn(id: string) {
+    for(let i in _columns.value) {
+        if (_columns.value[i].id === id) {
+            return _columns.value[i]
+        }
+    }
+    return undefined
+}
+
 function headerResized(newWidth, oldWidth, column) {
 
     for(let i in _columns.value) {
@@ -416,7 +425,11 @@ async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
 
 async function handleCellClick(scope:any) {
     //console.log(dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
-    if (!dataSource.readonly && !props.readonly && !(await getFieldReadonly(scope.column.property, scope)))
+    if (!dataSource.readonly &&
+        !props.readonly &&
+        !getColumn(scope.column.rawColumnKey).readonly &&
+        !(await getFieldReadonly(scope.column.property, scope))
+        )
         setCurrentCell({
             row: scope.$index,
             col: scope.cellIndex
@@ -559,7 +572,6 @@ async function init() {
     setCurrentCell(null)
     data.value = []
 
-    console.log(props)
 
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
@@ -577,49 +589,13 @@ async function init() {
         dataSource.on('item-inserted', onItemInserted)
         dataSource.on('item-removed', onItemRemoved)
         dataSource.on('update', onDataSourceUpdate)
+
+        if (dataSource instanceof CustomDataSource) {
+            console.log(props.context)
+            dataSource.setContext(props.context)
+        }
+
     }
-
-    // console.log('init', dataSource)
-    // if (props.dataSet) {
-    //
-    //     data.value = props.dataSet.data
-    //
-    //     props.dataSet.on('update', () => {
-    //         updateKey.value += 1
-    //         data.value = props.dataSet.data
-    //         console.log('update')
-    //     })
-    //     props.dataSet.on('open', () => {
-    //         console.log('open')
-    //         data.value = props.dataSet.data
-    //     })
-    // }
-
-
-    // If props.fieldDataSet is set than it is a field table we should get/set data from props.fieldDataSet
-    // if(props.fieldDataSet) {
-    //
-    //     if (!props.field) {
-    //         console.error(`Field for field table not set`)
-    //         return
-    //     }
-    //
-    //     let field = props.fieldDataSet.dataSource.getFieldByAlias(props.field)
-    //
-    //     if (!field) {
-    //         console.error(`DataSource "${props.fieldDataSet.dataSource.alias}" of field for field "${props.field}" table doesn't exist`)
-    //         return
-    //     }
-    //
-    //     console.log('emits')
-    //     props.fieldDataSet.on('open', getFieldData)
-    //     props.fieldDataSet.on('update', getFieldData)
-    //     props.dataSet.on('update', setDataToFieldDataSet)
-    //
-    //     if (props.fieldDataSet.isOpen && props.fieldDataSet.current) {
-    //         getFieldData()
-    //     }
-    // }
 }
 
 </script>

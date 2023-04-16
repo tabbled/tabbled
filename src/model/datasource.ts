@@ -395,6 +395,10 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
     setContext(ctx: any) {
         this.context = ctx
+
+        if (this.model && (this.model.setContext instanceof Function)) {
+            this.model.setContext(ctx)
+        }
     }
 
     setScript(script: string) {
@@ -421,6 +425,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     async compile() {
+
         let func = await compileScript(this.script, 'ctx', 'emit')
         this.model = null
 

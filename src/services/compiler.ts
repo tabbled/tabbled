@@ -25,7 +25,7 @@ export class CompiledFunc {
 
     compile(source: string, ...args: string[]) : boolean  {
         this.source = source;
-        this.func = new Function('dataSources', 'utils', 'functions', ...args,
+        this.func = new Function('dataSources', 'utilities', 'functions', ...args,
             ` ${source} `)
         return true
     }

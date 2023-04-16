@@ -21,7 +21,8 @@ export class FunctionScriptHelper {
         }
         let funcSrc = functions[0]
 
-        let func = await compileScript(funcSrc.source)
+        let func = await compileScript(funcSrc.script, 'ctx')
+        console.log(funcSrc)
         return await func.exec(context)
     }
 }

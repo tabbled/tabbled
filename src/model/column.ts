@@ -6,7 +6,8 @@ export interface ColumnConfigInterface {
     width: number,
     title?: string,
     sortable?: boolean,
-    visible?: boolean
+    visible?: boolean,
+    readonly: boolean
 }
 
 export const columnProperties:FieldConfigInterface[] = [
@@ -40,4 +41,10 @@ export const columnProperties:FieldConfigInterface[] = [
         alias: 'visible',
         type: "bool",
         default: true
+    },
+    {
+        title: 'Readonly',
+        alias: 'readonly',
+        type: "bool",
+        default: false
     }]
