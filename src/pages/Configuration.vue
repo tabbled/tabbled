@@ -95,7 +95,7 @@ const pagesColumns:ColumnConfigInterface[] = [
         "field": "alias",
         "title": "Page alias",
         "width": 150,
-        "sortable": true
+        "sortable": true,
     },
     {
         "id": "2",

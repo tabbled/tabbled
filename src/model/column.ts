@@ -7,7 +7,7 @@ export interface ColumnConfigInterface {
     title?: string,
     sortable?: boolean,
     visible?: boolean,
-    readonly: boolean
+    readonly?: boolean
 }
 
 export const columnProperties:FieldConfigInterface[] = [
