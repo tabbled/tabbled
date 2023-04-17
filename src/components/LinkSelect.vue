@@ -3,15 +3,16 @@
                :disabled="isDisabled"
     />
     <el-select v-if="fieldConfig && fieldConfig.type === 'link'"
-                  filterable
-                  :model-value="value"
-                  :disabled="isDisabled"
-                  remote
-                  clearable
-                  remote-show-suffix
-                  :remote-method="getData"
-                  :loading="isLoading"
-                  @change="(val) => change(val)"
+               filterable
+               :model-value="value"
+               :disabled="isDisabled"
+               remote
+               clearable
+               remote-show-suffix
+               :remote-method="getData"
+               :loading="isLoading"
+               @change="(val) => change(val)"
+               style="width: 100%"
     >
         <el-option
             v-for="item in data"
@@ -26,6 +27,7 @@
                :disabled="isDisabled"
                clearable
                @change="(val) => change(val)"
+               style="width: 100%"
     >
         <el-option
             v-for="item in fieldConfig.values"

@@ -1,9 +1,9 @@
 <template>
     <div v-if="dataSource" style="padding-bottom: 16px; display: flex;">
-        <el-button v-if="actions.onAdd || (!actions.onAdd && !isTree)" type="primary" @click="add" size="small">
+        <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree))  && !dataSource.readonly  && !props.readonly" type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
-        <el-dropdown v-else
+        <el-dropdown v-else-if="!dataSource.readonly  && !props.readonly"
                      split-button
                      type="primary"
                      @click="add"
@@ -18,10 +18,10 @@
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
-        <el-button v-if="dataSource && actions.onEdit" @click="edit" size="small">
+        <el-button v-if="dataSource && !dataSource.readonly && !props.readonly && actions.onEdit" @click="edit" size="small">
             {{t('edit')}}
         </el-button>
-        <el-button v-if="dataSource" @click="remove" size="small">
+        <el-button v-if="dataSource && !dataSource.readonly && !props.readonly" @click="remove" size="small">
             {{t('delete')}}
         </el-button>
     </div>
