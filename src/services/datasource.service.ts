@@ -43,7 +43,14 @@ export class DataSourceService {
         }
 
         if (ds instanceof  CustomDataSource) {
-            await ds.init()
+            try {
+                await ds.init()
+            } catch (e) {
+                console.error(`Error while compiling CustomDataSource "${config.alias}"`)
+                console.error(e)
+                return
+            }
+
         }
 
         this.addDataSource(ds);

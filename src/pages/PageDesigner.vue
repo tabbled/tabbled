@@ -556,7 +556,7 @@ async function dropNewWidget(e:DragEvent) {
     let colWidth = grid?.clientWidth / 12
 
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)
-    let startRow = Math.round((relatedY - item.layerY)  / 35)
+    let startRow = Math.round((relatedY - item.layerY)  / 80)
 
 
     startCol = startCol >= 1 ? startCol : 1
