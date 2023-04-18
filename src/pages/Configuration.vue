@@ -79,6 +79,7 @@ import {ColumnConfigInterface} from "../model/column";
 import {onMounted, ref} from "vue";
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
+import {useSyncService} from "../services/sync.service";
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -88,6 +89,8 @@ const route = useRoute()
 const router = useRouter()
 const dsService = useDataSourceService()
 let activeTab = ref('')
+let sync = useSyncService()
+import {ElMessage} from "element-plus";
 
 const pagesColumns:ColumnConfigInterface[] = [
     {
@@ -184,15 +187,16 @@ function loadConfigFile() {
 }
 
 async function importConfig(config: any) {
-    //console.log(config)
     console.log('Start load configuration with version ' + config.version)
 
-    await updateConfigOnDataSource('menu', config.menu)
-    await updateConfigOnDataSource('function', config.function)
-    await updateConfigOnDataSource('page', config.page)
-    await updateConfigOnDataSource('datasource', config.datasource)
-
-    console.log("Loading configuration have been finished. Reload the page")
+    try {
+        await sync.importConfig(config)
+        console.log("Loading configuration have been finished. Reload the page")
+        ElMessage.success('Imported successfully')
+    } catch (e) {
+        console.error(e)
+        ElMessage.error('Import error')
+    }
 }
 
 async function exportConfig() {

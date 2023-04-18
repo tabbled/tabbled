@@ -145,6 +145,14 @@ export class SyncService extends EventEmitter {
         }
     }
 
+    async importConfig(config: any) {
+        try {
+            await socketClient.emit(`config/import`, config)
+        } catch (e) {
+            throw e;
+        }
+    }
+
     async getLastRevision(type: DataSourceType):Promise<BigInt> {
         let snapshot = await db.database.ref(`/${type}/lastRevision`)
             .get()
