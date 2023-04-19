@@ -105,10 +105,13 @@
                         </template>
                     </el-popover>
 
-                    <div style="width: 100%;">
+                    <div style="width: 100%; display: flex; justify-content: space-between;">
                         <el-button @click="setCollapsed" text style="width: 32px; opacity:0.2" size="small">
                             <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
                         </el-button>
+                        <div style="padding-right: 16px; font-size: 10px; opacity: 0.5">
+                            v0.2.5
+                        </div>
                     </div>
                 </div>
             </el-aside>

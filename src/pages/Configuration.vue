@@ -40,7 +40,7 @@
                    :context="{}"
                    :is-inline-editing="false"
                    @row-dbl-click="editPage"
-                   :readonly="false"
+                   :readonly="true"
             />
         </el-tab-pane>
 
@@ -52,6 +52,7 @@
                    :is-inline-editing="false"
                    :readonly="true"
                    @row-dbl-click="editDataSource"
+
             />
         </el-tab-pane>
 

@@ -1,9 +1,9 @@
 <template>
-    <div v-if="dataSource" style="padding-bottom: 16px; display: flex;">
-        <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree))  && !dataSource.readonly  && !props.readonly" type="primary" @click="add" size="small">
+    <div v-if="dataSource && actionButtonsVisible" style="padding-bottom: 16px; display: flex;">
+        <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree)) " type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
-        <el-dropdown v-else-if="!dataSource.readonly  && !props.readonly"
+        <el-dropdown v-else
                      split-button
                      type="primary"
                      @click="add"
@@ -18,10 +18,10 @@
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
-        <el-button v-if="dataSource && !dataSource.readonly && !props.readonly && actions.onEdit" @click="edit" size="small">
+        <el-button v-if="actions.onEdit" @click="edit" size="small">
             {{t('edit')}}
         </el-button>
-        <el-button v-if="dataSource && !dataSource.readonly && !props.readonly" @click="remove" size="small">
+        <el-button @click="remove" size="small">
             {{t('delete')}}
         </el-button>
     </div>
@@ -96,21 +96,23 @@ import {ElMessageBox} from "element-plus";
 
 interface Props {
     id: string,
-    modelValue?: any[]
+    modelValue?: any[],
     field?: string,
     datasource: string,
     fieldConfig?: FieldConfigInterface,
     columns: ColumnConfigInterface[],
     readonly ?: boolean,
+    actionButtonsVisible?: boolean,
     context: any,
-    onRowClick?: EventHandlerConfigInterface
-    onRowDoubleClick?: EventHandlerConfigInterface
-    onEdit?: EventHandlerConfigInterface
-    onAdd?: EventHandlerConfigInterface
+    onRowClick?: EventHandlerConfigInterface,
+    onRowDoubleClick?: EventHandlerConfigInterface,
+    onEdit?: EventHandlerConfigInterface,
+    onAdd?: EventHandlerConfigInterface,
     onRemove?: EventHandlerConfigInterface
 }
 const props = withDefaults(defineProps<Props>(), {
-    readonly: false
+    readonly: false,
+    actionButtonsVisible: true
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -121,7 +123,6 @@ let actions = ref({
 })
 
 const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue'])
-let updateKey = ref(0)
 
 interface CellRef {row: number, col: number}
 

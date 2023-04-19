@@ -21,6 +21,12 @@ export function properties():FieldConfigInterface[] {
             type: 'bool',
             default: true
         },{
+            title: "Action buttons are visible",
+            alias: "actionButtonsVisible",
+            type: 'bool',
+            default: true
+        },
+        {
             title: 'Columns',
             alias: 'columns',
             type: 'list',
