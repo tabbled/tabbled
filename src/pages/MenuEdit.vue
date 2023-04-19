@@ -80,13 +80,6 @@ let isNew = ref(false)
 
 
 onMounted(async () => {
-    // let n = !route.params.id || route.params.id === 'new'
-    // await dataSet.openOne( n ? undefined : <string>route.params.id)
-    //
-    // items.value = dataSet.current.items
-    //
-    // //@ts-ignore
-    //
     datasource = dsService.getDataSourceByAlias('menu')
 
     if (!datasource) {
@@ -137,7 +130,7 @@ async function cancel() {
     router.back()
 }
 
-async function getValue(alias) {
+function getValue(alias) {
     if (!menuEntity.value)
         return undefined;
 
