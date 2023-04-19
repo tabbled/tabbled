@@ -105,6 +105,7 @@ const mutations = {
         if (!account) {
             state.account = user.accounts[0];
             localStorage.setItem('account', JSON.stringify(state.account))
+            socketClient.updateAuth()
         } else if (account.id !== state.account.id) {// Need to reconnect socket client if current account was changed
             socketClient.updateAuth()
         }

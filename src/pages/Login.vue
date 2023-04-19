@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from 'vue-router'
 import {useStore} from "vuex";
 import { ElMessage } from 'element-plus'
@@ -63,6 +63,12 @@ let rules = ref({
         required: true,
         trigger: 'blur',
     }]
+})
+
+onMounted(async () => {
+    //@ts-ignore
+    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
+    document.title = `${route.meta.title} | ${ appTitle }`
 })
 
 

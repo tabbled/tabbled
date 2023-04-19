@@ -406,7 +406,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     emitHandler(event: string, ...args) {
-        console.log('emitHandler', event, ...args)
+        //console.log('emitHandler', event, ...args)
 
         switch (event) {
             case 'update': this.emit('update', ...args); break;

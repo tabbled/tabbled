@@ -40,7 +40,7 @@
                    :context="{}"
                    :is-inline-editing="false"
                    @row-dbl-click="editPage"
-                   :readonly="true"
+                   :readonly="false"
             />
         </el-tab-pane>
 
@@ -80,6 +80,7 @@ import {onMounted, ref} from "vue";
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {useSyncService} from "../services/sync.service";
+import {ElMessage} from "element-plus";
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -90,7 +91,6 @@ const router = useRouter()
 const dsService = useDataSourceService()
 let activeTab = ref('')
 let sync = useSyncService()
-import {ElMessage} from "element-plus";
 
 const pagesColumns:ColumnConfigInterface[] = [
     {

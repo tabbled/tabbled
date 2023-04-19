@@ -108,7 +108,7 @@ watch(() => props.pageConfig,
 
 watch(() => editEntity.value,
     async () => {
-        console.log('update entity', editEntity.value)
+        //console.log('update entity', editEntity.value)
     }, {deep: true})
 
 onMounted(async () => {
@@ -281,10 +281,6 @@ async function init() {
     }
 
     scriptContext.value.item = editEntity.value
-
-    //update.value++
-
-    console.log('editEntity', editEntity.value)
 
     if (actions.value.onOpen) {
         await execAction(actions.value.onOpen)

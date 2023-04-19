@@ -286,7 +286,6 @@ async function getData() {
     }
 
     if (props.field) {
-        console.log('loadData', props.modelValue)
         data.value = props.modelValue
         await dataSource.setData(props.modelValue)
     } else {
@@ -502,8 +501,7 @@ async function initColumns() {
 }
 
 let onItemUpdated = async (id, item) => {
-    console.log('item-updated', id, item)
-
+    //console.log('item-updated', id, item)
     if (dataSource.isTree) {
         let path = await getTreePath(id)
         _.set(data.value, path, item)
@@ -519,12 +517,10 @@ let onItemUpdated = async (id, item) => {
 }
 
 let onItemInserted = async (id, item) => {
-    console.log('item-inserted', id, item)
+    //console.log('item-inserted', id, item)
     if (dataSource.isTree && item.parentId) {
         let path = await getTreePath(item.parentId)
         let parentItem = _.get(data.value, path)
-
-        console.log(path, parentItem)
 
         if (!parentItem.children) parentItem.children = []
 
@@ -538,12 +534,10 @@ let onItemInserted = async (id, item) => {
 }
 
 let onItemRemoved = async (id, item) => {
-    console.log('item-removed', id, item)
+    //console.log('item-removed', id, item)
     if (dataSource.isTree) {
         let path = await getTreePath(item.parentId)
         let parentItem = _.get(data.value, path)
-
-        console.log(path)
 
         for(let i in parentItem.children) {
             if (parentItem.children[i].id === id) {
@@ -563,7 +557,7 @@ let onItemRemoved = async (id, item) => {
 
 let onDataSourceUpdate = async (data) => {
     //data.value = data
-    console.log('update', data)
+    //console.log('update', data)
     emit('update:modelValue', data)
     emit('change', data)
 }
@@ -591,7 +585,6 @@ async function init() {
         dataSource.on('update', onDataSourceUpdate)
 
         if (dataSource instanceof CustomDataSource) {
-            console.log(props.context)
             dataSource.setContext(props.context)
         }
 
