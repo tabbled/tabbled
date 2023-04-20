@@ -145,9 +145,9 @@ export class SyncService extends EventEmitter {
         }
     }
 
-    async importConfig(config: any) {
+    async import(type: DataSourceType, data: any) {
         try {
-            await socketClient.emit(`config/import`, config)
+            await socketClient.emit(`${type}/import`, data)
         } catch (e) {
             throw e;
         }

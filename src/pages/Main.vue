@@ -109,8 +109,8 @@
                         <el-button @click="setCollapsed" text style="width: 32px; opacity:0.2" size="small">
                             <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
                         </el-button>
-                        <div style="padding-right: 16px; font-size: 10px; opacity: 0.5">
-                            v0.2.5
+                        <div style="padding-right: 16px; font-size: 12px; opacity: 0.4">
+                            v{{version}}
                         </div>
                     </div>
                 </div>
@@ -143,7 +143,7 @@ import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePageHeader} from "../services/page.service";
-
+import {version} from '../../package.json'
 
 const props = defineProps<{
     screenSize: ScreenSize

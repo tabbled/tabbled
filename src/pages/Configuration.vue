@@ -3,26 +3,45 @@
         <template #content>
             <span> {{route.meta.title}} </span>
         </template>
-        <template #extra>
-            <el-button text @click="loadConfigFile">
-                <template #icon>
-                    <Icon width="26" icon="mdi:import"></Icon>
-                </template>
-                Import
-            </el-button>
+        <template #extra >
+            <div style="display: flex; align-self: center;">
+                <el-dropdown
+                    style="margin-right: 24px; "
+                >
+                <span class="dropdown-link">
+                            Import
+                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
+                </span>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item @click="loadConfigFile">Config</el-dropdown-item>
+                            <el-dropdown-item @click="loadDataFile">Data from *.json</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
 
-            <el-button text @click="exportConfig">
-                <template #icon>
-                    <Icon width="26" icon="mdi:export"></Icon>
-                </template>
-                Export
-            </el-button>
+                <el-dropdown
+                    style="margin-right: 8px"
+                >
+                <span class="dropdown-link">
+                            Export
+                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
+                </span>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item @click="exportConfig">Config</el-dropdown-item>
+                            <el-dropdown-item @click="exportData">Data to *.json</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
+            </div>
+
         </template>
     </el-page-header>
 
-    <el-tabs tab-position="left" style="height: calc(100% - 64px)" v-model="activeTab" @tab-change="tabChange">
+    <el-tabs tab-position="top" style="height: calc(100% - 64px); padding-left: 16px" v-model="activeTab" @tab-change="tabChange">
 
-        <el-tab-pane label="Menus"  style="padding: 16px" name="menus">
+        <el-tab-pane label="Menus" name="menus">
             <Table :columns="menuColumns"
                    id="menu"
                    :context="{}"
@@ -33,7 +52,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Pages"  style="padding: 16px" name="pages">
+        <el-tab-pane label="Pages"  name="pages">
             <Table :columns="pagesColumns"
                    id="pages"
                    datasource="page"
@@ -44,7 +63,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Data sources" style="padding: 16px" name="datasources">
+        <el-tab-pane label="Data sources" name="datasources">
             <Table :columns="dsColumns"
                    id="ds"
                    :context="{}"
@@ -56,7 +75,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Functions" style="padding: 16px" name="functions">
+        <el-tab-pane label="Functions" name="functions">
             <Table :columns="funcColumns"
                    id="func"
                    :context="{}"
@@ -67,7 +86,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Report templates" style="padding: 16px" name="reports">
+        <el-tab-pane label="Report templates" name="reports">
             Report templates coming soon
         </el-tab-pane>
     </el-tabs>
@@ -82,6 +101,7 @@ import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {useSyncService} from "../services/sync.service";
 import {ElMessage} from "element-plus";
+import {DataSourceType} from "../model/datasource";
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -173,26 +193,41 @@ onMounted(async () => {
 });
 
 
+function loadFile() : Promise<any> {
+    return new Promise( (resolve) => {
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = _ => {
+            let files =   Array.from(input.files);
+            const fr = new FileReader();
+            fr.readAsText(files[0]);
+            fr.addEventListener('load', (e) => {
+                resolve(e.target.result)
+            })
+        };
+        input.click();
+    })
+}
+
+
 function loadConfigFile() {
-    let input = document.createElement('input');
-    input.type = 'file';
-    input.onchange = _ => {
-        let files =   Array.from(input.files);
-        const fr = new FileReader();
-        fr.readAsText(files[0]);
-        fr.addEventListener('load', (e) => {
-            importConfig(JSON.parse(e.target.result.toString()))
-        })
-    };
-    input.click();
+    loadFile().then(data => {
+        importConfig(JSON.parse(data.toString()))
+    })
+}
+
+function loadDataFile() {
+    loadFile().then(data => {
+        importData(JSON.parse(data.toString()))
+    })
 }
 
 async function importConfig(config: any) {
     console.log('Start load configuration with version ' + config.version)
 
     try {
-        await sync.importConfig(config)
-        console.log("Loading configuration have been finished. Reload the page")
+        await sync.import(DataSourceType.config, config)
+        console.log("Loading configuration have finished. Reload the page")
         ElMessage.success('Imported successfully')
     } catch (e) {
         console.error(e)
@@ -200,15 +235,24 @@ async function importConfig(config: any) {
     }
 }
 
-async function exportConfig() {
+async function importData(data: any) {
+    try {
+        await sync.import(DataSourceType.data, data)
+        console.log("Loading data have finished.")
+        ElMessage.success('Imported successfully')
+    } catch (e) {
+        console.error(e)
+        ElMessage.error('Import error')
+    }
+}
 
-    let data = JSON.stringify(await gatherConfig(), null, 4)
+function saveFile(data: any, filename: string) {
     let file = new Blob([data]);
     let a = document.createElement("a"),
         url = URL.createObjectURL(file)
 
     a.href = url;
-    a.download = 'configuration.json';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
 
@@ -216,6 +260,27 @@ async function exportConfig() {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     }, 0);
+}
+
+async function exportConfig() {
+    let data = JSON.stringify(await gatherConfig(), null, 4)
+    saveFile(data, 'configuration.json')
+}
+
+async function exportData() {
+    let data = JSON.stringify(await gatherData(), null, 4)
+    saveFile(data, 'data.json')
+}
+
+async function gatherData() {
+    let data = {}
+    let sources = dsService.getDataSources()
+    for(const i in sources) {
+        const source = sources[i]
+        data[source.alias] = await gatherFromDataSource(source.alias)
+    }
+
+    return data
 }
 
 async function gatherConfig() {
@@ -234,19 +299,6 @@ async function gatherFromDataSource(alias: string) {
         return undefined;
 
     return await ds.getManyRaw([], 1000)
-}
-
-async function updateConfigOnDataSource(alias: string, data: any[]) {
-
-    let ds = dsService.getDataSourceByAlias(alias)
-    if (!ds)
-        return;
-
-    for(let i in data) {
-        const item = data[i]
-        await ds.updateById(item.id, item.data)
-    }
-
 }
 
 function tabChange(d) {
@@ -291,4 +343,10 @@ function editMenu(ctx) {
 
 <style scoped>
 
+.dropdown-link {
+    cursor: pointer;
+    color: var(--el-color-primary);
+    display: flex;
+    align-items: center;
+}
 </style>
