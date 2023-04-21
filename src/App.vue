@@ -90,9 +90,15 @@ onUnmounted(() => {
 })
 
 async function getAppVersion() {
-    let ver = await syncService.getAppVersion()
-    if (ver !== version) {
-        window.location.reload()
+    // @ts-ignore
+    const env = import.meta.env.MODE || "production";
+
+    if (env === "production") {
+        let ver = await syncService.getAppVersion()
+        if (ver !== version) {
+            console.log('current version', version, 'server', ver)
+            window.location.reload()
+        }
     }
 }
 
