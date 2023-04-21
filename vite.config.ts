@@ -9,6 +9,7 @@ export default defineConfig({
             injectRegister: 'script',
             filename: "sw.ts",
             strategies: "injectManifest",
+
             includeAssets: ["/icon.png"],
             srcDir: "src",
             base: '/',

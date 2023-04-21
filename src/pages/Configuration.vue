@@ -25,7 +25,7 @@
                 >
                 <span class="dropdown-link">
                             Export
-                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
+                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-upload"></Icon>
                 </span>
                     <template #dropdown>
                         <el-dropdown-menu>
