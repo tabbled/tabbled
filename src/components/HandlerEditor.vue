@@ -1,38 +1,67 @@
 <template>
-    <CodeEditor v-if="type==='script'"
+    <CodeEditor v-if="modelValue && modelValue.type === 'script'"
                 :model-value="getScript()"
                 @update:model-value="onCodeUpdate"
                 runnable
                 style="width: 100%;"
     />
+    <el-select v-if="modelValue && modelValue.type ==='function'"
+        filterable
+        v-model="modelValue.functionId"
+    >
+        <el-option
+            v-for="item in functions"
+            :label="item.label"
+            :value="item.key"
+
+        />
+    </el-select>
 </template>
 
 <script setup lang="ts">
 
 import CodeEditor from "./CodeEditor.vue";
+import {HandlerInterface} from "../model/handler";
+import {onMounted, ref} from "vue";
+import {useDataSourceService} from "../services/datasource.service";
 
-interface Props {
-    type: 'script' | 'action'
-    script?: string,
-    action?: string
+let dsService = useDataSourceService()
+
+interface ListItem {key: string, label: string}
+const functions = ref<Array<ListItem>>([])
+
+interface Props  {
+    modelValue: HandlerInterface
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    type: "script",
-    script: ""
 })
+
 let emit = defineEmits(['update'])
+
+onMounted(async() => {
+    let ds = dsService.getDataSourceByAlias('function')
+    let data = await ds.getAll()
+    data.forEach(ds => {
+        functions.value.push({
+            key: ds.id,
+            label: ds.title
+        })
+    })
+})
 
 function onCodeUpdate(code: string) {
     emit('update', {
-        type: props.type ? props.type : 'script',
+        type: props.modelValue.type ? props.modelValue.type : 'script',
         script: code
     })
 }
 
 function getScript() {
-    return props.script
+    return props.modelValue.script
 }
+
+
 
 </script>
 

@@ -726,6 +726,13 @@ export class DataSourceConfigDataSource extends DataSource {
                     type: "bool",
                     required: false,
                     default: false
+                },{
+                    title: "Event handlers",
+                    alias: "eventHandlers",
+                    type: "handler",
+                    required: false,
+                    default: [],
+                    isMultiple: true
                 }
             ]});
     }

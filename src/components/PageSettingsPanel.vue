@@ -48,8 +48,7 @@
                                     @change="(val) => onInput(prop.alias, val)"
                         />
                         <HandlerEditor v-else-if="prop.type === 'handler'"
-                                       :type="getValue(prop, currentElement) ? getValue(prop, currentElement).type : 'script'"
-                                       :script="getValue(prop, currentElement) ? getValue(prop, currentElement).script : ''"
+                                       :model-value="getValue(prop, currentElement) ? getValue(prop, currentElement) : { type: 'script', script: '' }"
                                        @update="(val) => onInput(prop.alias, val)"
                         />
                         <ItemList v-else-if="prop.type === 'list'"
@@ -296,7 +295,7 @@ onMounted(() => {
 })
 
 function onInput(alias: string, value: any) {
-    //console.log(alias, value)
+    console.log(alias, value)
     emit('update', getPropPath(alias), value)
 }
 
@@ -310,6 +309,8 @@ function onFieldSelectInput(alias: string, value: any, field: FieldConfigInterfa
 }
 
 function getValue(prop: FieldConfigInterface, element: any) {
+    if (prop.type === 'handler')
+        console.log(element[prop.alias])
     return element[prop.alias]
 }
 

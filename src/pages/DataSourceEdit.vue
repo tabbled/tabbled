@@ -131,6 +131,29 @@
 
                 />
             </el-tab-pane>
+
+            <el-tab-pane v-if="dataSourceEntity && dataSourceEntity.source !== 'custom'"
+                         label="Events"
+                         name="events"
+                         style="padding-right: 2px"
+            >
+
+                <ItemList key-prop="alias"
+                          title-prop="title"
+                          :list="dataSourceEntity ? dataSourceEntity.eventHandlers : []"
+                          @remove="removeEventHandler"
+                          @insert="insertEventHandler"
+                          @edit="editEventHandler"
+                >
+                    <template #default="{item}">
+                        <el-tag style="width: 80px">{{item['event']}}</el-tag>
+                        <div style="margin-left: 16px; font-size: 14px">
+                            {{getEventHandlerTitle(item)}}
+                        </div>
+                    </template>
+                </ItemList>
+
+            </el-tab-pane>
         </el-tabs>
 
 
@@ -148,6 +171,20 @@
           <span class="dialog-footer">
               <el-button @click="fieldEditDialogVisible = false">Cancel</el-button>
               <el-button type="primary" @click="saveField">Save</el-button>
+          </span>
+        </template>
+    </el-dialog>
+
+    <el-dialog
+        v-model="eventHandlerEditDialogVisible"
+        title="Edit event handler"
+        width="70%"
+    >
+        <EventHandlerEdit :model-value="currentEventHandler"/>
+        <template #footer>
+          <span class="dialog-footer">
+              <el-button @click="eventHandlerEditDialogVisible = false">Cancel</el-button>
+              <el-button type="primary" @click="saveEventHandler">Save</el-button>
           </span>
         </template>
     </el-dialog>
@@ -171,12 +208,17 @@ import CheckboxField from "../components/CheckboxField.vue";
 import {ColumnConfigInterface} from "../model/column";
 import {useDataSourceService} from "../services/datasource.service";
 import LinkSelect from "../components/LinkSelect.vue";
+import {EventHandlerInterface} from "../model/eventHandler";
+import EventHandlerEdit from "../components/EventHandlerEdit.vue";
 
 let router = useRouter();
 let route = useRoute()
 let currentField = ref<FieldConfigInterface>(null)
+let currentEventHandler = ref<EventHandlerInterface>(null)
 let currentIndex = -1;
 let fieldEditDialogVisible = ref(false)
+let currentEventHandlerIndex = -1;
+let eventHandlerEditDialogVisible = ref(false)
 const { t } = useI18n();
 let activeTab = ref('fields')
 let availableHeight = ref(0)
@@ -189,6 +231,7 @@ let testDataSource: DataSourceInterface = null
 
 let context = ref<any>(getContext())
 let columns = ref<ColumnConfigInterface[]>([])
+const functions = ref<Map<string, string>>(new Map())
 
 onMounted(async () => {
     datasource = dsService.getDataSourceByAlias('datasource')
@@ -205,8 +248,12 @@ onMounted(async () => {
 
     availableHeight.value = window.innerHeight - 260
 
-    // if (dataSet.value.current['source'] === 'custom')
-    //     await tryBuildDataSource()
+    let ds = dsService.getDataSourceByAlias('function')
+    let data = await ds.getAll()
+    for(const i in data) {
+        functions.value.set(data[i].id, data[i].title)
+    }
+    console.log(functions)
 });
 
 async function load() {
@@ -387,6 +434,66 @@ function removeField(row) {
     )
         .then(() => {
             dataSourceEntity.value.fields.splice(row, 1)
+        })
+}
+
+function saveEventHandler() {
+    eventHandlerEditDialogVisible.value = false;
+
+    console.log(currentEventHandler.value)
+
+    if (currentIndex == -1) {
+        dataSourceEntity.value.eventHandlers.push(currentEventHandler.value)
+    } else {
+        dataSourceEntity.value.eventHandlers[currentEventHandlerIndex] = currentEventHandler.value
+    }
+}
+
+function getEventHandlerTitle(item: EventHandlerInterface) {
+    if (item.handler.type === 'function') {
+        return `Function: ${functions.value.get(item.handler.functionId)}`
+    } else {
+        return item.handler.type
+    }
+}
+
+function insertEventHandler() {
+
+    currentEventHandler.value = {
+        event: 'onAdd',
+        handler: {
+            type: 'function',
+            functionId: null
+        }
+    }
+    currentIndex = -1;
+    eventHandlerEditDialogVisible.value = true
+
+
+    if (!dataSourceEntity.value.eventHandlers) {
+        dataSourceEntity.value.eventHandlers = []
+    }
+    dataSourceEntity.value.eventHandlers.push()
+}
+
+function editEventHandler(row) {
+    currentEventHandler.value = _.cloneDeep(dataSourceEntity.value.eventHandlers[row])
+    currentEventHandlerIndex = row;
+    eventHandlerEditDialogVisible.value = true
+}
+
+function removeEventHandler(row) {
+    ElMessageBox.confirm(
+        t('confirmDeleteTitle'),
+        t('delete'),
+        {
+            confirmButtonText: t('delete'),
+            cancelButtonText: t('cancel'),
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            dataSourceEntity.value.eventHandlers.splice(row, 1)
         })
 }
 
