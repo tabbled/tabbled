@@ -110,7 +110,7 @@
                             <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
                         </el-button>
                         <div style="padding-right: 16px; font-size: 12px; opacity: 0.4">
-                            v{{version}}
+                            v{{appVersion}}
                         </div>
                     </div>
                 </div>
@@ -143,7 +143,8 @@ import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePageHeader} from "../services/page.service";
-import {version} from '../../package.json'
+import _package from '../../package.json'
+
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -156,6 +157,7 @@ const rView = ref(null)
 let mainViewHeight = ref(0)
 let mainViewWidth = ref(0)
 let mainSideBarWidth = ref(250)
+let appVersion = _package.version
 
 
 let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')

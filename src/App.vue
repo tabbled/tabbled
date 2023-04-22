@@ -25,7 +25,6 @@ import {useDataSourceService} from "./services/datasource.service";
 import {useDatabase} from "./services/database.service";
 import {useSyncService} from "./services/sync.service";
 import PageView from "./pages/PageView.vue";
-import {version} from '../package.json'
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -79,7 +78,6 @@ onMounted(async () => {
 
         await loadConfig()
         await loadData()
-        await getAppVersion()
     }
 })
 
@@ -88,19 +86,6 @@ onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
     configLoadState.value = ConfigLoadState.NotLoaded
 })
-
-async function getAppVersion() {
-    // @ts-ignore
-    const env = import.meta.env.MODE || "production";
-
-    if (env === "production") {
-        let ver = await syncService.getAppVersion()
-        if (ver !== version) {
-            console.log('current version', version, 'server', ver)
-            window.location.reload()
-        }
-    }
-}
 
 function handleResize() {
     screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
