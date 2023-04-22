@@ -442,7 +442,7 @@ function saveEventHandler() {
 
     console.log(currentEventHandler.value)
 
-    if (currentIndex == -1) {
+    if (currentEventHandlerIndex == -1) {
         dataSourceEntity.value.eventHandlers.push(currentEventHandler.value)
     } else {
         dataSourceEntity.value.eventHandlers[currentEventHandlerIndex] = currentEventHandler.value
