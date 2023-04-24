@@ -43,11 +43,14 @@
         </el-form-item>
 
         <el-form-item label="Script">
+            <el-button text type="primary" style="margin-bottom: 8px"  @click="run();">
+                <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
+                Run
+            </el-button>
             <CodeEditor :context="context"
                         :field-config="getField('script')"
                         field="script"
                         format="javascript"
-                        runnable
                         :model-value="getValue('script')"
                         @change="(val) => setValue('script', val)"
             />
@@ -67,6 +70,7 @@ import Input from "../components/Input.vue";
 import {generateEntityWithDefault} from "../model/field";
 import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
+import {useSocketClient} from "../services/socketio.service";
 
 let router = useRouter();
 let route = useRoute()
@@ -75,6 +79,8 @@ let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
 let updateKey = ref(0)
+
+const socket = useSocketClient()
 
 
 onMounted(async () => {
@@ -124,7 +130,6 @@ async function save() {
 }
 
 function getValue(alias) {
-    console.log(alias, functionEntity.value)
     if (!functionEntity.value)
         return undefined;
 
@@ -154,6 +159,13 @@ const context: ComputedRef<any> = computed((): any =>  {
         return {}
     }
 })
+
+function run() {
+    socket.emit('functions/call', {
+        alias: functionEntity.value.alias,
+        context: context.value
+    })
+}
 
 
 </script>

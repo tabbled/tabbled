@@ -36,8 +36,13 @@ export class SocketIOClient {
         this.socket.on("disconnect", async () => {
             console.log("Disconnected from the socket server");
         })
+
+
+        this.socket.on('functions/console.log', async (...args) => {
+            console.log('Func console.log: ', ...args)
+        })
     }
-    //import.meta.env.VITE_SOME_KEY
+
     readonly socket: Socket
 
     url(): string {
@@ -67,6 +72,7 @@ export class SocketIOClient {
     }
 
     async emit(topic: string, message?: any) : Promise<any> {
+        console.log(topic, message)
         return new Promise((resolve, reject) => {
             this.socket.timeout(5000).emit(topic, message || {},
                 (err: any, res: any) => {
