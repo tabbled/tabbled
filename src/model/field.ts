@@ -192,7 +192,7 @@ export async function generateEntityWithDefault(fields: FieldConfigInterface[]):
             case "list":
             case "elements":
             case "table": item[f.alias] = []; break;
-            case "handler": item[f.alias] = {type: 'script', script: ""};break;
+            case "handler": item[f.alias] = f.isMultiple ? [] : {type: 'script', script: ""};break;
             default: item[f.alias] = null;
         }
     }

@@ -88,8 +88,7 @@
                        id="testDataSourceTable"
                        :context="context"
                        :datasource="dataSourceEntity ? dataSourceEntity.alias : ''"
-                       :is-inline-editing="true"
-                       :is-readonly="false"
+                       :readonly="false"
                 />
             </el-tab-pane>
 
@@ -140,7 +139,7 @@
 
                 <ItemList key-prop="alias"
                           title-prop="title"
-                          :list="dataSourceEntity ? dataSourceEntity.eventHandlers : []"
+                          :list="dataSourceEntity && dataSourceEntity.eventHandlers ? dataSourceEntity.eventHandlers : []"
                           @remove="removeEventHandler"
                           @insert="insertEventHandler"
                           @edit="editEventHandler"
@@ -267,6 +266,8 @@ async function load() {
         dataSourceEntity.value = await datasource.getById(<string>route.params.id)
         isNew.value = false
     }
+
+    console.log(dataSourceEntity.value)
 }
 
 async  function initTestDataSource() {
@@ -439,8 +440,6 @@ function removeField(row) {
 
 function saveEventHandler() {
     eventHandlerEditDialogVisible.value = false;
-
-    console.log(currentEventHandler.value)
 
     if (currentEventHandlerIndex == -1) {
         dataSourceEntity.value.eventHandlers.push(currentEventHandler.value)

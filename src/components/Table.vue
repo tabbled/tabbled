@@ -1,6 +1,6 @@
 <template>
     <div v-if="dataSource && actionButtonsVisible" style="padding-bottom: 16px; display: flex;">
-        <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree)) " type="primary" @click="add" size="small">
+        <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
         <el-dropdown v-else
@@ -109,6 +109,9 @@ interface Props {
     onEdit?: EventHandlerConfigInterface,
     onAdd?: EventHandlerConfigInterface,
     onRemove?: EventHandlerConfigInterface
+    onClickAdd?: () => (void)
+    onClickEdit?: () => (void)
+    onClickDelete?: () => (void)
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -199,7 +202,9 @@ async function addSibling() {
 async function add() {
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
-    } else {
+    } else if (props.onClickAdd instanceof Function) {
+        props.onClickAdd()
+    } else{
         let item = await generateEntityWithDefault(dataSource.fields)
         console.log(item.id, item, currentId.value)
         await dataSource.insert(item.id, item, currentId.value)

@@ -46,9 +46,9 @@
                    id="menu"
                    :context="{}"
                    datasource="menu"
-                   :is-inline-editing="false"
                    @row-dbl-click="editMenu"
                    :readonly="true"
+                   :on-click-add="addMenu"
             />
         </el-tab-pane>
 
@@ -57,9 +57,9 @@
                    id="pages"
                    datasource="page"
                    :context="{}"
-                   :is-inline-editing="false"
                    @row-dbl-click="editPage"
                    :readonly="true"
+                   :on-click-add="addPage"
             />
         </el-tab-pane>
 
@@ -68,9 +68,9 @@
                    id="ds"
                    :context="{}"
                    datasource="datasource"
-                   :is-inline-editing="false"
                    :readonly="true"
                    @row-dbl-click="editDataSource"
+                   :on-click-add="addDataSource"
 
             />
         </el-tab-pane>
@@ -80,9 +80,9 @@
                    id="func"
                    :context="{}"
                    datasource="function"
-                   :is-inline-editing="false"
                    @row-dbl-click="editFunc"
                    :readonly="true"
+                   :on-click-add="addFunc"
             />
         </el-tab-pane>
 

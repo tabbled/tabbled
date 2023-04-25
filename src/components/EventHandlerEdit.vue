@@ -16,7 +16,7 @@
         </el-form-item>
 
         <el-form-item label="Handler">
-            <HandlerEditor v-model="modelValue.handler" title=""/>
+            <HandlerEditor v-model="modelValue.handler"/>
         </el-form-item>
 
 
