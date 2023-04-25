@@ -6,7 +6,7 @@
             <div class="list-item-title" @click="emit('edit', idx); setCurrentIndex(idx)">
                 <Icon icon="ic:baseline-drag-indicator"
                       style="padding-right: 4px; color: var(--el-border-color); cursor: move" width="16"/>
-                <slot :item="item">
+                <slot :item="item" :index="idx">
                     {{item[titleProp]}}
                 </slot>
             </div>

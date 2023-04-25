@@ -1,10 +1,27 @@
 <template>
-    <el-input :disabled="isDisabled" @input="change" :model-value="value" :type="type"/>
+    <div v-if="fieldConfig && fieldConfig.isMultiple">
+        Multiple
+<!--        <div v-for="item in value">-->
+<!--            {{item}}-->
+<!--        </div>-->
+        <ItemList key-prop="alias"
+                  title-prop="title"
+                  :list="multiValue"
+                  @remove="(row) => multiValue.splice(row, 1)"
+                  @insert="multiValue.push('')"
+        >
+            <template #default="{item, index}">
+                <el-input style="padding-left: 8px; width: calc(100% - 24px)" :disabled="isDisabled" @input="(val) => inputMulti(val, index)" :model-value="multiValue[index]"/>
+            </template>
+        </ItemList>
+    </div>
+    <el-input v-else :disabled="isDisabled" @input="change" :model-value="value" :type="type"/>
 </template>
 
 <script setup lang="ts">
 import {onMounted, ref, watch} from "vue";
 import {FieldConfigInterface} from "../model/field";
+import ItemList from "./ItemList.vue";
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
@@ -15,7 +32,8 @@ const props = defineProps<{
     context?:any
 }>()
 
-let value = ref('')
+let value = ref<string | Array<string>>()
+let multiValue = ref<Array<string>>([])
 let type: 'text' | 'textarea' = 'text'
 let isDisabled = ref(false)
 
@@ -32,7 +50,17 @@ watch(() => props.modelValue,
 
 
 async function getValue() {
+    if (props.modelValue && props.fieldConfig && props.fieldConfig.isMultiple) {
+        multiValue.value = (props.modelValue instanceof Array) ? props.modelValue : [props.modelValue]
+        return;
+    }
     value.value = props.modelValue
+}
+
+function inputMulti(val, index) {
+    console.log(val, index)
+    multiValue.value[index] = val
+    emit('change', multiValue.value)
 }
 
 function init() {

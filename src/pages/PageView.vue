@@ -31,14 +31,12 @@
 
                 <component :id="element.id || idx.toString()"
                            style="width: 100%"
-                           :is="element.name" v-bind="element"
+                           :is="element.name"
+                           v-bind="element"
                            :fieldConfig="getField(element)"
                            :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
-                           :update="update"
-                           :load="loadValue(element.field)"
-
                 />
             </el-form-item>
         </el-form>

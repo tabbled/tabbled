@@ -42,13 +42,11 @@
                     <el-checkbox :disabled="!!modelValue.datasource" v-model="modelValue.isTree"/>
                 </el-form-item>
 
-
-
                 <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.precision')">
                     <el-input-number v-model="modelValue.precision" controls-position="right" :min="0" :max="9" style="text-align: start"></el-input-number>
                 </el-form-item>
 
-                <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'list'" :label="t('fieldConfig.isMultiple')">
+                <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'list' || modelValue.type === 'string'" :label="t('fieldConfig.isMultiple')">
                     <el-checkbox v-model="modelValue.isMultiple"></el-checkbox>
                 </el-form-item>
 

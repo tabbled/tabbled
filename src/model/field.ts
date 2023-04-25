@@ -15,7 +15,7 @@ export function getFieldDataTypes():Array<FieldDataType> {
         'string',
         'bool',
         'text',
-        'list',
+        //'list',
         'enum',
        // 'status',
         'image',
