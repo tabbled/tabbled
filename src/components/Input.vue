@@ -1,9 +1,5 @@
 <template>
     <div v-if="fieldConfig && fieldConfig.isMultiple">
-        Multiple
-<!--        <div v-for="item in value">-->
-<!--            {{item}}-->
-<!--        </div>-->
         <ItemList key-prop="alias"
                   title-prop="title"
                   :list="multiValue"
