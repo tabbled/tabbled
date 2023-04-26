@@ -91,7 +91,8 @@ export interface DataSourceConfigInterface {
     keyField?: string,
     isTree?: boolean,
     source?: DataSourceSource,
-    script?: string
+    script?: string,
+    cached?: boolean
 }
 
 export class DataSource extends EventEmitter implements DataSourceInterface {
@@ -106,6 +107,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.fields = []
         this.readonly = !!config.readonly ? config.readonly : false
         this.isTree = config.isTree
+        this.cached = config.cached
+
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -126,6 +129,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     type: DataSourceType
     source: DataSourceSource
     isTree: boolean
+
 
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
         return undefined
@@ -160,7 +164,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         let ref = await db.database.query(`/${this.type}/${this.alias}`)
 
-        for(const i in filter) {
+        for(const i in this.defaultFilters(filter)) {
             let item = filter[i]
             ref = ref.filter(item.key, item.op, item.compare)
         }
@@ -306,7 +310,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         let current_item = await this.getByIdRaw(item.id)
 
         await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
-        this.emit('update', item.id)
+        //this.emit('update', item.id)
 
         if (!current_item) {
             this.emit('item-inserted', item.id, item.data)
@@ -331,6 +335,18 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         item[field] = value
         await this.updateById(id, item)
         this.emit('update', item.id)
+    }
+
+    defaultFilters(filter: FilterItemInterface[]): FilterItemInterface[] {
+        let f = filter;
+        let deleted = filter.filter((item) => item.key === 'deleted_at')
+        if (!deleted.length)
+            f.push({
+                key: 'deletedAt',
+                op: "==",
+                compare: null
+            })
+        return f
     }
 }
 
@@ -566,6 +582,7 @@ export class PageConfigDataSource extends DataSource {
             type: DataSourceType.config,
             alias: 'page',
             keyField: 'alias',
+            cached: true,
             fields: [{
                 title: 'Title',
                 alias: 'title',
@@ -615,6 +632,7 @@ export class MenuConfigDataSource extends DataSource {
             type: DataSourceType.config,
             alias: 'menu',
             keyField: 'alias',
+            cached: true,
             fields: [
             {
                 title: 'Title',
@@ -650,6 +668,7 @@ export class DataSourceConfigDataSource extends DataSource {
             type: DataSourceType.config,
             alias: 'datasource',
             keyField: 'alias',
+            cached: true,
             fields: [
                 {
                     title: 'Title',
@@ -744,6 +763,7 @@ export class FunctionsConfigDataSource extends DataSource {
             type: DataSourceType.config,
             alias: 'function',
             keyField: 'alias',
+            cached: true,
             fields: [
                 {
                     title: 'Title',

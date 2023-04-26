@@ -72,6 +72,11 @@
             </template>
         </el-table-column>
 
+        <template #append >
+            <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext()">
+                Load next entities
+            </el-button>
+        </template>
     </el-table>
 </template>
 
@@ -111,11 +116,12 @@ interface Props {
     onRemove?: EventHandlerConfigInterface
     onClickAdd?: () => (void)
     onClickEdit?: () => (void)
-    onClickDelete?: () => (void)
+    onClickDelete?: () => (void),
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
-    actionButtonsVisible: true
+    actionButtonsVisible: true,
+    infinitiveScroll: false
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -139,38 +145,28 @@ const { t } = useI18n();
 let selectedIds = ref<string[]>([])
 let currentId = ref(null)
 let isTree = ref(false)
+let skipInGet = 0;
+let canLoadNext = ref(false)
 
 let data = ref<Array<any>>([])
 
 let sync = useSyncService()
 const configAlias = `config/table-config-${props.id}`
 
-
-watch(() => props.field,
-    async () => {
-        await init();
-        await initColumns();
-        await getData();
-    })
-
 watch(() => props.modelValue,
     async () => {
-
         await getData();
     })
 
-watch(() => props.datasource,
-    async () => {
-        await init();
-        await initColumns();
-        await getData();
-    })
+watch(() => props.field, load)
+watch(() => props.datasource, load)
+onMounted(load);
 
-onMounted(async () => {
+async function load() {
     await init();
     await initColumns();
     await getData();
-});
+}
 
 onUnmounted(() => {
     if (dataSource) {
@@ -295,7 +291,21 @@ async function getData() {
         data.value = props.modelValue
         await dataSource.setData(props.modelValue)
     } else {
-        data.value = await dataSource.getAll();
+        data.value = []
+        skipInGet = 0
+        await loadNext()
+    }
+}
+
+async function loadNext() {
+    let take = 50
+    let nextVal = await dataSource.getMany([], take, skipInGet);
+    canLoadNext.value = nextVal.length === take
+
+    if (nextVal.length) {
+        data.value = data.value.concat( nextVal )
+        skipInGet += take
+        canLoadNext.value = true
     }
 }
 
@@ -563,9 +573,9 @@ let onItemRemoved = async (id, item) => {
 
 let onDataSourceUpdate = async (data) => {
     //data.value = data
-    //console.log('update', data)
-    emit('update:modelValue', data)
-    emit('change', data)
+    console.log('update', data)
+    //emit('update:modelValue', data)
+    //emit('change', data)
 }
 
 async function init() {
