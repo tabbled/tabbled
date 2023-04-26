@@ -177,6 +177,9 @@ onUnmounted(() => {
     }
 })
 
+
+
+
 async function addSibling() {
     console.log('addSibling')
 
@@ -305,7 +308,6 @@ async function loadNext() {
     if (nextVal.length) {
         data.value = data.value.concat( nextVal )
         skipInGet += take
-        canLoadNext.value = true
     }
 }
 
