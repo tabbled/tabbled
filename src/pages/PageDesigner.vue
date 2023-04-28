@@ -599,7 +599,7 @@ async function dropNewWidget(e:DragEvent) {
                 rowTo: startRow + comp.defaultPosition.rows,
             }
         },
-        ...properties
+        props: properties
     })
     isChanged.value = true;
 }
