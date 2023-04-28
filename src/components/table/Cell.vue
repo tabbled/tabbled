@@ -21,7 +21,7 @@ import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
-    modelValue: any | Promise<any>,
+    modelValue: any,
     field: FieldInterface,
     context?:any
 }

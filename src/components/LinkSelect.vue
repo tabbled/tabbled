@@ -58,8 +58,9 @@ interface Props {
     modelValue?: any
     keyProp?: string,
     displayProp?: string,
-    update?:number,
-    //load?: Promise<any>
+    context?:any,
+    title?:string,
+    id?: string
 }
 
 
@@ -80,12 +81,7 @@ watch(() => props.modelValue,
         await getValue()
     })
 
-watch(() => props.update,
-    async () => {
-        await getValue()
-    })
-
-function init() {
+async function init() {
     isDisabled.value = true
 
     if (!props.fieldConfig) {
@@ -100,7 +96,8 @@ function init() {
             console.warn(`Link source "${props.fieldConfig.datasource}" for field "${props.fieldConfig.alias}" not found`)
             return
         }
-        getData()
+        await getData()
+        await getValue()
     }
 
     isDisabled.value = false

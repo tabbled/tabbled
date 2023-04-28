@@ -30,9 +30,8 @@
                           class="element">
 
                 <component :id="element.id || idx.toString()"
-                           style="width: 100%"
                            :is="element.name"
-                           v-bind="element"
+                           v-bind="element.props"
                            :fieldConfig="getField(element)"
                            :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
@@ -216,10 +215,9 @@ async function init() {
             id: element.id,
             layout: element.layout,
             name: element.name,
-            field: element.field
+            field: element.field,
+            props: {}
         }
-
-
 
         let elProps = componentService.getByName(el.name)
         if (!elProps) {
@@ -228,9 +226,9 @@ async function init() {
         }
 
         elProps.properties.forEach(item => {
-            el[item.alias] = _.cloneDeep(element[item.alias])
+            el.props[item.alias] = _.cloneDeep(element[item.alias])
         })
-        //el['context'] = scriptContext.value
+        el.props['context'] = scriptContext.value
         elements.value.push(el)
     })
     pageHeader.actions = []
@@ -286,8 +284,8 @@ async function init() {
 }
 
 function getLabelElement(el) {
-    if (el['title'] && el['title'] !== "") {
-        return el['title'].toString()
+    if (el.props && el.props['title'] && el.props['title'] !== "") {
+        return el.props['title'].toString()
     }
     return ""
 }

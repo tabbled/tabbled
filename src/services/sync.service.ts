@@ -7,6 +7,14 @@ import {useDatabase} from "./database.service";
 const socketClient = useSocketClient();
 const db = useDatabase()
 
+export interface DataChangesResponse {
+    items: {
+        [key: string]: DataItemInterface[],
+    }
+    length?: number,
+    lastRev: string
+}
+
 export interface DataItemInterface {
     id: string
     rev: string
@@ -111,35 +119,37 @@ export class SyncService extends EventEmitter {
         }
 
         try {
-            let data: Array<DataItemInterface> = await socketClient.emit(`${type}/getChanges`, {
+            let res: DataChangesResponse = await socketClient.emit(`${type}/getChanges`, {
                 lastRevision: rev.toString()
             })
 
-            if(!data.length)
+            if(!res.items)
                 return;
 
-            console.log(`Got changes from server, ${data.length} items`)
+            console.log(`Got changes from server, ${res.length} items`)
 
-            for (let i in data) {
-                let item = data[i]
+            let sets = Object.keys(res.items)
 
-                let ds = targetDs.get(item.alias)
 
+            for(let i in sets) {
+                let alias = sets[i]
+                console.log(i, alias)
+
+                let ds = targetDs.get(alias)
                 if (!ds) {
-                    console.warn(`DataSource "${item.alias}" doesn't exist`)
+                    console.warn(`DataSource "${alias}" doesn't exist`)
                     continue
                 }
 
-                let synced = await ds.setRemoteChanges(item)
+                let synced = await ds.setRemoteChanges(res.items[alias])
 
                 if (!synced) {
-                    console.warn(`Item ${item.id} not synced by dataSource`)
-                    continue
+                    console.warn(`DataSource ${alias} didn't sync`)
+                    return
                 }
-                if (BigInt(item.rev) > rev)
-                    rev = BigInt(item.rev);
             }
-            await this.setLastRevision(type, rev)
+
+            await this.setLastRevision(type, BigInt(res.lastRev))
         } catch (e) {
             throw e
         }

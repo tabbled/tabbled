@@ -73,7 +73,7 @@ export interface DataSourceInterface extends EventEmitter {
     getChildren(id: string) : Promise<EntityInterface | undefined>
 
     // Sync Service use this method when got data from server
-    setRemoteChanges?(item: DataItemInterface): Promise<boolean>
+    setRemoteChanges?(item: DataItemInterface[]): Promise<boolean>
 
     // Set items
     setData?(items: EntityInterface[]): Promise<void>
@@ -303,24 +303,30 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         return true;
     }
 
-    async setRemoteChanges(item: DataItemInterface):Promise<boolean> {
+    async setRemoteChanges(items: DataItemInterface[]):Promise<boolean> {
         if (!db.database)
             return false;
 
-        let current_item = await this.getByIdRaw(item.id)
+        console.log(`DataSource ${this.alias} got remote changes, count: ${items.length}`)
 
-        await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
-        //this.emit('update', item.id)
+        for(const i in items) {
+            const item = items[i]
+            let current_item = await this.getByIdRaw(item.id)
 
-        if (!current_item) {
-            this.emit('item-inserted', item.id, item.data)
-        } else {
-            this.emit('item-updated', item.id, item.data)
+            await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
 
-            if (item.deletedAt && !current_item.deletedAt) {
-                this.emit('item-removed', item.id, item.data)
+
+            if (!current_item) {
+                this.emit('item-inserted', item.id, item.data)
+            } else {
+                this.emit('item-updated', item.id, item.data)
+
+                if (item.deletedAt && !current_item.deletedAt) {
+                    this.emit('item-removed', item.id, item.data)
+                }
             }
         }
+        this.emit('update')
         return true
     }
 

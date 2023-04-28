@@ -101,6 +101,7 @@ import {ElMessageBox} from "element-plus";
 
 interface Props {
     id: string,
+    title?:string,
     modelValue?: any[],
     field?: string,
     datasource: string,
@@ -183,6 +184,7 @@ onUnmounted(() => {
 async function addSibling() {
     console.log('addSibling')
 
+
     let item = await generateEntityWithDefault(dataSource.fields)
     console.log(item.id, item, currentId.value)
 
@@ -205,7 +207,7 @@ async function add() {
         props.onClickAdd()
     } else{
         let item = await generateEntityWithDefault(dataSource.fields)
-        console.log(item.id, item, currentId.value)
+        //console.log(item.id, item, currentId.value)
         await dataSource.insert(item.id, item, currentId.value)
     }
 }
@@ -573,11 +575,9 @@ let onItemRemoved = async (id, item) => {
     emit('change', data.value)
 }
 
-let onDataSourceUpdate = async (data) => {
-    //data.value = data
-    console.log('update', data)
-    //emit('update:modelValue', data)
-    //emit('change', data)
+let onDataSourceUpdate = async (dt) => {
+    data.value = dt
+    emit('update:modelValue', data.value)
 }
 
 async function init() {

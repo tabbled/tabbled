@@ -43,7 +43,8 @@ export interface ElementInterface {
         [key in ScreenSize]: PositionElementInterface
     },
     name: string,
-    field: string
+    field: string,
+    props: any
 }
 
 export interface ComponentInterface {

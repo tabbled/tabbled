@@ -51,9 +51,7 @@ const props = defineProps<{
     field?: string,
     context?:any,
     height?: number,
-    width?: number,
-    update: number,
-    load?: Promise<any>
+    width?: number
 }>()
 
 let imageUrl = ref(null)
@@ -63,7 +61,7 @@ let dialogVisible = ref(false)
 
 
 async function getValue() {
-    imageUrl.value = await props.load
+    imageUrl.value = props.modelValue
 }
 
 onMounted(async () => {
@@ -89,11 +87,6 @@ function uploaded(res) {
 }
 
 watch(() => props.modelValue,
-    async () => {
-        await getValue()
-    })
-
-watch(() => props.update,
     async () => {
         await getValue()
     })
