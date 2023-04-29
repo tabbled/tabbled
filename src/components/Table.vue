@@ -1,5 +1,5 @@
 <template>
-    <div v-if="dataSource && actionButtonsVisible" style="padding-bottom: 16px; display: flex;">
+    <div v-if="dataSource && actionButtonsVisible" style="padding-bottom: 16px; display: flex;  margin-right: 16px">
         <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
             {{t('add')}}
         </el-button>
@@ -8,7 +8,7 @@
                      type="primary"
                      @click="add"
                      size="small"
-                     style="margin-right: 8px"
+                     style="margin-right: 8px; min-width: fit-content;"
         >
             Add
             <template #dropdown>
@@ -21,9 +21,14 @@
         <el-button v-if="actions.onEdit" @click="edit" size="small">
             {{t('edit')}}
         </el-button>
-        <el-button @click="remove" size="small">
+        <el-button v-if="selectedIds.length || currentId" @click="remove" size="small">
             {{t('delete')}}
         </el-button>
+        <el-input style="margin-left: 8px;"
+                  size="small"
+                  placeholder="Search..."
+                  @input="searchChange"
+                  :model-value="searchText"/>
     </div>
     <el-table
             ref="table"
@@ -41,6 +46,7 @@
             @row-click="onTableRowClick"
             @rowDblclick="onTableRowDblClick"
             @header-dragend="headerResized"
+            @sort-change="sortChange"
     >
         <el-table-column type="selection" width="30" />
         <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
@@ -73,7 +79,7 @@
         </el-table-column>
 
         <template #append >
-            <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext()">
+            <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext(data.length)">
                 Load next entities
             </el-button>
         </template>
@@ -146,8 +152,11 @@ const { t } = useI18n();
 let selectedIds = ref<string[]>([])
 let currentId = ref(null)
 let isTree = ref(false)
-let skipInGet = 0;
 let canLoadNext = ref(false)
+let searchText = ref('')
+let loadingData = ref(false)
+let sort = ref<{order: string | null, prop: string | null}>(null)
+
 
 let data = ref<Array<any>>([])
 
@@ -251,6 +260,17 @@ function remove() {
         }).catch(() => {})
 }
 
+function searchChange(e) {
+    searchText.value = e
+    loadNext()
+}
+
+function sortChange(e) {
+    sort.value = e
+    loadNext()
+    console.log(e)
+}
+
 function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
     resolve([])
 }
@@ -296,21 +316,43 @@ async function getData() {
         data.value = props.modelValue
         await dataSource.setData(props.modelValue)
     } else {
-        data.value = []
-        skipInGet = 0
         await loadNext()
     }
 }
 
-async function loadNext() {
+async function loadNext(skip: number = 0) {
+    if (loadingData.value)
+        return
+
+    loadingData.value = true
     let take = 50
-    let nextVal = await dataSource.getMany([], take, skipInGet);
+
+    let filter = []
+    if (searchText.value) {
+        filter.push({
+            key: "data/name",
+            op: "like",
+            compare: `%${searchText.value}%`
+        })
+    }
+
+    let sortField = undefined
+    let sortAsc = undefined
+    if (sort.value && sort.value.order) {
+        sortField = sort.value.prop
+        sortAsc = sort.value.order === 'ascending'
+    }
+
+    console.log(sortField, sortAsc)
+
+
+    let nextVal = await dataSource.getMany(filter, take, skip, sortField, sortAsc);
     canLoadNext.value = nextVal.length === take
 
     if (nextVal.length) {
-        data.value = data.value.concat( nextVal )
-        skipInGet += take
+        data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
     }
+    loadingData.value = false
 }
 
 

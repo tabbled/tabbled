@@ -52,8 +52,8 @@ export interface DataSourceInterface extends EventEmitter {
      * Get data with filters and pagination
      * @returns {EntityInterface[]} data from data source
      */
-    getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]>
-    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]>
+    getMany(filter: FilterItemInterface[], take?: number, skip?: number, sort?: string, sortAsk?:boolean): Promise<EntityInterface[]>
+    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number, sort?: string, sortAsk?:boolean): Promise<DataItemInterface[]>
 
     /**
      * Return entity data by row
@@ -153,12 +153,12 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         return arr
     }
 
-    async getMany(filter: FilterItemInterface[], take: number = 100, skip: number = 0): Promise<EntityInterface[]> {
-        let items = await this.getManyRaw(filter, take, skip)
+    async getMany(filter: FilterItemInterface[], take: number = 100, skip: number = 0, sort?: string, sortAsc: boolean = true): Promise<EntityInterface[]> {
+        let items = await this.getManyRaw(filter, take, skip, sort, sortAsc)
         return items.map(item => item.data)
     }
 
-    async getManyRaw(filter: FilterItemInterface[], take: number = 100, skip: number = 0): Promise<DataItemInterface[]> {
+    async getManyRaw(filter: FilterItemInterface[], take: number = 100, skip: number = 0, sort?: string, sortAsc: boolean = true): Promise<DataItemInterface[]> {
         if (!db.database)
             return []
 
@@ -166,10 +166,22 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         for(const i in this.defaultFilters(filter)) {
             let item = filter[i]
+
+            // Replace sql like pattern to AceBase pattern
+            if (item.op ==='like' || item.op === '!like') {
+                item.compare = item.compare.replaceAll('%', '*')
+            }
+
             ref = ref.filter(item.key, item.op, item.compare)
         }
+        if (take) ref.take(take)
+        if (skip) ref.skip(skip)
+        if (sort) ref.sort(sort, sortAsc)
 
-        let vals = await ref.take(take).skip(skip).get()
+        console.log(ref)
+
+
+        let vals = await ref.get()
         let values = vals.getValues()
 
         let arr = []
