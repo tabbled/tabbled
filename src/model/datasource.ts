@@ -4,6 +4,7 @@ import { useDatabase } from '../services/database.service'
 import {DataItemInterface, useSyncService} from "../services/sync.service";
 import {compileScript} from "../services/compiler";
 import {EventEmitter} from "events";
+import {ServerInterface} from "../services/socketio.service";
 
 const db = useDatabase()
 const syncService = useSyncService()
@@ -32,6 +33,17 @@ export interface FilterItemInterface {
     compare?: any
 }
 
+export interface GetDataManyOptions {
+    filter?: FilterItemInterface[]
+    take?: number
+    skip?: number
+    sort?: {
+        field: string
+        ask: boolean
+    }
+
+}
+
 export interface DataSourceInterface extends EventEmitter {
     readonly: boolean,
     alias: string,
@@ -43,6 +55,7 @@ export interface DataSourceInterface extends EventEmitter {
     source: DataSourceSource
 
     /**
+     * @deprecated
      * Get all data store from the data source
      * @returns {EntityInterface[]} all data from data source
      */
@@ -52,8 +65,8 @@ export interface DataSourceInterface extends EventEmitter {
      * Get data with filters and pagination
      * @returns {EntityInterface[]} data from data source
      */
-    getMany(filter: FilterItemInterface[], take?: number, skip?: number, sort?: string, sortAsk?:boolean): Promise<EntityInterface[]>
-    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number, sort?: string, sortAsk?:boolean): Promise<DataItemInterface[]>
+    getMany(options?: GetDataManyOptions): Promise<EntityInterface[]>
+    getManyRaw(options?: GetDataManyOptions): Promise<DataItemInterface[]>
 
     /**
      * Return entity data by row
@@ -66,8 +79,8 @@ export interface DataSourceInterface extends EventEmitter {
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
     onChange?: (id: string, newValue: any) => void;
 
-    insert(id: string, value: any, parentId?: string): Promise<any>
-    updateById(id: string, value: object): Promise<void>
+    insert(id: string, value: any, parentId?: string): Promise<EntityInterface>
+    updateById(id: string, value: object): Promise<EntityInterface>
     removeById(id: string): Promise<boolean>
 
     getChildren(id: string) : Promise<EntityInterface | undefined>
@@ -96,7 +109,7 @@ export interface DataSourceConfigInterface {
 }
 
 export class DataSource extends EventEmitter implements DataSourceInterface {
-    constructor(config: DataSourceConfigInterface) {
+    constructor(config: DataSourceConfigInterface, server: ServerInterface) {
         super()
         this.fieldByAlias = new Map()
         this.alias = config.alias
@@ -108,6 +121,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.readonly = !!config.readonly ? config.readonly : false
         this.isTree = config.isTree
         this.cached = config.cached
+        this.server = server
 
 
         config.fields.forEach(conf => {
@@ -120,6 +134,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
+    private server: ServerInterface = null
 
     alias: string;
     fields: FieldInterface[];
@@ -136,35 +151,35 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     }
 
     async getAll(): Promise<EntityInterface[]> {
-        if (!db.database)
-            return []
+        return await this.getMany()
+    }
 
-        let snapshot= await db.database.query(`/${this.type}/${this.alias}`)
-            .filter('deletedAt', '==', null)
-            .take(1000)
-            .get()
-
-        let arr = []
-        let vals = snapshot.getValues();
-        for (const i in vals) {
-            arr.push( _.cloneDeep(vals[i].data))
+    async getMany(options: GetDataManyOptions = {}): Promise<EntityInterface[]> {
+        if (this.cached) {
+            let items = await this.getManyRaw(options)
+            console.log(items)
+            return items.map(item => item.data)
+        } else {
+            let dt = new Date().getMilliseconds()
+            console.log("getMany from server, options: ", options)
+            let res = await this.server.emit('dataSources/data/getMany', {
+                alias: this.alias,
+                options: options
+            })
+            console.log(`${this.alias}, got items: ${res.length}; timing, ms: ${new Date().getMilliseconds() - dt}`)
+            return res
         }
-
-        return arr
     }
 
-    async getMany(filter: FilterItemInterface[], take: number = 100, skip: number = 0, sort?: string, sortAsc: boolean = true): Promise<EntityInterface[]> {
-        let items = await this.getManyRaw(filter, take, skip, sort, sortAsc)
-        return items.map(item => item.data)
-    }
-
-    async getManyRaw(filter: FilterItemInterface[], take: number = 100, skip: number = 0, sort?: string, sortAsc: boolean = true): Promise<DataItemInterface[]> {
+    async getManyRaw(options: GetDataManyOptions = {}): Promise<DataItemInterface[]> {
         if (!db.database)
             return []
 
         let ref = await db.database.query(`/${this.type}/${this.alias}`)
 
-        for(const i in this.defaultFilters(filter)) {
+
+        let filter = this.defaultFilters(options.filter)
+        for(const i in filter) {
             let item = filter[i]
 
             // Replace sql like pattern to AceBase pattern
@@ -174,12 +189,9 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
             ref = ref.filter(item.key, item.op, item.compare)
         }
-        if (take) ref.take(take)
-        if (skip) ref.skip(skip)
-        if (sort) ref.sort(sort, sortAsc)
-
-        console.log(ref)
-
+        if (options.take) ref.take(options.take)
+        if (options.skip) ref.skip(options.skip)
+        if (options.sort) ref.sort(options.sort.field, options.sort.ask)
 
         let vals = await ref.get()
         let values = vals.getValues()
@@ -200,14 +212,27 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         if (!id)
             return undefined
 
-        try {
-            let item = await this.getByIdRaw(id)
-            return item?.data;
-        } catch (e) {
-            throw e
+        if (this.cached) {
+            try {
+                let item = await this.getByIdRaw(id)
+                return item?.data;
+            } catch (e) {
+                throw e
+            }
+        } else {
+            let dt = new Date().getMilliseconds()
+            //console.log(this.alias, " getById from server")
+            let res = await this.server.emit('dataSources/data/getById', {
+                alias: this.alias,
+                id: id
+            })
+            console.log(this.alias, " gotById from server; timing, ms: ", new Date().getMilliseconds() - dt)
+            return res
         }
     }
 
+    // Only needed for pages service,
+    // TODO remove that method
     async getByKey(key: string | number) : Promise<EntityInterface | undefined> {
         if (!db.database)
             return undefined
@@ -238,81 +263,125 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         }
     }
 
-    async insert(id: string, value: any): Promise<void> {
-        if (!db.database)
-            return
-        try {
-            let item:DataItemInterface = {
-                id: id,
-                accountId: db.accountId,
-                createdAt: new Date(),
-                createdBy: db.userId,
-                updatedAt: new Date(),
-                updatedBy: db.userId,
-                version: 1,
-                alias: this.alias,
-                rev: '',
-                data:  _.cloneDeep(value)
-            }
+    async insert(id: string, value: any): Promise<EntityInterface> {
+        if (this.cached) {
+            if (!db.database)
+                return
+            try {
+                let item:DataItemInterface = {
+                    id: id,
+                    accountId: db.accountId,
+                    createdAt: new Date(),
+                    createdBy: db.userId,
+                    updatedAt: new Date(),
+                    updatedBy: db.userId,
+                    version: 1,
+                    alias: this.alias,
+                    rev: '',
+                    data:  _.cloneDeep(value)
+                }
 
-            await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
-            await syncService.push(this.type, [item]);
-            this.emit('update')
-            this.emit('item-inserted', id, value)
-        } catch (e) {
-            throw e
+                await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
+                await syncService.push(this.type, [item]);
+                this.emit('update')
+                this.emit('item-inserted', id, value)
+                return value
+            } catch (e) {
+                throw e
+            }
+        } else {
+            let dt = new Date().getMilliseconds()
+            console.log(this.alias, " insert")
+
+            let res = await this.server.emit('dataSources/data/insert', {
+                alias: this.alias,
+                id: id,
+                value: value
+            })
+            console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
+
+            this.emit('item-inserted', id, res.data)
+            return res
         }
+
     }
 
-    async updateById(id: string, value: object): Promise<void> {
-        if (!db.database)
-            return
+    async updateById(id: string, value: object): Promise<EntityInterface> {
+        if (this.cached) {
+            if (!db.database)
+                return
 
-        try {
-            let old = await this.getByIdRaw(id);
+            try {
+                let old = await this.getByIdRaw(id);
 
-            if (!old) {
-                console.error(`Item with id ${id} in "${this.alias}" not found`)
-                return;
+                if (!old) {
+                    console.error(`Item with id ${id} in "${this.alias}" not found`)
+                    return;
+                }
+
+                let item: DataItemInterface = _.cloneDeep(old)
+
+                item.updatedAt = new Date();
+                item.updatedBy = db.userId;
+                item.version = old.version + 1;
+                item.rev = ''
+                item.data = _.cloneDeep(value)
+                await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
+                await syncService.push(this.type, [item]);
+                this.emit('updated')
+                this.emit('item-updated', id, item.data)
+            } catch (e) {
+                console.log(value)
+                throw e
             }
+        } else {
+            let dt = new Date().getMilliseconds()
+            console.log(this.alias, " insert")
 
-            let item:DataItemInterface = _.cloneDeep(old)
+            let res = await this.server.emit('dataSources/data/updateById', {
+                alias: this.alias,
+                id: id,
+                value: value
+            })
+            console.log(this.alias, " updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
-            item.updatedAt = new Date();
-            item.updatedBy = db.userId;
-            item.version = old.version + 1;
-            item.rev = ''
-            item.data =  _.cloneDeep(value)
-            await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
-            await syncService.push(this.type, [item]);
-            this.emit('updated')
-            this.emit('item-updated', id, item.data)
-        } catch (e) {
-            console.log(value)
-            throw e
+            this.emit('item-updated', id, res.data)
+            return res
         }
     }
 
     async removeById(id: string): Promise<boolean> {
-        if (!db.database)
-            return false
+        if (this.cached) {
+            if (!db.database)
+                return false
 
-        let item = await this.getByIdRaw(id);
+            let item = await this.getByIdRaw(id);
 
-        if (!item) {
-            console.error(`Item with id ${id} in "${this.alias}" not found`)
-            return false;
+            if (!item) {
+                console.error(`Item with id ${id} in "${this.alias}" not found`)
+                return false;
+            }
+
+            item.deletedAt = new Date();
+            item.deletedBy = db.userId
+            item.rev = '';
+
+            await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
+            await syncService.push(this.type, [item]);
+            this.emit('updated')
+            this.emit('item-removed', id, item.data)
+            return true;
+        } else {
+            let dt = new Date().getMilliseconds()
+            let res = await this.server.emit('dataSources/data/removeById', {
+                alias: this.alias,
+                id: id
+            })
+            console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
+
+            this.emit('item-removed', id, res.data)
+            return true
         }
-
-        item.deletedAt = new Date();
-        item.deletedBy = db.userId
-        item.rev = '';
-
-        await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
-        await syncService.push(this.type, [item]);
-        this.emit('updated')
-        this.emit('item-removed', id, item.data)
-        return true;
     }
 
     async setRemoteChanges(items: DataItemInterface[]):Promise<boolean> {
@@ -343,22 +412,37 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     }
 
     async setValue(id: string, field: string, value: any) {
-        if (!db.database)
-            return
+        if (this.cached) {
+            if (!db.database)
+                return
 
-        let item = await this.getById(id)
-        if (!item)
-            return
+            let item = await this.getById(id)
+            if (!item)
+                return
 
-        item[field] = value
-        await this.updateById(id, item)
-        this.emit('update', item.id)
+            item[field] = value
+            await this.updateById(id, item)
+        } else {
+            let dt = new Date().getMilliseconds()
+            let res = await this.server.emit('dataSources/data/setValue', {
+                alias: this.alias,
+                id: id,
+                field: field,
+                value: value
+            })
+            console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
+
+            console.log(res)
+
+            this.emit('item-updated', id, res.data)
+        }
+
     }
 
     defaultFilters(filter: FilterItemInterface[]): FilterItemInterface[] {
-        let f = filter;
-        let deleted = filter.filter((item) => item.key === 'deleted_at')
-        if (!deleted.length)
+        let f = filter || [];
+        let deleted = f.find((item) => item && item.key === 'deletedAt')
+        if (!deleted)
             f.push({
                 key: 'deletedAt',
                 op: "==",
@@ -472,7 +556,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     async getById(id: string | number): Promise<EntityInterface | undefined> {
-        if (!this.model)
+        if (!this.model || !(this.model.getById instanceof Function))
             return;
 
         return await this.model.getById(id)
@@ -482,19 +566,22 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         return this.fieldByAlias.get(alias)
     }
 
-    async getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {
-        if (!this.model)
+    async getMany(options: GetDataManyOptions): Promise<EntityInterface[]> {
+        if (!this.model || !(this.model.getMany instanceof Function))
             return [];
 
-        return await this.getAll()
+        return await this.model.getMany(options)
     }
 
-    async getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
-        return [];
+    async getManyRaw(options: GetDataManyOptions): Promise<DataItemInterface[]> {
+        if (!this.model || !(this.model.getMany instanceof Function))
+            return [];
+
+        return await this.model.getManyRaw(options)
     }
 
     async insert(id: string, value: any, parentId?: string): Promise<any> {
-        if (!this.model)
+        if (!this.model || !(this.model.insert instanceof Function))
             return;
 
         return await this.model.insert(id, value, parentId)
@@ -509,7 +596,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         return await this.model.removeById(id)
     }
 
-    async updateById(id: string, value: object): Promise<void> {
+    async updateById(id: string, value: object): Promise<EntityInterface> {
         if (!this.model)
             return;
 
@@ -569,15 +656,15 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         return this.fieldByAlias.get(alias)
     }
 
-    getMany(filter: FilterItemInterface[], take?: number, skip?: number): Promise<EntityInterface[]> {
+    getMany(options: GetDataManyOptions): Promise<EntityInterface[]> {
         return Promise.resolve([]);
     }
 
-    getManyRaw(filter: FilterItemInterface[], take?: number, skip?: number): Promise<DataItemInterface[]> {
+    getManyRaw(options: GetDataManyOptions): Promise<DataItemInterface[]> {
         return Promise.resolve([]);
     }
 
-    insert(id: string, value: any): Promise<void> {
+    insert(id: string, value: any): Promise<EntityInterface> {
         return Promise.resolve(undefined);
     }
 
@@ -585,7 +672,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         return Promise.resolve(false);
     }
 
-    updateById(id: string, value: object): Promise<void> {
+    updateById(id: string, value: object): Promise<EntityInterface> {
         return Promise.resolve(undefined);
     }
 
@@ -595,7 +682,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 }
 
 export class PageConfigDataSource extends DataSource {
-    constructor() {
+    constructor(server: ServerInterface) {
         super({
             type: DataSourceType.config,
             alias: 'page',
@@ -640,12 +727,12 @@ export class PageConfigDataSource extends DataSource {
                     alias: "onOpen",
                     type: 'handler'
                 }]
-        });
+        }, server);
     }
 }
 
 export class MenuConfigDataSource extends DataSource {
-    constructor() {
+    constructor(server: ServerInterface) {
         super({
             type: DataSourceType.config,
             alias: 'menu',
@@ -676,12 +763,12 @@ export class MenuConfigDataSource extends DataSource {
                 type: "list",
                 required: false
             }
-        ]});
+        ]}, server);
     }
 }
 
 export class DataSourceConfigDataSource extends DataSource {
-    constructor() {
+    constructor(server: ServerInterface) {
         super({
             type: DataSourceType.config,
             alias: 'datasource',
@@ -771,12 +858,12 @@ export class DataSourceConfigDataSource extends DataSource {
                     default: [],
                     isMultiple: true
                 }
-            ]});
+            ]}, server);
     }
 }
 
 export class FunctionsConfigDataSource extends DataSource {
-    constructor() {
+    constructor(server: ServerInterface) {
         super({
             type: DataSourceType.config,
             alias: 'function',
@@ -808,6 +895,6 @@ export class FunctionsConfigDataSource extends DataSource {
                     required: true,
                     default: "{}"
                 }
-            ]});
+            ]}, server);
     }
 }

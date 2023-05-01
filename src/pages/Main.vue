@@ -237,7 +237,7 @@ function openInNewWindow(to: string) {
 async function loadMenu() {
     let menus
     try {
-        menus = await dsService.getDataSourceByAlias('menu').getAll()
+        menus = await dsService.getDataSourceByAlias('menu').getMany()
     } catch (e) {
         console.error(e)
         return;

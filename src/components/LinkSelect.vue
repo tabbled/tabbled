@@ -107,9 +107,21 @@ async function getValue() {
     value.value = props.modelValue
 }
 
-async function getData() {
+async function getData(query?: string) {
     isLoading.value = true;
-    data.value = await dataSource.getAll()
+
+    let opt = {
+        filter: []
+    }
+    if (query) {
+        opt.filter.push({
+            key: props.displayProp,
+            op: 'like',
+            compare: query
+        })
+    }
+
+    data.value = await dataSource.getMany()
     isLoading.value = false;
 }
 

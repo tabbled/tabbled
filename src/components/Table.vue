@@ -101,7 +101,7 @@ import {useSyncService} from "../services/sync.service";
 import {useDataSourceService} from "../services/datasource.service";
 import Cell from "./table/Cell.vue";
 import _ from "lodash";
-import {CustomDataSource, DataSourceInterface} from "../model/datasource";
+import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useI18n} from "vue-i18n";
 import {ElMessageBox} from "element-plus";
 
@@ -325,33 +325,33 @@ async function loadNext(skip: number = 0) {
         return
 
     loadingData.value = true
-    let take = 50
+    let options: GetDataManyOptions = {
+        take: 50,
+        skip: skip
+    }
 
-    let filter = []
     if (searchText.value) {
-        filter.push({
-            key: "data/name",
+        options.filter = []
+        options.filter.push({
+            key: "name",
             op: "like",
             compare: `%${searchText.value}%`
         })
     }
 
-    let sortField = undefined
-    let sortAsc = undefined
     if (sort.value && sort.value.order) {
-        sortField = sort.value.prop
-        sortAsc = sort.value.order === 'ascending'
+        options.sort = {
+            field: sort.value.prop,
+            ask: sort.value.order === 'ascending'
+        }
     }
 
-    console.log(sortField, sortAsc)
+    let nextVal = await dataSource.getMany(options);
+    canLoadNext.value = nextVal.length === options.take
 
 
-    let nextVal = await dataSource.getMany(filter, take, skip, sortField, sortAsc);
-    canLoadNext.value = nextVal.length === take
-
-    if (nextVal.length) {
-        data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
-    }
+    data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
+    console.log(nextVal)
     loadingData.value = false
 }
 
@@ -563,7 +563,12 @@ async function initColumns() {
 }
 
 let onItemUpdated = async (id, item) => {
-    //console.log('item-updated', id, item)
+
+    if (!id || !item)
+        return;
+
+    console.log('item-updated', id, item)
+
     if (dataSource.isTree) {
         let path = await getTreePath(id)
         _.set(data.value, path, item)
@@ -579,7 +584,7 @@ let onItemUpdated = async (id, item) => {
 }
 
 let onItemInserted = async (id, item) => {
-    //console.log('item-inserted', id, item)
+    console.log('item-inserted', id, item)
     if (dataSource.isTree && item.parentId) {
         let path = await getTreePath(item.parentId)
         let parentItem = _.get(data.value, path)
@@ -618,6 +623,7 @@ let onItemRemoved = async (id, item) => {
 }
 
 let onDataSourceUpdate = async (dt) => {
+    console.log('updated', dt)
     data.value = dt
     emit('update:modelValue', data.value)
 }

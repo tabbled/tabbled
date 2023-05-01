@@ -7,7 +7,11 @@ function getAccountId(): number {
     return acc ? JSON.parse(acc).id : -1
 }
 
-export class SocketIOClient {
+export interface ServerInterface {
+    emit(topic: string, message?: any) : Promise<any>
+}
+
+export class SocketIOClient implements ServerInterface {
     constructor() {
         let url = this.url()
         console.log('Socket server url - ', url)
@@ -43,7 +47,7 @@ export class SocketIOClient {
         })
     }
 
-    readonly socket: Socket
+    socket: Socket
 
     url(): string {
         // If url provided in env file then it passes to socket client

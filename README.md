@@ -1,5 +1,5 @@
 <div align="center" width="100%">
-    <img src="./public/icon.png" width="98" alt="" />
+    <img src="public/favicon.png" width="98" alt="" />
 </div>
 <h1 align="center">
   Tabbled
@@ -29,24 +29,23 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Types implementation
 - [x] Table editor
 - [x] Page designer
-- [x] Offline data first
 - [x] Progressive Web App
 - [x] View editor
 - [x] Store user data and config in IndexedDB
-- [ ] js models for tables
-- [ ] DataSource setting page
-- [ ] Menu setting page
-- [ ] Table cell editor widgets
-- [ ] Functions
+- [x] DataSource setting page
+- [x] Menu setting page
+- [x] Table cell editor widgets
+- [x] Functions
 - [ ] DataSources 
-  - [x] Internal DataSources
+  - [x] Internal DataSource
+  - [x] Custom DataSource
+  - [ ] Field DataSource
   - [ ] REST API
   - [ ] Databases:
     - [ ] PostgresSQL
     - [ ] MongoDB
     - [ ] MySQL
-- [ ] Dockerize entire project in the one image
-- [x] PWA application
+- [x] Dockerized entire project in the one image
 - [ ] Desktop version
 - [ ] Mobile version
 

@@ -84,7 +84,7 @@ import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
 
 interface Props {
-    modelValue: any | Promise<any>,
+    modelValue: any,
     field: FieldInterface
     context: any
 }
@@ -155,7 +155,7 @@ async function getLinkData() {
     }
 
     isLoading.value = true
-    linkData.value = await ds.getAll()
+    linkData.value = await ds.getMany()
     isLoading.value = false
 }
 

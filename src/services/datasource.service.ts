@@ -11,13 +11,15 @@ import {
 } from "../model/datasource";
 
 import {useSyncService} from "./sync.service";
+import {useSocketClient} from "./socketio.service";
 
-let pagesDataSource = new PageConfigDataSource()
-let dsDataSource = new DataSourceConfigDataSource()
-let menuDataSource = new MenuConfigDataSource()
-let functionDataSource = new FunctionsConfigDataSource()
+let pagesDataSource = new PageConfigDataSource(null)
+let dsDataSource = new DataSourceConfigDataSource(null)
+let menuDataSource = new MenuConfigDataSource(null)
+let functionDataSource = new FunctionsConfigDataSource(null)
 
 let syncService = useSyncService()
+let socketClient = useSocketClient()
 
 export class DataSourceService {
     constructor() { }
@@ -29,7 +31,7 @@ export class DataSourceService {
         let ds: DataSourceInterface = null
         switch (config.source) {
             case DataSourceSource.internal:
-                ds = new DataSource(config)
+                ds = new DataSource(config, socketClient)
                 break;
             case DataSourceSource.custom:
                 ds = new CustomDataSource(config)
@@ -104,7 +106,7 @@ export class DataSourceService {
 
 
     async registerAll() {
-        let items = await dsDataSource.getAll()
+        let items = await dsDataSource.getMany()
 
         items.forEach(ds => {
             this.registerDataSource(<DataSourceConfigInterface>ds)

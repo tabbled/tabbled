@@ -76,11 +76,16 @@ export class SyncService extends EventEmitter {
                 throw Error('Impossible type DataSource for sync ' + type)
         }
 
-        //Gathering not pushed data to the server
+        //Gathering not pushed data from cached data sources to the server
         for(const ds of targetDs.values()) {
-            data.push(...await ds.getManyRaw([
-                { key: 'rev', op: '==', compare: '' }
-            ]))
+            if (!ds.cached) continue;
+
+            let dt = await ds.getManyRaw({
+                filter: [
+                    { key: 'rev', op: '==', compare: '' }
+                ]
+            })
+            data = data.concat(dt)
         }
 
         if (data.length) {
@@ -140,12 +145,13 @@ export class SyncService extends EventEmitter {
                     console.warn(`DataSource "${alias}" doesn't exist`)
                     continue
                 }
+                if (ds.cached) {
+                    let synced = await ds.setRemoteChanges(res.items[alias])
 
-                let synced = await ds.setRemoteChanges(res.items[alias])
-
-                if (!synced) {
-                    console.warn(`DataSource ${alias} didn't sync`)
-                    return
+                    if (!synced) {
+                        console.error(`DataSource ${alias} didn't sync`)
+                        return
+                    }
                 }
             }
 

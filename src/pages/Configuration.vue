@@ -298,7 +298,7 @@ async function gatherFromDataSource(alias: string) {
     if (!ds)
         return undefined;
 
-    return await ds.getManyRaw([], 1000)
+    return []
 }
 
 function tabChange(d) {
