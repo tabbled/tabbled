@@ -44,6 +44,8 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - db
+      - redis
+      - s3
     pull_policy: always
 
   db:
@@ -72,6 +74,12 @@ services:
       - MINIO_SECRET_KEY=${S3_SECRET_ACCESS_KEY}
     volumes:
       - minio_data:/data
+
+  redis:
+    image: 'redis:alpine'
+    container_name: redis-server
+    ports:
+      - "${REDIS_PORT}:6379"
 
 
 volumes:

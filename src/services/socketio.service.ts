@@ -18,9 +18,11 @@ export class SocketIOClient implements ServerInterface {
         this.socket = io(url,{
             transports: [ 'websocket', 'polling' ],
             auth: (cb) => {
+                console.log('socket auth', getAccountId())
+                let accountId = getAccountId()
                 cb({
                     jwt: localStorage.getItem('token'),
-                    accountId: getAccountId(),
+                    accountId: accountId,
                 })
             }
         })

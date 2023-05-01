@@ -889,7 +889,7 @@ export class FunctionsConfigDataSource extends DataSource {
                     required: true
                 },
                 {
-                    title: "Test context",
+                    title: "Context",
                     alias: "context",
                     type: "text",
                     required: true,
