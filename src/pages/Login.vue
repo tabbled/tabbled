@@ -68,6 +68,8 @@ let rules = ref({
     }]
 })
 
+let signing = false
+
 onMounted(async () => {
     document.title = `${route.meta.title} | ${ settings.title }`
 })
@@ -77,25 +79,22 @@ async function login() {
     let valid = await validate();
     if (!valid)
         return;
+
     try {
         await store.dispatch('auth/login', {
             username: user.value.username,
             password: user.value.password
         });
 
-        await store.dispatch('auth/loadUserSettings');
-
         ElMessage.success('Logged in')
-        await router.push(route.redirectedFrom ? route.redirectedFrom : '/');
-
-
+        router.push(route.redirectedFrom ? route.redirectedFrom : '/');
 
     } catch (e: any) {
         console.error(e)
         ElMessage.error(e.toString())
     }
-
 }
+
 function validate() {
     return new Promise((resolve, reject) => {
         if (!form.value) {

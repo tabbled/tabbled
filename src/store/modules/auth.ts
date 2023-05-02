@@ -37,19 +37,20 @@ const getters = {
 const actions = {
     login ({ commit }: { commit: Commit }, user: any) {
         return new Promise((resolve, reject) => {
-            socketClient.socket.timeout(1000).emit("login", {
+            socketClient.socket.timeout(300000).emit("login", {
                 username: user.username,
                 password: user.password
             }, (err: any, res: any) => {
+                console.log('login', res)
                 if (!err && res && res.success === true) {
                     commit('loggedIn', res.jwt)
+                    commit('userLoaded', res.user)
                     resolve(res)
 
                 } else {
                     console.error(res)
                     reject(res && res.error_message || 'Login error')
                 }
-
             })
         });
     },
@@ -60,13 +61,11 @@ const actions = {
                 (err: any, res: any) => {
                 if (!err && res && res.success === true) {
                     commit('userLoaded', res.user)
-
                     resolve(res.user)
                 } else {
                     console.error(res)
                     reject((res && res.error_message) || 'Error loading user settings')
                 }
-
             })
         });
     },
@@ -77,7 +76,6 @@ const actions = {
     }
 }
 
-// mutations
 const mutations = {
     loggedIn (state: any, token: string) {
         localStorage.setItem('token', token)
@@ -108,8 +106,6 @@ const mutations = {
         if (!account) {
             state.account = user.accounts[0];
             localStorage.setItem('account', JSON.stringify(state.account))
-            socketClient.updateAuth()
-        } else if (account.id !== state.account.id) {// Need to reconnect socket client if current account was changed
             socketClient.updateAuth()
         }
     }
