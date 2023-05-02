@@ -26,13 +26,13 @@
 
 <script setup lang="ts">
 import {useDataSourceService} from "../services/datasource.service";
-import {DataSourceInterface} from "../model/datasource"
+import {DataSourceConfigInterface, DataSourceInterface} from "../model/datasource"
 import {FieldConfigInterface} from "../model/field";
 import {onMounted, ref} from "vue";
 
 let dsService = useDataSourceService()
 let isLoading = ref(false)
-let data = ref<{config: DataSourceInterface[], user: DataSourceInterface[]}>({
+let data = ref<{config: DataSourceInterface[], user: DataSourceConfigInterface[]}>({
     config: [],
     user: []
 })

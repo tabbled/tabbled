@@ -274,7 +274,7 @@ async function exportData() {
 
 async function gatherData() {
     let data = {}
-    let sources = dsService.getDataSources()
+    let sources = dsService.dsDataSource.getMany()
     for(const i in sources) {
         const source = sources[i]
         data[source.alias] = await gatherFromDataSource(source.alias)
@@ -294,7 +294,7 @@ async function gatherConfig() {
 }
 
 async function gatherFromDataSource(alias: string) {
-    let ds = dsService.getDataSourceByAlias(alias)
+    let ds = await dsService.getByAlias(alias)
     if (!ds)
         return undefined;
 

@@ -260,7 +260,7 @@ async function init() {
     }
 
     if (props.pageConfig.isEditPage && props.pageConfig.datasource) {
-        editDataSource= dsService.getDataSourceByAlias(props.pageConfig.datasource)
+        editDataSource = await dsService.getByAlias(props.pageConfig.datasource)
         if (!editDataSource) {
             console.warn(`DataSource ${props.pageConfig.datasource} for editing page ${props.pageConfig.alias} not found`)
             return;

@@ -117,7 +117,7 @@ onMounted(async () => {
     if (props.field && props.field.type === 'link') {
 
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
-        ds = dsService.getDataSourceByAlias(props.field.datasource);
+        ds = await dsService.getByAlias(props.field.datasource);
 
         console.log('ds', ds, props)
 

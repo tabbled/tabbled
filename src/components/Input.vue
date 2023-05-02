@@ -54,12 +54,12 @@ async function getValue() {
 }
 
 function inputMulti(val, index) {
-    console.log(val, index)
     multiValue.value[index] = val
     emit('change', multiValue.value)
 }
 
 function init() {
+    console.log("init", props)
     if (props.fieldConfig) {
         switch (props.fieldConfig.type) {
             case "text": type = 'textarea'; break;

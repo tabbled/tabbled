@@ -13,21 +13,33 @@ import {
 import {useSyncService} from "./sync.service";
 import {useSocketClient} from "./socketio.service";
 
-let pagesDataSource = new PageConfigDataSource(null)
-let dsDataSource = new DataSourceConfigDataSource(null)
-let menuDataSource = new MenuConfigDataSource(null)
-let functionDataSource = new FunctionsConfigDataSource(null)
-
 let syncService = useSyncService()
 let socketClient = useSocketClient()
 
 export class DataSourceService {
     constructor() { }
 
-    private dataSources: Map<string, DataSourceInterface> = new Map()
+    private dataSources: Map<string, DataSourceConfigInterface> = new Map()
     private configDataSources: Map<string, DataSourceInterface> = new Map()
 
-    async registerDataSource(config: DataSourceConfigInterface): Promise<DataSourceInterface | undefined> {
+    pagesDataSource = new PageConfigDataSource(null)
+    dsDataSource = new DataSourceConfigDataSource(null)
+    menuDataSource = new MenuConfigDataSource(null)
+    functionDataSource = new FunctionsConfigDataSource(null)
+
+    async getByAlias(alias: string) {
+
+        switch (alias) {
+            case 'menu': return this.menuDataSource;
+            case 'datasource': return this.dsDataSource;
+            case 'page': return this.pagesDataSource;
+            case 'function': return this.functionDataSource;
+        }
+
+        let config = this.dataSources.get(alias);
+        if (!config)
+            return undefined;
+
         let ds: DataSourceInterface = null
         switch (config.source) {
             case DataSourceSource.internal:
@@ -55,7 +67,6 @@ export class DataSourceService {
 
         }
 
-        this.addDataSource(ds);
         return ds;
     }
 
@@ -74,8 +85,7 @@ export class DataSourceService {
                 target = this.configDataSources;
                 break;
             case DataSourceType.data:
-                target = this.dataSources
-                break;
+                return;
             default:
                 console.error(`Can't register datasource ${dataSource.alias} with type ${dataSource.type}`)
                 console.error(dataSource)
@@ -95,30 +105,24 @@ export class DataSourceService {
                 this.configDataSources.clear();
                 break;
             case DataSourceType.data:
-                this.dataSources.clear();
                 break;
         }
     }
 
-    getDataSourceByAlias(alias: string): DataSourceInterface | undefined {
-        return this.dataSources.get(alias) || this.configDataSources.get(alias)
-    }
-
 
     async registerAll() {
-        let items = await dsDataSource.getMany()
+        let items = await this.dsDataSource.getMany()
 
         items.forEach(ds => {
-            this.registerDataSource(<DataSourceConfigInterface>ds)
+            this.dataSources.set(ds.alias, <DataSourceConfigInterface>ds)
         })
-        syncService.setDataSources(this.dataSources)
     }
 
     async registerConfig() {
-        this.addDataSource(dsDataSource);
-        this.addDataSource(pagesDataSource);
-        this.addDataSource(menuDataSource);
-        this.addDataSource(functionDataSource);
+        this.addDataSource(this.dsDataSource);
+        this.addDataSource(this.pagesDataSource);
+        this.addDataSource(this.menuDataSource);
+        this.addDataSource(this.functionDataSource);
 
         syncService.setConfigDataSources(this.configDataSources)
     }
@@ -129,7 +133,7 @@ export class DataSourceScriptHelper {
     }
 
     getByAlias(alias: string) {
-        return dsService.value.getDataSourceByAlias(alias)
+        return dsService.value.getByAlias(alias)
     }
 }
 

@@ -82,7 +82,7 @@ const settings = useSettings()
 
 
 onMounted(async () => {
-    datasource = dsService.getDataSourceByAlias('menu')
+    datasource = dsService.menuDataSource
 
     if (!datasource) {
         console.warn(`Menu datasource doesn't exist`)

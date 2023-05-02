@@ -90,7 +90,7 @@ async function init() {
 
 
     if (props.fieldConfig.type == 'link') {
-        dataSource = dsService.getDataSourceByAlias(props.fieldConfig.datasource)
+        dataSource = await dsService.getByAlias(props.fieldConfig.datasource)
 
         if (!dataSource) {
             console.warn(`Link source "${props.fieldConfig.datasource}" for field "${props.fieldConfig.alias}" not found`)

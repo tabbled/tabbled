@@ -86,7 +86,7 @@ const settings = useSettings()
 
 
 onMounted(async () => {
-    datasource = dsService.getDataSourceByAlias('function')
+    datasource = dsService.functionDataSource
     if (!datasource) {
         console.warn(`Function datasource doesn't exist`)
     }

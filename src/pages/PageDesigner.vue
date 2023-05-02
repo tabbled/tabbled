@@ -375,8 +375,7 @@ function onPathChanged(path) {
 }
 
 async function save() {
-    dsService.getDataSourceByAlias('page')
-    let ds = dsService.getDataSourceByAlias('page')
+    let ds = dsService.pagesDataSource
 
     //gather changes from elements to config after saving
     pageConfig.value.elements = elements.value
@@ -402,7 +401,7 @@ async function cancel() {
 }
 
 async function getPageConfig(id: string):Promise<PageConfigInterface | undefined> {
-    let ds = dsService.getDataSourceByAlias('page')
+    let ds = dsService.pagesDataSource
     let config = await ds.getById(id);
     return config ? <PageConfigInterface>config : undefined
 }

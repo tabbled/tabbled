@@ -164,6 +164,7 @@
         v-model="fieldEditDialogVisible"
         title="Edit field"
         width="70%"
+        :close-on-press-escape="false"
     >
         <field-edit :model-value="currentField"/>
         <template #footer>
@@ -235,7 +236,7 @@ let columns = ref<ColumnConfigInterface[]>([])
 const functions = ref<Map<string, string>>(new Map())
 
 onMounted(async () => {
-    datasource = dsService.getDataSourceByAlias('datasource')
+    datasource = dsService.dsDataSource
     if (!datasource) {
         console.warn(`Function datasource doesn't exist`)
     }
@@ -247,7 +248,7 @@ onMounted(async () => {
 
     availableHeight.value = window.innerHeight - 260
 
-    let ds = dsService.getDataSourceByAlias('function')
+    let ds = dsService.functionDataSource
     let data = await ds.getMany()
     for(const i in data) {
         functions.value.set(data[i].id, data[i].title)
@@ -274,7 +275,7 @@ async  function initTestDataSource() {
         return;
     }
 
-    testDataSource = await dsService.getDataSourceByAlias(dataSourceEntity.value.alias)
+    testDataSource = await dsService.getByAlias(dataSourceEntity.value.alias)
 
     if (!testDataSource) {
         console.warn(`Test datasource "${dataSourceEntity.value.alias}" not found`)

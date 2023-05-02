@@ -54,7 +54,6 @@ store.subscribe(async (payload) => {
     if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
         console.log('auth/userLoaded')
         await loadConfig()
-        await loadData()
     }
 
     if (payload.type === 'auth/loggedOut') {
@@ -86,7 +85,7 @@ onMounted(async () => {
         }
 
         await loadConfig()
-        await loadData()
+        //await loadData()
     }
 })
 
@@ -100,12 +99,12 @@ function handleResize() {
     screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
 }
 
-async function loadData() {
-    if (configLoadState.value !== ConfigLoadState.Loaded)
-        return;
-
-    await syncService.sync(DataSourceType.data)
-}
+// async function loadData() {
+//     if (configLoadState.value !== ConfigLoadState.Loaded)
+//         return;
+//
+//     await syncService.sync(DataSourceType.data)
+// }
 
 async function loadConfig() {
     if (configLoadState.value === ConfigLoadState.Loading)
@@ -121,8 +120,8 @@ async function loadConfig() {
     }
 
     await Promise.all([
+        registerPages(),
         dsService.registerAll(),
-        registerPages()
     ]).then(() => {
         configLoadState.value = ConfigLoadState.Loaded
     }).catch(e => {
@@ -140,7 +139,7 @@ function logout() {
 async function registerPages() {
     pagesByAlias.value.clear()
 
-    let pages = await dsService.getDataSourceByAlias('page').getMany()
+    let pages = await dsService.pagesDataSource.getMany()
 
     pages.forEach((item: PageConfigInterface) => {
         addRoute(item.path, item);

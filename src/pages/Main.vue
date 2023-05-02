@@ -232,7 +232,7 @@ function openInNewWindow(to: string) {
 async function loadMenu() {
     let menus
     try {
-        menus = await dsService.getDataSourceByAlias('menu').getMany()
+        menus = await dsService.menuDataSource.getMany()
     } catch (e) {
         console.error(e)
         return;

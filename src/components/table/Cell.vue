@@ -23,7 +23,8 @@ import {DataSourceInterface} from "../../model/datasource";
 interface Props {
     modelValue: any,
     field: FieldInterface,
-    context?:any
+    context?:any,
+
 }
 
 const props = defineProps<Props>()
@@ -91,7 +92,7 @@ async function getLinkValue() {
     }
 
     displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
-    ds = dsService.getDataSourceByAlias(props.field.datasource);
+    ds = await dsService.getByAlias(props.field.datasource);
 
     if (!ds) {
         console.warn(`DataSource for link data for field "${props.field.alias}" doesn't set`)
@@ -117,6 +118,7 @@ async function getLinkValue() {
 
 async function getEnumValue() {
     const items = props.field.values;
+
     let val = await props.modelValue
     for(const i in items) {
         if (items[i].key === val) {
@@ -124,6 +126,7 @@ async function getEnumValue() {
             return
         }
     }
+
     displayValue.value = 'Not found'
 }
 

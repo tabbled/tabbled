@@ -41,11 +41,11 @@ onMounted(async () => {
 
 })
 
-function init() {
+async function init() {
     if(!props.dataSource)
         return;
 
-    dataSource = dsService.getDataSourceByAlias(props.dataSource)
+    dataSource = await dsService.getByAlias(props.dataSource)
     if (!dataSource) {
         console.warn(`No dataSource with alias "${props.dataSource}"`)
     }
@@ -68,8 +68,8 @@ async function getData() {
     isLoading.value = false;
 }
 
-function change(key: string) {
-    let ds = dsService.getDataSourceByAlias(props.dataSource)
+async function change(key: string) {
+    let ds = await dsService.getByAlias(props.dataSource)
     let field = ds.getFieldByAlias(key)
 
     emit('change', key, field)

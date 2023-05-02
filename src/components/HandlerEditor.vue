@@ -40,7 +40,7 @@ const props = withDefaults(defineProps<Props>(), {
 let emit = defineEmits(['update'])
 
 onMounted(async() => {
-    let ds = dsService.getDataSourceByAlias('function')
+    let ds = dsService.functionDataSource
     let data = await ds.getAll()
     data.forEach(ds => {
         functions.value.push({

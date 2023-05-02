@@ -12,7 +12,7 @@ export class FunctionScriptHelper {
         console.log('invoking function ', alias)
 
         let dsService = await useDataSourceService()
-        let ds = await dsService.getDataSourceByAlias('function')
+        let ds = dsService.functionDataSource
         let functions = await  ds.getMany( {filter: [{key: 'data/alias', op: "==", compare: alias}]} )
 
         if (!functions.length) {

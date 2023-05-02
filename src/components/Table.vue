@@ -24,7 +24,7 @@
         <el-button v-if="selectedIds.length || currentId" @click="remove" size="small">
             {{t('delete')}}
         </el-button>
-        <el-input style="margin-left: 8px;"
+        <el-input v-if="canSearch" style="margin-left: 8px;"
                   size="small"
                   placeholder="Search..."
                   @input="searchChange"
@@ -156,6 +156,7 @@ let canLoadNext = ref(false)
 let searchText = ref('')
 let loadingData = ref(false)
 let sort = ref<{order: string | null, prop: string | null}>(null)
+let canSearch = ref(false)
 
 
 let data = ref<Array<any>>([])
@@ -268,7 +269,6 @@ function searchChange(e) {
 function sortChange(e) {
     sort.value = e
     loadNext()
-    console.log(e)
 }
 
 function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
@@ -638,11 +638,14 @@ async function init() {
     actions.value.onRemove = await compileAction(props.onRemove)
 
     if (props.datasource) {
-        dataSource = dsService.getDataSourceByAlias(props.datasource)
+        dataSource = await dsService.getByAlias(props.datasource)
     }
 
     if (dataSource) {
         isTree.value = dataSource.isTree
+
+        canSearch.value = dataSource.source !== 'custom'
+
         dataSource.on('item-updated', onItemUpdated)
         dataSource.on('item-inserted', onItemInserted)
         dataSource.on('item-removed', onItemRemoved)

@@ -139,7 +139,9 @@ onMounted(async () => {
         })
     })
 
-    dsService.getDataSources().forEach(item => {
+    let items = await dsService.dsDataSource.getMany()
+
+    items.forEach(item => {
         console.log(item)
         dataSources.value.push({
             key: item.alias,
@@ -171,9 +173,9 @@ function removeEnumItem(idx) {
     emit('update:modelValue', m)
 }
 
-function dataSourceChange() {
+async function dataSourceChange() {
     let m = props.modelValue;
-    let ds = dsService.getDataSourceByAlias(props.modelValue.datasource)
+    let ds = await dsService.getByAlias(props.modelValue.datasource)
     m.isTree = ds && !!ds.isTree
 
     emit('update:modelValue', m)
