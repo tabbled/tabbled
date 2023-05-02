@@ -105,7 +105,7 @@ let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
 
 onMounted(async () => {
-    //console.log('Input mounted', props.field)
+    console.log('Input mounted', props.field)
 
     if (props.modelValue instanceof Promise) {
         value.value = await props.modelValue
@@ -116,14 +116,11 @@ onMounted(async () => {
 
     if (props.field && props.field.type === 'link') {
 
-        let fGetList = await props.field.getListFunc()
-        if (fGetList) {
-            linkData.value = await fGetList.exec(props.context)
-            return;
-        }
-
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = dsService.getDataSourceByAlias(props.field.datasource);
+
+        console.log('ds', ds, props)
+
         await getLinkData();
     }
 })
@@ -149,13 +146,31 @@ function handleInput(val: any) {
 
 }
 
-async function getLinkData() {
+async function getLinkData(query?: string) {
+    let fGetList = await props.field.getListFunc()
+    if (fGetList) {
+        linkData.value = await fGetList.exec(Object.assign({ query: query }, props.context))
+        return;
+    }
+
     if (!ds) {
         return
     }
 
+    console.log(query)
+    let opt = {
+        filter: []
+    }
+    if (query) {
+        opt.filter.push({
+            key: displayProp.value,
+            op: 'like',
+            compare: query
+        })
+    }
+
     isLoading.value = true
-    linkData.value = await ds.getMany()
+    linkData.value = await ds.getMany(opt)
     isLoading.value = false
 }
 
