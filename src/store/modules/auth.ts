@@ -62,8 +62,11 @@ const actions = {
                     commit('userLoaded', res.user)
 
                     resolve(res.user)
-                } else
+                } else {
+                    console.error(res)
                     reject((res && res.error_message) || 'Error loading user settings')
+                }
+
             })
         });
     },
