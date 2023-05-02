@@ -71,6 +71,7 @@ import {generateEntityWithDefault} from "../model/field";
 import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {useSocketClient} from "../services/socketio.service";
+import {useSettings} from "../services/settings.service";
 
 let router = useRouter();
 let route = useRoute()
@@ -81,6 +82,7 @@ let isNew = ref(false)
 let updateKey = ref(0)
 
 const socket = useSocketClient()
+const settings = useSettings()
 
 
 onMounted(async () => {
@@ -90,8 +92,7 @@ onMounted(async () => {
     }
 
     await load()
-    //@ts-ignore
-    document.title = `Function ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${import.meta.env.VITE_APP_TITLE}`
+    document.title = `Function ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${settings.title}`
 });
 
 function getField(alias) {

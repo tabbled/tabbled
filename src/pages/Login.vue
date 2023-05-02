@@ -2,8 +2,9 @@
     <div style="max-width: 300px; margin: auto">
 
     <div style="padding-top: 24px;"></div>
-        <div style="text-align: center;">
-            <img height="60" class="logo" src="../assets/tabbled_logo.svg" alt=""/>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <img height="60" class="logo" :src="settings.favicon" alt=""/>
+            <span style="font-size: 30px; padding-left: 16px">{{settings.title}}</span>
         </div>
 
     <h3 style="text-align: center; width: 300px">{{$t('signIn')}}</h3>
@@ -43,11 +44,13 @@ import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from 'vue-router'
 import {useStore} from "vuex";
 import { ElMessage } from 'element-plus'
+import {useSettings} from "../services/settings.service";
 
 
 const router = useRouter();
 const store = useStore();
 const route = useRoute()
+const settings = useSettings()
 
 let form = ref(null)
 let user = ref({
@@ -66,9 +69,7 @@ let rules = ref({
 })
 
 onMounted(async () => {
-    //@ts-ignore
-    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `${route.meta.title} | ${ appTitle }`
+    document.title = `${route.meta.title} | ${ settings.title }`
 })
 
 

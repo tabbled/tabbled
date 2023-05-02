@@ -7,6 +7,7 @@ import Configuration from "./pages/Configuration.vue";
 import FunctionEdit from "./pages/FunctionEdit.vue";
 import DataSourceEdit from "./pages/DataSourceEdit.vue";
 import MenuEdit from "./pages/MenuEdit.vue";
+import {Settings} from "./services/settings.service";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -86,15 +87,17 @@ const routes: RouteRecordRaw[] = [
 
 
 
-export default function (store: any) {
+export default function (store: any, settings:Settings) {
     const router = createRouter({
         history: createWebHistory(),
         routes,
     });
 
+    console.log(settings)
+
     router.beforeEach(async (to, from, next) => {
         // @ts-ignore
-        window.document.title = `${to.meta && to.meta.title ? to.meta.title + ' | ' : ''}${ import.meta.env.VITE_APP_TITLE }`;
+        window.document.title = `${to.meta && to.meta.title ? to.meta.title + ' | ' : ''}${ settings.title }`;
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
                 next();

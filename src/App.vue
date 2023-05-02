@@ -25,6 +25,8 @@ import {useDataSourceService} from "./services/datasource.service";
 import {useDatabase} from "./services/database.service";
 import {useSyncService} from "./services/sync.service";
 import PageView from "./pages/PageView.vue";
+import { useFavicon } from '@vueuse/core'
+import {useSettings} from "./services/settings.service";
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -36,6 +38,7 @@ enum ConfigLoadState {
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const favicon = useFavicon()
 
 let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
@@ -43,6 +46,7 @@ let screenSize = ref(ScreenSize.desktop)
 const dsService = useDataSourceService();
 const db = useDatabase();
 const syncService = useSyncService()
+const settings = useSettings()
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
@@ -62,11 +66,16 @@ store.subscribe(async (payload) => {
 })
 
 onMounted(async () => {
+    console.log('App mounted')
+
+    await settings.refresh();
+    favicon.value = settings.favicon
+
     window.addEventListener('resize', handleResize);
     handleResize();
     configLoadState.value = ConfigLoadState.NotLoaded
 
-    console.log('App mounted')
+
 
     if (store.getters["auth/isAuthenticated"]) {
         try {

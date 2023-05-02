@@ -1,3 +1,5 @@
+import {useSettings} from "./services/settings.service";
+
 console.log('%cWelcome! This application works on Tabbled low-code platform', 'color: green')
 
 import { createApp, h } from 'vue'
@@ -135,7 +137,7 @@ componentService.registerComponent({
     }
 })
 
-app.use(router(store));
+app.use(router(store, useSettings()));
 app.use(store)
 app.use(ElementPlus)
 app.use(i18n)

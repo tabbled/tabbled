@@ -56,6 +56,7 @@ import {useComponentService} from "../services/component.service";
 import {DataSourceInterface, EntityInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
+import {useSettings} from "../services/settings.service";
 
 let store = useStore();
 let router = useRouter();
@@ -76,6 +77,7 @@ let grid = ref(null)
 let isEditPage = ref(false)
 let componentService = useComponentService()
 let dsService = useDataSourceService()
+let settings = useSettings()
 
 let editEntity = ref<EntityInterface>(null)
 let editDataSource: DataSourceInterface = null
@@ -114,9 +116,7 @@ onMounted(async () => {
 })
 
 function setAppTitle() {
-    // @ts-ignore
-    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `${route.meta.title} | ${ appTitle }`
+    document.title = `${route.meta.title} | ${ settings.title }`
 }
 
 async function save() {

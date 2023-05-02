@@ -209,6 +209,7 @@ import {useDataSourceService} from "../services/datasource.service";
 import LinkSelect from "../components/LinkSelect.vue";
 import {EventHandlerInterface} from "../model/eventHandler";
 import EventHandlerEdit from "../components/EventHandlerEdit.vue";
+import {useSettings} from "../services/settings.service";
 
 let router = useRouter();
 let route = useRoute()
@@ -226,6 +227,7 @@ let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
 let testDataSource: DataSourceInterface = null
+const settings = useSettings()
 
 
 let context = ref<any>(getContext())
@@ -241,9 +243,7 @@ onMounted(async () => {
     await load()
     await initTestDataSource()
 
-    // @ts-ignore
-    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `Data source ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ appTitle }`
+    document.title = `Data source ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ settings.title }`
 
     availableHeight.value = window.innerHeight - 260
 

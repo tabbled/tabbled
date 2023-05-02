@@ -65,6 +65,7 @@ import {MenuConfigInterface} from "../model/menu";
 import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
+import {useSettings} from "../services/settings.service";
 let flakeId = new FlakeId()
 
 let router = useRouter();
@@ -77,6 +78,7 @@ let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let menuEntity = ref(null)
 let isNew = ref(false)
+const settings = useSettings()
 
 
 onMounted(async () => {
@@ -88,8 +90,7 @@ onMounted(async () => {
 
     await load()
 
-    //@ts-ignore
-    document.title = `Menu ${ isNew.value ? 'new' : ' ' + menuEntity.title } | ${import.meta.env.VITE_APP_TITLE}`
+    document.title = `Menu ${ isNew.value ? 'new' : ' ' + menuEntity.title } | ${settings.title}`
 });
 
 function getField(alias) {

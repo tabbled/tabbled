@@ -102,6 +102,7 @@ import {useDataSourceService} from "../services/datasource.service";
 import {useSyncService} from "../services/sync.service";
 import {ElMessage} from "element-plus";
 import {DataSourceType} from "../model/datasource";
+import {useSettings} from "../services/settings.service";
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -112,6 +113,7 @@ const router = useRouter()
 const dsService = useDataSourceService()
 let activeTab = ref('')
 let sync = useSyncService()
+const settings = useSettings()
 
 const pagesColumns:ColumnConfigInterface[] = [
     {
@@ -180,9 +182,7 @@ const menuColumns:ColumnConfigInterface[] = [
 ]
 
 function setAppTitle() {
-    // @ts-ignore
-    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `Configuration | ${ appTitle }`
+    document.title = `Configuration | ${ settings.title }`
 }
 
 onMounted(async () => {

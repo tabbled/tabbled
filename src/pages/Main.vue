@@ -6,8 +6,8 @@
                     <div class="menu-header">
                         <div>
                             <el-row align="middle">
-                                <img height="30" src="./../assets/tabbled_icon.svg" alt=""/>
-                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{appTitle()}}</div>
+                                <img height="30" :src="settings.favicon" alt=""/>
+                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{settings.title}}</div>
                             </el-row>
                         </div>
                         <el-tag v-if="!isConnected" effect="light" size="small" type="danger">Offline</el-tag>
@@ -110,7 +110,7 @@
                             <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
                         </el-button>
                         <div style="padding-right: 16px; font-size: 12px; opacity: 0.4">
-                            v{{appVersion}}
+                            v{{settings.version}}
                         </div>
                     </div>
                 </div>
@@ -143,7 +143,7 @@ import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePageHeader} from "../services/page.service";
-import _package from '../../package.json'
+import {useSettings} from "../services/settings.service";
 
 
 const props = defineProps<{
@@ -157,7 +157,7 @@ const rView = ref(null)
 let mainViewHeight = ref(0)
 let mainViewWidth = ref(0)
 let mainSideBarWidth = ref(250)
-let appVersion = _package.version
+let settings = useSettings()
 
 
 let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
@@ -168,11 +168,6 @@ const route = useRoute()
 const dsService = useDataSourceService();
 const { t } = useI18n();
 const pageHeader = usePageHeader()
-const appTitle = () => {
-    // @ts-ignore
-    let title = import.meta.env.VITE_APP_TITLE
-    return !title ? "Tabbled" : title
-}
 
 let socketClient = useSocketClient()
 let isConnected = ref(socketClient.socket.connected)

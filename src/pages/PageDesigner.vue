@@ -188,6 +188,7 @@ import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
 import PageSettingsPanel from '../components/PageSettingsPanel.vue'
 import { FlakeId } from '../flake-id'
+import {useSettings} from "../services/settings.service";
 let flakeId = new FlakeId()
 
 interface ComponentDropInterface extends ComponentInterface {
@@ -223,6 +224,7 @@ let isResizingSettingPanel = false
 let startXResizingSettingPanel = 0
 let _currentPathArray = ref(['Path'])
 let isChanged = ref(false)
+const settings = useSettings()
 
 const grid = ref(null);
 
@@ -243,9 +245,7 @@ onUnmounted(() => {
 })
 
 function setAppTitle() {
-    // @ts-ignore
-    let appTitle = import.meta.env.VITE_APP_TITLE ? import.meta.env.VITE_APP_TITLE : 'Tabbled'
-    document.title = `${route.meta.title} | ${ appTitle }`
+    document.title = `${route.meta.title} | ${ settings.title }`
 }
 
 function setPathIdx(idx: number) {
