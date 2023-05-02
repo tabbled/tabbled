@@ -71,7 +71,7 @@ let rules = ref({
 let signing = false
 
 onMounted(async () => {
-    document.title = `${route.meta.title} | ${ settings.title }`
+    document.title = `${route.meta.title}${ settings.title ? ' | ' + settings.title : '' }`
 })
 
 

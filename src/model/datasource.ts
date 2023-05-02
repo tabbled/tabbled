@@ -157,7 +157,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     async getMany(options: GetDataManyOptions = {}): Promise<EntityInterface[]> {
         if (this.cached) {
             let items = await this.getManyRaw(options)
-            console.log(items)
             return items.map(item => item.data)
         } else {
             let dt = new Date().getMilliseconds()
@@ -431,8 +430,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 value: value
             })
             console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
-
-            console.log(res)
 
             this.emit('item-updated', id, res.data)
         }

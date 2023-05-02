@@ -349,9 +349,7 @@ async function loadNext(skip: number = 0) {
     let nextVal = await dataSource.getMany(options);
     canLoadNext.value = nextVal.length === options.take
 
-
     data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
-    console.log(nextVal)
     loadingData.value = false
 }
 
@@ -567,7 +565,7 @@ let onItemUpdated = async (id, item) => {
     if (!id || !item)
         return;
 
-    console.log('item-updated', id, item)
+    //console.log('item-updated', id, item)
 
     if (dataSource.isTree) {
         let path = await getTreePath(id)
@@ -584,7 +582,7 @@ let onItemUpdated = async (id, item) => {
 }
 
 let onItemInserted = async (id, item) => {
-    console.log('item-inserted', id, item)
+    //console.log('item-inserted', id, item)
     if (dataSource.isTree && item.parentId) {
         let path = await getTreePath(item.parentId)
         let parentItem = _.get(data.value, path)
@@ -623,7 +621,7 @@ let onItemRemoved = async (id, item) => {
 }
 
 let onDataSourceUpdate = async (dt) => {
-    console.log('updated', dt)
+    //console.log('updated', dt)
     data.value = dt
     emit('update:modelValue', data.value)
 }

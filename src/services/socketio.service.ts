@@ -78,7 +78,7 @@ export class SocketIOClient implements ServerInterface {
     }
 
     async emit(topic: string, message?: any) : Promise<any> {
-        console.log(topic, message)
+        //console.log(topic, message)
         return new Promise((resolve, reject) => {
             this.socket.timeout(5000).emit(topic, message || {},
                 (err: any, res: any) => {

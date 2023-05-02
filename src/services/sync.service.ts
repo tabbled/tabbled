@@ -138,8 +138,6 @@ export class SyncService extends EventEmitter {
 
             for(let i in sets) {
                 let alias = sets[i]
-                console.log(i, alias)
-
                 let ds = targetDs.get(alias)
                 if (!ds) {
                     console.warn(`DataSource "${alias}" doesn't exist`)

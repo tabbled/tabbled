@@ -5,18 +5,21 @@ import _package from '../../package.json'
 const socket = useSocketClient()
 
 export class Settings {
-    favicon: string = './favicon.png'
-    title: string = 'Tabbled'
+    favicon: string = localStorage.getItem('favicon')
+    title: string = localStorage.getItem('title')
     version: string
     serverVersion: string
 
     async refresh() {
         let res = await socket.emit('getSettings')
-        console.log(res)
-        this.favicon = res.favicon || './favicon.png'
-        this.title = res.title || 'Tabbled'
+
+        this.favicon = res.favicon
+        this.title = res.title
         this.version = _package.version
         this.serverVersion = res.version
+
+        localStorage.setItem('favicon', this.favicon)
+        localStorage.setItem('title', this.title)
     }
 }
 

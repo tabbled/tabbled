@@ -252,7 +252,6 @@ onMounted(async () => {
     for(const i in data) {
         functions.value.set(data[i].id, data[i].title)
     }
-    console.log(functions)
 });
 
 async function load() {

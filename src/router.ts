@@ -95,7 +95,7 @@ export default function (store: any, settings:Settings) {
 
     router.beforeEach(async (to, from, next) => {
         // @ts-ignore
-        window.document.title = `${to.meta && to.meta.title ? to.meta.title + ' | ' : ''}${ settings.title }`;
+        window.document.title = `${to.meta && to.meta.title ? to.meta.title : ''}${ settings.title ? ' | ' + settings.title : '' }`;
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
                 next();
