@@ -107,14 +107,19 @@ function handleResize() {
 // }
 
 async function loadConfig() {
+    console.log('loadConfig', configLoadState.value)
     if (configLoadState.value === ConfigLoadState.Loading)
         return
 
     configLoadState.value = ConfigLoadState.Loading
     try {
+        console.log('1')
         await db.open(store.getters["auth/account"], store.getters["auth/user"]);
+        console.log('1')
         await dsService.registerConfig();
+        console.log('1')
         await syncService.sync(DataSourceType.config)
+        console.log('1')
     } catch (e) {
         console.error(e)
     }

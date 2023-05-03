@@ -19,7 +19,8 @@ let socketClient = useSocketClient()
 export class DataSourceService {
     constructor() { }
 
-    private dataSources: Map<string, DataSourceConfigInterface> = new Map()
+    private dataSourceConfigs: Map<string, DataSourceConfigInterface> = new Map()
+    private dataSources: Map<string, DataSourceInterface> = new Map()
     private configDataSources: Map<string, DataSourceInterface> = new Map()
 
     pagesDataSource = new PageConfigDataSource(null)
@@ -29,24 +30,28 @@ export class DataSourceService {
 
     async getByAlias(alias: string) {
 
-        switch (alias) {
-            case 'menu': return this.menuDataSource;
-            case 'datasource': return this.dsDataSource;
-            case 'page': return this.pagesDataSource;
-            case 'function': return this.functionDataSource;
+        if (this.dataSources.has(alias)) {
+            return this.dataSources.get(alias)
         }
 
-        let config = this.dataSources.get(alias);
+        let config = this.dataSourceConfigs.get(alias);
         if (!config)
             return undefined;
 
-        let ds: DataSourceInterface = null
+        let ds = null
         switch (config.source) {
             case DataSourceSource.internal:
                 ds = new DataSource(config, socketClient)
                 break;
             case DataSourceSource.custom:
                 ds = new CustomDataSource(config)
+                try {
+                    await ds.init()
+                } catch (e) {
+                    console.error(`Error while compiling CustomDataSource "${config.alias}"`)
+                    console.error(e)
+                    return
+                }
                 break;
             case DataSourceSource.field:
                 ds = new FieldDataSource(config)
@@ -56,16 +61,7 @@ export class DataSourceService {
                 return;
         }
 
-        if (ds instanceof  CustomDataSource) {
-            try {
-                await ds.init()
-            } catch (e) {
-                console.error(`Error while compiling CustomDataSource "${config.alias}"`)
-                console.error(e)
-                return
-            }
-
-        }
+        this.addDataSource(ds);
 
         return ds;
     }
@@ -75,7 +71,7 @@ export class DataSourceService {
     }
 
     getDataSources() {
-        return [...this.dataSources.values()]
+        return [...this.dataSourceConfigs.values()]
     }
 
     addDataSource(dataSource: DataSourceInterface) {
@@ -97,6 +93,8 @@ export class DataSourceService {
         }
         console.log(`DataSource "${dataSource.alias}" registered`)
         target.set(dataSource.alias, dataSource);
+
+        this.dataSources.set(dataSource.alias, dataSource)
     }
 
     clear(type: DataSourceType) {
@@ -114,7 +112,7 @@ export class DataSourceService {
         let items = await this.dsDataSource.getMany()
 
         items.forEach(ds => {
-            this.dataSources.set(ds.alias, <DataSourceConfigInterface>ds)
+            this.dataSourceConfigs.set(ds.alias, <DataSourceConfigInterface>ds)
         })
     }
 
@@ -132,8 +130,8 @@ export class DataSourceScriptHelper {
     constructor() {
     }
 
-    getByAlias(alias: string) {
-        return dsService.value.getByAlias(alias)
+    async getByAlias(alias: string) {
+        return await dsService.value.getByAlias(alias)
     }
 }
 

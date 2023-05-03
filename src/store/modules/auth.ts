@@ -37,11 +37,11 @@ const getters = {
 const actions = {
     login ({ commit }: { commit: Commit }, user: any) {
         return new Promise((resolve, reject) => {
-            socketClient.socket.timeout(300000).emit("login", {
+            socketClient.socket.timeout(5000).emit("login", {
                 username: user.username,
                 password: user.password
             }, (err: any, res: any) => {
-                console.log('login', res)
+                //console.log('login', res)
                 if (!err && res && res.success === true) {
                     commit('loggedIn', res.jwt)
                     commit('userLoaded', res.user)
