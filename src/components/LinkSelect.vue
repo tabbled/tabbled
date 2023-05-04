@@ -77,8 +77,13 @@ onMounted(() => {
 
 watch(() => props.modelValue,
     async () => {
-        init()
+        await init()
         await getValue()
+    })
+
+watch(() => props.fieldConfig,
+    async () => {
+        await init()
     })
 
 async function init() {

@@ -159,14 +159,14 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             let items = await this.getManyRaw(options)
             return items.map(item => item.data)
         } else {
-            let dt = new Date().getMilliseconds()
-            console.log("getMany from server, options: ", options)
-            let res = await this.server.emit('dataSources/data/getMany', {
+            //let dt = new Date().getMilliseconds()
+            //console.log("getMany from server, options: ", options)
+            return await this.server.emit('dataSources/data/getMany', {
                 alias: this.alias,
                 options: options
             })
-            console.log(`${this.alias}, got items: ${res.length}; timing, ms: ${new Date().getMilliseconds() - dt}`)
-            return res
+            //console.log(`${this.alias}, got items: ${res.length}; timing, ms: ${new Date().getMilliseconds() - dt}`)
+            //return res
         }
     }
 
@@ -221,14 +221,14 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 throw e
             }
         } else {
-            let dt = new Date().getMilliseconds()
+            //let dt = new Date().getMilliseconds()
             //console.log(this.alias, " getById from server")
-            let res = await this.server.emit('dataSources/data/getById', {
+            return await this.server.emit('dataSources/data/getById', {
                 alias: this.alias,
                 id: id
             })
-            console.log(this.alias, " gotById from server; timing, ms: ", new Date().getMilliseconds() - dt)
-            return res
+            //console.log(this.alias, " gotById from server; timing, ms: ", new Date().getMilliseconds() - dt)
+            //return res
         }
     }
 

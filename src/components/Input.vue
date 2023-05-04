@@ -44,6 +44,11 @@ watch(() => props.modelValue,
         await getValue()
     })
 
+watch(() => props.fieldConfig,
+    async () => {
+        init()
+    })
+
 
 async function getValue() {
     if (props.modelValue && props.fieldConfig && props.fieldConfig.isMultiple) {

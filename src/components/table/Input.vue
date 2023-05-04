@@ -105,31 +105,24 @@ let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
 
 onMounted(async () => {
-    console.log('Input mounted', props.field)
-
     if (props.modelValue instanceof Promise) {
         value.value = await props.modelValue
     } else {
         value.value = props.modelValue
     }
 
-
     if (props.field && props.field.type === 'link') {
 
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = await dsService.getByAlias(props.field.datasource);
 
-        console.log('ds', ds, props)
-
         await getLinkData();
     }
 })
 
-
-
 watch(() => value,
     async () => {
-        console.log('update', value.value)
+        //console.log('update', value.value)
         emit('update:modelValue', value.value)
     },
     {
@@ -157,7 +150,7 @@ async function getLinkData(query?: string) {
         return
     }
 
-    console.log(query)
+    //console.log(query)
     let opt = {
         filter: []
     }

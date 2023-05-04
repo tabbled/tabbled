@@ -173,6 +173,10 @@ function getField(el:ElementInterface) {
     if (!f) {
         console.error(`Field ${el.field} for page element ${el.name} not found in datasource ${props.pageConfig.datasource}`)
     }
+
+    if (el.field === 'min_qty')
+        console.log('getField', f)
+
     return f
 }
 
@@ -274,7 +278,11 @@ async function init() {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
             isNew.value = true
         }
+
+        console.log(id, editEntity.value)
     }
+
+
 
     scriptContext.value.item = editEntity.value
 

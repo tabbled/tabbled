@@ -29,7 +29,6 @@ export class DataSourceService {
     functionDataSource = new FunctionsConfigDataSource(null)
 
     async getByAlias(alias: string) {
-
         if (this.dataSources.has(alias)) {
             return this.dataSources.get(alias)
         }
@@ -50,7 +49,7 @@ export class DataSourceService {
                 } catch (e) {
                     console.error(`Error while compiling CustomDataSource "${config.alias}"`)
                     console.error(e)
-                    return
+                    return undefined
                 }
                 break;
             case DataSourceSource.field:
@@ -81,7 +80,8 @@ export class DataSourceService {
                 target = this.configDataSources;
                 break;
             case DataSourceType.data:
-                return;
+                target = this.dataSources;
+                break
             default:
                 console.error(`Can't register datasource ${dataSource.alias} with type ${dataSource.type}`)
                 console.error(dataSource)
