@@ -11,7 +11,7 @@
             </template>
         </ItemList>
     </div>
-    <div v-else style="width: 100%">
+    <div v-else-if="fieldConfig" style="width: 100%">
         <el-input v-if="fieldConfig.type === 'string'"
                   :disabled="isDisabled"
                   @input="change"
@@ -79,7 +79,6 @@ function inputMulti(val, index) {
 }
 
 function init() {
-    console.log("init", props)
     if (props.fieldConfig) {
         switch (props.fieldConfig.type) {
             case "text": type = 'textarea'; break;

@@ -336,15 +336,15 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 throw e
             }
         } else {
-            let dt = new Date().getMilliseconds()
-            console.log(this.alias, " insert")
+            //let dt = new Date().getMilliseconds()
+            //console.log(this.alias, " insert")
 
             let res = await this.server.emit('dataSources/data/updateById', {
                 alias: this.alias,
                 id: id,
                 value: value
             })
-            console.log(this.alias, " updated; timing, ms: ", new Date().getMilliseconds() - dt)
+            //console.log(this.alias, " updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
             this.emit('item-updated', id, res.data)
             return res

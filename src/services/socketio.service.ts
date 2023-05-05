@@ -84,8 +84,16 @@ export class SocketIOClient implements ServerInterface {
                 (err: any, res: any) => {
                     if (!err && res && res.success === true) {
                         resolve(res.data)
-                    } else
-                        reject((res && res.error_message) || `Unknown error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
+                    } else {
+                        if (res && res.error_message)
+                            reject(res.error_message)
+                        else {
+                            reject('Unknown error')
+                            console.error(`Unknown error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
+                        }
+                    }
+
+
                 })
         });
     }

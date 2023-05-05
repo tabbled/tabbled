@@ -626,9 +626,10 @@ let onItemRemoved = async (id, item) => {
 }
 
 let onDataSourceUpdate = async (dt) => {
-    //console.log('updated', dt)
+    console.log('updated', dt)
     data.value = dt
     emit('update:modelValue', data.value)
+    emit('change', data.value)
 }
 
 async function init() {

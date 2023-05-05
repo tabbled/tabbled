@@ -190,7 +190,12 @@ function treeChange(a) {
     margin: 1px;
     padding: 0 !important;
 
+    .select-trigger {
+        width: 100%;
+    }
+
     .el-input__wrapper {
+        width: 100% !important;
         box-shadow: unset !important;
         border-radius: unset;
         padding-left: 8px;
