@@ -103,7 +103,7 @@ import Cell from "./table/Cell.vue";
 import _ from "lodash";
 import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useI18n} from "vue-i18n";
-import {ElMessageBox} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 interface Props {
     id: string,
@@ -346,10 +346,15 @@ async function loadNext(skip: number = 0) {
         }
     }
 
-    let nextVal = await dataSource.getMany(options);
-    canLoadNext.value = nextVal.length === options.take
+    try {
+        let nextVal = await dataSource.getMany(options);
+        canLoadNext.value = nextVal.length === options.take
+        data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
 
-    data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
+    } catch (e) {
+        console.error(e)
+        ElMessage.error(e.toString())
+    }
     loadingData.value = false
 }
 

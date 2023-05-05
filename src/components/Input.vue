@@ -1,5 +1,5 @@
 <template>
-    <div v-if="fieldConfig && fieldConfig.isMultiple">
+    <div v-if="fieldConfig && fieldConfig.isMultiple" style="width: 100%">
         <ItemList key-prop="alias"
                   title-prop="title"
                   :list="multiValue"
@@ -7,11 +7,26 @@
                   @insert="multiValue.push('')"
         >
             <template #default="{item, index}">
-                <el-input style="padding-left: 8px; width: calc(100% - 24px)" :disabled="isDisabled" @input="(val) => inputMulti(val, index)" :model-value="multiValue[index]"/>
+                <el-input style="padding: 8px 4px 4px 8px; width: calc(100% - 24px)" :disabled="isDisabled" @input="(val) => inputMulti(val, index)" :model-value="multiValue[index]"/>
             </template>
         </ItemList>
     </div>
-    <el-input v-else :disabled="isDisabled" @input="change" :model-value="value" :type="type"/>
+    <div v-else style="width: 100%">
+        <el-input v-if="fieldConfig.type === 'string'"
+                  :disabled="isDisabled"
+                  @input="change"
+                  :model-value="value"
+                  :type="type"/>
+        <el-input-number v-if="fieldConfig.type === 'number'"
+                         :disabled="isDisabled"
+                         @input="change"
+                         :controls="false"
+                         :precision="fieldConfig.precision ? fieldConfig.precision : 0"
+                         :model-value="value"
+                         style="width: 100%"
+                         type="type"/>
+    </div>
+
 </template>
 
 <script setup lang="ts">
