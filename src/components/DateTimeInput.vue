@@ -5,12 +5,13 @@
         placeholder="Select date and time"
         @change="change"
         :disabled="isDisabled"
+        :format="format"
     />
 </template>
 
 <script setup lang="ts">
 import {FieldConfigInterface} from "../model/field";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {DataSourceInterface} from "../model/datasource";
 
 let isLoading = ref(false)
@@ -23,11 +24,11 @@ interface Props {
     field: string,
     fieldConfig: FieldConfigInterface,
     context?:any,
-    update?: number,
-    load?: Promise<any>
+    format?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
+    format: ""
 })
 
 const emit = defineEmits(['change', 'update:modelValue'])
@@ -52,8 +53,13 @@ function init() {
     isDisabled.value = !(!!props.fieldConfig)
 }
 
+watch(() => props.fieldConfig,
+    async () => {
+        init()
+    })
+
 async function getValue() {
-    value.value = await props.load
+    value.value = props.modelValue
 }
 
 function change(val) {

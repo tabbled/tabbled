@@ -90,7 +90,6 @@ let componentService = useComponentService()
 
 
 let pageForm = ref(null)
-let dataSetOptions = ref([])
 let divToHeight = ref(null)
 let scrollHeight = ref(window.innerHeight)
 
@@ -295,22 +294,18 @@ onMounted(() => {
 })
 
 function onInput(alias: string, value: any) {
-    console.log(alias, value)
     emit('update', getPropPath(alias), value)
 }
 
 function onFieldSelectInput(alias: string, value: any, field: FieldConfigInterface) {
     emit('update', getPropPath(alias), value)
 
-    console.log(currentElement.value)
-    if(!currentElement.value['title'] && currentElement.value['title'] === '') {
+    if(!currentElement.value['title'] || currentElement.value['title'] === '') {
         currentElement.value['title'] = field.title
     }
 }
 
 function getValue(prop: FieldConfigInterface, element: any) {
-    if (prop.type === 'handler')
-        console.log(element[prop.alias])
     return element[prop.alias]
 }
 
