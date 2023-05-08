@@ -552,7 +552,7 @@ function getHeaderClass() {
 }
 
 async function initColumns() {
-    _columns.value = props.columns
+    _columns.value = props.columns || []
     let widths = await sync.getValue(configAlias)
 
     for(let i in _columns.value) {

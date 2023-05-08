@@ -12,7 +12,7 @@
         </ItemList>
     </div>
     <div v-else-if="fieldConfig" style="width: 100%">
-        <el-input v-if="fieldConfig.type === 'string'"
+        <el-input v-if="fieldConfig.type === 'string' || fieldConfig.type === 'text'"
                   :disabled="isDisabled"
                   @input="change"
                   :model-value="value"

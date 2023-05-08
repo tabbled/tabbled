@@ -1,6 +1,7 @@
 <template>
     <el-date-picker
         v-model="value"
+        style="width: 100%"
         :type="fieldConfig ? fieldConfig.type : 'datetime'"
         placeholder="Select date and time"
         @change="change"

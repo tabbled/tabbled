@@ -150,15 +150,15 @@ async function getLinkData(query?: string) {
         return
     }
 
-    //console.log(query)
     let opt = {
-        filter: []
+        filter: [],
+        take: 50
     }
     if (query) {
         opt.filter.push({
             key: displayProp.value,
             op: 'like',
-            compare: query
+            compare: `%${query}%`
         })
     }
 
