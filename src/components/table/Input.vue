@@ -13,7 +13,7 @@
         :precision="field.precision ? field.precision : 0"
         ref="el"
         class="table-input-number"
-        :model-value="Number(value)"
+        :model-value="value === null || value === undefined ? null : Number(value)"
         @mouseenter="handleMouseEnter"
         @input="handleInput"
     />

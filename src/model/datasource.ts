@@ -619,6 +619,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     readonly: boolean;
     source: DataSourceSource.field;
     type: DataSourceType = DataSourceType.data;
+    data: any[] = []
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
@@ -644,39 +645,70 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     }
 
     getAll(): Promise<EntityInterface[]> {
-        return Promise.resolve([]);
+        return this.getMany()
     }
 
-    getById(id: string | number): Promise<EntityInterface | undefined> {
-        return Promise.resolve(undefined);
+    async getById(id: string | number): Promise<EntityInterface | undefined> {
+        for(let i in this.data) {
+            if (this.data[i].id === id) {
+                return this.data[i]
+            }
+        }
+        return undefined;
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
         return this.fieldByAlias.get(alias)
     }
 
-    getMany(options: GetDataManyOptions): Promise<EntityInterface[]> {
-        return Promise.resolve([]);
+    async getMany(options?: GetDataManyOptions): Promise<EntityInterface[]> {
+        return await this.getManyRaw(options)
     }
 
-    getManyRaw(options: GetDataManyOptions): Promise<DataItemInterface[]> {
-        return Promise.resolve([]);
+    async getManyRaw(options?: GetDataManyOptions): Promise<DataItemInterface[]> {
+        return _.cloneDeep(this.data)
     }
 
-    insert(id: string, value: any): Promise<EntityInterface> {
-        return Promise.resolve(undefined);
+    async insert(id: string, value: any): Promise<EntityInterface> {
+        console.log(id, value)
+        value.id = id
+        this.data.push(value)
+        this.emit('item-inserted', id, value)
+
+        return value
     }
 
-    removeById(id: string): Promise<boolean> {
-        return Promise.resolve(false);
+    async removeById(id: string): Promise<boolean> {
+        for(let i in this.data) {
+            let item = this.data[i]
+            if (item.id === id) {
+                this.data.splice(Number(i), 1);
+                this.emit('item-removed', id, item)
+                return true;
+            }
+        }
+
+        return false
     }
 
-    updateById(id: string, value: object): Promise<EntityInterface> {
-        return Promise.resolve(undefined);
+    async updateById(id: string, value: object): Promise<EntityInterface> {
+        for(let i in this.data) {
+            let item = this.data[i]
+            if (item.id === id) {
+                this.data[i] = value
+                this.emit('item-updated', id, value)
+                return item;
+            }
+        }
+        return undefined
     }
 
-    setValue(id: string, field: string, value: any): Promise<void> {
-        return
+    async setValue(id: string, field: string, value: any): Promise<void> {
+        let item = await this.getById(id)
+        if (item) {
+            item[field]  = value
+            await this.updateById(id, item)
+        }
     }
 }
 
