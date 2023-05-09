@@ -21,7 +21,7 @@ let value = ref(null)
 let isDisabled = ref(true)
 
 interface Props {
-    modelValue?: any,
+    modelValue: any,
     field: string,
     fieldConfig: FieldConfigInterface,
     context?:any,
@@ -57,6 +57,13 @@ function init() {
 watch(() => props.fieldConfig,
     async () => {
         init()
+    })
+
+
+watch(() => props.modelValue,
+    async () => {
+        init()
+        await getValue()
     })
 
 async function getValue() {
