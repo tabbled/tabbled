@@ -25,6 +25,7 @@ import {onMounted, ref, watch} from "vue";
 import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface} from "../../model/datasource";
+import {dayjs} from "element-plus";
 
 interface Props {
     modelValue: any,
@@ -80,6 +81,9 @@ async function getData() {
         case "enum": await getEnumValue(); break;
         case "link": await getLinkValue(); break;
         case "number": displayValue.value = formatNumber(props.modelValue, props.field.precision); break;
+        case "date": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY'); break;
+        case "time": displayValue.value = dayjs(props.modelValue).format('HH:MM:SS'); break;
+        case "datetime": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY HH:MM:SS'); break;
         default: displayValue.value = 'Error'
     }
 }
@@ -90,6 +94,7 @@ function formatNumber(value: any, precision: number) {
 
     return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
 }
+
 
 async function getLinkValue() {
 

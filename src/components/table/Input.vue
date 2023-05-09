@@ -81,6 +81,14 @@
                  style="padding-left: 16px"
     />
 
+    <el-date-picker v-else-if="field && (field.type==='date' || field.type==='datetime' || field.type==='time')"
+                    v-model="value"
+                    style="width: 100%"
+                    :type="field.type"
+                    @change="val => value = val"
+                    :format="format(field.type)"
+    />
+
 </template>
 
 <script setup lang="ts">
@@ -143,7 +151,14 @@ function handleMouseEnter() {
 
 function handleInput(val: any) {
     value.value = val
+}
 
+function format(type) {
+    switch (type) {
+        case "date": return 'DD.MM.YYYY';
+        case "time": return 'HH:MM:SS';
+        case "datetime": return 'DD.MM.YYYY HH:MM:SS';
+    }
 }
 
 async function getLinkData(query?: string) {
