@@ -266,8 +266,6 @@ async function load() {
         dataSourceEntity.value = await datasource.getById(<string>route.params.id)
         isNew.value = false
     }
-
-    console.log(dataSourceEntity.value)
 }
 
 async  function initTestDataSource() {

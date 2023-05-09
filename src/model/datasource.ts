@@ -174,8 +174,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         if (!db.database)
             return []
 
-        console.log(options)
-
         let ref = await db.database.query(`/${this.type}/${this.alias}`)
 
 

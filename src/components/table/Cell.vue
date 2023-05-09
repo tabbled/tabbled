@@ -1,7 +1,13 @@
 <template>
     <div v-if="field">
 
-        <div v-if="field.isMultiple">
+
+        <el-checkbox v-if="field.type==='bool'"
+                     :model-value='displayValue'
+                     style="padding-left: 8px"
+        />
+
+        <div v-else-if="field.isMultiple">
             <el-tag v-for="item in displayValue" style="margin-right: 4px">
                 {{item}}
             </el-tag>
@@ -69,6 +75,7 @@ async function getData() {
 
     switch(props.field.type) {
         case "text":
+        case "bool":
         case "string": displayValue.value = props.modelValue; break;
         case "enum": await getEnumValue(); break;
         case "link": await getLinkValue(); break;

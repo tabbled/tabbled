@@ -1,4 +1,5 @@
 <template>
+
     <el-input
         v-if="field && (field.type === 'text' || field.type === 'string')"
         ref="el"
@@ -74,6 +75,12 @@
             :value="item.key"
         />
     </el-select>
+    <el-checkbox v-else-if="field && field.type==='bool'"
+                 :model-value='value'
+                 @change="val => value = val"
+                 style="padding-left: 16px"
+    />
+
 </template>
 
 <script setup lang="ts">
