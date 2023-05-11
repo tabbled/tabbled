@@ -82,8 +82,8 @@ async function getData() {
         case "link": await getLinkValue(); break;
         case "number": displayValue.value = formatNumber(props.modelValue, props.field.precision); break;
         case "date": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY'); break;
-        case "time": displayValue.value = dayjs(props.modelValue).format('HH:MM:SS'); break;
-        case "datetime": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY HH:MM:SS'); break;
+        case "time": displayValue.value = dayjs(props.modelValue).format('hh:mm:ss'); break;
+        case "datetime": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY hh:mm:ss'); break;
         default: displayValue.value = 'Error'
     }
 }

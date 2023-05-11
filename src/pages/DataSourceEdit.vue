@@ -6,16 +6,37 @@
         </template>
 
         <template #extra>
-            <div class="page-header-action-panel">
-                <el-button text @click="exportConfig">
-                    <template #icon>
-                        <Icon width="26" icon="mdi:export"></Icon>
-                    </template>
-                    Export
-                </el-button>
-                <el-button @click="cancel">Cancel</el-button>
-                <el-button @click="save" type="primary">Save</el-button>
-            </div>
+                <div style="display: flex; align-self: center;">
+                    <el-dropdown
+                        style="margin-right: 24px; "
+                    >
+                <span class="dropdown-link">
+                            Import
+                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
+                </span>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+<!--                            <el-dropdown-item @click="loadConfigFile">Config</el-dropdown-item>-->
+                                <el-dropdown-item @click="importDataDialogVisible = true">Data from *.json</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+                    <el-dropdown
+                        style="margin-right: 8px"
+                    >
+                <span class="dropdown-link">
+                            Export
+                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-upload"></Icon>
+                </span>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item @click="exportConfig">Config</el-dropdown-item>
+<!--                            <el-dropdown-item @click="exportData">Data to *.json</el-dropdown-item>-->
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </div>
         </template>
     </el-page-header>
 
@@ -189,6 +210,17 @@
         </template>
     </el-dialog>
 
+
+    <el-dialog
+        v-model="importDataDialogVisible"
+        title="Import data"
+        width="50%"
+    >
+
+        <ImportData :data-source-alias="dataSourceEntity?.alias"></ImportData>
+
+    </el-dialog>
+
 </div>
 </template>
 
@@ -211,6 +243,7 @@ import LinkSelect from "../components/LinkSelect.vue";
 import {EventHandlerInterface} from "../model/eventHandler";
 import EventHandlerEdit from "../components/EventHandlerEdit.vue";
 import {useSettings} from "../services/settings.service";
+import ImportData from "../components/ImportData.vue";
 
 let router = useRouter();
 let route = useRoute()
@@ -220,6 +253,7 @@ let currentIndex = -1;
 let fieldEditDialogVisible = ref(false)
 let currentEventHandlerIndex = -1;
 let eventHandlerEditDialogVisible = ref(false)
+let importDataDialogVisible = ref(false)
 const { t } = useI18n();
 let activeTab = ref('fields')
 let availableHeight = ref(0)
@@ -310,6 +344,10 @@ async function exportConfig() {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     }, 0);
+}
+
+function importData() {
+
 }
 
 function getField(alias) {
@@ -500,6 +538,13 @@ function removeEventHandler(row) {
 
 .demo-tabs {
     max-height: 300px;
+}
+
+.dropdown-link {
+    cursor: pointer;
+    color: var(--el-color-primary);
+    display: flex;
+    align-items: center;
 }
 
 </style>
