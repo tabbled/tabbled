@@ -24,8 +24,8 @@
             <el-checkbox v-model="replaceExisting" label="Replace existing items in datasource"/>
         </el-form-item>
 
-        <el-form-item>
-            <el-checkbox v-model="removeNotExisting" label="Remove not existing items in file"/>
+        <el-form-item >
+            <el-checkbox disabled v-model="removeNotExisting" label="Remove not existing items in file"/>
         </el-form-item>
 
 
@@ -33,8 +33,8 @@
 
 
     <div style="display: flex; justify-content: end;">
-        <el-button @click="">Cancel</el-button>
-        <el-button  type="primary" @click="importData">Import</el-button>
+        <el-button @click="emit('cancel')">Cancel</el-button>
+        <el-button :disabled="inProcess" type="primary" @click="importData">{{inProcess ? 'Importing...' : 'Import'}}</el-button>
     </div>
 
 </template>
@@ -44,7 +44,7 @@
 import {ref} from "vue";
 import {ElMessage} from "element-plus";
 import {useApiClient} from "../services/api.service";
-const emit = defineEmits(['imported'])
+const emit = defineEmits(['imported', 'cancel'])
 
 const props = defineProps<{
     dataSourceAlias: string
@@ -54,6 +54,7 @@ let fileList = ref([])
 let replaceExisting = ref(true)
 let removeNotExisting= ref(false)
 let data = ref(null)
+let inProcess = ref(false)
 
 let api = useApiClient()
 
@@ -85,6 +86,11 @@ async function loadData(value) {
 }
 
 async function importData() {
+    if (inProcess.value)
+        return
+
+    inProcess.value = true
+
     try {
         let res = await api.post(`/datasources/${props.dataSourceAlias}/data/import`, {
             options: {
@@ -93,11 +99,11 @@ async function importData() {
             },
             data: data.value
         })
-        console.log(res)
-
-        ElMessage.success('Imported')
+        ElMessage.success(`Imported. Inserted: ${res.data.total.inserted}; Updated: ${res.data.total.updated}`)
     } catch (e) {
         ElMessage.error('Import error: ' + e.toString())
+    } finally {
+        inProcess.value = false
     }
 }
 

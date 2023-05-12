@@ -217,7 +217,7 @@
         width="50%"
     >
 
-        <ImportData :data-source-alias="dataSourceEntity?.alias"></ImportData>
+        <ImportData :data-source-alias="dataSourceEntity?.alias" @cancel="importDataDialogVisible = false"></ImportData>
 
     </el-dialog>
 
