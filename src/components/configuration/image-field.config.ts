@@ -1,7 +1,12 @@
+import {ComponentInterface} from "../../model/page";
 import {FieldConfigInterface} from "../../model/field";
 
-export function properties():FieldConfigInterface[] {
-    return [{
+export class Config implements ComponentInterface {
+    name:string = 'ImageField'
+    title:string = "Image"
+    icon:string = "mdi:file-image-box"
+    group:string = "Fields"
+    properties:FieldConfigInterface[] = [{
         title: "Field",
         alias: "field",
         type: "field"
@@ -19,6 +24,9 @@ export function properties():FieldConfigInterface[] {
         alias: "height",
         type: "number",
         default: 120
+    }]
+    defaultPosition = {
+        rows: 2,
+        cols: 3
     }
-    ]
 }

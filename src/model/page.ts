@@ -51,6 +51,7 @@ export interface ComponentInterface {
     name: string,
     title: string,
     icon?: string,
+    group?: string,
     properties: FieldConfigInterface[],
     defaultPosition: {
         cols: number,

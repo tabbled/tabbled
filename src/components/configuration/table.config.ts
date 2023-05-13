@@ -1,7 +1,13 @@
+
+import {ComponentInterface} from "../../model/page";
 import {FieldConfigInterface} from "../../model/field";
 
-export function properties():FieldConfigInterface[] {
-    return [
+export class Config implements ComponentInterface {
+    name:string = 'Table'
+    title:string = "Table"
+    icon:string = "mdi:table"
+    group:string = 'Fields'
+    properties:FieldConfigInterface[] = [
         {
             title: "Data source",
             alias: "datasource",
@@ -54,4 +60,8 @@ export function properties():FieldConfigInterface[] {
             alias: "onRemove",
             type: 'handler'
         }]
+    defaultPosition = {
+        rows: 1,
+        cols: 12
+    }
 }
