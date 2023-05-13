@@ -24,7 +24,7 @@
             <el-checkbox v-model="replaceExisting" label="Replace existing items in datasource"/>
         </el-form-item>
 
-        <el-form-item >
+        <el-form-item>
             <el-checkbox disabled v-model="removeNotExisting" label="Remove not existing items in file"/>
         </el-form-item>
 
