@@ -57,6 +57,7 @@ import {DataSourceInterface, EntityInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
+import {Filters, useFilters} from "../model/filter";
 
 let store = useStore();
 let router = useRouter();
@@ -83,6 +84,7 @@ let editEntity = ref<EntityInterface>(null)
 let editDataSource: DataSourceInterface = null
 let update = ref(0)
 let isNew = ref(false)
+let filters = ref<Filters>(null)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -121,7 +123,6 @@ function setAppTitle() {
 
 async function save() {
     try {
-        console.log(editEntity.value)
         if (isNew.value) {
             await editDataSource.insert(editEntity.value.id, editEntity.value)
         } else {
@@ -152,15 +153,23 @@ function getValue(el: ElementInterface) {
 
 async function setValue(el:ElementInterface, value: any) {
     //console.log('setValue', el, value)
-    if (!editEntity.value) {
-        return false
-    }
-    editEntity.value[el.field] = value
-    update.value++
 
-    let fSetValue = await editDataSource.getFieldByAlias(el.field).setValueFunc()
-    if (fSetValue) {
-        return await fSetValue.exec(scriptContext.value)
+    if (isEditPage.value) {
+        if (!editEntity.value)
+            return false
+
+        editEntity.value[el.field] = value
+        update.value++
+
+        let fSetValue = await editDataSource.getFieldByAlias(el.field).setValueFunc()
+        if (fSetValue) {
+            return await fSetValue.exec(scriptContext.value)
+        }
+    } else if (filters.value) {
+        if (!el.id) {
+            console.warn("Filter component doesn't have correct id")
+            return false
+        }
     }
 }
 
@@ -168,16 +177,7 @@ function getField(el:ElementInterface) {
     if (!editDataSource) {
         return undefined
     }
-    let f = editDataSource.getFieldByAlias(el.field)
-
-    if (!f) {
-        console.error(`Field ${el.field} for page element ${el.name} not found in datasource ${props.pageConfig.datasource}`)
-    }
-
-    if (el.field === 'min_qty')
-        console.log('getField', f)
-
-    return f
+    return editDataSource.getFieldByAlias(el.field)
 }
 
 
@@ -214,13 +214,34 @@ async function init() {
 
     scriptContext.value.page.params = route.params
 
+    if (props.pageConfig.datasource) {
+        editDataSource = await dsService.getByAlias(props.pageConfig.datasource)
+        if (!editDataSource) {
+            console.warn(`DataSource ${props.pageConfig.datasource} for editing page ${props.pageConfig.alias} not found`)
+            return;
+        }
+
+        filters = useFilters(editDataSource)
+
+        let id = <string>route.params.id
+
+        if (id && id !== 'new') {
+            editEntity.value = await editDataSource.getById(id)
+            isNew.value = false
+        } else {
+            editEntity.value = await generateEntityWithDefault(editDataSource.fields)
+            isNew.value = true
+        }
+    }
+
     props.pageConfig.elements.forEach(element => {
         let el:ElementInterface = {
             id: element.id,
             layout: element.layout,
             name: element.name,
             field: element.field,
-            props: {}
+            props: {},
+            filterable: element.filterable
         }
 
         let elProps = componentService.getByName(el.name)
@@ -233,6 +254,11 @@ async function init() {
             el.props[item.alias] = _.cloneDeep(element[item.alias])
         })
         el.props['context'] = scriptContext.value
+
+        if (elProps.filterable || elProps.group === 'Filters') {
+            el.props['filters'] = filters
+        }
+
         elements.value.push(el)
     })
     pageHeader.actions = []
@@ -262,27 +288,6 @@ async function init() {
             //console.error(e)
         }
     }
-
-    if (props.pageConfig.isEditPage && props.pageConfig.datasource) {
-        editDataSource = await dsService.getByAlias(props.pageConfig.datasource)
-        if (!editDataSource) {
-            console.warn(`DataSource ${props.pageConfig.datasource} for editing page ${props.pageConfig.alias} not found`)
-            return;
-        }
-        let id = <string>route.params.id
-
-        if (id && id !== 'new') {
-            editEntity.value = await editDataSource.getById(id)
-            isNew.value = false
-        } else {
-            editEntity.value = await generateEntityWithDefault(editDataSource.fields)
-            isNew.value = true
-        }
-
-        console.log(id, editEntity.value)
-    }
-
-
 
     scriptContext.value.item = editEntity.value
 

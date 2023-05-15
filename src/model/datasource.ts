@@ -5,6 +5,7 @@ import {DataItemInterface, useSyncService} from "../services/sync.service";
 import {compileScript} from "../services/compiler";
 import {EventEmitter} from "events";
 import {ServerInterface} from "../services/socketio.service";
+import {FilterItemInterface} from "./filter";
 
 const db = useDatabase()
 const syncService = useSyncService()
@@ -26,12 +27,7 @@ export interface EntityInterface {
     [name: string]: any | never
 }
 
-export declare type StandardQueryOperator = '<' | '<=' | '==' | '!=' | '>' | '>=' | 'exists' | '!exists' | 'between' | '!between' | 'like' | '!like' | 'matches' | '!matches' | 'in' | '!in' | 'has' | '!has' | 'contains' | '!contains';
-export interface FilterItemInterface {
-    key: string,
-    op: StandardQueryOperator,
-    compare?: any
-}
+
 
 export interface GetDataManyOptions {
     filter?: FilterItemInterface[]

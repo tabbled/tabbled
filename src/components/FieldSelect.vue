@@ -55,6 +55,9 @@ async function getData() {
     isLoading.value = true;
     data.value = []
 
+    if (!dataSource)
+        return
+
 
 
     for(const i in dataSource.fields) {

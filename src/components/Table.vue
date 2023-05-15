@@ -104,6 +104,7 @@ import _ from "lodash";
 import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useI18n} from "vue-i18n";
 import {ElMessage, ElMessageBox} from "element-plus";
+import {Filters} from "../model/filter";
 
 interface Props {
     id: string,
@@ -124,6 +125,7 @@ interface Props {
     onClickAdd?: () => (void)
     onClickEdit?: () => (void)
     onClickDelete?: () => (void),
+    filters?: Filters
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -172,6 +174,8 @@ watch(() => props.modelValue,
 watch(() => props.field, load)
 watch(() => props.datasource, load)
 onMounted(load);
+
+watch(() => props.filters.filters, () => loadNext())
 
 async function load() {
     await init();
@@ -327,17 +331,20 @@ async function loadNext(skip: number = 0) {
     loadingData.value = true
     let options: GetDataManyOptions = {
         take: 50,
-        skip: skip
+        skip: skip,
+        filter: []
     }
 
     if (searchText.value) {
-        options.filter = []
         options.filter.push({
             key: "name",
             op: "like",
             compare: `%${searchText.value}%`
         })
     }
+
+    if (props.filters)
+        options.filter.push(...props.filters.filters)
 
     if (sort.value && sort.value.order) {
         options.sort = {

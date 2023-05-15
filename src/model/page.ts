@@ -44,7 +44,8 @@ export interface ElementInterface {
     },
     name: string,
     field: string,
-    props: any
+    props: any,
+    filterable?: boolean
 }
 
 export interface ComponentInterface {
@@ -53,6 +54,7 @@ export interface ComponentInterface {
     icon?: string,
     group?: string,
     properties: FieldConfigInterface[],
+    filterable?: boolean,
     defaultPosition: {
         cols: number,
         rows: number

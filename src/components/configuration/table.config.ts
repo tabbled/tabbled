@@ -7,6 +7,7 @@ export class Config implements ComponentInterface {
     title:string = "Table"
     icon:string = "mdi:table"
     group:string = 'Fields'
+    filterable: boolean = true
     properties:FieldConfigInterface[] = [
         {
             title: "Data source",

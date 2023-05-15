@@ -27,7 +27,7 @@
                     >
                 <span class="dropdown-link">
                             Export
-                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-upload"></Icon>
+                           <Icon width="16" style="padding-left: 4px; padding-right: 8px" icon="ic:outline-file-upload"></Icon>
                 </span>
                         <template #dropdown>
                             <el-dropdown-menu>
@@ -36,6 +36,9 @@
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
+
+                    <el-button @click="cancel">Cancel</el-button>
+                    <el-button @click="save" type="primary">Save</el-button>
                 </div>
         </template>
     </el-page-header>
@@ -244,6 +247,7 @@ import {EventHandlerInterface} from "../model/eventHandler";
 import EventHandlerEdit from "../components/EventHandlerEdit.vue";
 import {useSettings} from "../services/settings.service";
 import ImportData from "../components/ImportData.vue";
+import CodeEditor from "../components/CodeEditor.vue";
 
 let router = useRouter();
 let route = useRoute()

@@ -11,11 +11,13 @@ import {Config as CheckboxConfig} from '../components/configuration/checkbox.con
 import {Config as InputConfig} from '../components/configuration/input.config'
 import {Config as DatetimeInputConfig} from '../components/configuration/datetime-select.config'
 import {Config as ImageFieldProps} from '../components/configuration/image-field.config'
+import {Config as StatusFilterProps} from '../components/configuration/status.filter.config'
 import CodeEditor from "../components/CodeEditor.vue";
 import CheckboxField from "../components/CheckboxField.vue";
 import Input from "../components/Input.vue";
 import DateTimeInput from "../components/DateTimeInput.vue";
 import ImageField from "../components/ImageField.vue";
+import StatusFilter from "../components/StatusFilter.vue";
 
 
 export interface ComponentTitle {
@@ -59,6 +61,7 @@ export class ComponentService {
         app.component('Input', Input);
         app.component('DateTimeInput', DateTimeInput);
         app.component('ImageField', ImageField)
+        app.component('StatusFilter', StatusFilter)
 
         this.registerComponent(new TableConfig)
         this.registerComponent(new LinkSelectConfig)
@@ -67,6 +70,7 @@ export class ComponentService {
         this.registerComponent(new InputConfig)
         this.registerComponent(new DatetimeInputConfig)
         this.registerComponent(new ImageFieldProps)
+        this.registerComponent(new StatusFilterProps)
     }
 }
 

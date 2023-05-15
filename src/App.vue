@@ -81,11 +81,10 @@ onMounted(async () => {
             await store.dispatch('auth/loadUserSettings')
         } catch (e) {
             console.error(e)
-            logout()
+            //logout()
         }
 
         await loadConfig()
-        //await loadData()
     }
 })
 
@@ -99,13 +98,6 @@ function handleResize() {
     screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
 }
 
-// async function loadData() {
-//     if (configLoadState.value !== ConfigLoadState.Loaded)
-//         return;
-//
-//     await syncService.sync(DataSourceType.data)
-// }
-
 async function loadConfig() {
     console.log('loadConfig', configLoadState.value)
     if (configLoadState.value === ConfigLoadState.Loading)
@@ -113,13 +105,9 @@ async function loadConfig() {
 
     configLoadState.value = ConfigLoadState.Loading
     try {
-        console.log('1')
         await db.open(store.getters["auth/account"], store.getters["auth/user"]);
-        console.log('1')
         await dsService.registerConfig();
-        console.log('1')
         await syncService.sync(DataSourceType.config)
-        console.log('1')
     } catch (e) {
         console.error(e)
     }
