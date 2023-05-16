@@ -22,6 +22,7 @@ import Input from "./components/Input.vue";
 import DateTimeInput from "./components/DateTimeInput.vue";
 import ImageField from "./components/ImageField.vue";
 import StatusFilter from "./components/StatusFilter.vue";
+import TreeFilter from "./components/TreeFilter.vue";
 const i18n = createI18n({
     messages: {
         ru: ru,
@@ -48,9 +49,10 @@ app.component('Input', Input);
 app.component('DateTimeInput', DateTimeInput);
 app.component('ImageField', ImageField)
 app.component('StatusFilter', StatusFilter)
+app.component('TreeFilter', TreeFilter)
 
 let componentService = useComponentService()
-componentService.registerAllComponents(app)
+componentService.registerAllComponents()
 
 app.use(router(store, useSettings()));
 app.use(store)

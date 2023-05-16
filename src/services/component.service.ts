@@ -9,6 +9,7 @@ import {Config as InputConfig} from '../components/configuration/input.config'
 import {Config as DatetimeInputConfig} from '../components/configuration/datetime-select.config'
 import {Config as ImageFieldProps} from '../components/configuration/image-field.config'
 import {Config as StatusFilterProps} from '../components/configuration/status.filter.config'
+import {Config as TreeFilterProps} from '../components/configuration/tree.filter.config'
 
 
 export interface ComponentTitle {
@@ -53,6 +54,7 @@ export class ComponentService {
         this.registerComponent(new DatetimeInputConfig)
         this.registerComponent(new ImageFieldProps)
         this.registerComponent(new StatusFilterProps)
+        this.registerComponent(new TreeFilterProps)
     }
 }
 

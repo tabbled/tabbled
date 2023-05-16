@@ -71,8 +71,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-onMounted(() => {
-    init()
+onMounted(async () => {
+    await init()
+    await getValue()
 })
 
 watch(() => props.modelValue,

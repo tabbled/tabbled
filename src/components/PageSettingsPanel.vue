@@ -1,8 +1,5 @@
 <template>
     <div class="panel">
-<!--        <el-divider ref="divToHeight" style="margin-top: 8px; margin-bottom: 8px"/>-->
-
-
 
         <div v-if="properties && currentElement" :style="{'max-height': scrollHeight - 60 + 'px'}">
                 <el-form label-position="top" style="padding: 0 0 0 16px" ref="pageForm" :model="currentElement" size="small">
@@ -35,12 +32,13 @@
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val) => onInput(prop.alias, val)"
                         />
-<!--                        <LinkSelect v-else-if="prop.type === 'link'"-->
-<!--                                    style="width: 100%"-->
-<!--                                    :field="prop"-->
-<!--                                    :model-value="getValue(prop, currentElement)"-->
-<!--                                    @change="(val) => onInput(prop.alias, val)"-->
-<!--                        />-->
+                        <LinkSelect v-else-if="prop.type === 'enum'"
+                                    style="width: 100%"
+                                    :field="prop.alias"
+                                    :field-config="prop"
+                                    :model-value="getValue(prop, currentElement)"
+                                    @change="(val) => onInput(prop.alias, val)"
+                        />
                         <DataSourceSelect v-else-if="prop.type === 'datasource'"
                                     style="width: 100%"
                                     :config="prop"
