@@ -2,10 +2,16 @@
     <el-card shadow="never" body-style="padding: 0" style="width: 100%">
         <div v-for="(item, idx)  in list" :id="item[keyProp]"
              :class="{'list-item': true, 'list-item-selected': currentIdx === idx}"
+             @dragover="(e) => onDragOver(item, idx, e)"
+             @dragend="() => finishDrag(item, idx)"
+             @dragstart="(e) => startDrag(item, idx, e)"
+             :draggable="sortable"
         >
             <div class="list-item-title" @click="emit('edit', idx); setCurrentIndex(idx)">
                 <Icon icon="ic:baseline-drag-indicator"
-                      style="padding-right: 4px; color: var(--el-border-color); cursor: move" width="16"/>
+                      style="padding-right: 4px; color: var(--el-border-color);" width="16"
+                      :class="{'sortable': sortable }"
+                />
                 <slot :item="item" :index="idx">
                     {{item[titleProp]}}
                 </slot>
@@ -50,6 +56,15 @@ interface Props {
 
 let currentIdx = ref(null)
 
+let over: {
+    pos: any,
+    item: any,
+    dir: any
+}
+let startLoc = 0
+let dragging = false
+let dragFrom = {}
+
 const props = withDefaults(defineProps<Props>(), {
     sortable: true,
     removable: true,
@@ -68,9 +83,31 @@ function setCurrentIndex(idx: number) {
     emit('update:currentIndex', idx)
 }
 
+function startDrag(item, i, e) {
+    startLoc = e.clientY;
+    dragging = true;
+    dragFrom = item;
+}
+
+function finishDrag(item, pos) {
+    props.list.splice(pos, 1)
+    props.list.splice(over.pos, 0, item);
+    over = null
+}
+
+function onDragOver(item, pos, e) {
+    const dir = (this.startLoc < e.clientY) ? 'down': 'up';
+    over = { item, pos, dir }
+}
+
+
 </script>
 
 <style lang="scss">
+
+.sortable {
+    cursor: move
+}
 
 .list-item {
     display: flex;
@@ -79,7 +116,6 @@ function setCurrentIndex(idx: number) {
     padding-bottom: 4px;
     align-items: center;
     justify-content: space-between;
-
 }
 
 .list-item-title {

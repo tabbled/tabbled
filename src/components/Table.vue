@@ -175,7 +175,7 @@ watch(() => props.field, load)
 watch(() => props.datasource, load)
 onMounted(load);
 
-watch(() => props.filters.filters, () => loadNext())
+watch(() => props.filters?.filters, () => loadNext())
 
 async function load() {
     await init();

@@ -96,6 +96,7 @@
                               @edit="editField"
                               @remove="removeField"
                               @insert="insertField"
+                              :sortable="true"
                     >
                         <template #default="{item}">
                             <el-tag style="width: 60px">{{item['type']}}</el-tag>

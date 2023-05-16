@@ -1,9 +1,6 @@
 import {ref, unref, UnwrapRef} from "vue";
 import {ComponentInterface} from "../model/page";
 
-import Table from "../components/Table.vue";
-import LinkSelect from "../components/LinkSelect.vue";
-
 import {Config as TableConfig} from '../components/configuration/table.config'
 import {Config as LinkSelectConfig} from '../components/configuration/link-select.config'
 import {Config as CodeEditorConfig} from '../components/configuration/code-editor.config'
@@ -12,12 +9,6 @@ import {Config as InputConfig} from '../components/configuration/input.config'
 import {Config as DatetimeInputConfig} from '../components/configuration/datetime-select.config'
 import {Config as ImageFieldProps} from '../components/configuration/image-field.config'
 import {Config as StatusFilterProps} from '../components/configuration/status.filter.config'
-import CodeEditor from "../components/CodeEditor.vue";
-import CheckboxField from "../components/CheckboxField.vue";
-import Input from "../components/Input.vue";
-import DateTimeInput from "../components/DateTimeInput.vue";
-import ImageField from "../components/ImageField.vue";
-import StatusFilter from "../components/StatusFilter.vue";
 
 
 export interface ComponentTitle {
@@ -53,16 +44,7 @@ export class ComponentService {
         console.log(`Component ${component.name} is registered`)
     }
 
-    registerAllComponents(app) {
-        app.component('Table', Table);
-        app.component('CodeEditor', CodeEditor)
-        app.component('LinkSelect', LinkSelect)
-        app.component('CheckboxField', CheckboxField)
-        app.component('Input', Input);
-        app.component('DateTimeInput', DateTimeInput);
-        app.component('ImageField', ImageField)
-        app.component('StatusFilter', StatusFilter)
-
+    registerAllComponents() {
         this.registerComponent(new TableConfig)
         this.registerComponent(new LinkSelectConfig)
         this.registerComponent(new CodeEditorConfig)

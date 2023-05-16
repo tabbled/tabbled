@@ -10,12 +10,18 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import './style.css'
 import { Icon } from "@iconify/vue"
-
-// i18n
 import ru from './locales/ru.json'
 import en from './locales/en.json'
 import { createI18n } from 'vue-i18n'
 import {useComponentService} from "./services/component.service";
+import Table from "./components/Table.vue";
+import CodeEditor from "./components/CodeEditor.vue";
+import LinkSelect from "./components/LinkSelect.vue";
+import CheckboxField from "./components/CheckboxField.vue";
+import Input from "./components/Input.vue";
+import DateTimeInput from "./components/DateTimeInput.vue";
+import ImageField from "./components/ImageField.vue";
+import StatusFilter from "./components/StatusFilter.vue";
 const i18n = createI18n({
     messages: {
         ru: ru,
@@ -34,6 +40,14 @@ const app = createApp({
 })
 
 app.component('Icon', Icon)
+app.component('Table', Table);
+app.component('CodeEditor', CodeEditor)
+app.component('LinkSelect', LinkSelect)
+app.component('CheckboxField', CheckboxField)
+app.component('Input', Input);
+app.component('DateTimeInput', DateTimeInput);
+app.component('ImageField', ImageField)
+app.component('StatusFilter', StatusFilter)
 
 let componentService = useComponentService()
 componentService.registerAllComponents(app)

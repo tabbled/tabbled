@@ -14,7 +14,7 @@ export const columnProperties:FieldConfigInterface[] = [
     {
         title: 'Field',
         alias: 'field',
-        type: "string",
+        type: "field",
         required: true
     },
     {

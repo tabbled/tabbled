@@ -30,7 +30,7 @@ interface Props {
     field?: string,
     fieldConfig: FieldConfigInterface,
     multiple?: boolean,
-    filters: Filters
+    filters?: Filters
 }
 
 const props = withDefaults(defineProps<Props>(), {
