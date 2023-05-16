@@ -49,8 +49,9 @@ let type: 'text' | 'textarea' = 'text'
 let isDisabled = ref(false)
 
 
-onMounted(() => {
+onMounted(async () => {
     init()
+    await getValue()
 })
 
 watch(() => props.modelValue,

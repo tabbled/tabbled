@@ -258,7 +258,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         }
     }
 
-    async insert(id: string, value: any): Promise<EntityInterface> {
+    async insert(id: string, value: any, parentId?: string): Promise<EntityInterface> {
         if (this.cached) {
             if (!db.database)
                 return
@@ -288,14 +288,19 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             let dt = new Date().getMilliseconds()
             console.log(this.alias, " insert")
 
+            if (this.isTree) {
+                value.parentId = parentId
+            }
+
             let res = await this.server.emit('dataSources/data/insert', {
                 alias: this.alias,
                 id: id,
+                parentId: this.isTree ? parentId : null,
                 value: value
             })
             console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
-
-            this.emit('item-inserted', id, res.data)
+            console.log(res)
+            this.emit('item-inserted', id, res.data, res.parentId)
             return res
         }
 

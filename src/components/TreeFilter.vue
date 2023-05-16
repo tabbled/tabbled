@@ -66,7 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
     type: 'list',
     keyProp: 'id',
     titleProp: 'name',
-    childrenProp: 'items',
+    childrenProp: 'children',
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -120,13 +120,11 @@ async function getData() {
 
 
     treeData.value = await dataSource.getMany(opt)
+
     isLoading.value = false;
 }
 
 function checked(val, prop) {
-    console.log(prop.checkedKeys)
-    //tree.getCheckedKeys
-
     if (!prop.checkedKeys.length) {
         change(null)
         return

@@ -281,6 +281,7 @@ function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
 
 async function getTreePath(id:string) : Promise<any> {
 
+    console.log('getTreePath', id)
     let item = await dataSource.getById(id)
 
     if (!item)
@@ -292,11 +293,16 @@ async function getTreePath(id:string) : Promise<any> {
         item = await dataSource.getById(item.parentId)
     }
 
+    console.log(pathA)
+
     let d = data.value
     let path = ""
     pathA.forEach(item => {
 
         let index = _.findIndex(d, (o:any) => { return o && o.id == item; });
+
+
+
         d = d[index].children
 
         if (path === "") {
@@ -593,10 +599,11 @@ let onItemUpdated = async (id, item) => {
     emit('change', data.value)
 }
 
-let onItemInserted = async (id, item) => {
-    //console.log('item-inserted', id, item)
-    if (dataSource.isTree && item.parentId) {
-        let path = await getTreePath(item.parentId)
+let onItemInserted = async (id, item, parentId) => {
+    console.log('item-inserted', id, item)
+    if (dataSource.isTree && parentId) {
+
+        let path = await getTreePath(parentId)
         let parentItem = _.get(data.value, path)
 
         if (!parentItem.children) parentItem.children = []
