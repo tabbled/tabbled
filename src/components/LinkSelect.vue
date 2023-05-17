@@ -2,7 +2,7 @@
     <el-select v-if="!fieldConfig"
                :disabled="isDisabled"
     />
-    <el-select v-if="fieldConfig && fieldConfig.type === 'link'"
+    <el-select v-else-if="fieldConfig.type === 'link' && !isTree"
                filterable
                :model-value="value"
                :disabled="isDisabled"
@@ -21,7 +21,18 @@
             :value="item[keyProp]"
         />
     </el-select>
-    <el-select v-else-if="fieldConfig && fieldConfig.type === 'enum'"
+    <el-tree-select v-else-if="fieldConfig.type === 'link' && isTree"
+                    :model-value="value"
+                    style="width: 100%"
+                    :data="data"
+                    :node-key="keyProp"
+                    :props="treeProps"
+                    show-checkbox
+                    check-strictly
+                    :multiple="fieldConfig.isMultiple"
+                    @check="treeChanged"
+    />
+    <el-select v-else-if=" fieldConfig.type === 'enum'"
                filterable
                :model-value="value"
                :disabled="isDisabled"
@@ -51,23 +62,32 @@ let value = ref(null)
 let isDisabled = ref(true)
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
+let isTree = ref(false)
 
 interface Props {
     field: string,
     fieldConfig: FieldConfigInterface,
-    modelValue?: any
+    modelValue?: any,
     keyProp?: string,
     displayProp?: string,
+    childrenProp?: string,
     context?:any,
     title?:string,
     id?: string
 }
 
 
+
 const props = withDefaults(defineProps<Props>(), {
     keyProp: "id",
-    displayProp: "name"
+    displayProp: "name",
+    childrenProp: "children"
 })
+
+const treeProps = {
+    children: props.childrenProp,
+    label: props.displayProp,
+}
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
@@ -78,7 +98,7 @@ onMounted(async () => {
 
 watch(() => props.modelValue,
     async () => {
-        await init()
+        //await init()
         await getValue()
     })
 
@@ -102,6 +122,8 @@ async function init() {
             console.warn(`Link source "${props.fieldConfig.datasource}" for field "${props.fieldConfig.alias}" not found`)
             return
         }
+
+        isTree.value = dataSource.isTree
         await getData()
         await getValue()
     }
@@ -111,6 +133,14 @@ async function init() {
 
 async function getValue() {
     value.value = props.modelValue
+}
+
+function treeChanged(node, prop) {
+    if (props.fieldConfig.isMultiple) {
+        change(prop.checkedKeys)
+    } else {
+        change(node.id === value.value ? null : node.id)
+    }
 }
 
 async function getData(query?: string) {

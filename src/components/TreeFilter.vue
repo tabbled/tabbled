@@ -4,10 +4,11 @@
             <el-tree ref="tree"
                      style="width: 100%"
                      :data="treeData"
+                     :model-value="selected"
                      :node-key="keyProp"
                      :props="treeProps"
                      default-expand-all
-                     check-on-click-node
+                     check-strictly
                      show-checkbox
                      @check="checked"
                      :multiple="multiple"
@@ -18,13 +19,13 @@
         <el-tree-select ref="tree"
                         v-else-if="type === 'dropdown'"
                         style="width: 100%"
-                        v-model="selected"
+                        :model-value="selected"
                         :data="treeData"
                         :node-key="keyProp"
                         :props="treeProps"
                         :render-after-expand="false"
-                        check-on-click-node
                         show-checkbox
+                        check-strictly
                         @check="checked"
                         :multiple="multiple"
         />
@@ -125,16 +126,18 @@ async function getData() {
 }
 
 function checked(val, prop) {
-    if (!prop.checkedKeys.length) {
-        change(null)
-        return
+    if (props.multiple) {
+        change(prop.checkedKeys.length ? prop.checkedKeys : null)
+    } else {
+        change(val.id === selected.value ? null : val.id)
     }
-
-    change(props.multiple ? prop.checkedKeys : prop.checkedKeys[0])
 }
 
 
 function change(value: any) {
+    selected.value = value
+    console.log(selected.value)
+
     emit('update:modelValue', value)
     emit('change', value)
 
