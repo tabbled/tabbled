@@ -59,7 +59,7 @@
                         />
                         <FieldSelect v-else-if="prop.type === 'field'"
                                      style="width: 100%"
-                                     :data-source="pageConfig.datasource"
+                                     :data-source="getDataSource(prop, currentElement)"
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
@@ -238,52 +238,6 @@ function onListRemove(alias:string, idx: number) {
     emit('update', path, lst)
 }
 
-// function populateDataSetsList() {
-//     if (!props.pageConfig)
-//         return;
-//
-//     dataSetOptions.value = props.pageConfig.dataSets.map(item => {
-//         return {
-//             value: item.alias,
-//             label: item.alias
-//         }
-//     })
-//}
-
-//function getDataSourceConfig(prop: FieldConfigInterface): DataSetConfigInterface | undefined {
-
-
-    //props.pageConfig
-
-    //let alias = ""
-
-    // If prop.dataSetField not set, find first field with dataset type
-    // if (!prop.dataSetField) {
-    //     for (const i in properties.value) {
-    //         let f = properties.value[i]
-    //
-    //         if (f.type === 'dataset') {
-    //             alias = _.get(props.pageConfig, _currentPath + '.' + f.alias)
-    //             break
-    //         }
-    //     }
-    // } else {
-    //     alias = alias = _.get(props.pageConfig, _currentPath + '.' + prop.dataSetField)
-    // }
-    //
-    // console.log(alias)
-    //
-    // if (alias === "")
-    //     return undefined;
-    //
-    // for(const i in props.pageConfig.dataSets) {
-    //     if (props.pageConfig.dataSets[i].alias === alias)
-    //         return props.pageConfig.dataSets[i]
-    // }
-
-//    return undefined;
-//}
-
 onMounted(() => {
     if (divToHeight.value)
         scrollHeight.value = window.innerHeight - divToHeight.value.$el.offsetTop - 60
@@ -301,6 +255,20 @@ function onFieldSelectInput(alias: string, value: any, field: FieldConfigInterfa
     if(!currentElement.value['title'] || currentElement.value['title'] === '') {
         currentElement.value['title'] = field.title
     }
+}
+
+//Returns parent's datasource, if not found, then returns page datasource
+function getDataSource() {
+    let items = _currentPath.split('.')
+    items.splice(items.length - 1, 1);
+    let parentPath = items.join('.').toString()
+
+    let parent = _.get(props.pageConfig, parentPath)
+
+    if (!parent || !parent.datasource)
+        return props.pageConfig.datasource
+
+    return parent.datasource
 }
 
 function getValue(prop: FieldConfigInterface, element: any) {

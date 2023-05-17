@@ -17,7 +17,7 @@
             <el-option
                 v-for="item in data[group.key]"
                 :key="item.alias"
-                :label="item.alias"
+                :label="`${item.title} (${item.alias})`"
                 :value="item.alias"
             />
         </el-option-group>

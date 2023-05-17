@@ -118,6 +118,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.isTree = config.isTree
         this.cached = config.cached
         this.server = server
+        this.title = config.title
 
 
         config.fields.forEach(conf => {
@@ -140,6 +141,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     type: DataSourceType
     source: DataSourceSource
     isTree: boolean
+    title: string
 
 
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
@@ -718,6 +720,7 @@ export class PageConfigDataSource extends DataSource {
             alias: 'page',
             keyField: 'alias',
             cached: true,
+            title: 'Pages',
             fields: [{
                 title: 'Title',
                 alias: 'title',
@@ -766,6 +769,7 @@ export class MenuConfigDataSource extends DataSource {
         super({
             type: DataSourceType.config,
             alias: 'menu',
+            title: 'Menus',
             keyField: 'alias',
             cached: true,
             fields: [
@@ -803,6 +807,7 @@ export class DataSourceConfigDataSource extends DataSource {
             type: DataSourceType.config,
             alias: 'datasource',
             keyField: 'alias',
+            title: 'Data sources',
             cached: true,
             fields: [
                 {
@@ -899,6 +904,7 @@ export class FunctionsConfigDataSource extends DataSource {
             alias: 'function',
             keyField: 'alias',
             cached: true,
+            title: 'Functions',
             fields: [
                 {
                     title: 'Title',

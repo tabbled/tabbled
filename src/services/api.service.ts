@@ -50,7 +50,7 @@ export class ApiClient {
         if (env === "development" || localStorage.dev === "dev") {
             url = "http://localhost:3000";
         } else {
-            url = location.protocol + 'api.' + location.host;
+            url = location.protocol + '//api.' + location.host;
         }
         return url;
     }

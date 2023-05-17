@@ -10,7 +10,7 @@
                                 <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{settings.title}}</div>
                             </el-row>
                         </div>
-                        <el-tag v-if="!isConnected" effect="light" size="small" type="danger">Offline</el-tag>
+                        <el-tag v-if="!isConnected && !isSideBarCollapsed" effect="light" size="small" type="danger">Offline</el-tag>
                     </div>
                 </el-header>
                 <el-divider style="margin: 0"/>
