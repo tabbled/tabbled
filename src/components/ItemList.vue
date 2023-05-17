@@ -96,7 +96,7 @@ function finishDrag(item, pos) {
 }
 
 function onDragOver(item, pos, e) {
-    const dir = (this.startLoc < e.clientY) ? 'down': 'up';
+    const dir = (startLoc < e.clientY) ? 'down': 'up';
     over = { item, pos, dir }
 }
 

@@ -136,7 +136,6 @@ function checked(val, prop) {
 
 function change(value: any) {
     selected.value = value
-    console.log(selected.value)
 
     emit('update:modelValue', value)
     emit('change', value)

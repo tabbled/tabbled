@@ -45,7 +45,7 @@ const props = defineProps<{
 
 let value = ref<string | Array<string>>()
 let multiValue = ref<Array<string>>([])
-let type: 'text' | 'textarea' = 'text'
+let type = ref<'text' | 'textarea'>('text')
 let isDisabled = ref(false)
 
 
@@ -82,10 +82,11 @@ function inputMulti(val, index) {
 function init() {
     if (props.fieldConfig) {
         switch (props.fieldConfig.type) {
-            case "text": type = 'textarea'; break;
-            default: type = 'text';
+            case "text": type.value = 'textarea'; break;
+            default: type.value = 'text';
         }
     }
+
     isDisabled.value = !(!!props.fieldConfig)
 
 }

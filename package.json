@@ -1,7 +1,7 @@
 {
   "name": "tabbled-web",
   "private": true,
-  "version": "0.3.12",
+  "version": "0.3.14",
   "type": "module",
   "license": "MIT",
   "scripts": {
