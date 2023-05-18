@@ -59,7 +59,7 @@
                         />
                         <FieldSelect v-else-if="prop.type === 'field'"
                                      style="width: 100%"
-                                     :data-source="getDataSource(prop, currentElement)"
+                                     :data-source="getDataSource()"
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
