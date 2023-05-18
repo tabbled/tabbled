@@ -35,8 +35,9 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['change', 'update:modelValue'])
 
 
-onMounted(() => {
-    init()
+onMounted(async () => {
+    await init()
+    await getValue()
 })
 
 function init() {
@@ -57,6 +58,7 @@ function init() {
 watch(() => props.fieldConfig,
     async () => {
         init()
+        await getValue()
     })
 
 
