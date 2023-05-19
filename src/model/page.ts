@@ -54,7 +54,7 @@ export interface ComponentInterface {
     icon?: string,
     group?: string,
     properties: FieldConfigInterface[],
-    filterable?: boolean,
+    filterable?: boolean, // If component can be filtered, then it must have property 'filters'
     defaultPosition: {
         cols: number,
         rows: number

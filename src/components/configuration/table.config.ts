@@ -28,6 +28,16 @@ export class Config implements ComponentInterface {
             type: 'bool',
             default: true
         },{
+            title: "Height",
+            alias: "height",
+            type: 'number',
+            default: null
+        },{
+            title: "Fill available height",
+            alias: "fillHeight",
+            type: 'bool',
+            default: false
+        },{
             title: "Action buttons are visible",
             alias: "actionButtonsVisible",
             type: 'bool',

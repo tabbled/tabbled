@@ -1,6 +1,6 @@
 <template>
-    <div class="page-view">
-        <el-page-header ref="mainHeader" style="padding: 0; padding-bottom: 16px" @back="$router.back()">
+    <div class="page-view" ref="page">
+        <el-page-header ref="mainHeader" style="padding: 16px" @back="$router.back()">
             <template #content>
                 <span class="text-large font-600 mr-3"> {{route.meta.title}} </span>
             </template>
@@ -22,11 +22,12 @@
             </template>
         </el-page-header>
 
-        <el-form  class="grid-wrap" :model="editEntity" label-position="top">
+        <el-form ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
 
             <el-form-item v-for="(element, idx) in elements"
                           :label="getLabelElement(element)"
                           :style="getGridElementStyle(element.layout)"
+
                           class="element">
 
                 <component :id="element.id || idx.toString()"
@@ -74,11 +75,12 @@ const scriptContext = ref({
 const pageHeader = usePageHeader()
 
 let elements = ref<Array<ElementInterface>>([])
-let grid = ref(null)
+let page = ref(null)
 let isEditPage = ref(false)
 let componentService = useComponentService()
 let dsService = useDataSourceService()
 let settings = useSettings()
+let elems = ref([])
 
 let editEntity = ref<EntityInterface>(null)
 let editDataSource: DataSourceInterface = null
@@ -116,6 +118,7 @@ onMounted(async () => {
     await init()
     setAppTitle()
 })
+
 
 function setAppTitle() {
     document.title = `${route.meta.title} | ${ settings.title }`
@@ -182,13 +185,16 @@ function getField(el:ElementInterface) {
 
 
 async function cancel() {
-    console.log('cancel')
-    //
-    // if (editingDataSet.value && editingDataSet.value.isChanged()) {
-    //     editingDataSet.value.rollback()
-    // }
-
     router.back();
+}
+
+function setComponentAvailableHeight() {
+    for(let i in elements.value) {
+        let item = elements.value[i]
+        if (item.props.fillHeight) {
+            item.props.height = page.value.clientHeight - 16
+        }
+    }
 }
 
 async function init() {
@@ -252,12 +258,16 @@ async function init() {
 
         elProps.properties.forEach(item => {
             el.props[item.alias] = _.cloneDeep(element[item.alias])
+
+
         })
         el.props['context'] = scriptContext.value
 
         if (elProps.filterable || elProps.group === 'Filters') {
             el.props['filters'] = filters
         }
+
+        if (elProps.properties)
 
         elements.value.push(el)
     })
@@ -294,6 +304,8 @@ async function init() {
     if (actions.value.onOpen) {
         await execAction(actions.value.onOpen)
     }
+
+    setComponentAvailableHeight()
 }
 
 function getLabelElement(el) {
@@ -355,16 +367,15 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
 <style lang="scss">
 
 .page-view {
-    margin: 16px;
+    height: inherit;
 }
 
 .grid-wrap {
-
+    margin: 16px;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: 10px;
     grid-auto-rows: minmax(20px, auto);
-    width: 100%;
     grid-auto-flow: dense
 }
 

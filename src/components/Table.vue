@@ -36,6 +36,7 @@
             :data="data"
             :fit="true"
             row-key="id"
+            :height="getHeight()"
             highlight-current-row
             :header-cell-class-name="getHeaderCellClass"
             :header-row-class-name="getHeaderClass"
@@ -105,6 +106,7 @@ import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../mode
 import {useI18n} from "vue-i18n";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Filters} from "../model/filter";
+import { useElementBounding } from '@vueuse/core'
 
 interface Props {
     id: string,
@@ -125,12 +127,15 @@ interface Props {
     onClickAdd?: () => (void)
     onClickEdit?: () => (void)
     onClickDelete?: () => (void),
-    filters?: Filters
+    filters?: Filters,
+    height?: number,
+    fillHeight?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
     actionButtonsVisible: true,
-    infinitiveScroll: false
+    infinitiveScroll: false,
+    fillHeight: false
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -159,6 +164,10 @@ let searchText = ref('')
 let loadingData = ref(false)
 let sort = ref<{order: string | null, prop: string | null}>(null)
 let canSearch = ref(false)
+let availableHeight = 200
+
+const tableBounding = useElementBounding(table)
+
 
 
 let data = ref<Array<any>>([])
@@ -173,9 +182,18 @@ watch(() => props.modelValue,
 
 watch(() => props.field, load)
 watch(() => props.datasource, load)
-onMounted(load);
+onMounted(async () => {
+    await load()
+});
 
 watch(() => props.filters?.filters, () => loadNext())
+
+function getHeight() {
+    if (props.fillHeight) {
+        return props.height - tableBounding.top.value
+    }
+    return props.height ? props.height : null
+}
 
 async function load() {
     await init();
@@ -200,7 +218,7 @@ async function addSibling() {
 
 
     let item = await generateEntityWithDefault(dataSource.fields)
-    console.log(item.id, item, currentId.value)
+    //console.log(item.id, item, currentId.value)
 
     let parentId = null
     if (currentId.value) {
