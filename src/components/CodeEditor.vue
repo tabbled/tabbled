@@ -39,6 +39,7 @@ import {onMounted, ref, shallowRef, watch} from "vue";
 import {Codemirror} from 'vue-codemirror'
 import {javascript} from '@codemirror/lang-javascript'
 import {json} from '@codemirror/lang-json'
+import {html} from '@codemirror/lang-html'
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {FieldConfigInterface} from "../model/field";
 
@@ -47,7 +48,7 @@ interface Props {
     field?: string,
     fieldConfig?: FieldConfigInterface,
     context?:any,
-    format: 'json' | 'javascript',
+    format: 'json' | 'javascript' | 'html',
     runnable: boolean,
     maxHeight: number
     update?: number
@@ -105,6 +106,8 @@ function setExtensions() {
         arr.push(json())
     if (props.format === 'javascript')
         arr.push(javascript())
+    if (props.format === 'html')
+        arr.push(html())
 
     extensions.value = arr
 }

@@ -801,6 +801,48 @@ export class MenuConfigDataSource extends DataSource {
     }
 }
 
+export class ReportConfigDataSource extends DataSource {
+    constructor(server: ServerInterface) {
+        super({
+            type: DataSourceType.config,
+            alias: 'report',
+            title: 'Reports',
+            cached: true,
+            fields: [
+                {
+                    title: 'Alias',
+                    alias: 'alias',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Title',
+                    alias: 'title',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Template',
+                    alias: 'template',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Script',
+                    alias: 'script',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Test data',
+                    alias: 'testData',
+                    type: "string",
+                    required: true
+                },
+            ]}, server);
+    }
+}
+
 export class DataSourceConfigDataSource extends DataSource {
     constructor(server: ServerInterface) {
         super({

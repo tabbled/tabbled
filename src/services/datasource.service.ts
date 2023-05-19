@@ -6,8 +6,7 @@ import {
     DataSourceConfigInterface,
     DataSourceInterface, DataSourceSource,
     DataSourceType, FieldDataSource, FunctionsConfigDataSource,
-    MenuConfigDataSource,
-    PageConfigDataSource
+    MenuConfigDataSource, PageConfigDataSource, ReportConfigDataSource
 } from "../model/datasource";
 
 import {useSyncService} from "./sync.service";
@@ -23,10 +22,11 @@ export class DataSourceService {
     private dataSources: Map<string, DataSourceInterface> = new Map()
     private configDataSources: Map<string, DataSourceInterface> = new Map()
 
-    pagesDataSource = new PageConfigDataSource(null)
+    pageDataSource = new PageConfigDataSource(null)
     dsDataSource = new DataSourceConfigDataSource(null)
     menuDataSource = new MenuConfigDataSource(null)
     functionDataSource = new FunctionsConfigDataSource(null)
+    reportDataSource = new ReportConfigDataSource(null)
 
     async getByAlias(alias: string) {
         if (this.dataSources.has(alias)) {
@@ -118,9 +118,10 @@ export class DataSourceService {
 
     async registerConfig() {
         this.addDataSource(this.dsDataSource);
-        this.addDataSource(this.pagesDataSource);
+        this.addDataSource(this.pageDataSource);
         this.addDataSource(this.menuDataSource);
         this.addDataSource(this.functionDataSource);
+        this.addDataSource(this.reportDataSource)
 
         syncService.setConfigDataSources(this.configDataSources)
     }

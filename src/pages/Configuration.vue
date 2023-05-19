@@ -87,7 +87,16 @@
         </el-tab-pane>
 
         <el-tab-pane label="Report templates" name="reports">
-            Report templates coming soon
+
+            <Table :columns="reportColumns"
+                   id="reps"
+                   :context="{}"
+                   datasource="report"
+                   @row-dbl-click="editReport"
+                   :readonly="true"
+                   :on-click-add="addReport"
+            />
+
         </el-tab-pane>
     </el-tabs>
 </template>
@@ -148,6 +157,24 @@ const funcColumns:ColumnConfigInterface[] = [
         "sortable": true
     }
 ]
+
+const reportColumns:ColumnConfigInterface[] = [
+    {
+        "id": "1",
+        "field": "alias",
+        "title": "alias",
+        "width": 150,
+        "sortable": true
+    },
+    {
+        "id": "2",
+        "field": "title",
+        "title": "Title",
+        "width": 200,
+        "sortable": true
+    }
+]
+
 const dsColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
@@ -336,6 +363,14 @@ function addMenu() {
 
 function editMenu(ctx) {
     router.push(`/configuration/menus/${ctx.id}`)
+}
+
+function addReport() {
+    router.push(`/configuration/reports/new`)
+}
+
+function editReport(ctx) {
+    router.push(`/configuration/reports/${ctx.id}`)
 }
 
 

@@ -19,7 +19,7 @@ export class PageHeader {
 class PageScriptHelper {
     constructor(router: Router) {
         this._router = router
-        this._pageDataSource = dsService.pagesDataSource
+        this._pageDataSource = dsService.pageDataSource
     }
 
     private _router:Router = null

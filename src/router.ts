@@ -8,6 +8,7 @@ import FunctionEdit from "./pages/FunctionEdit.vue";
 import DataSourceEdit from "./pages/DataSourceEdit.vue";
 import MenuEdit from "./pages/MenuEdit.vue";
 import {Settings} from "./services/settings.service";
+import ReportEdit from "./pages/ReportEdit.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -44,6 +45,16 @@ const routes: RouteRecordRaw[] = [
             isSingle: false,
             authRequired: true,
             title: "Function"
+        },
+    },
+    {
+        name: 'reportEdit',
+        path: "/configuration/reports/:id",
+        component: ReportEdit,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "Report"
         },
     },
     {
