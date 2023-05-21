@@ -834,8 +834,8 @@ export class ReportConfigDataSource extends DataSource {
                     required: true
                 },
                 {
-                    title: 'Test data',
-                    alias: 'testData',
+                    title: 'Test context',
+                    alias: 'testContext',
                     type: "string",
                     required: true
                 },

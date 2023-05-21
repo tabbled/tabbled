@@ -42,8 +42,7 @@ services:
       - S3_ENDPOINT=${S3_ENDPOINT}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-      - JSREPORT_HOST=${JSREPORT_HOST}
-      - JSREPORT_PORT=${JSREPORT_PORT}
+      - JSREPORT_URL=${JSREPORT_URL}
       - APP_TITLE=${APP_TITLE}
       - APP_FAVICON=N=${APP_FAVICON}
     extra_hosts:
@@ -93,7 +92,7 @@ services:
     container_name: jsreport
     restart: always
     ports:
-      - "${JSREPORT_PORT}:5488"
+      - "5488:5488"
 
 volumes:
   pg_data:

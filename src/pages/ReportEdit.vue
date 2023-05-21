@@ -36,7 +36,7 @@
 
             <el-tab-pane label="Template" name="template">
                 <el-form-item >
-                    <el-button text type="primary" style="margin-bottom: 8px"  @click="run();">
+                    <el-button text type="primary" style="margin-bottom: 8px"  @click="render();">
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
                         Render
                     </el-button>
@@ -66,15 +66,15 @@
                 </el-form-item>
             </el-tab-pane>
 
-            <el-tab-pane label="Test data" name="testData">
+            <el-tab-pane label="Test context" name="testContext">
 
                 <el-form-item>
-                    <CodeEditor :field-config="getField('testData')"
-                                field="context"
+                    <CodeEditor :field-config="getField('testContext')"
+                                field="testContext"
                                 format="json"
                                 :runnable="false"
-                                :model-value="getValue('testData')"
-                                @change="(val) => setValue('testData', val)"
+                                :model-value="getValue('testContext')"
+                                @change="(val) => setValue('testContext', val)"
                     />
                 </el-form-item>
 
@@ -189,11 +189,19 @@ const context: ComputedRef<any> = computed((): any =>  {
     }
 })
 
-function run() {
-    socket.emit('reports/render', {
-        alias: reportEntity.value.alias,
-        context: context.value
-    })
+async function render() {
+    try {
+        let rep = await socket.emit('reports/renderById', {
+            id: reportEntity.value.id
+        })
+
+        const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: 'application/pdf'}));
+        window.open(objectUrl)
+        URL.revokeObjectURL(objectUrl)
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
 }
 
 
