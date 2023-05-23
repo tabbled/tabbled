@@ -52,7 +52,7 @@
 
             <el-tab-pane label="Preparing script" name="script">
                 <el-form-item>
-                    <el-button text type="primary" style="margin-bottom: 8px"  @click="run();">
+                    <el-button text type="primary" style="margin-bottom: 8px"  @click="render();">
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
                         Run
                     </el-button>
