@@ -31,6 +31,7 @@ interface Props {
     modelValue: any,
     field: FieldInterface,
     context?:any,
+    item?:any
 
 }
 
@@ -101,6 +102,11 @@ async function getLinkValue() {
     if (props.field.config.getValue) {
         displayValue.value = await props.modelValue
         return;
+    }
+
+    if (props.item && props.item[`_${props.field.alias}_title`]) {
+        displayValue.value = props.item[`_${props.field.alias}_title`]
+        return
     }
 
     displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';

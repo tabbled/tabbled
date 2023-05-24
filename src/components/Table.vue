@@ -70,6 +70,7 @@
                     <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
                           :context="getRowContext(scope)"
+                          :item="scope.row"
                     />
                 </div>
 
@@ -342,6 +343,9 @@ async function getData() {
 
     if (props.field) {
         data.value = props.modelValue
+
+        console.log(dataSource)
+
         await dataSource.setData(props.modelValue)
     } else {
         await loadNext()

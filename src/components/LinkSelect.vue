@@ -56,7 +56,7 @@ import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 
 let isLoading = ref(false)
-let data = ref<Array<object>>([])
+let data = ref<Array<any>>([])
 let source: DataSourceInterface = null
 let value = ref(null)
 let isDisabled = ref(true)
@@ -133,6 +133,20 @@ async function init() {
 
 async function getValue() {
     value.value = props.modelValue
+
+    if (value.value && !itemExists()) {
+        let item = await dataSource.getById(value.value)
+        if (item)
+            data.value.push(item)
+    }
+}
+
+function itemExists() : boolean {
+    for(let i in data.value) {
+        if (data.value[i].id === value.value)
+            return true
+    }
+    return false
 }
 
 function treeChanged(node, prop) {
@@ -150,6 +164,7 @@ async function getData(query?: string) {
         filter: [],
         take: 50
     }
+
     if (query) {
         opt.filter.push({
             key: props.displayProp,

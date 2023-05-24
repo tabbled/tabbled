@@ -711,6 +711,10 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
             await this.updateById(id, item)
         }
     }
+
+    async setData(items: EntityInterface[]):Promise<void> {
+        this.data = items
+    }
 }
 
 export class PageConfigDataSource extends DataSource {
