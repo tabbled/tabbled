@@ -2,6 +2,7 @@
 
     <el-upload class="avatar-uploader"
                :show-file-list="false"
+               дш
                :action="actionUrl"
                :on-success="uploaded"
                :on-error="handleError"

@@ -71,6 +71,7 @@
                           :field="getField(element.field)"
                           :context="getRowContext(scope)"
                           :item="scope.row"
+                          :column="element"
                     />
                 </div>
 

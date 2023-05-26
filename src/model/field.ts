@@ -59,7 +59,8 @@ export interface FieldConfigInterface {
     getListValues?: string             // Evaluate when list or enum field gets values for dropdown menu
     setValue?: string             // Evaluate when value changed manually by user or by another script
     getReadonly?: string
-    dataSetField?: string               // For 'field' type that used for looking fields list in set dataset on PageSettingPanel
+    dataSetField?: string, // For 'field' type that used for looking fields list in set dataset on PageSettingPanel
+    format?: string
 }
 
 export interface FieldInterface {

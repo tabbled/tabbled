@@ -12,7 +12,7 @@
                 {{item}}
             </el-tag>
         </div>
-        <div v-else>
+        <div v-else :class="{ 'wordwrap': column && column.wordwrap }">
             {{displayValue}}
         </div>
     </div>
@@ -31,7 +31,8 @@ interface Props {
     modelValue: any,
     field: FieldInterface,
     context?:any,
-    item?:any
+    item?:any,
+    column: any
 
 }
 
@@ -50,7 +51,7 @@ onMounted(async () => {
 
 watch(() => props.modelValue,
     async () => {
-        //console.log('update', props.modelValue)
+
         await getData()
     },
     {
@@ -62,6 +63,8 @@ async function getData() {
     if (!props.field) {
         return
     }
+
+    console.log('update', props.column)
 
 
     if (props.field.config.getValue) {
@@ -81,7 +84,7 @@ async function getData() {
         case "string": displayValue.value = props.modelValue; break;
         case "enum": await getEnumValue(); break;
         case "link": await getLinkValue(); break;
-        case "number": displayValue.value = formatNumber(props.modelValue, props.field.precision); break;
+        case "number": displayValue.value = formatNumber(props.modelValue, props.field.precision, props.field.config.format); break;
         case "date": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY'); break;
         case "time": displayValue.value = dayjs(props.modelValue).format('hh:mm:ss'); break;
         case "datetime": displayValue.value = dayjs(props.modelValue).format('DD.MM.YYYY hh:mm:ss'); break;
@@ -89,11 +92,15 @@ async function getData() {
     }
 }
 
-function formatNumber(value: any, precision: number) {
+function formatNumber(value: any, precision: number, format: any) {
     if (value === undefined || value === null || value === "")
         return "";
 
-    return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
+    if (format && format !== 'none') {
+        return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
+    }
+
+    return value
 }
 
 
@@ -219,6 +226,10 @@ async function getValueFunc() {
         }
 
     }
+}
+
+.wordwrap {
+    white-space: normal;
 }
 
 </style>

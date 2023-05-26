@@ -54,6 +54,18 @@
                     <el-input v-model="modelValue.default"></el-input>
                 </el-form-item>
 
+                <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.format')">
+                    <el-select v-model="modelValue.format" >
+                        <el-option
+                            v-for="item in numberFormats"
+                            :key="item.key"
+                            :label="item.label"
+                            :value="item.key"
+                        >
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+
                 <el-form-item v-if="modelValue.type === 'enum'" :label="t('fieldConfig.values')">
                     <ItemList key-prop="alias"
                               title-prop="title"
@@ -69,6 +81,9 @@
                         </template>
                     </ItemList>
                 </el-form-item>
+
+
+
             </el-tab-pane>
 
             <el-tab-pane label="Customizing">
@@ -130,6 +145,12 @@ const fieldTypes = ref<Array<ListItem>>([])
 const dataSources = ref<Array<ListItem>>([])
 
 let dsService = useDataSourceService()
+
+let numberFormats:Array<ListItem> = [
+    { key: "none", label: "None"},
+    { key: "decimal", label: "Decimal"},
+    { key: "currency", label: "Currency"}
+]
 
 onMounted(async () => {
     getFieldDataTypes().forEach(key => {

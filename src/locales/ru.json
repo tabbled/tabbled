@@ -19,6 +19,7 @@
         "isMultiple": "Мультивыбор",
         "type": "Тип",
         "precision": "Точность",
+        "format": "Формат",
         "values": "Список значений"
     },
     "menuConfig": {

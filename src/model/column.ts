@@ -47,4 +47,10 @@ export const columnProperties:FieldConfigInterface[] = [
         alias: 'readonly',
         type: "bool",
         default: false
+    },
+    {
+        title: 'Word wrap',
+        alias: 'wordwrap',
+        type: "bool",
+        default: false
     }]

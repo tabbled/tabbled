@@ -25,6 +25,7 @@
         "isTree": "Tree",
         "type": "Type",
         "precision": "Precision",
+        "format": "Format",
         "values": "Values",
         "getListValues": "Get list",
         "getValue": "Get value",
