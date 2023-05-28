@@ -64,9 +64,6 @@ async function getData() {
         return
     }
 
-    console.log('update', props.column)
-
-
     if (props.field.config.getValue) {
         try {
             displayValue.value  = await getValueFunc()
