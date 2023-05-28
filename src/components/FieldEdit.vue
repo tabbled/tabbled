@@ -66,6 +66,10 @@
                     </el-select>
                 </el-form-item>
 
+                <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.autoincrement')">
+                    <el-checkbox v-model="modelValue.autoincrement"/>
+                </el-form-item>
+
                 <el-form-item v-if="modelValue.type === 'enum'" :label="t('fieldConfig.values')">
                     <ItemList key-prop="alias"
                               title-prop="title"

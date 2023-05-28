@@ -20,6 +20,7 @@
         "type": "Тип",
         "precision": "Точность",
         "format": "Формат",
+        "autoincrement": "Счетчик",
         "values": "Список значений"
     },
     "menuConfig": {

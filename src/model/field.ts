@@ -9,6 +9,9 @@ export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'en
 export type FieldType = FieldComponentType | FieldDataType
 export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action'
 
+export type NumericFormatType = 'none' | 'decimal' | 'currency'
+export type FormatType = NumericFormatType
+
 export function getFieldDataTypes():Array<FieldDataType> {
     return [
         'number',
@@ -60,7 +63,8 @@ export interface FieldConfigInterface {
     setValue?: string             // Evaluate when value changed manually by user or by another script
     getReadonly?: string
     dataSetField?: string, // For 'field' type that used for looking fields list in set dataset on PageSettingPanel
-    format?: string
+    format?: FormatType,
+    autoincrement?: boolean
 }
 
 export interface FieldInterface {

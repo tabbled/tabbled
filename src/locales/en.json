@@ -26,6 +26,7 @@
         "type": "Type",
         "precision": "Precision",
         "format": "Format",
+        "autoincrement": "Auto increment",
         "values": "Values",
         "getListValues": "Get list",
         "getValue": "Get value",
