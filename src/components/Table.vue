@@ -300,8 +300,6 @@ function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
 }
 
 async function getTreePath(id:string) : Promise<any> {
-
-    console.log('getTreePath', id)
     let item = await dataSource.getById(id)
 
     if (!item)
@@ -312,8 +310,6 @@ async function getTreePath(id:string) : Promise<any> {
         pathA.unshift(item.parentId)
         item = await dataSource.getById(item.parentId)
     }
-
-    console.log(pathA)
 
     let d = data.value
     let path = ""
@@ -343,6 +339,7 @@ async function getData() {
     }
 
     if (props.field) {
+        console.log('getData', props.field)
         data.value = props.modelValue
 
         console.log(dataSource)
@@ -634,7 +631,7 @@ let onItemInserted = async (id, item, parentId) => {
         parentItem.children.push(item)
 
     } else {
-        data.value.push(item)
+        //data.value.push(item)
     }
     emit('update:modelValue', data.value)
     emit('change', data.value)

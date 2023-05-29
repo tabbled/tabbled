@@ -671,7 +671,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     }
 
     async insert(id: string, value: any): Promise<EntityInterface> {
-        console.log(id, value)
+        console.log(id, this)
         value.id = id
         this.data.push(value)
         this.emit('item-inserted', id, value)
@@ -713,7 +713,9 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     }
 
     async setData(items: EntityInterface[]):Promise<void> {
-        this.data = items
+        console.log('setData', items)
+        this.data = !items ? [] : items
+        this.emit('update', this.data)
     }
 }
 
