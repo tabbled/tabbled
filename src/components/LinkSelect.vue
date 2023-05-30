@@ -134,7 +134,7 @@ async function init() {
 async function getValue() {
     value.value = props.modelValue
 
-    if (value.value && !itemExists()) {
+    if (dataSource && value.value && !itemExists()) {
         let item = await dataSource.getById(value.value)
         if (item)
             data.value.push(item)

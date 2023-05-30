@@ -269,7 +269,7 @@ function remove() {
             if (actions.value.onRemove) {
                 execAction(actions.value.onRemove)
             } else {
-                console.log(data.value)
+                //console.log(data.value)
                 if (selectedIds.value.length) {
 
                     selectedIds.value.forEach(id => {
@@ -295,9 +295,9 @@ function sortChange(e) {
     loadNext()
 }
 
-function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
-    resolve([])
-}
+// function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
+//     resolve([])
+// }
 
 async function getTreePath(id:string) : Promise<any> {
     let item = await dataSource.getById(id)
@@ -311,7 +311,7 @@ async function getTreePath(id:string) : Promise<any> {
         item = await dataSource.getById(item.parentId)
     }
 
-    let d = data.value
+    let d = dataSource.data
     let path = ""
     pathA.forEach(item => {
 
@@ -382,8 +382,8 @@ async function loadNext(skip: number = 0) {
     try {
         let nextVal = await dataSource.getMany(options);
         canLoadNext.value = nextVal.length === options.take
-        data.value = skip === 0 ? nextVal : data.value.concat( nextVal )
-
+        //data.value = dataSource.data
+        //emit('change', dataSource.data)
     } catch (e) {
         console.error(e)
         ElMessage.error(e.toString())
@@ -605,69 +605,49 @@ let onItemUpdated = async (id, item) => {
 
     //console.log('item-updated', id, item)
 
-    if (dataSource.isTree) {
-        let path = await getTreePath(id)
-        _.set(data.value, path, item)
-    } else {
-        let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
-        if (idx >= 0)
-            data.value[idx] = item
-    }
+    // if (dataSource.isTree) {
+    //     let path = await getTreePath(id)
+    //     _.set(data.value, path, item)
+    // } else {
+    //     let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
+    //     if (idx >= 0)
+    //         data.value[idx] = item
+    // }
 
+    data.value = dataSource.data
 
-    emit('update:modelValue', data.value)
-    emit('change', data.value)
+    emit('update:modelValue', dataSource.data)
+    emit('change', dataSource.data)
 }
 
-let onItemInserted = async (id, item, parentId) => {
+let onItemInserted = async (id, item) => {
     console.log('item-inserted', id, item)
-    if (dataSource.isTree && parentId) {
 
-        let path = await getTreePath(parentId)
-        let parentItem = _.get(data.value, path)
-
-        if (!parentItem.children) parentItem.children = []
-
-        parentItem.children.push(item)
-
-    } else {
-        //data.value.push(item)
-    }
-    emit('update:modelValue', data.value)
-    emit('change', data.value)
+    data.value = dataSource.data
+    emit('update:modelValue', dataSource.data)
+    emit('change', dataSource.data)
 }
 
 let onItemRemoved = async (id, item) => {
-    //console.log('item-removed', id, item)
-    if (dataSource.isTree) {
-        let path = await getTreePath(item.parentId)
-        let parentItem = _.get(data.value, path)
+    console.log('item-removed', id, item)
 
-        for(let i in parentItem.children) {
-            if (parentItem.children[i].id === id) {
-                parentItem.children.splice(i, 1)
-            }
-        }
-    } else {
-        let idx = _.findIndex(data.value, (o: any) => {
-            return o && o.id == id;
-        })
-        if (idx >= 0)
-            data.value.splice(idx, 1)
-    }
-    emit('update:modelValue', data.value)
-    emit('change', data.value)
+    data.value = dataSource.data
+    emit('update:modelValue', dataSource.data)
+    emit('change', dataSource.data)
 }
 
 let onDataSourceUpdate = async (dt) => {
     console.log('updated', dt)
-    data.value = dt
-    emit('update:modelValue', data.value)
-    emit('change', data.value)
+
+    data.value = dataSource.data
+
+    emit('update:modelValue', dataSource.data)
+    emit('change', dataSource.data)
 }
 
 async function init() {
     setCurrentCell(null)
+
     data.value = []
 
 
@@ -678,6 +658,7 @@ async function init() {
     actions.value.onRemove = await compileAction(props.onRemove)
 
     if (props.datasource) {
+
         dataSource = await dsService.getByAlias(props.datasource)
     }
 
