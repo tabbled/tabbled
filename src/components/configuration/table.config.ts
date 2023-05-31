@@ -38,6 +38,11 @@ export class Config implements ComponentInterface {
             type: 'bool',
             default: false
         },{
+            title: "Show count",
+            alias: "showCount",
+            type: 'bool',
+            default: false
+        },{
             title: "Action buttons are visible",
             alias: "actionButtonsVisible",
             type: 'bool',

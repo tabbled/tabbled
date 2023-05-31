@@ -82,9 +82,13 @@
         </el-table-column>
 
         <template #append >
-            <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext(data.length)">
-                Load next entities
-            </el-button>
+            <div style="display: flex; flex-direction: row; align-items: center">
+                <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext(data.length)">
+                    Load next entities
+                </el-button>
+                <div v-if="showCount" style="padding-left: 8px">Count: {{itemsCount}}</div>
+            </div>
+
         </template>
     </el-table>
 </template>
@@ -131,13 +135,15 @@ interface Props {
     onClickDelete?: () => (void),
     filters?: Filters,
     height?: number,
-    fillHeight?: boolean
+    fillHeight?: boolean,
+    showCount?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
     actionButtonsVisible: true,
     infinitiveScroll: false,
-    fillHeight: false
+    fillHeight: false,
+    showCount: false
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -167,6 +173,7 @@ let loadingData = ref(false)
 let sort = ref<{order: string | null, prop: string | null}>(null)
 let canSearch = ref(false)
 let availableHeight = 200
+let itemsCount = ref(0)
 
 const tableBounding = useElementBounding(table)
 
@@ -380,10 +387,9 @@ async function loadNext(skip: number = 0) {
     }
 
     try {
-        let nextVal = await dataSource.getMany(options);
-        canLoadNext.value = nextVal.length === options.take
-        //data.value = dataSource.data
-        //emit('change', dataSource.data)
+        await dataSource.getMany(options);
+        canLoadNext.value = dataSource.hasNext()
+        itemsCount.value = dataSource.count()
     } catch (e) {
         console.error(e)
         ElMessage.error(e.toString())

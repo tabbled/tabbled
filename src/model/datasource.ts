@@ -89,7 +89,11 @@ export interface DataSourceInterface extends EventEmitter {
     setData?(items: EntityInterface[]): Promise<void>
     setValue(id: string, field: string, value: any): Promise<void>
 
+    hasNext() : boolean
+    count(): number
+
     getFieldByAlias(alias: string): FieldInterface | undefined
+
 }
 
 export interface DataSourceConfigInterface {
@@ -144,6 +148,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     isTree: boolean
     title: string
     _data: EntityInterface[] = []
+    _count: 0
 
 
     async getChildren(id: string) : Promise<EntityInterface | undefined> {
@@ -168,16 +173,19 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         } else {
             let dt = new Date().getMilliseconds()
             console.log("getMany from server, options: ", options)
-            items = await this.server.emit('dataSources/data/getMany', {
+            let data = await this.server.emit('dataSources/data/getMany', {
                 alias: this.alias,
                 options: options
             })
+            items = data.items
             console.log(`${this.alias}, got items: ${items.length}; timing, ms: ${new Date().getMilliseconds() - dt}`)
             //return res
+            this._count = data.count
 
         }
 
         this._data = options.skip === 0 ? items : this._data.concat( items )
+
         this.emit('update')
         return this._data;
     }
@@ -465,6 +473,14 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             })
         return f
     }
+
+    hasNext():boolean {
+        return this._data.length < this._count
+    }
+
+    count(): number {
+        return this._count
+    }
 }
 
 export class CustomDataSource extends EventEmitter implements DataSourceInterface {
@@ -629,6 +645,20 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
         await this.model.setValue(id, field, value)
     }
+
+    hasNext():boolean {
+        if (!this.model || !(this.model.hasNext instanceof Function))
+            return false;
+
+        return this.model.hasNext()
+    }
+
+    count(): number {
+        if (!this.model || !(this.model.count instanceof Function))
+            return 0;
+
+        return this.model.count()
+    }
 }
 
 export class FieldDataSource extends EventEmitter implements DataSourceInterface {
@@ -741,6 +771,14 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 
     async setData(items: EntityInterface[]):Promise<void> {
         this._data = !items ? [] : _.cloneDeep(items)
+    }
+
+    hasNext():boolean {
+        return false
+    }
+
+    count(): number {
+        return this._data.length
     }
 }
 
