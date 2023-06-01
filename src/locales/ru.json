@@ -21,7 +21,8 @@
         "precision": "Точность",
         "format": "Формат",
         "autoincrement": "Счетчик",
-        "values": "Список значений"
+        "values": "Список значений",
+        "searchable": "Текстовый поиск по полю"
     },
     "menuConfig": {
         "title": "Название",

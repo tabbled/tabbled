@@ -31,7 +31,8 @@
         "getListValues": "Get list",
         "getValue": "Get value",
         "setValue": "Set value",
-        "getReadonly": "Readonly"
+        "getReadonly": "Readonly",
+        "searchable": "Searchable"
     },
     "menuConfig": {
         "title": "Title",

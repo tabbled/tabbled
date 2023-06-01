@@ -31,6 +31,7 @@ export interface EntityInterface {
 
 export interface GetDataManyOptions {
     filter?: FilterItemInterface[]
+    search?: string
     take?: number
     skip?: number
     sort?: {
@@ -160,7 +161,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     }
 
     get data(): EntityInterface[] {
-        return this._data
+        return _.cloneDeep(this._data)
     }
 
     async getMany(options: GetDataManyOptions = {}): Promise<EntityInterface[]> {
@@ -184,7 +185,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         }
 
-        this._data = options.skip === 0 ? items : this._data.concat( items )
+        this._data = !options.skip ? items : this._data.concat( items )
 
         this.emit('update')
         return this._data;
@@ -323,7 +324,10 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 value: value
             })
             console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
-            console.log(res)
+            //console.log(res)
+
+            this._data.push(res.data)
+
             this.emit('update')
             this.emit('item-inserted', id, res.data, res.parentId)
             return res
@@ -370,9 +374,25 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             })
             //console.log(this.alias, " updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
+            let idx = this.getIndexById(id)
+            if (idx) {
+                console.log(res.data)
+                this._data[idx] = res.data
+            }
+
             this.emit('item-updated', id, res.data)
             return res
         }
+    }
+
+    getIndexById(id) : number {
+        for(let i in this._data) {
+            if (this._data[i].id === id) {
+                return Number(i)
+            }
+        }
+
+        return undefined
     }
 
     async removeById(id: string): Promise<boolean> {
@@ -404,7 +424,15 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             })
             console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
 
+            let idx = this.getIndexById(id)
+            if (idx) {
+                this._data.splice(idx, 1)
+            }
+
             this.emit('item-removed', id, res.data)
+            this.emit('update')
+
+
             return true
         }
     }
@@ -457,9 +485,14 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             })
             console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
-            this.emit('item-updated', id, res.data)
-        }
+            let idx = this.getIndexById(id)
+            if (idx) {
+                this._data[idx] = res.data
+            }
 
+            this.emit('item-updated', id, res.data)
+            this.emit('update')
+        }
     }
 
     defaultFilters(filter: FilterItemInterface[]): FilterItemInterface[] {

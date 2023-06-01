@@ -66,6 +66,10 @@
                     </el-select>
                 </el-form-item>
 
+                <el-form-item v-if="modelValue.type === 'number' || modelValue.type === 'string' || modelValue.type === 'text' || modelValue.type === 'link'" :label="t('fieldConfig.searchable')">
+                    <el-checkbox v-model="modelValue.searchable"/>
+                </el-form-item>
+
                 <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.autoincrement')">
                     <el-checkbox v-model="modelValue.autoincrement"/>
                 </el-form-item>

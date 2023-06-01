@@ -212,9 +212,9 @@ async function load() {
 
 onUnmounted(() => {
     if (dataSource) {
-        dataSource.removeListener('item-inserted', onItemInserted)
-        dataSource.removeListener('item-updated', onItemUpdated)
-        dataSource.removeListener('item-removed', onItemRemoved)
+        //dataSource.removeListener('item-inserted', onItemInserted)
+        //dataSource.removeListener('item-updated', onItemUpdated)
+        //dataSource.removeListener('item-removed', onItemRemoved)
         dataSource.removeListener('update', onDataSourceUpdate)
     }
 })
@@ -246,7 +246,7 @@ async function add() {
         await execAction(actions.value.onAdd)
     } else if (props.onClickAdd instanceof Function) {
         props.onClickAdd()
-    } else{
+    } else {
         let item = await generateEntityWithDefault(dataSource.fields)
         //console.log(item.id, item, currentId.value)
         await dataSource.insert(item.id, item, currentId.value)
@@ -369,12 +369,30 @@ async function loadNext(skip: number = 0) {
     }
 
     if (searchText.value) {
-        options.filter.push({
-            key: "name",
-            op: "like",
-            compare: `%${searchText.value}%`
-        })
+        options.search = searchText.value
     }
+
+    // if (searchText.value) {
+    //     options.search = []
+    //
+    //     searchFields.forEach(alias => {
+    //         let field = dataSource.getFieldByAlias(alias)
+    //
+    //         if (field.type === 'number') {
+    //             options.search.push({
+    //                 key: alias,
+    //                 op: '==',
+    //                 compare: `${searchText.value}`
+    //             })
+    //         } else {
+    //             options.search.push({
+    //                 key: alias,
+    //                 op: 'like',
+    //                 compare: `%${searchText.value}%`
+    //             })
+    //         }
+    //     })
+    // }
 
     if (props.filters)
         options.filter.push(...props.filters.filters)
@@ -642,8 +660,8 @@ let onItemRemoved = async (id, item) => {
     emit('change', dataSource.data)
 }
 
-let onDataSourceUpdate = async (dt) => {
-    console.log('updated', dt)
+let onDataSourceUpdate = async () => {
+    //console.log('updated', dt)
 
     data.value = dataSource.data
 
@@ -673,9 +691,9 @@ async function init() {
 
         canSearch.value = dataSource.source !== 'custom'
 
-        dataSource.on('item-updated', onItemUpdated)
-        dataSource.on('item-inserted', onItemInserted)
-        dataSource.on('item-removed', onItemRemoved)
+        //dataSource.on('item-updated', onItemUpdated)
+        //dataSource.on('item-inserted', onItemInserted)
+        //dataSource.on('item-removed', onItemRemoved)
         dataSource.on('update', onDataSourceUpdate)
 
         if (dataSource instanceof CustomDataSource) {

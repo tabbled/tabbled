@@ -64,7 +64,8 @@ export interface FieldConfigInterface {
     getReadonly?: string
     dataSetField?: string, // For 'field' type that used for looking fields list in set dataset on PageSettingPanel
     format?: FormatType,
-    autoincrement?: boolean
+    autoincrement?: boolean,
+    searchable?: boolean // Only for string and number types
 }
 
 export interface FieldInterface {
