@@ -55,7 +55,11 @@
     "importData": "Import data from *.json",
     "exportData": "Export data to *.json",
     "error": "Error",
+    "customizing": "Customizing",
     "fieldConfig": {
+        "editField": "Edit field",
+        "editEventHandler": "Edit event handler",
+        "importData": "Import data",
         "title": "Title",
         "alias": "Alias",
         "datasource": "Data source",

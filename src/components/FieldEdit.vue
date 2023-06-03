@@ -3,7 +3,7 @@
 
         <el-tabs>
 
-            <el-tab-pane label="Setting">
+            <el-tab-pane :label="t('settings')">
                 <el-form-item :label="t('fieldConfig.title')" prop="title">
                     <el-input v-model="modelValue.title"/>
                 </el-form-item>
@@ -94,7 +94,7 @@
 
             </el-tab-pane>
 
-            <el-tab-pane label="Customizing">
+            <el-tab-pane :label="t('customizing')">
 
                 <el-form-item :label="t('fieldConfig.getValue')">
                     <CodeEditor v-model="modelValue.getValue"

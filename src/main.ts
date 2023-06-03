@@ -54,10 +54,11 @@ app.component('TreeFilter', TreeFilter)
 let componentService = useComponentService()
 componentService.registerAllComponents()
 
+app.use(i18n)
 app.use(router(store, useSettings()));
 app.use(store)
 app.use(ElementPlus)
-app.use(i18n)
+
 
 app.mount("#app");
 

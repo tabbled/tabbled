@@ -2,7 +2,7 @@
 <div style="padding: 16px">
     <el-page-header ref="mainHeader" style="padding: 0 0 16px 0" @back="$router.back()">
         <template #content>
-            <span class="text-large font-600 mr-3"> {{route.meta.title}} </span>
+            <span class="text-large font-600 mr-3"> {{$t('datasource')}} </span>
         </template>
 
         <template #extra>
@@ -26,7 +26,7 @@
                         style="margin-right: 8px"
                     >
                 <span class="dropdown-link">
-                            Export
+                            {{$t('export')}}
                            <Icon width="16" style="padding-left: 4px; padding-right: 8px" icon="ic:outline-file-upload"></Icon>
                 </span>
                         <template #dropdown>
@@ -187,7 +187,7 @@
 
     <el-dialog
         v-model="fieldEditDialogVisible"
-        title="Edit field"
+        :title="t('fieldConfig.editField')"
         width="70%"
         :close-on-press-escape="false"
     >
@@ -202,7 +202,7 @@
 
     <el-dialog
         v-model="eventHandlerEditDialogVisible"
-        title="Edit event handler"
+        :title="t('fieldConfig.editEventHandler')"
         width="70%"
     >
         <EventHandlerEdit :model-value="currentEventHandler"/>
@@ -217,7 +217,7 @@
 
     <el-dialog
         v-model="importDataDialogVisible"
-        title="Import data"
+        :title="t('import')"
         width="50%"
     >
 
@@ -283,7 +283,7 @@ onMounted(async () => {
     await load()
     await initTestDataSource()
 
-    document.title = `Data source ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ settings.title }`
+    document.title = `${t('datasource')} ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ settings.title }`
 
     availableHeight.value = window.innerHeight - 260
 

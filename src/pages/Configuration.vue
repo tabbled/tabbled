@@ -1,7 +1,7 @@
 <template>
     <el-page-header style="padding: 16px;" @back="$router.back()">
         <template #content>
-            <span> {{route.meta.title}} </span>
+            <span> {{$t('configuration')}} </span>
         </template>
         <template #extra >
             <div style="display: flex; align-self: center;">

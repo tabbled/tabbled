@@ -114,6 +114,7 @@ export default function (store: any, settings:Settings) {
         routes,
     });
 
+
     router.beforeEach(async (to, from, next) => {
         // @ts-ignore
         window.document.title = `${to.meta && to.meta.title ? to.meta.title : ''}${ settings.title ? ' | ' + settings.title : '' }`;

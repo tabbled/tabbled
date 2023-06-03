@@ -42,11 +42,15 @@
     "count": "Всего записей",
     "loadNext": "Загрузить еще",
     "error": "Ошибка",
+    "customizing": "Кастомизация",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"
     },
     "fieldConfig": {
+        "editField": "Изменить поле",
+        "editEventHandler": "Edit event handler",
+        "importData": "Импорт",
         "title": "Название",
         "alias": "Псевдоним",
         "datasource": "Источник",
@@ -57,6 +61,10 @@
         "format": "Формат",
         "autoincrement": "Счетчик",
         "values": "Список значений",
+        "getListValues": "getListValues",
+        "getValue": "getValue",
+        "setValue": "setValue",
+        "getReadonly": "getReadonly",
         "searchable": "Текстовый поиск по полю"
     },
     "menuConfig": {
