@@ -365,7 +365,8 @@ async function loadNext(skip: number = 0) {
     let options: GetDataManyOptions = {
         take: 50,
         skip: skip,
-        filter: []
+        filter: [],
+        fields: props.columns.map(i => i.field)
     }
 
     if (searchText.value) {

@@ -30,7 +30,8 @@ export interface EntityInterface {
 
 
 export interface GetDataManyOptions {
-    filter?: FilterItemInterface[]
+    filter?: FilterItemInterface[],
+    fields?: string[],
     search?: string
     take?: number
     skip?: number
