@@ -31,6 +31,7 @@
                   :model-value="searchText"/>
     </div>
     <el-table
+
             ref="table"
             border
             :data="data"
@@ -58,6 +59,7 @@
                          :prop="element.field"
         >
             <template #default="scope">
+
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
                        :model-value="getCellData(scope)"
                        :field="getField(element.field)"
@@ -69,9 +71,7 @@
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
-                          :context="getRowContext(scope)"
-                          :item="scope.row"
-                          :column="element"
+                          :column="getColumn(scope)"
                     />
                 </div>
 
@@ -91,6 +91,7 @@
 
         </template>
     </el-table>
+
 </template>
 
 <script setup lang="ts">
@@ -110,9 +111,10 @@ import Cell from "./table/Cell.vue";
 import _ from "lodash";
 import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useI18n} from "vue-i18n";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {dayjs, ElMessage, ElMessageBox} from "element-plus";
 import {Filters} from "../model/filter";
 import { useElementBounding } from '@vueuse/core'
+
 
 interface Props {
     id: string,
@@ -593,12 +595,106 @@ let getHeaderTitle = (scope: any) => {
     return col.title
 }
 
-let getCellData = (scope: any) => {
+async function getCellData (scope: any) {
     if (!dataSource)
-        return;
+        return '';
 
-    return scope.row[scope.column.property]
+    let value = scope.row[scope.column.property]
+    let field = getField(scope.column.property)
+
+    if (value === undefined || value === null)
+        return ""
+
+    if (field.config.getValue) {
+        try {
+            return await getValueFunc()
+        } catch (e) {
+            console.error(e)
+            return 'Error'
+        }
+    }
+
+    let display
+    switch(field.type) {
+        case "text":
+        case "bool":
+        case "string": display = value; break;
+        case "enum": getEnumValue(); break;
+        case "link": await getLinkValue(); break;
+        case "number": display = formatNumber(value, field.precision, field.config.format); break;
+        case "date": display = dayjs(value).format('DD.MM.YYYY'); break;
+        case "time": display = dayjs(value).format('hh:mm:ss'); break;
+        case "datetime": display = dayjs(value).format('DD.MM.YYYY hh:mm:ss'); break;
+        default: display = 'Error'
+    }
+
+    return display
+
+    async function getLinkValue() {
+        if (value && scope.row[`_${field.alias}_title`]) {
+            return scope.row[`_${field.alias}_title`]
+        }
+
+        //displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
+        let ds = await dsService.getByAlias(field.datasource);
+
+        if (!ds) {
+            console.warn(`DataSource for link data for field "${field.alias}" doesn't set`)
+            return ""
+        }
+
+        if (field.isMultiple) {
+            return value
+        } else {
+            let link_entity = await ds.getById(value)
+            if (!link_entity)
+                return 'not found'
+
+            return link_entity[field.displayProp ? field.displayProp : 'name']
+        }
+    }
+
+    function getEnumValue() {
+        for(const i in field.values) {
+            if (field.values[i].key === value) {
+                return field.values[i].title
+            }
+        }
+        return 'Not found'
+    }
+
+    function formatNumber(value: any, precision: number, format: any) {
+        if (value === undefined || value === null || value === "")
+            return "";
+
+        if (format && format !== 'none') {
+            return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
+        }
+
+        return value
+    }
+
+
+
+    async function getValueFunc() {
+
+        let getValueFunc = await field.getValueFunc()
+
+        if (getValueFunc) {
+            try {
+                return await getValueFunc.exec(props.context)
+            } catch (e) {
+                console.error(`Error while evaluating field ${field.alias} getValue function `)
+                console.error(e)
+                return null
+            }
+        }
+        return '';
+    }
 }
+
+
+
 
 function getRowClass() {
     return "table-row"
