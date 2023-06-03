@@ -68,7 +68,7 @@
                     <div style="width: 100%;">
                         <el-button text @click="router.push('/configuration')" :style="{width: isSideBarCollapsed ? '64px' : '100%', 'justify-content': 'left'}" size="large">
                             <Icon style="padding: 4px" icon="ic:outline-display-settings" width="20"/>
-                            <div v-if="!isSideBarCollapsed" style="text-align: start;">Configuration</div>
+                            <div v-if="!isSideBarCollapsed" style="text-align: start;">{{$t('configuration')}}</div>
                         </el-button>
                     </div>
 
@@ -88,17 +88,17 @@
                         </template>
                         <template #default>
                             <div>
-                                <el-button @click="" text style="width: 100%; justify-content: left">
+                                <el-button @click="router.push('/settings')" text style="width: 100%; justify-content: left">
                                     <template #icon>
                                         <Icon icon="ic:outline-settings" width="24"/>
                                     </template>
-                                    Settings
+                                    {{$t('settings')}}
                                 </el-button>
                                 <el-button @click="logout" text style="width: 100%; justify-content: left; margin-left: 0">
                                     <template #icon>
                                         <Icon icon="ic:baseline-logout" width="24"/>
                                     </template>
-                                    Logout
+                                    {{$t('logout')}}
                                 </el-button>
                             </div>
 
@@ -126,11 +126,6 @@
             </el-container>
         </el-container>
     </el-container>
-    <!--    <div class="locale-changer">-->
-    <!--        <select v-model="$i18n.locale">-->
-    <!--            <option v-for="locale in $i18n.availableLocales" :key="`locale-${locale}`" :value="locale">{{ locale }}</option>-->
-    <!--        </select>-->
-    <!--    </div>-->
 </template>
 
 <script setup lang="ts">
@@ -138,13 +133,14 @@ import {computed, ComputedRef, onMounted, onUnmounted, ref} from "vue";
 import {MenuConfigInterface} from "../model/menu";
 import {useStore} from "vuex";
 import {useRoute, useRouter} from 'vue-router'
-import {useI18n} from 'vue-i18n'
 import {useSocketClient} from '../services/socketio.service'
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {usePageHeader} from "../services/page.service";
 import {useSettings} from "../services/settings.service";
 
+import {useI18n} from 'vue-i18n'
+const { t } = useI18n();
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -166,7 +162,7 @@ const store = useStore();
 const router = useRouter();
 const route = useRoute()
 const dsService = useDataSourceService();
-const { t } = useI18n();
+
 const pageHeader = usePageHeader()
 
 let socketClient = useSocketClient()

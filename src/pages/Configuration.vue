@@ -9,13 +9,13 @@
                     style="margin-right: 24px; "
                 >
                 <span class="dropdown-link">
-                            Import
+                            {{$t('import')}}
                            <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
                 </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item @click="loadConfigFile">Config</el-dropdown-item>
-                            <el-dropdown-item @click="loadDataFile">Data from *.json</el-dropdown-item>
+                            <el-dropdown-item @click="loadConfigFile">{{$t('configuration')}}</el-dropdown-item>
+                            <el-dropdown-item @click="loadDataFile">{{$t('importData')}}</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -24,13 +24,13 @@
                     style="margin-right: 8px"
                 >
                 <span class="dropdown-link">
-                            Export
+                            {{$t('export')}}
                            <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-upload"></Icon>
                 </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item @click="exportConfig">Config</el-dropdown-item>
-                            <el-dropdown-item @click="exportData">Data to *.json</el-dropdown-item>
+                            <el-dropdown-item @click="exportConfig">{{$t('configuration')}}</el-dropdown-item>
+                            <el-dropdown-item @click="exportData">{{$t('exportData')}}</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -41,7 +41,7 @@
 
     <el-tabs tab-position="top" style="height: calc(100% - 64px); padding-left: 16px" v-model="activeTab" @tab-change="tabChange">
 
-        <el-tab-pane label="Menus" name="menus">
+        <el-tab-pane :label="$t('menu')" name="menu">
             <Table :columns="menuColumns"
                    id="menu"
                    :context="{}"
@@ -52,7 +52,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Pages"  name="pages">
+        <el-tab-pane :label="$t('pages')"  name="pages">
             <Table :columns="pagesColumns"
                    id="pages"
                    datasource="page"
@@ -63,7 +63,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Data sources" name="datasources">
+        <el-tab-pane :label="$t('datasources')" name="datasources">
             <Table :columns="dsColumns"
                    id="ds"
                    :context="{}"
@@ -75,7 +75,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Functions" name="functions">
+        <el-tab-pane :label="$t('functions')" name="functions">
             <Table :columns="funcColumns"
                    id="func"
                    :context="{}"
@@ -86,7 +86,7 @@
             />
         </el-tab-pane>
 
-        <el-tab-pane label="Report templates" name="reports">
+        <el-tab-pane :label="$t('reportTemplates')" name="reports">
 
             <Table :columns="reportColumns"
                    id="reps"
@@ -358,11 +358,11 @@ function editDataSource(ctx) {
 }
 
 function addMenu() {
-    router.push(`/configuration/menus/new`)
+    router.push(`/configuration/menu/new`)
 }
 
 function editMenu(ctx) {
-    router.push(`/configuration/menus/${ctx.id}`)
+    router.push(`/configuration/menu/${ctx.id}`)
 }
 
 function addReport() {

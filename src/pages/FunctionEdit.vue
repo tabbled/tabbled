@@ -7,15 +7,15 @@
 
         <template #extra>
             <div class="page-header-action-panel">
-                <el-button @click="cancel">Cancel</el-button>
-                <el-button @click="save" type="primary">Save</el-button>
+                <el-button @click="cancel">{{$t('cancel')}}</el-button>
+                <el-button @click="save" type="primary">{{$t('save')}}</el-button>
             </div>
         </template>
     </el-page-header>
 
     <el-form label-position="top">
         <div style="display: flex; flex-direction: row; width: 100%">
-            <el-form-item label="Title" style="width: 50%; padding-right: 8px">
+            <el-form-item :label="$t('title')" style="width: 50%; padding-right: 8px">
                 <Input :field-config="getField('title')"
                        field="title"
                        :model-value="getValue('title')"
@@ -23,7 +23,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Alias" style="width: 50%">
+            <el-form-item :label="$t('alias')" style="width: 50%">
                 <Input :field-config="getField('alias')"
                        field="alias"
                        :model-value="getValue('alias')"
@@ -32,7 +32,7 @@
             </el-form-item>
         </div>
 
-        <el-form-item label="Context">
+        <el-form-item :label="$t('context')">
             <CodeEditor :field-config="getField('context')"
                         field="context"
                         format="json"
@@ -42,10 +42,10 @@
             />
         </el-form-item>
 
-        <el-form-item label="Script">
+        <el-form-item :label="$t('script')">
             <el-button text type="primary" style="margin-bottom: 8px"  @click="run();">
                 <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
-                Run
+                {{$t('run')}}
             </el-button>
             <CodeEditor :context="context"
                         :field-config="getField('script')"
@@ -72,6 +72,7 @@ import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {useSocketClient} from "../services/socketio.service";
 import {useSettings} from "../services/settings.service";
+import {useI18n} from 'vue-i18n'
 
 let router = useRouter();
 let route = useRoute()
@@ -84,6 +85,8 @@ let updateKey = ref(0)
 const socket = useSocketClient()
 const settings = useSettings()
 
+const { t } = useI18n();
+
 
 onMounted(async () => {
     datasource = dsService.functionDataSource
@@ -92,7 +95,7 @@ onMounted(async () => {
     }
 
     await load()
-    document.title = `Function ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${settings.title}`
+    document.title = `${t('function')} ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${settings.title}`
 });
 
 function getField(alias) {
@@ -123,7 +126,7 @@ async function save() {
             await datasource.updateById(functionEntity.value.id, functionEntity.value)
         }
 
-        ElMessage.success('Saved successfully')
+        ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)

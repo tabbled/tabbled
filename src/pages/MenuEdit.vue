@@ -7,8 +7,8 @@
 
         <template #extra>
             <div class="page-header-action-panel">
-                <el-button @click="cancel">Cancel</el-button>
-                <el-button @click="save" type="primary">Save</el-button>
+                <el-button @click="cancel">{{$t('cancel')}}</el-button>
+                <el-button @click="save" type="primary">{{$t('save')}}</el-button>
             </div>
         </template>
     </el-page-header>
@@ -23,7 +23,7 @@
         </el-form-item>
 
 
-        <el-form-item label="Items">
+        <el-form-item :label="$t('items')">
             <Tree :data="menuEntity ? menuEntity.items : []"
                   @insert="insert"
                   @edit="edit"
@@ -35,14 +35,14 @@
 
     <el-dialog
         v-model="menuEditDialogVisible"
-        title="Edit menu item"
+        :title="$t('edit')"
         width="400px"
     >
         <MenuItemEdit :model-value="currentMenu"/>
         <template #footer>
           <span class="dialog-footer">
-              <el-button @click="menuEditDialogVisible = false">Cancel</el-button>
-              <el-button type="primary" @click="saveMenu">Save</el-button>
+              <el-button @click="menuEditDialogVisible = false">{{$t('cancel')}}</el-button>
+              <el-button type="primary" @click="saveMenu">{{$t('save')}}</el-button>
           </span>
         </template>
     </el-dialog>
@@ -90,7 +90,7 @@ onMounted(async () => {
 
     await load()
 
-    document.title = `Menu ${ isNew.value ? 'new' : ' ' + menuEntity.title } | ${settings.title}`
+    document.title = `${t('menu')} ${ isNew.value ? 'new' : ' ' + menuEntity.title } | ${settings.title}`
 });
 
 function getField(alias) {
@@ -120,7 +120,7 @@ async function save() {
             await datasource.updateById(menuEntity.value.id, menuEntity.value)
         }
 
-        ElMessage.success('Saved successfully')
+        ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)

@@ -13,11 +13,11 @@
                     >
                         {{action.title}}
                     </el-button>
-                    <el-button v-if="isEditPage" @click="cancel">Cancel</el-button>
+                    <el-button v-if="isEditPage" @click="cancel">{{$t('cancel')}}</el-button>
                     <el-button v-if="isEditPage"
                                @click="save"
                                type="primary"
-                    >Save</el-button>
+                    >{{$t('save')}}</el-button>
                 </div>
             </template>
         </el-page-header>
@@ -59,6 +59,9 @@ import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
 import {Filters, useFilters} from "../model/filter";
+
+import {useI18n} from 'vue-i18n'
+const { t } = useI18n();
 
 let store = useStore();
 let router = useRouter();
@@ -132,7 +135,7 @@ async function save() {
             await editDataSource.updateById(editEntity.value.id, editEntity.value)
         }
 
-        ElMessage.success('Saved successfully')
+        ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)

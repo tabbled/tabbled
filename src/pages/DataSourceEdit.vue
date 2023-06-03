@@ -11,13 +11,13 @@
                         style="margin-right: 24px; "
                     >
                 <span class="dropdown-link">
-                            Import
+                            {{$t('import')}}
                            <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
                 </span>
                         <template #dropdown>
                             <el-dropdown-menu>
 <!--                            <el-dropdown-item @click="loadConfigFile">Config</el-dropdown-item>-->
-                                <el-dropdown-item @click="importDataDialogVisible = true">Data from *.json</el-dropdown-item>
+                                <el-dropdown-item @click="importDataDialogVisible = true">{{$t('importData')}}</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
@@ -31,21 +31,21 @@
                 </span>
                         <template #dropdown>
                             <el-dropdown-menu>
-                                <el-dropdown-item @click="exportConfig">Config</el-dropdown-item>
+                                <el-dropdown-item @click="exportConfig">{{$t('configuration')}}</el-dropdown-item>
 <!--                            <el-dropdown-item @click="exportData">Data to *.json</el-dropdown-item>-->
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
 
-                    <el-button @click="cancel">Cancel</el-button>
-                    <el-button @click="save" type="primary">Save</el-button>
+                    <el-button @click="cancel">{{$t('cancel')}}</el-button>
+                    <el-button @click="save" type="primary">{{$t('save')}}</el-button>
                 </div>
         </template>
     </el-page-header>
 
     <el-form label-position="top" :style="{ 'height': availableHeight }" ref="main">
         <div style="display: flex; flex-direction: row; width: 100%;">
-            <el-form-item label="Title" style="width: 50%; padding-right: 8px">
+            <el-form-item :label="$t('title')" style="width: 50%; padding-right: 8px">
                 <Input field="title"
                        :field-config="getField('title')"
                        :model-value="getValue('title')"
@@ -53,7 +53,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Alias" style="width: 50%">
+            <el-form-item :label="$t('alias')" style="width: 50%">
                 <Input field="alias"
                        :field-config="getField('alias')"
                        :model-value="getValue('alias')"
@@ -61,7 +61,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Source" style="padding-left: 8px">
+            <el-form-item :label="$t('source')" style="padding-left: 8px">
                 <LinkSelect field="source"
                             :field-config="getField('source')"
                             :model-value="getValue('source')"
@@ -69,7 +69,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Is tree" style="padding-left: 8px; width: 100px">
+            <el-form-item :label="$t('isTree')" style="padding-left: 8px; width: 100px">
                 <CheckboxField field="isTree"
                                :field-config="getField('isTree')"
                                :model-value="getValue('isTree')"
@@ -77,7 +77,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Readonly" style="padding-left: 8px; width: 100px">
+            <el-form-item :label="$t('readonly')" style="padding-left: 8px; width: 100px">
                 <CheckboxField field="readonly"
                                :field-config="getField('readonly')"
                                :model-value="getValue('readonly')"
@@ -87,7 +87,7 @@
         </div>
 
         <el-tabs v-model="activeTab" class="demo-tabs">
-            <el-tab-pane label="Fields" name="fields">
+            <el-tab-pane :label="$t('fields')" name="fields">
 
                 <el-form-item >
                     <ItemList key-prop="alias"
@@ -118,7 +118,7 @@
             </el-tab-pane>
 
             <el-tab-pane v-if="dataSourceEntity && dataSourceEntity.source === 'custom'"
-                         label="Script"
+                         :label="$t('script')"
                          name="script"
                          style="padding-right: 2px;"
             >
@@ -141,7 +141,7 @@
             </el-tab-pane>
 
             <el-tab-pane v-if="dataSourceEntity && dataSourceEntity.source === 'custom'"
-                         label="Context"
+                         :label="$t('context')"
                          name="context"
                          style="padding-right: 2px"
             >
@@ -157,7 +157,7 @@
             </el-tab-pane>
 
             <el-tab-pane v-if="dataSourceEntity && dataSourceEntity.source !== 'custom'"
-                         label="Events"
+                         :label="$t('events')"
                          name="events"
                          style="padding-right: 2px"
             >

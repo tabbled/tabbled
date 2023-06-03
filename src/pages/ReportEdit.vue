@@ -7,15 +7,15 @@
 
         <template #extra>
             <div class="page-header-action-panel">
-                <el-button @click="cancel">Cancel</el-button>
-                <el-button @click="save" type="primary">Save</el-button>
+                <el-button @click="cancel">{{$t('cancel')}}</el-button>
+                <el-button @click="save" type="primary">{{$t('save')}}</el-button>
             </div>
         </template>
     </el-page-header>
 
     <el-form label-position="top">
         <div style="display: flex; flex-direction: row; width: 100%">
-            <el-form-item label="Title" style="width: 50%; padding-right: 8px">
+            <el-form-item :label="$t('title')" style="width: 50%; padding-right: 8px">
                 <Input :field-config="getField('title')"
                        field="title"
                        :model-value="getValue('title')"
@@ -23,7 +23,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Alias" style="width: 50%">
+            <el-form-item :label="$t('alias')" style="width: 50%">
                 <Input :field-config="getField('alias')"
                        field="alias"
                        :model-value="getValue('alias')"
@@ -34,11 +34,11 @@
 
         <el-tabs v-model="activeTab" class="demo-tabs">
 
-            <el-tab-pane label="Template" name="template">
+            <el-tab-pane :label="$t('template')" name="template">
                 <el-form-item >
                     <el-button text type="primary" style="margin-bottom: 8px"  @click="render();">
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
-                        Render
+                        {{$t('render')}}
                     </el-button>
                     <CodeEditor :context="context"
                                 :field-config="getField('template')"
@@ -50,11 +50,11 @@
                 </el-form-item>
             </el-tab-pane>
 
-            <el-tab-pane label="Preparing script" name="script">
+            <el-tab-pane :label="$t('preparingScript')" name="script">
                 <el-form-item>
                     <el-button text type="primary" style="margin-bottom: 8px"  @click="render();">
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
-                        Run
+                        {{$t('run')}}
                     </el-button>
                     <CodeEditor :context="context"
                                 :field-config="getField('script')"
@@ -66,7 +66,7 @@
                 </el-form-item>
             </el-tab-pane>
 
-            <el-tab-pane label="Test context" name="testContext">
+            <el-tab-pane :label="$t('context')" name="testContext">
 
                 <el-form-item>
                     <CodeEditor :field-config="getField('testContext')"
@@ -99,6 +99,7 @@ import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {useSocketClient} from "../services/socketio.service";
 import {useSettings} from "../services/settings.service";
+import {useI18n} from 'vue-i18n'
 
 let router = useRouter();
 let route = useRoute()
@@ -108,6 +109,8 @@ let dsService = useDataSourceService()
 let isNew = ref(false)
 let updateKey = ref(0)
 let activeTab = ref('template')
+
+const { t } = useI18n();
 
 const socket = useSocketClient()
 const settings = useSettings()
@@ -120,7 +123,7 @@ onMounted(async () => {
     }
 
     await load()
-    document.title = `Report ${ isNew.value ? 'new' : ' ' + reportEntity.title } | ${settings.title}`
+    document.title = `${t('template')} ${ isNew.value ? 'new' : ' ' + reportEntity.title } | ${settings.title}`
 });
 
 function getField(alias) {
@@ -151,7 +154,7 @@ async function save() {
             await datasource.updateById(reportEntity.value.id, reportEntity.value)
         }
 
-        ElMessage.success('Saved successfully')
+        ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)

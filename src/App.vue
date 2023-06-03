@@ -9,7 +9,7 @@
             :duration="1"
             :percentage="100"
         />
-        <div>Loading...</div>
+        <div>{{$t('loading')}}</div>
     </div>
     <Main v-else :screen-size="screenSize" />
 </template>
@@ -27,6 +27,7 @@ import {useSyncService} from "./services/sync.service";
 import PageView from "./pages/PageView.vue";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
+import {useI18n} from 'vue-i18n'
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -47,6 +48,8 @@ const dsService = useDataSourceService();
 const db = useDatabase();
 const syncService = useSyncService()
 const settings = useSettings()
+
+const { t, locale } = useI18n();
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
@@ -69,6 +72,11 @@ onMounted(async () => {
 
     await settings.refresh();
     favicon.value = settings.favicon
+
+    let user = store.getters["auth/user"]
+    if (user && user.settings && user.settings.lang) {
+        locale.value = user.settings.lang
+    }
 
     window.addEventListener('resize', handleResize);
     handleResize();

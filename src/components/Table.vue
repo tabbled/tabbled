@@ -10,11 +10,11 @@
                      size="small"
                      style="margin-right: 8px; min-width: fit-content;"
         >
-            Add
+            {{$t('add')}}
             <template #dropdown>
                 <el-dropdown-menu>
-                    <el-dropdown-item @click="addSibling">Add sibling</el-dropdown-item>
-                    <el-dropdown-item @click="add">Add child</el-dropdown-item>
+                    <el-dropdown-item @click="addSibling">{{$t('addSibling')}}</el-dropdown-item>
+                    <el-dropdown-item @click="add">{{$t('addChild')}}</el-dropdown-item>
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
@@ -26,7 +26,7 @@
         </el-button>
         <el-input v-if="canSearch" style="margin-left: 8px;"
                   size="small"
-                  placeholder="Search..."
+                  :placeholder="$t('search')"
                   @input="searchChange"
                   :model-value="searchText"/>
     </div>
@@ -84,9 +84,9 @@
         <template #append >
             <div style="display: flex; flex-direction: row; align-items: center">
                 <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext(data.length)">
-                    Load next entities
+                    {{$t('loadNext')}}
                 </el-button>
-                <div v-if="showCount" style="padding-left: 8px">Count: {{itemsCount}}</div>
+                <div v-if="showCount" style="padding-left: 8px">{{$t('count')}}: {{itemsCount}}</div>
             </div>
 
         </template>
@@ -348,10 +348,8 @@ async function getData() {
     }
 
     if (props.field) {
-        console.log('getData', props.field)
+        //console.log('getData', props.field)
         data.value = props.modelValue
-
-        console.log(dataSource)
 
         await dataSource.setData(props.modelValue)
     } else {
@@ -373,28 +371,6 @@ async function loadNext(skip: number = 0) {
     if (searchText.value) {
         options.search = searchText.value
     }
-
-    // if (searchText.value) {
-    //     options.search = []
-    //
-    //     searchFields.forEach(alias => {
-    //         let field = dataSource.getFieldByAlias(alias)
-    //
-    //         if (field.type === 'number') {
-    //             options.search.push({
-    //                 key: alias,
-    //                 op: '==',
-    //                 compare: `${searchText.value}`
-    //             })
-    //         } else {
-    //             options.search.push({
-    //                 key: alias,
-    //                 op: 'like',
-    //                 compare: `%${searchText.value}%`
-    //             })
-    //         }
-    //     })
-    // }
 
     if (props.filters)
         options.filter.push(...props.filters.filters)
@@ -444,7 +420,7 @@ function setCurrentCell(cell: CellRef) {
 }
 
 function getField(field: string) {
-    if (!dataSource)
+    if (!dataSource || !field)
         return undefined;
 
     let f = dataSource.getFieldByAlias(field)
@@ -590,20 +566,17 @@ let getHeaderTitle = (scope: any) => {
     let idx = scope.$index -1
     let col = props.columns[idx];
     if (!col)
-        return "error"
+        return t('error')
 
     return col.title
 }
 
 async function getCellData (scope: any) {
-    if (!dataSource)
+    let field = getField(scope.column.property)
+    if (!dataSource || !field)
         return '';
 
     let value = scope.row[scope.column.property]
-    let field = getField(scope.column.property)
-
-    if (value === undefined || value === null)
-        return ""
 
     if (field.config.getValue) {
         try {
@@ -614,13 +587,16 @@ async function getCellData (scope: any) {
         }
     }
 
+    if (value === undefined || value === null)
+        return ""
+
     let display
     switch(field.type) {
         case "text":
         case "bool":
         case "string": display = value; break;
-        case "enum": getEnumValue(); break;
-        case "link": await getLinkValue(); break;
+        case "enum": display = getEnumValue(); break;
+        case "link": display = await getLinkValue(); break;
         case "number": display = formatNumber(value, field.precision, field.config.format); break;
         case "date": display = dayjs(value).format('DD.MM.YYYY'); break;
         case "time": display = dayjs(value).format('hh:mm:ss'); break;
@@ -635,6 +611,10 @@ async function getCellData (scope: any) {
             return scope.row[`_${field.alias}_title`]
         }
 
+        if (value && scope.row[`${field.alias}_title`]) {
+            return scope.row[`${field.alias}_title`]
+        }
+
         //displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         let ds = await dsService.getByAlias(field.datasource);
 
@@ -646,10 +626,10 @@ async function getCellData (scope: any) {
         if (field.isMultiple) {
             return value
         } else {
+
             let link_entity = await ds.getById(value)
             if (!link_entity)
-                return 'not found'
-
+                return t('notFound')
             return link_entity[field.displayProp ? field.displayProp : 'name']
         }
     }
@@ -660,7 +640,7 @@ async function getCellData (scope: any) {
                 return field.values[i].title
             }
         }
-        return 'Not found'
+        return t('notFound')
     }
 
     function formatNumber(value: any, precision: number, format: any) {
@@ -682,14 +662,14 @@ async function getCellData (scope: any) {
 
         if (getValueFunc) {
             try {
-                return await getValueFunc.exec(props.context)
+                return await getValueFunc.exec(getRowContext(scope))
             } catch (e) {
                 console.error(`Error while evaluating field ${field.alias} getValue function `)
                 console.error(e)
                 return null
             }
         }
-        return '';
+        return null;
     }
 }
 

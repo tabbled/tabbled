@@ -9,6 +9,7 @@ import DataSourceEdit from "./pages/DataSourceEdit.vue";
 import MenuEdit from "./pages/MenuEdit.vue";
 import {Settings} from "./services/settings.service";
 import ReportEdit from "./pages/ReportEdit.vue";
+import UserSettings from "./pages/UserSettings.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -69,7 +70,7 @@ const routes: RouteRecordRaw[] = [
     },
     {
         name: 'menuEdit',
-        path: "/configuration/menus/:id",
+        path: "/configuration/menu/:id",
         component: MenuEdit,
         meta: {
             isSingle: false,
@@ -84,6 +85,15 @@ const routes: RouteRecordRaw[] = [
             isSingle: false,
             authRequired: true,
             title: "Configuration"
+        },
+    },
+    {
+        path: "/settings",
+        component: UserSettings,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "User settings"
         },
     },
     {
