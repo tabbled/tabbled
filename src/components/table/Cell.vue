@@ -55,7 +55,6 @@ function getData() {
         console.error(e)
         displayValue.value = "Error"
     })
-
 }
 
 </script>

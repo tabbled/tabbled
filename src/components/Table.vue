@@ -71,7 +71,7 @@
                 <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
                     <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
-                          :column="getColumn(scope)"
+                          :column="getColumn(scope.column.rawColumnKey)"
                     />
                 </div>
 
@@ -486,6 +486,7 @@ function getColumn(id: string) {
             return _columns.value[i]
         }
     }
+
     return undefined
 }
 
