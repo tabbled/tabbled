@@ -43,8 +43,10 @@
 import {onMounted, ref, watch} from "vue";
 import {ElMessage, UploadProps} from "element-plus";
 import {FieldConfigInterface} from "../model/field";
+import {useApiClient} from "../services/api.service";
 
 const emit = defineEmits(['update:modelValue', 'change'])
+let api = useApiClient()
 
 const props = defineProps<{
     modelValue: any,
@@ -67,24 +69,11 @@ async function getValue() {
 
 onMounted(async () => {
     await getValue()
-    actionUrl.value = url()
+    actionUrl.value = api.url() + '/pictures'
 })
 
-function url(port: string = '3000') {
-    let _url;
-    // @ts-ignore
-    const env = import.meta.env.MODE || "production";
-
-    if (env === "development" || localStorage.dev === "dev") {
-        _url = location.protocol + '//' + location.hostname + ":" + port;
-    } else {
-        _url = location.protocol + '//api.' + location.host;
-    }
-    return _url + '/pictures'
-}
-
 function uploaded(res) {
-    change(`${url()}/${res.filename}`)
+    change(`${actionUrl.value}/${res.filename}`)
 }
 
 watch(() => props.modelValue,
