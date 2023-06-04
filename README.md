@@ -15,13 +15,12 @@ It's a low-code platform for building web application for enterprise, to manage 
 
 ## ⭐ Features
 
-* Drag-and-drop user interface configuration
+* Drag-and-drop Form Builder to configure user interface
 * Built-in data sources or connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
-* Scripting - JavaScript works anywhere
-* Functions - cloud functions, evaluating on the server side 
-* Permission - you can limit access to any data for users and groups
+* Scripting - customize application anywhere with JavaScript
+* Functions - cloud functions to evaluating business logic
+* Permission - user access limitation for any data or element of interface
 * Live data - each device gets synchronized data in real-time
-* Offline working - the data you chose as offline will be available offline wherever you go
 
 ## 🌿 Roadmap
 
@@ -29,7 +28,6 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Types implementation
 - [x] Table editor
 - [x] Page designer
-- [x] Progressive Web App
 - [x] View editor
 - [x] Store user data and config in IndexedDB
 - [x] DataSource setting page
@@ -48,6 +46,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Dockerized entire project in the one image
 - [ ] Desktop version
 - [ ] Mobile version
+- [ ] PWA implementation
 
 ## 🚀 How to Install
 
