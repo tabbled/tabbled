@@ -97,5 +97,8 @@
         "time": "Time",
         "link": "Link",
         "table": "Table"
+    },
+    "filters": {
+        "title": "Filters"
     }
 }

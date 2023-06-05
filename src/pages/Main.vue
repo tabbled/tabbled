@@ -15,7 +15,7 @@
                 </el-header>
                 <el-divider style="margin: 0"/>
 
-                <el-menu :style="{height: `${mainViewHeight}px`, overflow: 'auto'}"
+                <el-menu :style="{height: `${mainMenuHeight}px`, overflow: 'auto'}"
                          :collapse="isSideBarCollapsed"
                          :collapse-transition="false"
                          :default-active="$route.fullPath"
@@ -152,6 +152,7 @@ const mainHeader = ref(null);
 const rView = ref(null)
 
 let mainViewHeight = ref(0)
+let mainMenuHeight = ref(0)
 let mainViewWidth = ref(0)
 let mainSideBarWidth = ref(250)
 let settings = useSettings()
@@ -202,8 +203,8 @@ const currentPageTitle: ComputedRef<string> = computed((): string =>  {
 
 onMounted(() => {
     console.log('Main mounted')
-    console.log(footer.value)
-    mainViewHeight.value = mainContainer.value.$el.clientHeight - 170
+    mainViewHeight.value = mainContainer.value.$el.clientHeight
+    mainMenuHeight.value = mainContainer.value.$el.clientHeight - 170
     handleResize();
     window.addEventListener('resize', handleResize);
     loadMenu();

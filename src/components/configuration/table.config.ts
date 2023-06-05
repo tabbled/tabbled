@@ -47,6 +47,11 @@ export class Config implements ComponentInterface {
             alias: "actionButtonsVisible",
             type: 'bool',
             default: true
+        },{
+            title: "Filters are visible",
+            alias: "filtersVisible",
+            type: 'bool',
+            default: true
         },
         {
             title: 'Columns',

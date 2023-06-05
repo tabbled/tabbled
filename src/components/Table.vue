@@ -29,6 +29,26 @@
                   :placeholder="$t('search')"
                   @input="searchChange"
                   :model-value="searchText"/>
+
+
+        <el-popover
+            placement="bottom"
+            :title="$t('filters.title')"
+            :width="200"
+            :visible="filtersPopoverVisible"
+            content="this is content, this is content, this is content"
+        >
+            <template #reference>
+                <el-button text size="small" style="padding-left: 8px" @click="filtersPopoverVisible = !filtersPopoverVisible">
+                    <Icon icon="ic:sharp-filter-list" width="20"/>
+                </el-button>
+            </template>
+            <template #default>
+                <CustomFilterConstructor v-model="props.filters.filters"/>
+            </template>
+        </el-popover>
+
+
     </div>
     <el-table
 
@@ -114,6 +134,7 @@ import {useI18n} from "vue-i18n";
 import {dayjs, ElMessage, ElMessageBox} from "element-plus";
 import {Filters} from "../model/filter";
 import { useElementBounding } from '@vueuse/core'
+import CustomFilterConstructor from "./CustomFilterConstructor.vue";
 
 
 interface Props {
@@ -138,14 +159,16 @@ interface Props {
     filters?: Filters,
     height?: number,
     fillHeight?: boolean,
-    showCount?: boolean
+    showCount?: boolean,
+    filtersVisible: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
     actionButtonsVisible: true,
     infinitiveScroll: false,
     fillHeight: false,
-    showCount: false
+    showCount: false,
+    filtersVisible: true
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -176,6 +199,7 @@ let sort = ref<{order: string | null, prop: string | null}>(null)
 let canSearch = ref(false)
 let availableHeight = 200
 let itemsCount = ref(0)
+let filtersPopoverVisible = ref(false)
 
 const tableBounding = useElementBounding(table)
 
