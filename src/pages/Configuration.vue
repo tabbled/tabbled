@@ -49,6 +49,7 @@
                    @row-dbl-click="editMenu"
                    :readonly="true"
                    :on-click-add="addMenu"
+                   :filters-visible="false"
             />
         </el-tab-pane>
 
@@ -60,6 +61,7 @@
                    @row-dbl-click="editPage"
                    :readonly="true"
                    :on-click-add="addPage"
+                   :filters-visible="false"
             />
         </el-tab-pane>
 
@@ -71,6 +73,7 @@
                    :readonly="true"
                    @row-dbl-click="editDataSource"
                    :on-click-add="addDataSource"
+                   :filters-visible="false"
 
             />
         </el-tab-pane>
@@ -83,6 +86,7 @@
                    @row-dbl-click="editFunc"
                    :readonly="true"
                    :on-click-add="addFunc"
+                   :filters-visible="false"
             />
         </el-tab-pane>
 
@@ -95,6 +99,7 @@
                    @row-dbl-click="editReport"
                    :readonly="true"
                    :on-click-add="addReport"
+                   :filters-visible="true"
             />
 
         </el-tab-pane>

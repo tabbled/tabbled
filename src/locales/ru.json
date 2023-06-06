@@ -21,6 +21,7 @@
     "import": "Импорт",
     "importData": "Импорт данных из *.json",
     "exportData": "Экспорт данных в *.json",
+    "data": "Данные",
     "title": "Заголовок",
     "alias": "Псевдоним",
     "context": "Контекст",
@@ -43,6 +44,9 @@
     "loadNext": "Загрузить еще",
     "error": "Ошибка",
     "customizing": "Кастомизация",
+    "apply": "Применить",
+    "close": "Закрыть",
+    "select": "Выбрать",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"
@@ -65,7 +69,8 @@
         "getValue": "getValue",
         "setValue": "setValue",
         "getReadonly": "getReadonly",
-        "searchable": "Текстовый поиск по полю"
+        "searchable": "Текстовый поиск по полю",
+        "isTree": "Древовидный"
     },
     "menuConfig": {
         "title": "Название",
@@ -82,6 +87,22 @@
     "cancel": "Отмена",
     "save": "Сохранить",
     "filters": {
-        "title": "Фильтры"
+        "title": "Фильтры",
+        "value": "Значение",
+        "field": "Поле",
+        "operator": "Оператор",
+        "==": "равно",
+        "!=": "не равно",
+        ">": "более",
+        "<": "менее",
+        ">=": "больше или равно",
+        "<=": "меньше или равно",
+        "between": "между",
+        "contains": "содержит",
+        "!contains": "не содержит",
+        "in": "входит",
+        "!in": "не входит",
+        "any": "любое",
+        "empty": "пусто"
     }
 }

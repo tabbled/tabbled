@@ -108,7 +108,7 @@
                 </el-form-item>
 
             </el-tab-pane>
-            <el-tab-pane label="Data" name="data">
+            <el-tab-pane :label="$t('data')" name="data">
                 <Table :columns="columns"
                        id="testDataSourceTable"
                        :context="context"
@@ -194,8 +194,8 @@
         <field-edit :model-value="currentField"/>
         <template #footer>
           <span class="dialog-footer">
-              <el-button @click="fieldEditDialogVisible = false">Cancel</el-button>
-              <el-button type="primary" @click="saveField">Save</el-button>
+              <el-button @click="fieldEditDialogVisible = false">{{$t('cancel')}}</el-button>
+              <el-button type="primary" @click="saveField">{{$t('save')}}</el-button>
           </span>
         </template>
     </el-dialog>
@@ -208,8 +208,8 @@
         <EventHandlerEdit :model-value="currentEventHandler"/>
         <template #footer>
           <span class="dialog-footer">
-              <el-button @click="eventHandlerEditDialogVisible = false">Cancel</el-button>
-              <el-button type="primary" @click="saveEventHandler">Save</el-button>
+              <el-button @click="eventHandlerEditDialogVisible = false">{{$t('cancel')}}</el-button>
+              <el-button type="primary" @click="saveEventHandler">{{$t('save')}}</el-button>
           </span>
         </template>
     </el-dialog>

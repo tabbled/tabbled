@@ -7,6 +7,7 @@
         remote-show-suffix
         :remote-method="getData"
         :loading="isLoading"
+        :size="size ? size : 'default'"
         @change="(val) => change(val)"
     >
         <el-option
@@ -30,10 +31,11 @@ let dataSource:DataSourceInterface = null
 
 const props = defineProps<{
     dataSource?: string,
-    modelValue?: string
+    modelValue?: string,
+    size?: string
 }>()
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'update:modelValue'])
 
 onMounted(async () => {
     await init();
@@ -42,10 +44,14 @@ onMounted(async () => {
 })
 
 async function init() {
+    console.log('init field select', props.dataSource)
     if(!props.dataSource)
         return;
 
     dataSource = await dsService.getByAlias(props.dataSource)
+
+
+
     if (!dataSource) {
         console.warn(`No dataSource with alias "${props.dataSource}"`)
     }
@@ -57,8 +63,6 @@ async function getData() {
 
     if (!dataSource)
         return
-
-
 
     for(const i in dataSource.fields) {
         const f = dataSource.fields[i]
@@ -76,6 +80,7 @@ async function change(key: string) {
     let field = ds.getFieldByAlias(key)
 
     emit('change', key, field)
+    emit('update:modelValue', key, field)
 }
 
 </script>

@@ -23,7 +23,7 @@
         v-else-if="field && (field.type === 'link')  && !field.isTree"
         class="table-select"
         :model-value="value"
-        placeholder="Select"
+        :placeholder="$t('select')"
         filterable
         remote
         clearable
@@ -52,6 +52,8 @@
         :multiple="field.isMultiple"
         style="order: 0; height: 100%; width: calc(100% - 2px); margin: 1px "
         @change="treeChange"
+        @remove-tag="removeTag"
+        :placeholder="$t('select')"
     >
 
     </el-tree-select>
@@ -60,7 +62,7 @@
         v-else-if="field && (field.type === 'enum') "
         class="table-select"
         :model-value="value"
-        placeholder="Select"
+        :placeholder="$t('select')"
         filterable
         remote
         clearable
@@ -76,7 +78,7 @@
         />
     </el-select>
     <el-checkbox v-else-if="field && field.type==='bool'"
-                 :model-value='value'
+                 :model-value="value"
                  @change="val => value = val"
                  style="padding-left: 16px"
     />
@@ -96,7 +98,7 @@
 import {onMounted, ref, watch} from "vue";
 import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
-import {DataSourceInterface} from "../../model/datasource";
+import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
 
 interface Props {
     modelValue: any,
@@ -111,9 +113,9 @@ let emit = defineEmits(['update:modelValue'])
 let el = ref(null)
 let isLoading = ref(false)
 let linkData = ref([])
-let value = ref('')
+let value = ref()
 let isTree = ref(true)
-let treeValue = ref()
+let oldValue = null
 
 let displayProp = ref('name')
 let dsService = useDataSourceService()
@@ -137,8 +139,11 @@ onMounted(async () => {
 
 watch(() => value,
     async () => {
-        //console.log('update', value.value)
-        emit('update:modelValue', value.value)
+
+        if (oldValue !== value.value) {
+            emit('update:modelValue', value.value)
+        }
+
     },
     {
         deep: true
@@ -172,16 +177,14 @@ async function getLinkData(query?: string) {
         return
     }
 
-    let opt = {
+    let opt:GetDataManyOptions = {
         filter: [],
-        take: 50
+        take: 50,
+        fields: [displayProp.value]
     }
+
     if (query) {
-        opt.filter.push({
-            key: displayProp.value,
-            op: 'like',
-            compare: `%${query}%`
-        })
+        opt.search = query
     }
 
     isLoading.value = true
@@ -190,15 +193,24 @@ async function getLinkData(query?: string) {
 }
 
 function checkChanged(node,params) {
+    //console.log(params.checkedKeys)
     value.value = params.checkedKeys
     emit('update:modelValue', value.value)
 }
 
 function treeChange(a) {
+    //console.log(a)
     if (!props.field.isMultiple) {
-        console.log('treeChange', a)
+        //console.log('treeChange', a)
         value.value = a
         emit('update:modelValue', value.value)
+    }
+}
+
+function removeTag(tag) {
+    for(let i in value.value) {
+        if (value.value[i] === tag)
+            value.value.splice(i, 1)
     }
 }
 

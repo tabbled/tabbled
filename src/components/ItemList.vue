@@ -8,7 +8,8 @@
              :draggable="sortable"
         >
             <div class="list-item-title" @click="emit('edit', idx); setCurrentIndex(idx)">
-                <Icon icon="ic:baseline-drag-indicator"
+                <Icon v-if="sortable"
+                      icon="ic:baseline-drag-indicator"
                       style="padding-right: 4px; color: var(--el-border-color);" width="16"
                       :class="{'sortable': sortable }"
                 />
@@ -27,12 +28,12 @@
                 </el-button>
             </div>
         </div>
-        <el-divider style="margin: 0"/>
+        <el-divider v-if="list.length > 0" style="margin: 0"/>
         <el-button link size="small"
                    style="margin: 4px;
                    padding-left: 8px"
                    @click="emit('insert')">
-            Add
+            {{$t('add')}}
         </el-button>
     </el-card>
 

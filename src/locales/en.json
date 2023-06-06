@@ -54,8 +54,12 @@
     "render": "Render",
     "importData": "Import data from *.json",
     "exportData": "Export data to *.json",
+    "data": "Data",
     "error": "Error",
     "customizing": "Customizing",
+    "apply": "Apply",
+    "close": "Close",
+    "select": "Select",
     "fieldConfig": {
         "editField": "Edit field",
         "editEventHandler": "Edit event handler",
@@ -99,6 +103,22 @@
         "table": "Table"
     },
     "filters": {
-        "title": "Filters"
+        "title": "Filters",
+        "value": "Value",
+        "field": "Field",
+        "operator": "Operator",
+        "==": "equal",
+        "!=": "not equal",
+        ">": "greater",
+        "<": "less",
+        ">=": "greater or equal",
+        "<=": "less or equal",
+        "between": "between",
+        "contains": "contains",
+        "!contains": "not contains",
+        "in": "in",
+        "!in": "not in",
+        "any": "any value",
+        "empty": "is empty"
     }
 }

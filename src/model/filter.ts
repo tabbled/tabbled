@@ -1,7 +1,7 @@
 import {ref} from "vue";
 import {DataSourceInterface} from "./datasource";
 
-export declare type StandardQueryOperator = '<' | '<=' | '==' | '!=' | '>' | '>=' | 'exists' | '!exists' | 'between' | '!between' | 'like' | '!like' | 'matches' | '!matches' | 'in' | '!in' | 'has' | '!has' | 'contains' | '!contains';
+export declare type StandardQueryOperator = '<' | '<=' | '==' | '!=' | '>' | '>=' | 'exists' | '!exists' | 'between' | '!between' | 'like' | '!like' | 'matches' | '!matches' | 'in' | '!in' | 'has' | '!has' | 'contains' | '!contains' | 'any' | 'empty';
 export interface FilterItemInterface {
     key: string,
     op: StandardQueryOperator,
@@ -10,14 +10,18 @@ export interface FilterItemInterface {
 
 export class Filters {
     constructor(dataSource: DataSourceInterface) {
-        this.dataSource = dataSource
+        this._dataSource = dataSource
     }
-    private dataSource: DataSourceInterface
+    private readonly _dataSource: DataSourceInterface
     private filtersById: Map<string, FilterItemInterface> = new Map()
 
     get filters() {
         return this._filters;
     }
+    get dataSource() {
+        return this._dataSource
+    }
+
     private _filters: Array<FilterItemInterface> = []
 
     setFilter(id, filter: FilterItemInterface | null) {

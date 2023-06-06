@@ -208,6 +208,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 item.compare = item.compare.replaceAll('%', '*')
             }
 
+            //@ts-ignore
             ref = ref.filter(item.key, item.op, item.compare)
         }
         if (options.take) ref.take(options.take)

@@ -34,17 +34,25 @@
         <el-popover
             placement="bottom"
             :title="$t('filters.title')"
-            :width="200"
+            :width="400"
             :visible="filtersPopoverVisible"
             content="this is content, this is content, this is content"
         >
             <template #reference>
-                <el-button text size="small" style="padding-left: 8px" @click="filtersPopoverVisible = !filtersPopoverVisible">
-                    <Icon icon="ic:sharp-filter-list" width="20"/>
-                </el-button>
+                    <el-button v-if="filtersVisible" text size="small" style="margin-left: 8px" @click="filtersPopoverVisible = !filtersPopoverVisible">
+                        <Icon icon="ic:sharp-filter-list" width="20"/>
+                    </el-button>
             </template>
             <template #default>
-                <CustomFilterConstructor v-model="props.filters.filters"/>
+                <CustomFilterConstructor
+                    v-if="filtersVisible"
+                    v-model="props.filters.filters"
+                    :filters="props.filters"
+                    :data-source="datasource"
+                    :close-button="true"
+                    @apply="filtersPopoverVisible = false"
+                    @close="filtersPopoverVisible = false"
+                />
             </template>
         </el-popover>
 
@@ -81,7 +89,7 @@
             <template #default="scope">
 
                 <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
-                       :model-value="getCellData(scope)"
+                       :model-value="scope.row[scope.column.property]"
                        :field="getField(element.field)"
                        @update:model-value="(val) => onCellInput(scope, val)"
                        @keydown="inputKeyDown"
@@ -92,6 +100,7 @@
                     <Cell :model-value="getCellData(scope)"
                           :field="getField(element.field)"
                           :column="getColumn(scope.column.rawColumnKey)"
+                          @click="cellFocusedOut()"
                     />
                 </div>
 
@@ -160,7 +169,7 @@ interface Props {
     height?: number,
     fillHeight?: boolean,
     showCount?: boolean,
-    filtersVisible: boolean
+    filtersVisible?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -168,7 +177,10 @@ const props = withDefaults(defineProps<Props>(), {
     infinitiveScroll: false,
     fillHeight: false,
     showCount: false,
-    filtersVisible: true
+    filtersVisible: true,
+    filters: () => {
+        return new Filters(null)
+    }
 })
 let actions = ref({
     onRowDoubleClick: null,
@@ -597,7 +609,7 @@ let getHeaderTitle = (scope: any) => {
     return col.title
 }
 
-async function getCellData (scope: any) {
+async function getCellData(scope: any) {
     let field = getField(scope.column.property)
     if (!dataSource || !field)
         return '';

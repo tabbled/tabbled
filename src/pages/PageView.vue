@@ -195,7 +195,7 @@ function setComponentAvailableHeight() {
     for(let i in elements.value) {
         let item = elements.value[i]
         if (item.props.fillHeight) {
-            item.props.height = page.value.clientHeight - 16
+            item.props.height = page.value.clientHeight - 40
         }
     }
 }
