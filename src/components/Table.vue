@@ -39,13 +39,13 @@
             content="this is content, this is content, this is content"
         >
             <template #reference>
-                    <el-button v-if="filtersVisible" text size="small" style="margin-left: 8px" @click="filtersPopoverVisible = !filtersPopoverVisible">
+                    <el-button v-if="props.filters && filtersVisible" text size="small" style="margin-left: 8px" @click="filtersPopoverVisible = !filtersPopoverVisible">
                         <Icon icon="ic:sharp-filter-list" width="20"/>
                     </el-button>
             </template>
             <template #default>
                 <CustomFilterConstructor
-                    v-if="filtersVisible"
+                    v-if="props.filters &&  filtersVisible"
                     v-model="props.filters.filters"
                     :filters="props.filters"
                     :data-source="datasource"
@@ -610,6 +610,8 @@ let getHeaderTitle = (scope: any) => {
 }
 
 async function getCellData(scope: any) {
+    //console.log('getCellData', dataSource.alias)
+
     let field = getField(scope.column.property)
     if (!dataSource || !field)
         return '';
@@ -618,7 +620,7 @@ async function getCellData(scope: any) {
 
     if (field.config.getValue) {
         try {
-            return await getValueFunc()
+            value = await getValueFunc()
         } catch (e) {
             console.error(e)
             return 'Error'
@@ -645,6 +647,9 @@ async function getCellData(scope: any) {
     return display
 
     async function getLinkValue() {
+        if (field.config.getValue)
+            return value
+
         if (value && scope.row[`_${field.alias}_title`]) {
             return scope.row[`_${field.alias}_title`]
         }
@@ -673,6 +678,9 @@ async function getCellData(scope: any) {
     }
 
     function getEnumValue() {
+        if (field.config.getValue)
+            return value
+
         for(const i in field.values) {
             if (field.values[i].key === value) {
                 return field.values[i].title
@@ -775,7 +783,7 @@ let onItemRemoved = async (id, item) => {
 }
 
 let onDataSourceUpdate = async () => {
-    //console.log('updated', dt)
+    console.log('>>>> DS updated', dataSource.alias)
 
     data.value = dataSource.data
 

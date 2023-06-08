@@ -377,7 +377,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             //console.log(this.alias, " updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
             let idx = this.getIndexById(id)
-            if (idx) {
+            if (idx !== undefined) {
                 console.log(res.data)
                 this._data[idx] = res.data
             }
@@ -488,7 +488,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
             let idx = this.getIndexById(id)
-            if (idx) {
+            if (idx !== undefined) {
                 this._data[idx] = res.data
             }
 
