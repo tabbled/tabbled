@@ -24,11 +24,16 @@
         <el-button v-if="selectedIds.length || currentId" @click="remove" size="small">
             {{t('delete')}}
         </el-button>
+
         <el-input v-if="canSearch" style="margin-left: 8px;"
                   size="small"
                   :placeholder="$t('search')"
                   @input="searchChange"
                   :model-value="searchText"/>
+
+<!--        This is strange thing, whithout this input the first input while keydown the enter key that reload app
+            Maybe it is Element-plus' bag -->
+        <el-input style="width: 0; height: 0; opacity: 0"/>
 
 
         <el-popover
@@ -142,7 +147,7 @@ import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../mode
 import {useI18n} from "vue-i18n";
 import {dayjs, ElMessage, ElMessageBox} from "element-plus";
 import {Filters} from "../model/filter";
-import { useElementBounding } from '@vueuse/core'
+import { useElementBounding, useDebounceFn } from '@vueuse/core'
 import CustomFilterConstructor from "./CustomFilterConstructor.vue";
 
 
@@ -206,6 +211,7 @@ let currentId = ref(null)
 let isTree = ref(false)
 let canLoadNext = ref(false)
 let searchText = ref('')
+let searchVal = ""
 let loadingData = ref(false)
 let sort = ref<{order: string | null, prop: string | null}>(null)
 let canSearch = ref(false)
@@ -215,7 +221,9 @@ let filtersPopoverVisible = ref(false)
 
 const tableBounding = useElementBounding(table)
 
-
+const debouncedSearch = useDebounceFn(() => {
+    loadNext()
+}, 200, {maxWait: 1000})
 
 let data = ref<Array<any>>([])
 
@@ -332,7 +340,8 @@ function remove() {
 
 function searchChange(e) {
     searchText.value = e
-    loadNext()
+    searchVal = e
+    debouncedSearch()
 }
 
 function sortChange(e) {
@@ -394,6 +403,7 @@ async function getData() {
 }
 
 async function loadNext(skip: number = 0) {
+
     if (loadingData.value)
         return
 
@@ -406,7 +416,7 @@ async function loadNext(skip: number = 0) {
     }
 
     if (searchText.value) {
-        options.search = searchText.value
+        options.search = searchVal
     }
 
     if (props.filters)
