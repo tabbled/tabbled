@@ -2,6 +2,7 @@ import {ref} from "vue";
 import {DataSourceInterface} from "./datasource";
 
 export declare type StandardQueryOperator = '<' | '<=' | '==' | '!=' | '>' | '>=' | 'exists' | '!exists' | 'between' | '!between' | 'like' | '!like' | 'matches' | '!matches' | 'in' | '!in' | 'has' | '!has' | 'contains' | '!contains' | 'any' | 'empty';
+
 export interface FilterItemInterface {
     key: string,
     op: StandardQueryOperator,
@@ -14,6 +15,7 @@ export class Filters {
     }
     private readonly _dataSource: DataSourceInterface
     private filtersById: Map<string, FilterItemInterface> = new Map()
+    private groupById: Map<string, FilterItemInterface[]> = new Map()
 
     get filters() {
         return this._filters;
@@ -31,12 +33,39 @@ export class Filters {
             this.filtersById.set(id, filter)
         }
 
-        this._filters = [...this.filtersById.values()]
+        this.updateFilters()
+
+
+    }
+
+    setGroup(id, filters: Array<FilterItemInterface>) {
+        console.log(id, filters)
+        if (!filters) {
+            this.groupById.delete(id)
+        } else {
+            this.groupById.set(id, filters)
+        }
+
+        this.updateFilters()
     }
 
     clear() {
         this.filtersById.clear()
         this._filters = []
+    }
+
+    private updateFilters() {
+        let filters = [...this.filtersById.values()]
+
+        this.groupById.forEach(gr => {
+
+
+            filters = filters.concat(gr)
+        })
+
+        console.log(filters)
+
+        this._filters = filters
     }
 }
 

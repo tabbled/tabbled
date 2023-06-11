@@ -4,6 +4,7 @@
                :list="_filters"
                style="margin-bottom: 16px"
                @insert="insertFilter"
+               @remove="removeFilter"
                :sortable="false"
     >
         <template #default="{item}">
@@ -16,7 +17,7 @@
                                  size="small"
                                  :data-source="dataSource"
                                  v-model="item['key']"
-                                 @update:model-value="() => item['field'] = getField(item['key'])"
+                                 @update:model-value="fieldChanged(item)"
                     />
 
                     <el-select :placeholder="$t('filters.operator')" size="small" v-model="item['op']">
@@ -70,27 +71,51 @@
 
                     <div>
 
-<!--                        <el-select-->
-<!--                            ref="el"-->
-<!--                            v-else-if="field && (field.type === 'link')  && !field.isTree"-->
-<!--                            class="table-select"-->
-<!--                            :model-value="value"-->
-<!--                            :placeholder="$t('select')"-->
-<!--                            filterable-->
-<!--                            remote-->
-<!--                            clearable-->
-<!--                            remote-show-suffix-->
-<!--                            :remote-method="getLinkData"-->
-<!--                            :loading="isLoading"-->
-<!--                            @change="handleInput"-->
-<!--                        >-->
-<!--                            <el-option-->
-<!--                                v-for="item in linkData"-->
-<!--                                :key="item.id"-->
-<!--                                :label="item[displayProp]"-->
-<!--                                :value="item.id"-->
-<!--                            />-->
-<!--                        </el-select>-->
+                        <el-select
+                            v-if="item['field'].type === 'link'  && !isTree"
+                            v-model="item['compare']"
+                            :placeholder="$t('select')"
+                            filterable
+                            remote
+                            clearable
+                            show-checkbox
+                            :multiple="true"
+                            remote-show-suffix
+                            :remote-method="getLinkData"
+                        >
+                            <el-option
+                                v-for="item in linkData"
+                                :key="item.id"
+                                :label="item[displayProp]"
+                                :value="item.id"
+                            />
+                        </el-select>
+
+                        <el-tree-select v-if="item['field'].type === 'link'  && isTree"
+                                        v-model="item['compare']"
+                                        :data="linkData"
+                                        :node-key="'id'"
+                                        :props="treeProps"
+                                        show-checkbox
+                                        check-strictly
+                                        :multiple="true"
+                        />
+
+                        <el-select v-else-if=" item['field'].type === 'enum'"
+                                   filterable
+                                   v-model="item['compare']"
+                                   clearable
+                                   style="width: 100%"
+                                   show-checkbox
+                                   :multiple="true"
+                        >
+                            <el-option
+                                v-for="it in item['field'].values"
+                                :key="it.key"
+                                :label="it.title"
+                                :value="it.key"
+                            />
+                        </el-select>
 
                     </div>
 
@@ -120,13 +145,20 @@ import {ref} from "vue";
 import FieldSelect from "./FieldSelect.vue";
 import {useI18n} from "vue-i18n";
 import {FieldConfigInterface, FieldType} from "../model/field";
+import {DataSourceInterface} from "../model/datasource";
+import {useDataSourceService} from "../services/datasource.service";
 const { t } = useI18n();
 
 interface Props {
-    modelValue: any
+    id?: string
     filters?: Filters,
     closeButton?:boolean,
-    dataSource:string
+    dataSource:string,
+}
+
+const treeProps = {
+    children: "children",
+    label: "name"
 }
 
 interface Operator {
@@ -135,11 +167,18 @@ interface Operator {
     types: FieldType[]
 }
 
+
 interface FilterItem extends FilterItemInterface {
     field?: FieldConfigInterface
 }
 
 let _filters = ref<FilterItem[]>([])
+let linkData = ref([])
+let displayProp = ref('name')
+let linkDataSource:DataSourceInterface = null
+let dsService = useDataSourceService()
+let isTree = ref(false)
+let isLoading = ref(false)
 
 let operators: Operator[] = [
     { key: '==',  title: t("filters.=="), types: ['number', 'string', 'text', 'link', 'list', 'date', 'time', 'datetime', 'bool', 'enum'] },
@@ -148,8 +187,6 @@ let operators: Operator[] = [
     { key: '<',  title: t("filters.<"), types: ['number', 'date', 'time', 'datetime'] },
     { key: '>=',  title: t("filters.>="), types: ['number', 'date', 'time', 'datetime'] },
     { key: '<=',  title: t("filters.<="), types: ['number', 'date', 'time', 'datetime'] },
-    { key: 'in',  title: t("filters.in"), types: ['enum'] },
-    { key: '!in',  title: t("filters.!in"), types: ['enum'] },
     { key: 'between', title: t("filters.between"), types: ['number', 'date', 'time', 'datetime'] },
     { key: 'contains',  title: t("filters.contains"), types: ['string', 'text'] },
     { key: '!contains', title: t("filters.!contains"), types: ['string', 'text'] },
@@ -161,19 +198,33 @@ const props = withDefaults(defineProps<Props>(), {
     closeButton: false
 })
 
-const emit = defineEmits(['update:modelValue', 'apply', 'close'])
-
+const emit = defineEmits(['apply', 'close'])
 
 function apply() {
-    //props.filters.setFilter()
-    emit('apply')
+    let filters = []
+
+    _filters.value.forEach(filter => {
+        if (filter.key && filter.op) {
+            let f = Object.assign({}, filter)
+            delete f.field
+
+            filters.push(f)
+        }
+    })
+
+    props.filters.setGroup(props.id, filters)
+    emit('apply', filters.length)
 }
 
-function insertFilter() {
+async function insertFilter() {
     _filters.value.push({
         key:null,
         op:null
     })
+}
+
+function removeFilter(idx) {
+    _filters.value.splice(idx, 1)
 }
 
 function getOperators(alias) {
@@ -205,6 +256,52 @@ function format(type) {
         case "time": return 'HH:MM:SS';
         case "datetime": return 'DD.MM.YYYY HH:MM:SS';
     }
+}
+
+async function fieldChanged(item) {
+    let field = getField(item['key']);
+
+    if (!field)
+        return
+
+    let ops = getOperators(item['key'])
+
+    item['field'] = field
+    item['op'] = ops.length ? ops[0].key : null
+    item['compare'] = null
+
+    if (field.type === 'link') {
+        if (field.displayProp)
+            displayProp.value = field.displayProp
+
+        linkDataSource = await dsService.getByAlias(field.datasource)
+
+        if (!linkDataSource) {
+            console.warn(`Link source "${field.datasource}" for field "${field.alias}" not found`)
+            return
+        }
+
+        isTree.value = linkDataSource.isTree
+        await getLinkData()
+    }
+}
+
+async function getLinkData(query?: string) {
+    if (isLoading.value || !linkDataSource)
+        return
+
+    isLoading.value = true
+
+    let opt = {
+        take: 50
+    }
+
+    if (query) {
+        opt['search'] = query
+    }
+
+    linkData.value = await linkDataSource.getMany(opt)
+    isLoading.value = false
 }
 
 </script>

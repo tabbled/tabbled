@@ -44,19 +44,25 @@
             content="this is content, this is content, this is content"
         >
             <template #reference>
-                    <el-button v-if="props.filters && filtersVisible" text size="small" style="margin-left: 8px" @click="filtersPopoverVisible = !filtersPopoverVisible">
+                <el-badge style="margin-bottom: 1px; height: 10px" :value="customFiltersCount" :hidden="!customFiltersCount">
+
+
+                    <el-button v-if="props.filters && filtersVisible" text size="small" style="margin-left: 8px; margin-bottom: 10px" @click="filtersPopoverVisible = !filtersPopoverVisible">
                         <Icon icon="ic:sharp-filter-list" width="20"/>
                     </el-button>
+
+                </el-badge>
             </template>
             <template #default>
                 <CustomFilterConstructor
                     v-if="props.filters &&  filtersVisible"
-                    v-model="props.filters.filters"
+                    :id="id"
                     :filters="props.filters"
                     :data-source="datasource"
                     :close-button="true"
-                    @apply="filtersPopoverVisible = false"
+                    @apply="(cnt) => {customFiltersCount = cnt; filtersPopoverVisible = false}"
                     @close="filtersPopoverVisible = false"
+
                 />
             </template>
         </el-popover>
@@ -218,6 +224,7 @@ let canSearch = ref(false)
 let availableHeight = 200
 let itemsCount = ref(0)
 let filtersPopoverVisible = ref(false)
+let customFiltersCount = ref(0)
 
 const tableBounding = useElementBounding(table)
 

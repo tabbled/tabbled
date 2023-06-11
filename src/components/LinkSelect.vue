@@ -161,16 +161,11 @@ async function getData(query?: string) {
     isLoading.value = true;
 
     let opt = {
-        filter: [],
         take: 50
     }
 
     if (query) {
-        opt.filter.push({
-            key: props.displayProp,
-            op: 'like',
-            compare: `%${query}%`
-        })
+        opt['search'] = query
     }
 
     data.value = await dataSource.getMany(opt)
