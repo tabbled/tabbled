@@ -80,7 +80,15 @@ export class Config implements ComponentInterface {
             title: "onRemove",
             alias: "onRemove",
             type: 'handler'
-        }]
+        },
+        {
+            title: "Custom actions",
+            alias: "customActions",
+            type: 'list',
+            listOf: 'action',
+            keyProp: 'alias',
+            displayProp: 'alias',
+        },]
     defaultPosition = {
         rows: 1,
         cols: 12

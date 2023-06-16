@@ -7,7 +7,6 @@
         remote-show-suffix
         :remote-method="getData"
         :loading="isLoading"
-        :size="size ? size : 'default'"
         @change="(val) => change(val)"
     >
         <el-option

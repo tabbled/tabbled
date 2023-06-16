@@ -1,7 +1,28 @@
 <template>
+    <div style="display: flex; flex-flow: row; align-self: center">
+        <div style="align-items: center; display: flex; cursor: pointer; padding-left: 16px" @click="back()">
+            <Icon icon="mdi:arrow-left" width="16"/>
+        </div>
+
+        <div style="display: flex; flex-flow: column;">
+
+            <div class="title" >{{$t('settings')}}</div>
+            <div class="path">
+                <div style="display: flex" v-for="(item,idx)  in _currentPathArray">
+                    <div v-if="idx > 0" class="path-separator">/</div>
+                    <el-button :disabled="idx === _currentPathArray.length -1"
+                               style="font-weight: normal; cursor: auto;"
+                               link
+                               @click="setPathIdx(idx)" >{{item}}</el-button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="panel">
 
-        <div v-if="properties && currentElement" :style="{'max-height': scrollHeight - 60 + 'px'}">
+        <div v-if="properties && currentElement" :style="{'max-height': scrollHeight - 100+ 'px'}">
                 <el-form label-position="top" style="padding: 0 0 0 16px" ref="pageForm" :model="currentElement" size="small">
                     <el-form-item v-for="(prop, idx)  in properties.filter(item => !item.hidden)"
                                   style="margin-bottom: 8px;"
@@ -85,8 +106,6 @@ let flakeId = new FlakeId()
 
 let componentService = useComponentService()
 
-
-
 let pageForm = ref(null)
 let divToHeight = ref(null)
 let scrollHeight = ref(window.innerHeight)
@@ -94,6 +113,7 @@ let scrollHeight = ref(window.innerHeight)
 let properties = ref<FieldConfigInterface[]>([])
 let currentElement = ref(null)
 let _currentPath = ''
+let _currentPathArray = ref(['Path'])
 
 let pageListTypesProperties = new PageTypesProperties()
 
@@ -115,10 +135,42 @@ watch(() => props,
 watch(() => props.currentPath,
     async () => {
         setCurrentElement(props.currentPath ? props.currentPath : '')
+        onPathChanged(props.currentPath)
     },
     {
         deep: true
     })
+
+
+function setPathIdx(idx: number) {
+    let path = ''
+    for (let i = 1; i <= idx; i++) {
+        if (path !== '') path += '.';
+        path += _currentPathArray.value[i]
+    }
+
+    emit('path-changed', path)
+}
+
+function back() {
+    let path = ''
+    for (let i = 1; i <= _currentPathArray.value.length -2; i++) {
+        if (path !== '') path += '.';
+        path += _currentPathArray.value[i]
+    }
+
+    emit('path-changed', path)
+    setCurrentElement(path)
+}
+
+function onPathChanged(path) {
+    //currentConfigPath.value = path
+    console.log(path)
+    emit('path-changed', path)
+
+    _currentPathArray.value = path !== "" ? path.split('.') : []
+    _currentPathArray.value.splice(0, 0, 'Page');
+}
 
 function setCurrentElement(cpath: string) {
     if (cpath === '') {
@@ -292,12 +344,29 @@ function getValue(prop: FieldConfigInterface, element: any) {
     background: white;
     z-index: 0;
     width: 100%;
-    //padding: 16px;
     overflow-y: auto;
     overflow-x: hidden;
     scroll-behavior: auto;
+    padding-top: 16px;
+
+
+    .path-separator {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
 }
 
+.title {
+    font-size: var(--el-font-size-medium);
+    padding-left: 16px;
+}
 
+.path {
+    font-size: var(--el-font-size-small);
+    display: flex;
+    flex-flow: wrap;
+    height: 24px;
+    padding-left: 16px;
+}
 
 </style>

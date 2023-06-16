@@ -104,5 +104,9 @@
         "!in": "не входит",
         "any": "любое",
         "empty": "пусто"
+    },
+    "pageDesigner": {
+        "pageSettings": "Настройки",
+        "addElement": "Добавить элемент"
     }
 }

@@ -1,169 +1,159 @@
 <template>
 
-    <div style="display: flex; flex-flow: column; padding: 16px; height: calc(100% - 32px)"
+    <div style="display: flex; flex-flow: row; padding: 16px; height: calc(100% - 32px)"
          @mouseup="endResizeSettingPanel"
          @mousemove="onResizeSettingPanel">
 
-    <el-row align="middle" justify="space-between" style="padding-bottom: 16px">
-        <div style="display: flex; flex-flow: wrap; align-items: center;">
-            <el-radio-group v-model="selectedSize" size="small">
-                <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
-            </el-radio-group>
-            <el-divider direction="vertical"/>
-            <el-dropdown type="default"
-                         size="small"
-                         trigger="click"
-            >
-                <el-button size="small">
-                    Add element
-                    <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
-                </el-button>
-                <template #dropdown>
-                    <el-dropdown-menu>
-                        <el-dropdown-item v-for="(comp) in componentService.getList()"
-                                          @dragstart="(e) => startDragNewElement(e, comp)"
-                                          draggable="true"
-                                          style="cursor: move"
-                        >
-                            <Icon :icon="comp.icon" style="padding-right: 4px"/>
-                            {{comp.title}}
-                        </el-dropdown-item>
-                    </el-dropdown-menu>
-                </template>
-            </el-dropdown>
+        <div style="padding-bottom: 16px; display: flex; flex-flow: column;">
 
-            <div style="display: flex; flex-flow: wrap; align-items: center;">
-                <el-button size="small" link @click="selectWidget('')" style="padding-left: 8px">
-                    <Icon icon="mdi:cog" width="16" style="padding-right: 4px"/>
-                    Page settings
-                </el-button>
+            <div  style="display: flex; flex-flow: wrap; justify-content: space-between">
+                <div style="display: flex; flex-flow: wrap; align-items: center">
+                    <el-radio-group v-model="selectedSize" size="small">
+                        <el-radio-button v-for="i in getAvailableScreenSizes($t)" :label="i.size">{{i.title}} </el-radio-button>
+                    </el-radio-group>
+                    <el-divider direction="vertical"/>
+                    <el-dropdown type="default"
+                                 size="small"
+                                 trigger="click"
+                    >
+                        <el-button size="small">
+                            {{$t('pageDesigner.addElement')}}
+                            <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item v-for="(comp) in componentService.getList()"
+                                                  @dragstart="(e) => startDragNewElement(e, comp)"
+                                                  draggable="true"
+                                                  style="cursor: move"
+                                >
+                                    <Icon :icon="comp.icon" style="padding-right: 4px"/>
+                                    {{comp.title}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
 
-            </div>
-        </div>
-
-
-        <div class="settings-panel" :style="{width: String(settingPanelWidth) + 'px'}"
-        >
-            <div style="display: flex; flex-flow: column;">
-                <div class="title">Settings</div>
-                <div class="path">
-                    <div style="display: flex" v-for="(item,idx)  in _currentPathArray">
-                        <div v-if="idx > 0" class="path-separator">/</div>
-                        <el-button :disabled="idx === _currentPathArray.length -1"
-                                   style="font-weight: normal; cursor: auto;"
-                                   link
-                                   @click="setPathIdx(idx)" >{{item}}</el-button>
+                    <div style="display: flex; flex-flow: wrap; align-items: center;">
+                        <el-button size="small" link @click="selectWidget('')" style="padding-left: 8px">
+                            <Icon icon="mdi:cog" width="16" style="padding-right: 4px"/>
+                            {{$t('pageDesigner.pageSettings')}}
+                        </el-button>
 
                     </div>
                 </div>
-            </div>
-            <div>
-                <el-button size="small" @click="cancel">Cancel</el-button>
-                <el-button size="small" type="primary" @click="save" :disabled="!isChanged">Save</el-button>
-
-            </div>
-        </div>
-
-    </el-row>
-
-    <div style="display: flex; flex-flow: row">
-
-    <div style="display: flex; flex-flow: column; width: 100%" >
 
 
-
-        <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
-            <template #content>
-                <span class="text-large font-600 mr-3"> {{pageConfig ? pageConfig.title : ""}} </span>
-            </template>
-
-            <template #extra>
-                <div class="page-header-action-panel">
-                    <el-button v-for="action in pageHeader.actions"
-                               :type="action.type ? action.type : 'default'"
-                               @click="action.func()"
-                    >
-                        {{action.title}}
-                    </el-button>
-                    <el-button v-if="pageConfig ? pageConfig.isEditPage : false" disabled>Cancel</el-button>
-                    <el-button v-if="pageConfig ? pageConfig.isEditPage : false" type="primary" disabled>Save</el-button>
+                <div style="margin-right: 16px">
+                    <el-button size="small" @click="cancel">{{$t('cancel')}}</el-button>
+                    <el-button size="small" type="primary" @click="save" :disabled="!isChanged">{{$t('save')}}</el-button>
                 </div>
-            </template>
-        </el-page-header>
-
-        <el-form label-position="top">
-            <div ref="grid"
-                 class="grid-wrapper"
-                 @mouseup="endDrag"
-                 @mousemove="onDrag"
-                 @dragover.prevent
-                 @dragenter.prevent
-                 @drop="dropNewWidget($event)"
-                 @click="gridClicked"
-            >
-                <div v-for="(element, idx) in elements"
-                     class="dragging widget-draggable"
-                     :id="String(idx)"
-                     :style="getGridElStyle(element)"
-                     :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}">
+            </div>
 
 
-                    <el-form-item
-                        :id="String(idx)"
 
-                    >
-                        <template #label>
-                            <div
-                                 style="cursor: move; width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" @mousedown="initDragMove"
-                                 :id="String(idx)">
-                                <span :id="String(idx)">{{getElementTitle(element)}}</span>
-                                <div @click="removeWidget(Number(idx))">
-                                    <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
-                                </div>
-                            </div>
+            <div style="display: flex; flex-flow: row">
+
+                <div style="display: flex; flex-flow: column; width: 100%" >
+
+
+
+                    <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
+                        <template #content>
+                            <span class="text-large font-600 mr-3"> {{pageConfig ? pageConfig.title : ""}} </span>
                         </template>
 
-                        <component
-                            :id="String(idx)"
-                            style="width: 100%"
-                            v-bind="getElementProperties(element)"
-                            :is="element.name"
-                        />
-                    </el-form-item>
+                        <template #extra>
+                            <div class="page-header-action-panel">
+                                <el-button v-for="action in pageHeader.actions"
+                                           :type="action.type ? action.type : 'default'"
+                                           @click="action.func()"
+                                >
+                                    {{action.title}}
+                                </el-button>
+                                <el-button v-if="pageConfig ? pageConfig.isEditPage : false" disabled>{{$t('cancel')}}</el-button>
+                                <el-button v-if="pageConfig ? pageConfig.isEditPage : false" type="primary" disabled>{{$t('save')}}</el-button>
+                            </div>
+                        </template>
+                    </el-page-header>
 
-                    <div :class="{
+                    <el-form label-position="top">
+                        <div ref="grid"
+                             class="grid-wrapper"
+                             @mouseup="endDrag"
+                             @mousemove="onDrag"
+                             @dragover.prevent
+                             @dragenter.prevent
+                             @drop="dropNewWidget($event)"
+                             @click="gridClicked"
+                        >
+                            <div v-for="(element, idx) in elements"
+                                 class="dragging widget-draggable"
+                                 :id="String(idx)"
+                                 :style="getGridElStyle(element)"
+                                 :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}">
+
+
+                                <el-form-item
+                                    :id="String(idx)"
+
+                                >
+                                    <template #label>
+                                        <div
+                                            style="cursor: move; width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" @mousedown="initDragMove"
+                                            :id="String(idx)">
+                                            <span :id="String(idx)">{{getElementTitle(element)}}</span>
+                                            <div @click="removeWidget(Number(idx))">
+                                                <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <component
+                                        :id="String(idx)"
+                                        style="width: 100%"
+                                        v-bind="getElementProperties(element)"
+                                        :is="element.name"
+                                    />
+                                </el-form-item>
+
+                                <div :class="{
                             'resizer-right': true,
                             'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
-                         @mousedown="initDragRight" :id="String(idx)"></div>
-                    <div :class="{
+                                     @mousedown="initDragRight" :id="String(idx)"></div>
+                                <div :class="{
                             'resizer-bottom': true,
                             'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
-                         @mousedown="initDragBottom" :id="String(idx)"></div>
+                                     @mousedown="initDragBottom" :id="String(idx)"></div>
+                            </div>
+                        </div>
+                    </el-form>
                 </div>
-            </div>
-        </el-form>
-    </div>
 
+
+
+
+
+            </div>
+
+        </div>
 
 
         <el-aside
-            class="settingsPanel"
+            style="overflow: hidden;"
             :width="String(settingPanelWidth) + 'px'">
 
             <div class="resizer"
                  @mousedown="initResizeSettingPanel"/>
 
             <PageSettingsPanel
-                style="width: 100%"
                 :page-config="pageConfig"
                 :current-path="currentConfigPath"
+                @path-changed="v => currentConfigPath = v"
                 @update="onUpdateProperty"
-                @path-changed="onPathChanged"
             />
 
         </el-aside>
-
-    </div>
     </div>
 
 
@@ -222,7 +212,7 @@ let currentConfigPath = ref('')
 let settingPanelWidth = ref<number>(getSettingsPanelWidth())
 let isResizingSettingPanel = false
 let startXResizingSettingPanel = 0
-let _currentPathArray = ref(['Path'])
+
 let isChanged = ref(false)
 const settings = useSettings()
 
@@ -246,16 +236,6 @@ onUnmounted(() => {
 
 function setAppTitle() {
     document.title = `${route.meta.title} | ${ settings.title }`
-}
-
-function setPathIdx(idx: number) {
-    let path = ''
-    for (let i = 1; i <= idx; i++) {
-        if (path !== '') path += '.';
-        path += _currentPathArray.value[i]
-    }
-    currentConfigPath.value = path
-    //setCurrentElement(path)
 }
 
 function getSettingsPanelWidth():number {
@@ -365,13 +345,6 @@ async function onUpdateProperty(path: string, value: any) {
     })
 
     isChanged.value = true
-}
-
-function onPathChanged(path) {
-    currentConfigPath.value = path
-
-    _currentPathArray.value = path !== "" ? path.split('.') : []
-    _currentPathArray.value.splice(0, 0, 'Page');
 }
 
 async function save() {
@@ -622,31 +595,13 @@ async function dropNewWidget(e:DragEvent) {
     flex-flow: row;
     padding-left: 16px;
     justify-content: space-between;
-
-    .title {
-        font-size: var(--el-font-size-medium);
-        width: 100%;
-        padding-left: 16px;
-    }
-
-    .path {
-        font-size: var(--el-font-size-small);
-        display: flex;
-        flex-flow: wrap;
-        height: 24px;
-        padding-left: 16px;
-    }
-
-    .path-separator {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
 }
 
 .setting-panel {
     width: 216px;
     background: white;
     padding-left: 16px;
+    position: absolute;
 }
 
 .setting-panel-trans-enter-active {

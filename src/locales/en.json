@@ -120,5 +120,9 @@
         "!in": "not in",
         "any": "any value",
         "empty": "is empty"
+    },
+    "pageDesigner": {
+        "pageSettings": "Page settings",
+        "addElement": "Add element"
     }
 }
