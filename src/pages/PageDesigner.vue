@@ -318,16 +318,6 @@ async function init() {
     pageHeader.title = `Page designer #` + pageConfig.value.alias
 
     pageHeader.actions = []
-    // pageHeader.actions.push({
-    //     title: 'Cancel',
-    //     type: 'default',
-    //     func: () => { console.log('cancel') }
-    // })
-    // pageHeader.actions.push({
-    //     title: 'Save',
-    //     type: 'primary',
-    //     func: () => { console.log('save') }
-    // })
 
     elements.value = []
 

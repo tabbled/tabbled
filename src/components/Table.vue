@@ -33,7 +33,16 @@
 
 <!--        This is strange thing, whithout this input the first input while keydown the enter key that reload app
             Maybe it is Element-plus' bag -->
-        <el-input style="width: 0; height: 0; opacity: 0"/>
+        <el-input style="width: 0; height: 0; opacity: 0; padding-right: 8px"/>
+
+
+        <el-button v-for="action in _customActions"
+                   size="small"
+                   :type="action.type ? action.type : 'default'"
+                   @click="action.func()"
+        >
+            {{action.title}}
+        </el-button>
 
 
         <el-popover
@@ -155,6 +164,8 @@ import {dayjs, ElMessage, ElMessageBox} from "element-plus";
 import {Filters} from "../model/filter";
 import { useElementBounding, useDebounceFn } from '@vueuse/core'
 import CustomFilterConstructor from "./CustomFilterConstructor.vue";
+import {PageActionsInterface} from "../services/page.service";
+import {PageActionConfigInterface} from "../model/page";
 
 
 interface Props {
@@ -180,7 +191,8 @@ interface Props {
     height?: number,
     fillHeight?: boolean,
     showCount?: boolean,
-    filtersVisible?: boolean
+    filtersVisible?: boolean,
+    customActions: PageActionConfigInterface[]
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -225,6 +237,7 @@ let availableHeight = 200
 let itemsCount = ref(0)
 let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
+let _customActions = ref<PageActionsInterface[]>([])
 
 const tableBounding = useElementBounding(table)
 
@@ -263,7 +276,7 @@ async function load() {
     await getData();
 }
 
-onUnmounted(() => {
+onUnmounted(async () => {
     if (dataSource) {
         //dataSource.removeListener('item-inserted', onItemInserted)
         //dataSource.removeListener('item-updated', onItemUpdated)
@@ -500,6 +513,9 @@ async function compileAction(action) {
 async function execAction(action: CompiledFunc, additionalContext?: object) {
     try {
         let ctx = Object.assign(props.context, additionalContext)
+        ctx.table = table.value
+        ctx.currentId = currentId.value
+        ctx.currentItem = await dataSource.getById(currentId.value)
         action.exec(ctx)
     } catch (e) {
         console.error(`Execution error in action`)
@@ -838,7 +854,32 @@ async function init() {
         if (dataSource instanceof CustomDataSource) {
             dataSource.setContext(props.context)
         }
+    }
 
+    for(let i in props.customActions) {
+        const action = props.customActions[i]
+
+        let compiledFunc: CompiledFunc
+        let act = {
+            title: action.title,
+            type: action.type,
+            func: async () => {
+                try {
+                    await execAction(compiledFunc)
+                } catch (e) {
+                    //console.error(`Execution error in action "${action.title}"`)
+                    //console.error(e);
+                }
+            }
+        }
+
+        try {
+            compiledFunc = await compileAction(action.onClick)
+            _customActions.value.push(act)
+        } catch (e) {
+            //console.error(`Compilation error in script for action "${action.title}"`)
+            //console.error(e)
+        }
     }
 }
 
