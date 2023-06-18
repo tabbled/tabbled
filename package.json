@@ -22,7 +22,7 @@
     "codemirror": "^6.0.1",
     "core-js": "^3.30.2",
     "dayjs": "^1.11.7",
-    "element-plus": "^2.3.4",
+    "element-plus": "^2.3.6",
     "events": "^3.3.0",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",

@@ -276,7 +276,7 @@ async function load() {
     await getData();
 }
 
-onUnmounted(async () => {
+onUnmounted( () => {
     if (dataSource) {
         //dataSource.removeListener('item-inserted', onItemInserted)
         //dataSource.removeListener('item-updated', onItemUpdated)
@@ -513,9 +513,8 @@ async function compileAction(action) {
 async function execAction(action: CompiledFunc, additionalContext?: object) {
     try {
         let ctx = Object.assign(props.context, additionalContext)
-        ctx.table = table.value
-        ctx.currentId = currentId.value
-        ctx.currentItem = await dataSource.getById(currentId.value)
+         ctx.currentId = currentId.value
+         ctx.currentItem = await dataSource.getById(currentId.value)
         action.exec(ctx)
     } catch (e) {
         console.error(`Execution error in action`)
