@@ -12,6 +12,10 @@
         <div>{{$t('loading')}}</div>
     </div>
     <Main v-else :screen-size="screenSize" />
+
+    <DialogView  v-model:visible="dialogVisible"
+                 :screen-size="screenSize"
+                 :options="dialogOptions"/>
 </template>
 
 <script setup lang="ts">
@@ -28,6 +32,7 @@ import PageView from "./pages/PageView.vue";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
+import DialogView from "./components/DialogView.vue";
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -48,6 +53,8 @@ const dsService = useDataSourceService();
 const db = useDatabase();
 const syncService = useSyncService()
 const settings = useSettings()
+let dialogVisible = ref(false)
+let dialogOptions = ref()
 
 const { t, locale } = useI18n();
 
@@ -101,6 +108,12 @@ onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
     configLoadState.value = ConfigLoadState.NotLoaded
 })
+
+function openDialog(options) {
+    console.log(options)
+    dialogOptions.value = options
+    dialogVisible.value = true
+}
 
 function handleResize() {
     screenSize.value = window.innerWidth > 800 ? ScreenSize.desktop : ScreenSize.mobile
@@ -164,7 +177,8 @@ function addRoute(path: string, page: PageConfigInterface) {
         component: PageView,
         props: {
             pageConfig: page,
-            screenSize: screenSize.value
+            screenSize: screenSize.value,
+            openDialog: openDialog
         },
         meta: {
             isSingle: false,

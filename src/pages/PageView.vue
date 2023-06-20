@@ -67,13 +67,7 @@ let store = useStore();
 let router = useRouter();
 let route = useRoute();
 const pageService = usePageScriptHelper(router)
-const scriptContext = ref({
-    pages: pageService,
-    page: {
-        params: {}
-    },
-    item: null
-})
+
 
 const pageHeader = usePageHeader()
 
@@ -93,8 +87,18 @@ let filters = ref<Filters>(null)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
-    screenSize: ScreenSize
+    screenSize: ScreenSize,
+    openDialog: Function
 }>()
+
+const scriptContext = ref({
+    pages: pageService,
+    page: {
+        params: {}
+    },
+    item: null,
+    openDialog: null
+})
 
 let actions = ref({
     onOpen: null
@@ -111,11 +115,6 @@ watch(() => props.pageConfig,
         await init()
         setAppTitle()
     })
-
-watch(() => editEntity.value,
-    async () => {
-        //console.log('update entity', editEntity.value)
-    }, {deep: true})
 
 onMounted(async () => {
     await init()
@@ -221,7 +220,10 @@ async function init() {
     editDataSource = null
     editEntity.value = null
 
+    //console.log(props)
+
     scriptContext.value.page.params = route.params
+    scriptContext.value.openDialog = props.openDialog
 
     if (props.pageConfig.datasource) {
         editDataSource = await dsService.getByAlias(props.pageConfig.datasource)

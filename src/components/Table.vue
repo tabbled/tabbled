@@ -192,7 +192,7 @@ interface Props {
     fillHeight?: boolean,
     showCount?: boolean,
     filtersVisible?: boolean,
-    customActions: PageActionConfigInterface[]
+    customActions?: PageActionConfigInterface[]
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -265,7 +265,7 @@ watch(() => props.filters?.filters, () => loadNext())
 
 function getHeight() {
     if (props.fillHeight) {
-        return props.height - tableBounding.top.value
+        return (props.height ? props.height : 400) - tableBounding.top.value
     }
     return props.height ? props.height : null
 }
