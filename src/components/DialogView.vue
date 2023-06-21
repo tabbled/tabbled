@@ -38,7 +38,8 @@ import {ref, watch} from "vue";
 import {DataSourceInterface, EntityInterface} from "../model/datasource";
 import _ from "lodash";
 import {useComponentService} from "../services/component.service";
-import {Filters} from "../model/filter";
+import {Filters, useFilters} from "../model/filter";
+import {generateEntityWithDefault} from "../model/field";
 
 const dsService = useDataSourceService();
 let componentService = useComponentService()
@@ -87,6 +88,26 @@ async function init() {
     elements.value = []
     editDataSource = null
     editEntity.value = null
+
+    if (pageConfig.value.datasource) {
+        editDataSource = await dsService.getByAlias(pageConfig.value.datasource)
+        if (!editDataSource) {
+            console.warn(`DataSource ${pageConfig.value.datasource} for editing page ${pageConfig.value.alias} not found`)
+            return;
+        }
+
+        filters = useFilters(editDataSource)
+
+        let id = props.options.id
+
+        if (id && id !== 'new') {
+            editEntity.value = await editDataSource.getById(id)
+            isNew.value = false
+        } else {
+            editEntity.value = await generateEntityWithDefault(editDataSource.fields)
+            isNew.value = true
+        }
+    }
 
     pageConfig.value.elements.forEach(element => {
         let el:ElementInterface = {
