@@ -3,9 +3,11 @@
                :model-value="visible"
                style="padding: 0"
                @close="emit('update:visible', false)"
-               :title="options && options.title ? options.title : 'Dialog'"
+               :title="pageConfig ? pageConfig.title : 'Dialog'"
                :modal="options && options.modal ? options.modal : false"
                draggable
+               :width="options && options.width ? options.width : '60%'"
+               :fullscreen="screenSize === ScreenSize.mobile"
     >
         <el-form ref="grid"  class="grid-wrap" :model="editEntity" label-position="top" style="padding: 0">
 
