@@ -43,15 +43,14 @@
         ref="el"
         v-else-if="field && (field.type === 'link') && field.isTree"
         class="table-select"
-        :model-value="value"
+        v-model="value"
         :data="linkData"
         :render-after-expand="false"
-        @check="checkChanged"
+
         check-strictly
         show-checkbox
         :multiple="field.isMultiple"
         style="order: 0; height: 100%; width: calc(100% - 2px); margin: 1px "
-        @change="treeChange"
         @remove-tag="removeTag"
         :placeholder="$t('select')"
     >
@@ -189,22 +188,22 @@ async function getLinkData(query?: string) {
 
     isLoading.value = true
     linkData.value = await ds.getMany(opt)
+
+    if (ds && value.value && !itemExists()) {
+        let item = await ds.getById(value.value)
+        if (item)
+            linkData.value.push(item)
+    }
+
     isLoading.value = false
 }
 
-function checkChanged(node,params) {
-    //console.log(params.checkedKeys)
-    value.value = params.checkedKeys
-    emit('update:modelValue', value.value)
-}
-
-function treeChange(a) {
-    //console.log(a)
-    if (!props.field.isMultiple) {
-        //console.log('treeChange', a)
-        value.value = a
-        emit('update:modelValue', value.value)
+function itemExists() : boolean {
+    for(let i in linkData.value) {
+        if (linkData.value[i].id === value.value)
+            return true
     }
+    return false
 }
 
 function removeTag(tag) {
