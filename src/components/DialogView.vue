@@ -8,13 +8,13 @@
                draggable
                :width="options && options.width ? options.width : '60%'"
                :fullscreen="screenSize === ScreenSize.mobile"
+               :append-to-body="true"
     >
         <el-form ref="grid"  class="grid-wrap" :model="editEntity" label-position="top" style="padding: 0">
 
             <el-form-item v-for="(element, idx) in elements"
                           :label="getLabelElement(element)"
                           :style="getGridElementStyle(element.layout)"
-
                           class="element">
 
                 <component :id="element.id || idx.toString()"
@@ -24,9 +24,16 @@
                            :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
+                           @update:currentId="currentIdChanged"
                 />
             </el-form-item>
         </el-form>
+        <template #footer>
+            <div style="display: flex; flex-direction: row; justify-content: end;">
+                <el-button @click="emit('update:visible', false)">{{$t('close')}}</el-button>
+                <el-button :disabled="!selected" type="primary" @click="select">{{$t('select')}}</el-button>
+            </div>
+        </template>
     </el-dialog>
 </template>
 
@@ -44,11 +51,13 @@ import {generateEntityWithDefault} from "../model/field";
 const dsService = useDataSourceService();
 let componentService = useComponentService()
 let pageConfig = ref(null)
+let selected = ref(null)
 
 const props = defineProps<{
     screenSize: ScreenSize,
     visible: boolean,
-    options: any
+    options: any,
+    selecting?: boolean
 }>()
 
 const scriptContext = ref({
@@ -65,7 +74,7 @@ let isNew = ref(false)
 let elements = ref<Array<ElementInterface>>([])
 let filters = ref<Filters>(null)
 
-const emit = defineEmits(['update:visible'])
+const emit = defineEmits(['update:visible', 'selected'])
 
 watch(() => props.visible, () => {
     if (props.visible) {
@@ -208,6 +217,20 @@ async function setValue(el:ElementInterface, value: any) {
             return false
         }
     }
+}
+
+function select() {
+    if (!selected.value) {
+        console.error("no selected item")
+        return
+    }
+
+    emit('selected', selected.value)
+    emit('update:visible', false)
+}
+
+function currentIdChanged(id) {
+    selected.value = id
 }
 
 </script>

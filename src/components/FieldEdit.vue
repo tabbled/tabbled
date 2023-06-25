@@ -1,5 +1,5 @@
 <template>
-    <el-form ref="formRef" :model="modelValue" label-width="100px">
+    <el-form ref="formRef" :model="modelValue" label-width="170px">
 
         <el-tabs>
 
@@ -38,8 +38,13 @@
                     </el-select>
                 </el-form-item>
 
+
                 <el-form-item v-if="modelValue.type === 'link'" :label="t('fieldConfig.isTree')">
                     <el-checkbox :disabled="!!modelValue.datasource" v-model="modelValue.isTree"/>
+                </el-form-item>
+
+                <el-form-item :label="t('fieldConfig.searchDialog')" prop="searchDialog">
+                    <el-input v-model="modelValue.searchDialog"/>
                 </el-form-item>
 
                 <el-form-item v-if="modelValue.type === 'number'" :label="t('fieldConfig.precision')">

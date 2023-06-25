@@ -70,7 +70,8 @@
         "setValue": "setValue",
         "getReadonly": "getReadonly",
         "searchable": "Текстовый поиск по полю",
-        "isTree": "Древовидный"
+        "isTree": "Древовидный",
+        "searchDialog": "Диалог поиска"
     },
     "menuConfig": {
         "title": "Название",

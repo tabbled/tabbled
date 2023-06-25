@@ -66,6 +66,7 @@ export interface FieldConfigInterface {
     format?: FormatType,
     autoincrement?: boolean,
     searchable?: boolean // Only for string and number types
+    searchDialog?: string // only for link field
 }
 
 export interface FieldInterface {

@@ -1,59 +1,77 @@
 <template>
-    <el-select v-if="!fieldConfig"
-               :disabled="isDisabled"
-    />
-    <el-select v-else-if="fieldConfig.type === 'link' && !isTree"
-               filterable
-               :model-value="value"
-               :disabled="isDisabled"
-               remote
-               clearable
-               remote-show-suffix
-               :remote-method="getData"
-               :loading="isLoading"
-               @change="(val) => change(val)"
-               style="width: 100%"
-    >
-        <el-option
-            v-for="item in data"
-            :key="item[keyProp]"
-            :label="item[displayProp]"
-            :value="item[keyProp]"
+    <div style="display: flex; flex-direction: row; width: 100%; padding-top: 1px">
+        <el-select v-if="!fieldConfig"
+                   :disabled="isDisabled"
         />
-    </el-select>
-    <el-tree-select v-else-if="fieldConfig.type === 'link' && isTree"
-                    :model-value="value"
-                    style="width: 100%"
-                    :data="data"
-                    :node-key="keyProp"
-                    :props="treeProps"
-                    show-checkbox
-                    check-strictly
-                    :multiple="fieldConfig.isMultiple"
-                    @check="treeChanged"
-    />
-    <el-select v-else-if=" fieldConfig.type === 'enum'"
-               filterable
-               :model-value="value"
-               :disabled="isDisabled"
-               clearable
-               @change="(val) => change(val)"
-               style="width: 100%"
-    >
-        <el-option
-            v-for="item in fieldConfig.values"
-            :key="item.key"
-            :label="item.title"
-            :value="item.key"
+        <el-select v-else-if="fieldConfig.type === 'link' && !isTree"
+                   filterable
+                   :model-value="value"
+                   :disabled="isDisabled"
+                   remote
+                   clearable
+                   remote-show-suffix
+                   :remote-method="getData"
+                   :loading="isLoading"
+                   @change="(val) => change(val)"
+                   style="width: 100%;"
+        >
+            <el-option
+                v-for="item in data"
+                :key="item[keyProp]"
+                :label="item[displayProp]"
+                :value="item[keyProp]"
+            />
+        </el-select>
+
+        <el-tree-select v-else-if="fieldConfig.type === 'link' && isTree"
+                        :model-value="value"
+                        style="width: 100%"
+                        :data="data"
+                        :node-key="keyProp"
+                        :props="treeProps"
+                        show-checkbox
+                        check-strictly
+                        :multiple="fieldConfig.isMultiple"
+                        @check="treeChanged"
         />
-    </el-select>
+        <el-select v-else-if=" fieldConfig.type === 'enum'"
+                   filterable
+                   :model-value="value"
+                   :disabled="isDisabled"
+                   clearable
+                   @change="(val) => change(val)"
+                   style="width: 100%"
+        >
+            <el-option
+                v-for="item in fieldConfig.values"
+                :key="item.key"
+                :label="item.title"
+                :value="item.key"
+            />
+        </el-select>
+
+        <el-button v-if="fieldConfig && fieldConfig.type === 'link' && fieldConfig.config.searchDialog"
+                   text
+                   @click="searchDialogVisible = true"
+                   style="width: 32px; opacity:0.5; margin-left: 4px"
+        >
+            <Icon icon="mdi:magnify" width="24"/>
+        </el-button>
+    </div>
+    <DialogView :screen-size="screenSize"
+                v-model:visible="searchDialogVisible"
+                :options="{modal: true, page: fieldConfig && fieldConfig.config.searchDialog}"
+                @selected="change"
+    />
 </template>
 
 <script setup lang="ts">
-import {FieldConfigInterface} from "../model/field";
+import {FieldInterface} from "../model/field";
 import {onMounted, ref, watch} from "vue";
 import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
+import DialogView from "./DialogView.vue";
+import {ScreenSize} from "../model/page";
 
 let isLoading = ref(false)
 let data = ref<Array<any>>([])
@@ -63,17 +81,20 @@ let isDisabled = ref(true)
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
 let isTree = ref(false)
+let searchDialogVisible = ref(false)
+
 
 interface Props {
     field: string,
-    fieldConfig: FieldConfigInterface,
+    fieldConfig: FieldInterface,
     modelValue?: any,
     keyProp?: string,
     displayProp?: string,
     childrenProp?: string,
     context?:any,
     title?:string,
-    id?: string
+    id?: string,
+    screenSize?: ScreenSize
 }
 
 
@@ -113,6 +134,8 @@ async function init() {
     if (!props.fieldConfig) {
         return
     }
+
+    console.log(props.fieldConfig)
 
 
     if (props.fieldConfig.type == 'link') {
@@ -177,6 +200,7 @@ function change(val: string) {
     emit('update:modelValue', val)
     emit('change', val)
 }
+
 
 </script>
 

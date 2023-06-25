@@ -213,7 +213,7 @@ let actions = ref({
     onRemove: null
 })
 
-const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue'])
+const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue', 'update:currentId'])
 
 interface CellRef {row: number, col: number}
 
@@ -578,6 +578,8 @@ function headerResized(newWidth, oldWidth, column) {
 
 function currentRowChanged(row: any) {
     currentId.value = row ? row.id : undefined
+
+    emit('update:currentId', currentId.value)
 }
 
 function onCellInput(scope: any, value: any) {

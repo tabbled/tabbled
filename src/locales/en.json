@@ -79,7 +79,8 @@
         "getValue": "Get value",
         "setValue": "Set value",
         "getReadonly": "Readonly",
-        "searchable": "Searchable"
+        "searchable": "Searchable",
+        "searchDialog": "Search dialog"
     },
     "menuConfig": {
         "title": "Title",

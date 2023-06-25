@@ -1,95 +1,109 @@
 <template>
-
-    <el-input
-        v-if="field && (field.type === 'text' || field.type === 'string')"
-        ref="el"
-        class="table-input"
-        :model-value="value"
-        @mouseenter="handleMouseEnter"
-        @input="handleInput"
-    />
-    <el-input-number
-        v-else-if="field && (field.type === 'number')"
-        :controls="false"
-        :precision="field.precision ? field.precision : 0"
-        ref="el"
-        class="table-input-number"
-        :model-value="value === null || value === undefined ? null : Number(value)"
-        @mouseenter="handleMouseEnter"
-        @input="handleInput"
-    />
-    <el-select
-        ref="el"
-        v-else-if="field && (field.type === 'link')  && !field.isTree"
-        class="table-select"
-        :model-value="value"
-        :placeholder="$t('select')"
-        filterable
-        remote
-        clearable
-        remote-show-suffix
-        :remote-method="getLinkData"
-        :loading="isLoading"
-        @change="handleInput"
-    >
-        <el-option
-            v-for="item in linkData"
-            :key="item.id"
-            :label="item[displayProp]"
-            :value="item.id"
+    <div style="display: flex; flex-direction: row; width: 100%; padding-top: 1px">
+        <el-input
+            v-if="field && (field.type === 'text' || field.type === 'string')"
+            ref="el"
+            class="table-input"
+            :model-value="value"
+            @mouseenter="handleMouseEnter"
+            @input="handleInput"
         />
-    </el-select>
-    <el-tree-select
-        ref="el"
-        v-else-if="field && (field.type === 'link') && field.isTree"
-        class="table-select"
-        v-model="value"
-        :data="linkData"
-        :render-after-expand="false"
-
-        check-strictly
-        show-checkbox
-        :multiple="field.isMultiple"
-        style="order: 0; height: 100%; width: calc(100% - 2px); margin: 1px "
-        @remove-tag="removeTag"
-        :placeholder="$t('select')"
-    >
-
-    </el-tree-select>
-    <el-select
-        ref="el"
-        v-else-if="field && (field.type === 'enum') "
-        class="table-select"
-        :model-value="value"
-        :placeholder="$t('select')"
-        filterable
-        remote
-        clearable
-        :multiple="field.isMultiple"
-        :loading="isLoading"
-        @change="handleInput"
-    >
-        <el-option
-            v-for="item in field.values"
-            :key="item.key"
-            :label="item.title"
-            :value="item.key"
+        <el-input-number
+            v-else-if="field && (field.type === 'number')"
+            :controls="false"
+            :precision="field.precision ? field.precision : 0"
+            ref="el"
+            class="table-input-number"
+            :model-value="value === null || value === undefined ? null : Number(value)"
+            @mouseenter="handleMouseEnter"
+            @input="handleInput"
         />
-    </el-select>
-    <el-checkbox v-else-if="field && field.type==='bool'"
-                 :model-value="value"
-                 @change="val => value = val"
-                 style="padding-left: 16px"
-    />
+        <el-select
+            ref="el"
+            v-else-if="field && (field.type === 'link')  && !field.isTree"
+            class="table-select"
+            :model-value="value"
+            :placeholder="$t('select')"
+            filterable
+            remote
+            clearable
+            remote-show-suffix
+            :remote-method="getLinkData"
+            :loading="isLoading"
+            @change="handleInput"
+        >
+            <el-option
+                v-for="item in linkData"
+                :key="item.id"
+                :label="item[displayProp]"
+                :value="item.id"
+            />
+        </el-select>
+        <el-tree-select
+            ref="el"
+            v-else-if="field && (field.type === 'link') && field.isTree"
+            class="table-select"
+            v-model="value"
+            :data="linkData"
+            :render-after-expand="false"
 
-    <el-date-picker v-else-if="field && (field.type==='date' || field.type==='datetime' || field.type==='time')"
-                    v-model="value"
-                    style="width: 100%"
-                    :type="field.type"
-                    @change="val => value = val"
-                    :format="format(field.type)"
-    />
+            check-strictly
+            show-checkbox
+            :multiple="field.isMultiple"
+            style="order: 0; height: 100%; width: calc(100% - 2px); margin: 1px "
+            @remove-tag="removeTag"
+            :placeholder="$t('select')"
+        >
 
+        </el-tree-select>
+        <el-select
+            ref="el"
+            v-else-if="field && (field.type === 'enum') "
+            class="table-select"
+            :model-value="value"
+            :placeholder="$t('select')"
+            filterable
+            remote
+            clearable
+            :multiple="field.isMultiple"
+            :loading="isLoading"
+            @change="handleInput"
+        >
+            <el-option
+                v-for="item in field.values"
+                :key="item.key"
+                :label="item.title"
+                :value="item.key"
+            />
+        </el-select>
+        <el-checkbox v-else-if="field && field.type==='bool'"
+                     :model-value="value"
+                     @change="val => value = val"
+                     style="padding-left: 16px"
+        />
+
+        <el-date-picker v-else-if="field && (field.type==='date' || field.type==='datetime' || field.type==='time')"
+                        v-model="value"
+                        style="width: 100%"
+                        :type="field.type"
+                        @change="val => value = val"
+                        :format="format(field.type)"
+        />
+
+        <el-button v-if="field && field.type === 'link' && field.config.searchDialog"
+                   text
+                   @click="searchDialogVisible = true"
+                   style="width: 32px; opacity:0.5; margin-left: 4px"
+        >
+            <Icon icon="mdi:magnify" width="24"/>
+        </el-button>
+    </div>
+
+    <DialogView :screen-size="ScreenSize.desktop"
+                v-model:visible="searchDialogVisible"
+                :options="{modal: true, page: field && field.config.searchDialog}"
+                @selected="val => value = val"
+    />
 </template>
 
 <script setup lang="ts">
@@ -98,6 +112,8 @@ import {onMounted, ref, watch} from "vue";
 import {FieldInterface} from "../../model/field";
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
+import DialogView from "../DialogView.vue";
+import {ScreenSize} from "../../model/page";
 
 interface Props {
     modelValue: any,
@@ -119,6 +135,7 @@ let oldValue = null
 let displayProp = ref('name')
 let dsService = useDataSourceService()
 let ds:DataSourceInterface = null
+let searchDialogVisible = ref(false)
 
 onMounted(async () => {
     if (props.modelValue instanceof Promise) {
