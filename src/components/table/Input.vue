@@ -102,7 +102,7 @@
     <DialogView :screen-size="ScreenSize.desktop"
                 v-model:visible="searchDialogVisible"
                 :options="{modal: true, page: field && field.config.searchDialog}"
-                @selected="val => value = val"
+                @selected="dialogSelected"
     />
 </template>
 
@@ -206,11 +206,7 @@ async function getLinkData(query?: string) {
     isLoading.value = true
     linkData.value = await ds.getMany(opt)
 
-    if (ds && value.value && !itemExists()) {
-        let item = await ds.getById(value.value)
-        if (item)
-            linkData.value.push(item)
-    }
+    await checkItemExisting()
 
     isLoading.value = false
 }
@@ -228,6 +224,19 @@ function removeTag(tag) {
         if (value.value[i] === tag)
             value.value.splice(i, 1)
     }
+}
+
+async function checkItemExisting() {
+    if (ds && value.value && !itemExists()) {
+        let item = await ds.getById(value.value)
+        if (item)
+            linkData.value.push(item)
+    }
+}
+
+function dialogSelected(id) {
+    value.value = id
+    checkItemExisting()
 }
 
 </script>

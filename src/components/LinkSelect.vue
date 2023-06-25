@@ -157,11 +157,7 @@ async function init() {
 async function getValue() {
     value.value = props.modelValue
 
-    if (dataSource && value.value && !itemExists()) {
-        let item = await dataSource.getById(value.value)
-        if (item)
-            data.value.push(item)
-    }
+    await checkItemExisting()
 }
 
 function itemExists() : boolean {
@@ -197,8 +193,17 @@ async function getData(query?: string) {
 
 function change(val: string) {
     value.value = val
+    checkItemExisting()
     emit('update:modelValue', val)
     emit('change', val)
+}
+
+async function checkItemExisting() {
+    if (dataSource && value.value && !itemExists()) {
+        let item = await dataSource.getById(value.value)
+        if (item)
+            data.value.push(item)
+    }
 }
 
 
