@@ -12,7 +12,7 @@
             <el-image  :src="imageUrl"
                        class=""
                        alt=""
-                       fit="cover"
+                       fit="scale-down"
                        :style="{ width: width + 'px', height: height + 'px' }"/>
 
             <el-icon class="image-field-actions">
@@ -41,9 +41,12 @@
 
 <script setup lang="ts">
 import {onMounted, ref, watch} from "vue";
-import {ElMessage, UploadProps} from "element-plus";
+import {ElMessage, ElMessageBox, UploadProps} from "element-plus";
 import {FieldConfigInterface} from "../model/field";
 import {useApiClient} from "../services/api.service";
+import {useI18n} from "vue-i18n";
+
+const { t } = useI18n();
 
 const emit = defineEmits(['update:modelValue', 'change'])
 let api = useApiClient()
@@ -100,8 +103,20 @@ function preview() {
 }
 
 function remove() {
-    imageUrl.value = ""
-    change("")
+
+    ElMessageBox.confirm(
+        t('confirmDeleteTitle'),
+        t('delete'),
+        {
+            confirmButtonText: t('delete'),
+            cancelButtonText: t('cancel'),
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            imageUrl.value = ""
+            change("")
+        })
 }
 
 </script>
@@ -128,7 +143,8 @@ function remove() {
     display: block;
     color: var(--el-border-color);
     font-size: 20px;
-    padding-left: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
     opacity: 0;
 }
 

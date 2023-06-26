@@ -135,9 +135,6 @@ async function init() {
         return
     }
 
-    console.log(props.fieldConfig)
-
-
     if (props.fieldConfig.type == 'link') {
         dataSource = await dsService.getByAlias(props.fieldConfig.datasource)
 
