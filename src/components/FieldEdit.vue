@@ -43,7 +43,7 @@
                     <el-checkbox :disabled="!!modelValue.datasource" v-model="modelValue.isTree"/>
                 </el-form-item>
 
-                <el-form-item :label="t('fieldConfig.searchDialog')" prop="searchDialog">
+                <el-form-item v-if="modelValue.type === 'link'" :label="t('fieldConfig.searchDialog')" prop="searchDialog">
                     <el-input v-model="modelValue.searchDialog"/>
                 </el-form-item>
 
