@@ -103,6 +103,7 @@
                 v-model:visible="searchDialogVisible"
                 :options="{modal: true, page: field && field.config.searchDialog}"
                 @selected="dialogSelected"
+                selecting
     />
 </template>
 

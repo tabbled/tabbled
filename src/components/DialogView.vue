@@ -4,7 +4,7 @@
                style="padding: 0"
                @close="emit('update:visible', false)"
                :title="pageConfig ? pageConfig.title : 'Dialog'"
-               :modal="options && options.modal ? options.modal : false"
+               :modal="options && options.modal ? options.modal : true"
                draggable
                :width="options && options.width ? options.width : '60%'"
                :fullscreen="screenSize === ScreenSize.mobile"
@@ -29,7 +29,7 @@
             </el-form-item>
         </el-form>
         <template #footer>
-            <div style="display: flex; flex-direction: row; justify-content: end;">
+            <div v-if="selecting" style="display: flex; flex-direction: row; justify-content: end;">
                 <el-button @click="emit('update:visible', false)">{{$t('close')}}</el-button>
                 <el-button :disabled="!selected" type="primary" @click="select">{{$t('select')}}</el-button>
             </div>
