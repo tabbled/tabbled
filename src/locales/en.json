@@ -24,6 +24,7 @@
     "events": "Events",
     "search": "Search...",
     "count": "Count",
+    "print": "Print",
     "loadNext": "Load next entities",
     "layout": {
         "desktop": "Desktop",

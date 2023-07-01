@@ -13,6 +13,24 @@
                     >
                         {{action.title}}
                     </el-button>
+
+                    <el-dropdown v-if="reportMenu.length"
+                        style="margin-right: 24px; "
+                    >
+                        <el-button type="primary">
+                            {{$t('print')}}
+                            <Icon width="16" style="padding-left: 4px" icon="material-symbols:keyboard-arrow-down"/>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+
+                                <el-dropdown-item v-for="rep in reportMenu" @click="generateReport(rep.id)">
+                                    {{rep.title}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
                     <el-button v-if="isEditPage" @click="cancel">{{$t('cancel')}}</el-button>
                     <el-button v-if="isEditPage"
                                @click="save"
@@ -61,6 +79,7 @@ import {useSettings} from "../services/settings.service";
 import {Filters, useFilters} from "../model/filter";
 
 import {useI18n} from 'vue-i18n'
+import {useSocketClient} from "../services/socketio.service";
 const { t } = useI18n();
 
 let store = useStore();
@@ -78,6 +97,8 @@ let componentService = useComponentService()
 let dsService = useDataSourceService()
 let settings = useSettings()
 let elems = ref([])
+let reportMenu = ref([])
+const socket = useSocketClient()
 
 let editEntity = ref<EntityInterface>(null)
 let editDataSource: DataSourceInterface = null
@@ -146,6 +167,23 @@ async function loadValue(field) {
         return null
     }
     return editEntity.value[field]
+}
+
+async function generateReport(id) {
+    console.log('generateReport', id)
+    try {
+        let rep = await socket.emit('reports/renderById', {
+            id: id,
+            context: scriptContext.value
+        })
+
+        const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: 'application/pdf'}));
+        window.open(objectUrl)
+        URL.revokeObjectURL(objectUrl)
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
 }
 
 function getValue(el: ElementInterface) {
@@ -308,6 +346,21 @@ async function init() {
 
     if (actions.value.onOpen) {
         await execAction(actions.value.onOpen)
+    }
+
+    reportMenu.value = []
+    let reports = await dsService.reportDataSource.getMany({
+        fields: ['title', 'pages']
+    })
+    for(let i in reports) {
+        let rep = reports[i]
+
+        if (rep.pages.includes(props.pageConfig.alias)) {
+            reportMenu.value.push({
+                id: rep.id,
+                title: rep.title
+            })
+        }
     }
 
     setComponentAvailableHeight()

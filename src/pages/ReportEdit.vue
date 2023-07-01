@@ -30,6 +30,16 @@
                        @change="(val) => setValue('alias', val)"
                 />
             </el-form-item>
+
+            <el-form-item :label="$t('pages')" style="width: 50%; margin-left: 8px">
+                <LinkSelect field="pages"
+                            :field-config="getField('pages')"
+                            key-prop="alias"
+                            display-prop="title"
+                            :model-value="getValue('pages')"
+                            @change="(val) => setValue('pages', val)"
+                />
+            </el-form-item>
         </div>
 
         <el-tabs v-model="activeTab" class="demo-tabs">
@@ -100,6 +110,7 @@ import {useDataSourceService} from "../services/datasource.service";
 import {useSocketClient} from "../services/socketio.service";
 import {useSettings} from "../services/settings.service";
 import {useI18n} from 'vue-i18n'
+import LinkSelect from "../components/LinkSelect.vue";
 
 let router = useRouter();
 let route = useRoute()
@@ -107,8 +118,8 @@ let reportEntity = ref(null)
 let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
-let updateKey = ref(0)
 let activeTab = ref('template')
+let pages = ref([])
 
 const { t } = useI18n();
 
@@ -121,6 +132,8 @@ onMounted(async () => {
     if (!datasource) {
         console.warn(`Reports datasource doesn't exist`)
     }
+
+    pages.value = await dsService.pageDataSource.getAll()
 
     await load()
     document.title = `${t('template')} ${ isNew.value ? 'new' : ' ' + reportEntity.title } | ${settings.title}`
@@ -143,7 +156,6 @@ async function load() {
         reportEntity.value = await datasource.getById(<string>route.params.id)
         isNew.value = false
     }
-    updateKey.value++
 }
 
 async function save() {

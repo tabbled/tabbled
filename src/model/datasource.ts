@@ -943,6 +943,16 @@ export class ReportConfigDataSource extends DataSource {
                     type: "string",
                     required: true
                 },
+                {
+                    title: 'Pages',
+                    alias: 'pages',
+                    type: "link",
+                    required: true,
+                    isMultiple: true,
+                    datasource: 'page',
+                    displayProp: 'title',
+                    keyProp: "alias"
+                },
             ]}, server);
     }
 }

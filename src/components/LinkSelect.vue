@@ -13,6 +13,7 @@
                    :remote-method="getData"
                    :loading="isLoading"
                    @change="(val) => change(val)"
+                   :multiple="fieldConfig.isMultiple"
                    style="width: 100%;"
         >
             <el-option
