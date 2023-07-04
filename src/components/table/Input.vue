@@ -149,7 +149,6 @@ onMounted(async () => {
 
         displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
         ds = await dsService.getByAlias(props.field.datasource);
-
         await getLinkData();
     }
 })
@@ -197,7 +196,12 @@ async function getLinkData(query?: string) {
     let opt:GetDataManyOptions = {
         filter: [],
         take: 50,
-        fields: [displayProp.value]
+        fields: [displayProp.value],
+        include: null
+    }
+
+    if (value.value) {
+        opt.include = props.field.isMultiple ? value.value : [value.value]
     }
 
     if (query) {
@@ -207,18 +211,9 @@ async function getLinkData(query?: string) {
     isLoading.value = true
     linkData.value = await ds.getMany(opt)
 
-    await checkItemExisting()
-
     isLoading.value = false
 }
 
-function itemExists() : boolean {
-    for(let i in linkData.value) {
-        if (linkData.value[i].id === value.value)
-            return true
-    }
-    return false
-}
 
 function removeTag(tag) {
     for(let i in value.value) {
@@ -227,17 +222,8 @@ function removeTag(tag) {
     }
 }
 
-async function checkItemExisting() {
-    if (ds && value.value && !itemExists()) {
-        let item = await ds.getById(value.value)
-        if (item)
-            linkData.value.push(item)
-    }
-}
-
 function dialogSelected(id) {
     value.value = id
-    checkItemExisting()
 }
 
 </script>

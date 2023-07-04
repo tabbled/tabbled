@@ -155,13 +155,11 @@ async function init() {
 
 async function getValue() {
     value.value = props.modelValue
-
-    await checkItemExisting()
 }
 
-function itemExists() : boolean {
+function itemExists(id) : boolean {
     for(let i in data.value) {
-        if (data.value[i].id === value.value)
+        if (data.value[i].id === id)
             return true
     }
     return false
@@ -179,7 +177,12 @@ async function getData(query?: string) {
     isLoading.value = true;
 
     let opt = {
-        take: 50
+        take: 50,
+        include: null
+    }
+
+    if (value.value) {
+        opt.include = props.fieldConfig.isMultiple ? value.value : [value.value]
     }
 
     if (query) {
@@ -192,18 +195,10 @@ async function getData(query?: string) {
 
 function change(val: string) {
     value.value = val
-    checkItemExisting()
     emit('update:modelValue', val)
     emit('change', val)
 }
 
-async function checkItemExisting() {
-    if (dataSource && value.value && !itemExists()) {
-        let item = await dataSource.getById(value.value)
-        if (item)
-            data.value.push(item)
-    }
-}
 
 
 </script>

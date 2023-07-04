@@ -39,6 +39,7 @@ export interface GetDataManyOptions {
         field: string
         ask: boolean
     }
+    include?: string[]
 
 }
 
