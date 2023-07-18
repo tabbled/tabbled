@@ -88,10 +88,10 @@ export interface FieldInterface {
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
     config: FieldConfigInterface
 
-    getValueFunc(): Promise<CompiledFunc | undefined>,
-    setValueFunc(): Promise<CompiledFunc | undefined>,
-    getListFunc() : Promise<CompiledFunc | undefined>
-    getReadonlyFunc() : Promise<CompiledFunc | undefined>
+    getValueFunc(): CompiledFunc | undefined,
+    setValueFunc(): CompiledFunc | undefined,
+    getListFunc() : CompiledFunc | undefined
+    getReadonlyFunc() : CompiledFunc | undefined
 }
 
 export class Field implements FieldInterface {
@@ -129,10 +129,10 @@ export class Field implements FieldInterface {
     values: EnumValuesInterface[]
     config: FieldConfigInterface
 
-    async getValueFunc(): Promise<CompiledFunc | undefined> {
+    getValueFunc(): CompiledFunc | undefined {
         if (this.config.getValue && !this._getValueFunc) {
             try {
-                this._getValueFunc = await compileScript(this.config.getValue, 'ctx')
+                this._getValueFunc = compileScript(this.config.getValue, 'ctx')
             } catch (e) {
                 this._getValueFunc = null
                 console.error(`Error while compile field ${this.alias} function getValue`)
@@ -143,10 +143,10 @@ export class Field implements FieldInterface {
         return this._getValueFunc
     }
 
-    async setValueFunc(): Promise<CompiledFunc | undefined> {
+    setValueFunc(): CompiledFunc | undefined {
         if (this.config.setValue && !this._setValueFunc) {
             try {
-                this._setValueFunc = await compileScript(this.config.setValue, 'ctx')
+                this._setValueFunc = compileScript(this.config.setValue, 'ctx')
             } catch (e) {
                 this._setValueFunc = null
                 console.error(`Error while compiling field ${this.alias} function setValue`)
@@ -156,10 +156,10 @@ export class Field implements FieldInterface {
 
         return this._setValueFunc
     }
-    async getListFunc() : Promise<CompiledFunc | undefined> {
+    getListFunc() : CompiledFunc | undefined {
         if (this.config.getListValues && !this._getListFunc) {
             try {
-                this._getListFunc = await compileScript(this.config.getListValues, 'ctx')
+                this._getListFunc = compileScript(this.config.getListValues, 'ctx')
             } catch (e) {
                 this._getListFunc = null
                 console.error(`Error while compile field ${this.alias} function getListValues`)
@@ -169,17 +169,16 @@ export class Field implements FieldInterface {
 
         return this._getListFunc
     }
-    async getReadonlyFunc() : Promise<CompiledFunc | undefined> {
+    getReadonlyFunc() : CompiledFunc | undefined {
         if (this.config.getReadonly && !this._getReadonlyFunc) {
             try {
-                this._getReadonlyFunc = await compileScript(this.config.getReadonly, 'ctx')
+                this._getReadonlyFunc = compileScript(this.config.getReadonly, 'ctx')
             } catch (e) {
                 this._getReadonlyFunc = null
                 console.error(`Error while compile field ${this.alias} function getReadonly`)
                 console.error(e)
             }
         }
-
         return this._getReadonlyFunc
     }
 }

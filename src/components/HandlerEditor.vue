@@ -41,8 +41,8 @@ let emit = defineEmits(['update'])
 
 onMounted(async() => {
     let ds = dsService.functionDataSource
-    let data = await ds.getAll()
-    data.forEach(ds => {
+    let res = await ds.getMany()
+    res.data.forEach(ds => {
         functions.value.push({
             key: ds.id,
             label: ds.title

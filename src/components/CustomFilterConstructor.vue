@@ -299,7 +299,7 @@ async function getLinkData(query?: string) {
         opt['search'] = query
     }
 
-    linkData.value = await linkDataSource.getMany(opt)
+    linkData.value = (await linkDataSource.getMany(opt)).data
     isLoading.value = false
 }
 

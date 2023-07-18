@@ -173,7 +173,7 @@ onMounted(async () => {
         })
     })
 
-    let items = await dsService.dsDataSource.getMany()
+    let items = (await dsService.dsDataSource.getMany()).data
 
     items.forEach(item => {
         console.log(item)

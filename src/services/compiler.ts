@@ -31,14 +31,8 @@ export class CompiledFunc {
     }
 }
 
-export async function compileScript(script: string, ...args: string[]) : Promise<CompiledFunc> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let func = new CompiledFunc()
-            func.compile(script, ...args)
-            resolve(func)
-        } catch (e) {
-            reject(e)
-        }
-    })
+export function compileScript(script: string, ...args: string[]) : CompiledFunc {
+    let func = new CompiledFunc()
+    func.compile(script, ...args)
+    return func
 }

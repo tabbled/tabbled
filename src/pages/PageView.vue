@@ -72,7 +72,7 @@ import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {ElMessage} from "element-plus";
 import {useComponentService} from "../services/component.service";
-import {DataSourceInterface, EntityInterface} from "../model/datasource";
+import {CustomDataSource, DataSourceInterface, EntityInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
@@ -201,18 +201,22 @@ async function setValue(el:ElementInterface, value: any) {
         if (!editEntity.value)
             return false
 
-        editEntity.value[el.field] = value
-        update.value++
-
-        let fSetValue = await editDataSource.getFieldByAlias(el.field).setValueFunc()
-        if (fSetValue) {
-            return await fSetValue.exec(scriptContext.value)
-        }
+        await setEntityValue(el.field, value)
     } else if (filters.value) {
         if (!el.id) {
             console.warn("Filter component doesn't have correct id")
             return false
         }
+    }
+}
+
+async function setEntityValue(alias, value) {
+    editEntity.value[alias] = value
+    update.value++
+
+    let fSetValue = await editDataSource.getFieldByAlias(alias).setValueFunc()
+    if (fSetValue) {
+        return await fSetValue.exec(scriptContext.value)
     }
 }
 
@@ -270,6 +274,8 @@ async function init() {
             return;
         }
 
+
+
         filters = useFilters(editDataSource)
 
         let id = <string>route.params.id
@@ -280,6 +286,46 @@ async function init() {
         } else {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
             isNew.value = true
+        }
+
+        console.log('editEntity', editEntity.value)
+
+        scriptContext.value.item = editEntity.value
+
+        // Need to set data of table fields to those datasource
+        if (editDataSource) {
+            for(let i in editDataSource.fields) {
+                let f = editDataSource.fields[i]
+                if (f.type === 'table') {
+                    let ds = await dsService.getByAlias(f.datasource)
+                    if (!ds) {
+                        console.warn(`DataSource ${f.datasource} for field ${f.alias} not found`)
+                        continue
+                    }
+
+                    if (ds instanceof CustomDataSource)
+                        ds.setContext(scriptContext.value)
+
+                    await ds.setData(editEntity.value[f.alias])
+
+                    ds.on('update', async () => {
+                        //console.log('ds update', ds.alias)
+                        await setEntityValue(f.alias, (await ds.getMany()).data)
+                    })
+                    ds.on('item-updated', async () => {
+                        //console.log('ds update', ds.alias)
+                        await setEntityValue(f.alias, (await ds.getMany()).data)
+                    })
+                    ds.on('item-inserted', async () => {
+                        //console.log('ds update', ds.alias)
+                        await setEntityValue(f.alias, (await ds.getMany()).data)
+                    })
+                    ds.on('item-removed', async () => {
+                        //console.log('ds update', ds.alias)
+                        await setEntityValue(f.alias, (await ds.getMany()).data)
+                    })
+                }
+            }
         }
     }
 
@@ -301,18 +347,17 @@ async function init() {
 
         elProps.properties.forEach(item => {
             el.props[item.alias] = _.cloneDeep(element[item.alias])
-
-
         })
         el.props['context'] = scriptContext.value
+
+
 
         if (elProps.filterable || elProps.group === 'Filters') {
             el.props['filters'] = filters
         }
 
         if (elProps.properties)
-
-        elements.value.push(el)
+            elements.value.push(el)
     })
     pageHeader.actions = []
 
@@ -342,16 +387,14 @@ async function init() {
         }
     }
 
-    scriptContext.value.item = editEntity.value
-
     if (actions.value.onOpen) {
         await execAction(actions.value.onOpen)
     }
 
     reportMenu.value = []
-    let reports = await dsService.reportDataSource.getMany({
+    let reports = (await dsService.reportDataSource.getMany({
         fields: ['title', 'pages']
-    })
+    })).data
     for(let i in reports) {
         let rep = reports[i]
 

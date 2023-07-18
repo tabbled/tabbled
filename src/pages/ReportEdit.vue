@@ -133,7 +133,7 @@ onMounted(async () => {
         console.warn(`Reports datasource doesn't exist`)
     }
 
-    pages.value = await dsService.pageDataSource.getAll()
+    pages.value = (await dsService.pageDataSource.getMany()).data
 
     await load()
     document.title = `${t('template')} ${ isNew.value ? 'new' : ' ' + reportEntity.title } | ${settings.title}`

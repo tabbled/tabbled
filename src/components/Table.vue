@@ -1,171 +1,158 @@
 <template>
-    <div v-if="dataSource && actionButtonsVisible" style="padding-bottom: 16px; display: flex;  margin-right: 16px">
-        <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
-            {{t('add')}}
-        </el-button>
-        <el-dropdown v-else
-                     split-button
-                     type="primary"
-                     @click="add"
-                     size="small"
-                     style="margin-right: 8px; min-width: fit-content;"
-        >
-            {{$t('add')}}
-            <template #dropdown>
-                <el-dropdown-menu>
-                    <el-dropdown-item @click="addSibling">{{$t('addSibling')}}</el-dropdown-item>
-                    <el-dropdown-item @click="add">{{$t('addChild')}}</el-dropdown-item>
-                </el-dropdown-menu>
-            </template>
-        </el-dropdown>
-        <el-button v-if="actions.onEdit" @click="edit" size="small">
-            {{t('edit')}}
-        </el-button>
-        <el-button v-if="selectedIds.length || currentId" @click="remove" size="small">
-            {{t('delete')}}
-        </el-button>
+    <div :style="{ height: `${getHeight()}px`, width: '100%'} ">
+        <div v-if="actionButtonsVisible" style="padding-bottom: 16px; display: flex;">
+            <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
+                {{t('add')}}
+            </el-button>
+            <el-dropdown v-else
+                         split-button
+                         type="primary"
+                         @click="add"
+                         size="small"
+                         style="margin-right: 8px; min-width: fit-content;"
+            >
+                {{$t('add')}}
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <el-dropdown-item @click="add">{{$t('addSibling')}}</el-dropdown-item>
+                        <el-dropdown-item @click="addChild">{{$t('addChild')}}</el-dropdown-item>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
+            <el-button v-if="actions.onEdit" @click="edit" size="small">
+                {{t('edit')}}
+            </el-button>
+            <el-button @click="remove" size="small">
+                {{t('delete')}}
+            </el-button>
 
-        <el-input v-if="canSearch" style="margin-left: 8px;"
-                  size="small"
-                  :placeholder="$t('search')"
-                  @input="searchChange"
-                  :model-value="searchText"/>
-
-<!--        This is strange thing, whithout this input the first input while keydown the enter key that reload app
-            Maybe it is Element-plus' bag -->
-        <el-input style="width: 0; height: 0; opacity: 0; padding-right: 8px"/>
+            <el-input style="margin-left: 8px; margin-right: 8px"
+                      size="small"
+                      :placeholder="$t('search')"
+                      @input="searchChange"
+                      :model-value="searchText"/>
 
 
-        <el-button v-for="action in _customActions"
-                   size="small"
-                   :type="action.type ? action.type : 'default'"
-                   @click="action.func()"
-        >
-            {{action.title}}
-        </el-button>
+            <el-button v-for="action in _customActions"
+                       size="small"
+                       :type="action.type ? action.type : 'default'"
+                       @click="action.func()"
+            >
+                {{action.title}}
+            </el-button>
 
 
-        <el-popover
-            placement="bottom"
-            :title="$t('filters.title')"
-            :width="400"
-            :visible="filtersPopoverVisible"
-            content="this is content, this is content, this is content"
-        >
-            <template #reference>
-                <el-badge style="margin-bottom: 1px; height: 10px" :value="customFiltersCount" :hidden="!customFiltersCount">
+            <el-popover
+                placement="bottom"
+                :title="$t('filters.title')"
+                :width="400"
+                :visible="filtersPopoverVisible"
+                content="this is content, this is content, this is content"
+            >
+                <template #reference>
+                    <el-badge style="margin-bottom: 1px; height: 10px" :value="customFiltersCount" :hidden="!customFiltersCount">
 
 
-                    <el-button v-if="props.filters && filtersVisible" text size="small" style="margin-left: 8px; margin-bottom: 10px" @click="filtersPopoverVisible = !filtersPopoverVisible">
-                        <Icon icon="ic:sharp-filter-list" width="20"/>
-                    </el-button>
+                        <el-button v-if="props.filters && filtersVisible" text size="small" style="margin-left: 8px; margin-bottom: 10px" @click="filtersPopoverVisible = !filtersPopoverVisible">
+                            <Icon icon="ic:sharp-filter-list" width="20"/>
+                        </el-button>
 
-                </el-badge>
-            </template>
-            <template #default>
-                <CustomFilterConstructor
-                    v-if="props.filters &&  filtersVisible"
-                    :id="id"
-                    :filters="props.filters"
-                    :data-source="datasource"
-                    :close-button="true"
-                    @apply="(cnt) => {customFiltersCount = cnt; filtersPopoverVisible = false}"
-                    @close="filtersPopoverVisible = false"
+                    </el-badge>
+                </template>
+                <template #default>
+                    <CustomFilterConstructor
+                        v-if="props.filters &&  filtersVisible"
+                        :id="id"
+                        :filters="props.filters"
+                        :data-source="datasource"
+                        :close-button="true"
+                        @apply="(cnt) => {customFiltersCount = cnt; filtersPopoverVisible = false}"
+                        @close="filtersPopoverVisible = false"
 
-                />
-            </template>
-        </el-popover>
-
-
-    </div>
-    <el-table
-
-            ref="table"
-            border
-            :data="data"
-            :fit="true"
-            row-key="id"
-            :height="getHeight()"
-            highlight-current-row
-            :header-cell-class-name="getHeaderCellClass"
-            :header-row-class-name="getHeaderClass"
-            :cell-class-name="getCellClass"
-            :row-class-name="getRowClass"
-            @current-change="currentRowChanged"
-            @selection-change="selectionChange"
-            @row-click="onTableRowClick"
-            @rowDblclick="onTableRowDblClick"
-            @header-dragend="headerResized"
-            @sort-change="sortChange"
-    >
-        <el-table-column type="selection" width="30" />
-        <el-table-column v-for="element in _columns.filter(item => item.visible === undefined || item.visible)"
-                         :sortable="element.sortable ? 'custom' : false"
-                         :key="element.id"
-                         :label="element.title"
-                         :width="element.width"
-                         :prop="element.field"
-        >
-            <template #default="scope">
-
-                <Input ref="editEl" v-if="editingCell && editingCell.row === scope.$index && editingCell.col === scope.column.no"
-                       :model-value="scope.row[scope.column.property]"
-                       :field="getField(element.field)"
-                       @update:model-value="(val) => onCellInput(scope, val)"
-                       @keydown="inputKeyDown"
-                       :style="getInputCellStyle()"
-                       :context="getRowContext(scope)"
-                />
-                <div v-else @click="() => handleCellClick(scope)" class="table-cell-text">
-                    <Cell :model-value="getCellData(scope)"
-                          :field="getField(element.field)"
-                          :column="getColumn(scope.column.rawColumnKey)"
-                          @click="cellFocusedOut()"
                     />
-                </div>
+                </template>
+            </el-popover>
 
-            </template>
-            <template #header="scope">
-                {{getHeaderTitle(scope)}}
-            </template>
-        </el-table-column>
 
-        <template #append >
-            <div style="display: flex; flex-direction: row; align-items: center">
-                <el-button v-if="dataSource && canLoadNext" style="margin: 16px" @click="loadNext(data.length)">
-                    {{$t('loadNext')}}
-                </el-button>
-                <div v-if="showCount" style="padding-left: 8px">{{$t('count')}}: {{itemsCount}}</div>
-            </div>
+        </div>
+        <ag-grid-vue
+            ref="grid"
+            class="ag-theme-balham"
+            :style="{ height: '100%'}"
+            :columnDefs="columnDefs"
+            :defaultColDef="defaultColumnDef"
+            rowSelection="multiple"
+            animateRows="true"
+            @grid-ready="onGridReady"
+            rowModelType="serverSide"
+            enableCellTextSelection
+            :dataTypeDefinitions="dataTypeDefinitions"
+            :rowGroupPanelShow="true"
+            :components="gridComponents"
+            @columnResized="saveColumnState"
+            @columnMoved="saveColumnState"
+            @columnVisible="saveColumnState"
+            :treeData="true"
+            :getDataPath="getDataPath"
+            groupDisplayType='custom'
+            :isServerSideGroup="isServerSideGroup"
+            :getServerSideGroupKey="getServerSideGroupKey"
+            :getRowId="getRowId"
+            cacheBlockSize="50"
+            :undoRedoCellEditing="true"
+            :undoRedoCellEditingLimit="40"
+            @cellValueChanged="cellValueChanged"
+            :enableCellChangeFlash="false"
+            @cellClicked="cellClicked"
+            @cellDoubleClicked="cellDoubleClicked"
+            @selectionChanged="selectionChanged"
 
-        </template>
-    </el-table>
-
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
-
-import {onMounted, onUnmounted, ref, watch} from 'vue'
-import {ColumnConfigInterface} from "../model/column";
-import Input from "./table/Input.vue"
-import {CompiledFunc, compileScript} from "../services/compiler";
+import { AgGridVue } from "ag-grid-vue3";  // the AG Grid Vue Component
 import {
-    EventHandlerConfigInterface,
-    FieldConfigInterface,
-    generateEntityWithDefault
-} from "../model/field";
-import {useSyncService} from "../services/sync.service";
-import {useDataSourceService} from "../services/datasource.service";
-import Cell from "./table/Cell.vue";
-import _ from "lodash";
-import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
-import {useI18n} from "vue-i18n";
-import {dayjs, ElMessage, ElMessageBox} from "element-plus";
+    ColDef,
+    GridApi,
+    ColumnApi,
+    ModuleRegistry,
+    IServerSideDatasource
+} from "ag-grid-community"
+import {onMounted, onUnmounted, ref, watch} from "vue";
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-balham.css";
+import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
+import {ColumnConfigInterface} from "../model/column";
 import {Filters} from "../model/filter";
-import { useElementBounding, useDebounceFn } from '@vueuse/core'
-import CustomFilterConstructor from "./CustomFilterConstructor.vue";
-import {PageActionsInterface} from "../services/page.service";
 import {PageActionConfigInterface} from "../model/page";
+import {useDataSourceService} from "../services/datasource.service";
+import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
+import {dayjs, ElMessageBox} from "element-plus";
+import {useI18n} from "vue-i18n";
+import EnumCellEditor from "./table/EnumCellEditor.vue";
+import LinkCellEditor from "./table/LinkCellEditor.vue";
+import DatetimeCellEditor from "./table/DatetimeCellEditor.vue";
+import NumberCellEditor from "./table/NumberCellEditor.vue";
+import TreeCellEditor from "./table/TreeCellEditor.vue";
+import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
+
+import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
+import { ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
+import {IServerSideGetRowsParams} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
+import { LicenseManager } from  'ag-grid-enterprise'
+import CustomFilterConstructor from "./CustomFilterConstructor.vue";
+import {useDebounceFn, useElementBounding} from "@vueuse/core";
+import {PageActionsInterface} from "../services/page.service";
+import {CompiledFunc, compileScript} from "../services/compiler";
+import CustomCellRenderer from "./table/CustomCellRenderer.vue";
+
+LicenseManager.setLicenseKey("abc")
+
+ModuleRegistry.registerModules([ RowGroupingModule, ServerSideRowModelModule ]);
+
+const { t } = useI18n();
 
 
 interface Props {
@@ -215,108 +202,315 @@ let actions = ref({
 
 const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue', 'update:currentId'])
 
-interface CellRef {row: number, col: number}
-
-let _columns = ref<ColumnConfigInterface[]>([])
-let editingCell = ref<CellRef | null>(null)
-let editEl = ref(null)
-let table = ref(null)
+let grid = ref(null)
+let gridApi:GridApi  = null
+let gridColumnApi:ColumnApi = null
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
-const { t } = useI18n();
-let selectedIds = ref<string[]>([])
-let currentId = ref(null)
-let isTree = ref(false)
-let canLoadNext = ref(false)
 let searchText = ref('')
 let searchVal = ""
-let loadingData = ref(false)
-let sort = ref<{order: string | null, prop: string | null}>(null)
-let canSearch = ref(false)
-let availableHeight = 200
-let itemsCount = ref(0)
+let isTree = ref(false)
+let _customActions = ref<PageActionsInterface[]>([])
 let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
-let _customActions = ref<PageActionsInterface[]>([])
 
-const tableBounding = useElementBounding(table)
+watch(() => props.filters?.filters, () => gridApi.refreshServerSide({
+    purge: true
+}))
 
-const debouncedSearch = useDebounceFn(() => {
-    loadNext()
-}, 200, {maxWait: 1000})
-
-let data = ref<Array<any>>([])
-
-let sync = useSyncService()
-const configAlias = `config/table-config-${props.id}`
-
-watch(() => props.modelValue,
-    async () => {
-        await getData();
+//watch(() => props.field, init)
+watch(() => props.datasource, async () => {
+    await init()
+    gridApi.refreshServerSide({
+        purge: true
     })
+})
 
-watch(() => props.field, load)
-watch(() => props.datasource, load)
-onMounted(async () => {
-    await load()
-});
+class GridDataSource implements IServerSideDatasource {
 
-watch(() => props.filters?.filters, () => loadNext())
+    destroy(): void {
+        console.log("destroy")
+    }
+
+    getRows(params: IServerSideGetRowsParams): void {
+        //console.log('getRows', params)
+
+        if (!dataSource) {
+            console.warn(`Datasource for Table2 doesn't set`)
+            console.log(props)
+            params.fail()
+            return;
+        }
+
+        let options: GetDataManyOptions = {
+            take: params.request.endRow - params.request.startRow,
+            skip: params.request.startRow,
+            filter: [],
+            fields: props.columns.map(i => i.field),
+            route: getRouteToNode(params.parentNode)
+        }
+
+        if (params.parentNode) {
+            options.parentId = params.parentNode.key
+        }
+
+        if (searchText.value) {
+            options.search = searchVal
+        }
+
+        if (props.filters)
+            options.filter.push(...props.filters.filters)
+
+        if (params.request.sortModel.length) {
+            options.sort = {
+                field: params.request.sortModel[0].colId,
+                ask: params.request.sortModel[0].sort === 'asc'
+            }
+        }
+
+        dataSource.getMany(options).then(res => {
+            params.success({
+                rowData: res.data,
+                rowCount: res.count
+            })
+        }).catch(e => {
+            console.error(e)
+            params.fail()
+        })
+
+    }
+}
+
+const tableBounding = useElementBounding(grid)
 
 function getHeight() {
     if (props.fillHeight) {
-        return (props.height ? props.height : 400) - tableBounding.top.value
+        return (props.height ? props.height : 200) - tableBounding.top.value
     }
-    return props.height ? props.height : null
+    return props.height ? props.height : 200
 }
 
-async function load() {
-    await init();
-    await initColumns();
-    await getData();
+
+function getDataPath(data) {
+    console.log('getDataPath',data)
+    return [data.id];
 }
+
+let gridComponents = {
+    enumCellEditor: EnumCellEditor,
+    linkCellEditor: LinkCellEditor,
+    datetimeCellEditor: DatetimeCellEditor,
+    numberCellEditor: NumberCellEditor,
+    treeCellEditor: TreeCellEditor,
+    multipleCellRenderer: MultipleCellRenderer,
+    customCellRenderer: CustomCellRenderer
+}
+
+
+const columnDefs = ref<ColDef[]>([]);
+
+let defaultColumnDef = {
+    flex: 0,
+    resizable: true,
+    minWidth: 100,
+    sortable: true,
+    cellDataType: false
+}
+
+let dataTypeDefinitions = {
+    number: {
+        baseDataType: 'number',
+        extendsDataType: 'number',
+        valueParser: params => {
+            return params.newValue === null ? null : Number(params.newValue)
+        },
+        valueFormatter: params => {
+            let field = dataSource.getFieldByAlias(params.colDef.field)
+            if (params.value === undefined || params.value === null || params.value === "")
+                return "";
+
+            if (field.config.format && field.config.format !== 'none') {
+                return Number.parseFloat(Number(params.value).toFixed(field.config.precision)).toLocaleString('ru-RU')
+            }
+            return params.value
+        },
+    },
+    date: {
+        baseDataType: 'date',
+        extendsDataType: 'date',
+        valueParser: params => {
+            return params.newValue === null ? null : dayjs(params.value)
+        },
+        valueFormatter: params => {
+            return params.value !== null ? dayjs(params.value).format('DD.MM.YYYY') : '';
+        },
+    },
+    datetime: {
+        baseDataType: 'date',
+        extendsDataType: 'date',
+        valueParser: params => {
+            return params.newValue === null ? null : dayjs(params.value)
+        },
+        valueFormatter: params => {
+            return params.value !== null ? dayjs(params.value).format('DD.MM.YYYY HH:mm:ss') : '';
+        },
+    },
+    time: {
+        baseDataType: 'date',
+        extendsDataType: 'date',
+        valueParser: params => {
+            return params.newValue === null ? null : dayjs(params.value)
+        },
+        valueFormatter: params => {
+            return params.value !== null ? dayjs(params.value).format('HH:mm:ss') : '';
+        },
+    },
+    bool: {
+        baseDataType: 'boolean',
+        extendsDataType: 'boolean',
+    },
+    string: {
+        baseDataType: 'text',
+        extendsDataType: 'text',
+    },
+    link: {
+        baseDataType: 'object',
+        extendsDataType: 'object',
+        // valueParser: params => {
+        //     return null
+        // },
+        valueFormatter: params => {
+            let field = dataSource.getFieldByAlias(params.colDef.field)
+            if (field.config.getValue)
+                return params.value
+
+            if (!params.value)
+                return ''
+
+
+            if (params.value && params.data[`__${field.alias}_title`]) {
+                return params.data[`__${field.alias}_title`]
+            }
+
+            return t('notFound')
+        }
+    },
+    enum: {
+        baseDataType: 'object',
+        extendsDataType: 'object',
+        // valueParser: params => {
+        //     return null
+        // },
+        valueFormatter: params => {
+            if (params.value === null)
+                return ''
+
+            let field = dataSource.getFieldByAlias(params.colDef.field)
+
+            if (field.config.getValue)
+                return params.value
+
+            for(const i in field.values) {
+                if (field.values[i].key === params.value) {
+                    return field.values[i].title
+                }
+            }
+            return t('notFound')
+        },
+    }
+}
+
+const debouncedSearch = useDebounceFn(() => {
+    gridApi.refreshServerSide({
+        purge: true
+    })
+}, 200, {maxWait: 1000})
+
+onMounted(async () => {
+
+});
 
 onUnmounted( () => {
     if (dataSource) {
-        //dataSource.removeListener('item-inserted', onItemInserted)
-        //dataSource.removeListener('item-updated', onItemUpdated)
-        //dataSource.removeListener('item-removed', onItemRemoved)
+        dataSource.removeListener('item-inserted', onItemInserted)
+        dataSource.removeListener('item-updated', onItemUpdated)
+        dataSource.removeListener('item-removed', onItemRemoved)
         dataSource.removeListener('update', onDataSourceUpdate)
     }
 })
 
-
-
-
-async function addSibling() {
-    console.log('addSibling')
-
-
-    let item = await generateEntityWithDefault(dataSource.fields)
-    //console.log(item.id, item, currentId.value)
-
-    let parentId = null
-    if (currentId.value) {
-        let current = await dataSource.getById(currentId.value)
-        if (current && current.parentId) {
-            parentId = current.parentId
-        }
+async function add() {
+    if (dataSource.isTree) {
+        await addChild()
+        return;
     }
 
-    await dataSource.insert(item.id, item, parentId)
 
-}
-
-async function add() {
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
-    } else if (props.onClickAdd instanceof Function) {
-        props.onClickAdd()
-    } else {
-        let item = await generateEntityWithDefault(dataSource.fields)
-        //console.log(item.id, item, currentId.value)
-        await dataSource.insert(item.id, item, currentId.value)
+        return
     }
+
+    if (props.onClickAdd instanceof Function) {
+        props.onClickAdd()
+        return;
+    }
+
+    let selected = gridApi.getSelectedNodes()
+    let index = selected.length ? selected[0].rowIndex : 0
+
+    let parentId = null
+    if (selected.length && selected[0].parent.key) {
+        parentId = selected[0].parent.key
+    }
+
+    let item = await generateEntityWithDefault(dataSource.fields)
+    let s_item = await dataSource.insert(item.id, item, parentId)
+
+    gridApi.applyServerSideTransaction({
+        addIndex: index,
+        add: [s_item]
+    })
+}
+
+async function addChild() {
+
+    if (actions.value.onAdd) {
+        await execAction(actions.value.onAdd)
+        return
+    }
+
+    if (props.onClickAdd instanceof Function) {
+        props.onClickAdd()
+        return;
+    }
+
+    let selected = gridApi.getSelectedNodes()
+    if (!selected.length)
+        return;
+
+    let route = getRouteToNode(selected[0])
+
+    let item = await generateEntityWithDefault(dataSource.fields)
+    let s_item = await dataSource.insert(item.id, item, selected[0].id)
+
+    if (route.length && !selected[0].data.hasChildren) {
+        selected[0].data.hasChildren = true
+
+        gridApi.applyServerSideTransaction({
+            route: route.slice(0, route.length - 1),
+            update: [selected[0].data],
+        });
+
+
+    } else {
+        gridApi.applyServerSideTransaction({
+            add: [s_item],
+            route: route
+        })
+    }
+
+    selected[0].setExpanded(true)
 }
 
 function edit() {
@@ -328,6 +522,10 @@ function edit() {
 }
 
 function remove() {
+    let selected = gridApi.getSelectedNodes()
+    if (!selected.length)
+        return
+
     ElMessageBox.confirm(
         t('confirmDeleteTitle'),
         t('delete'),
@@ -337,25 +535,46 @@ function remove() {
             type: 'warning',
         }
     )
-        .then(() => {
+        .then(async () => {
 
             if (actions.value.onRemove) {
-                execAction(actions.value.onRemove)
+                await execAction(actions.value.onRemove)
             } else {
-                //console.log(data.value)
-                if (selectedIds.value.length) {
 
-                    selectedIds.value.forEach(id => {
-                        console.log(id, selectedIds.value)
-                        dataSource.removeById(id)
-                    })
-                } else if (currentId.value) {
-                    console.log(currentId.value)
-                    dataSource.removeById(currentId.value)
+                for (let i in selected) {
+                    const data = selected[i]
+                    if (await dataSource.removeById(data.id)) {
+
+                        console.log(selected[i])
+
+                        if (isTree.value) {
+                            let route = getRouteToNode(selected[i])
+
+                            gridApi.refreshServerSide({
+                                route: route.slice(0, route.length - 1),
+                                purge: true
+                            })
+                        } else {
+                            gridApi.applyServerSideTransaction({
+                                remove: [data.id]
+                            })
+                        }
+
+                    }
                 }
-
             }
-        }).catch(() => {})
+        })
+}
+
+function getRouteToNode(rowNode) {
+    if (!rowNode.parent) {
+        return [];
+    }
+
+    return [
+        ...getRouteToNode(rowNode.parent),
+        rowNode.key ? rowNode.key : rowNode.data.id,
+    ];
 }
 
 function searchChange(e) {
@@ -364,472 +583,38 @@ function searchChange(e) {
     debouncedSearch()
 }
 
-function sortChange(e) {
-    sort.value = e
-    loadNext()
+async function onGridReady(params) {
+    console.log('onGridReady')
+    gridApi = params.api;
+    gridColumnApi = params.columnApi
+    gridApi.setServerSideDatasource(new GridDataSource())
+
+    await init()
 }
 
-// function loadChildren(item, treeNode: unknown, resolve: (date: any[]) => void) {
-//     resolve([])
-// }
-
-async function getTreePath(id:string) : Promise<any> {
-    let item = await dataSource.getById(id)
-
-    if (!item)
-        return undefined
-
-    let pathA = [id]
-    while (item.parentId) {
-        pathA.unshift(item.parentId)
-        item = await dataSource.getById(item.parentId)
-    }
-
-    let d = dataSource.data
-    let path = ""
-    pathA.forEach(item => {
-
-        let index = _.findIndex(d, (o:any) => { return o && o.id == item; });
-
-
-
-        d = d[index].children
-
-        if (path === "") {
-            path = `[${index}]`
-        } else {
-            path += `.children[${index}]`
-        }
-    })
-
-    return path
+function saveColumnState() {
+    localStorage.setItem(`${props.id}_columns_state`, JSON.stringify(gridColumnApi.getColumnState()))
 }
 
-async function getData() {
-    if (!dataSource) {
-        console.warn(`Datasource for Table doesn't set`)
-        console.log(props)
-        return;
-    }
-
-    if (props.field) {
-        //console.log('getData', props.field)
-        data.value = props.modelValue
-
-        await dataSource.setData(props.modelValue)
-    } else {
-        await loadNext()
-    }
-}
-
-async function loadNext(skip: number = 0) {
-
-    if (loadingData.value)
-        return
-
-    loadingData.value = true
-    let options: GetDataManyOptions = {
-        take: 50,
-        skip: skip,
-        filter: [],
-        fields: props.columns.map(i => i.field)
-    }
-
-    if (searchText.value) {
-        options.search = searchVal
-    }
-
-    if (props.filters)
-        options.filter.push(...props.filters.filters)
-
-    if (sort.value && sort.value.order) {
-        options.sort = {
-            field: sort.value.prop,
-            ask: sort.value.order === 'ascending'
-        }
-    }
-
-    try {
-        await dataSource.getMany(options);
-        canLoadNext.value = dataSource.hasNext()
-        itemsCount.value = dataSource.count()
-    } catch (e) {
-        console.error(e)
-        ElMessage.error(e.toString())
-    }
-    loadingData.value = false
-}
-
-
-function getInputCellStyle() {
-    let style:any = {}
-    //display: inline-flex; width:
-    if (dataSource.isTree && editingCell.value.col === 1) {
-        style.display = 'inline-flex'
-        style.width = 'calc(100% - 40px)'
-    }
-    return style
-}
-
-function getRowContext(scope) {
-    let ctx = props.context ? _.cloneDeep(props.context) : {}
-    ctx.row = scope.row
-    return ctx
-}
-
-function setCurrentCell(cell: CellRef) {
-
-    if (editingCell.value !== cell) {
-        editingCell.value = cell
-    }
-
-    editingCell.value = cell
-}
-
-function getField(field: string) {
-    if (!dataSource || !field)
-        return undefined;
-
-    let f = dataSource.getFieldByAlias(field)
-
-    if (!f)
-        console.warn(`Field "${field}" doesn't exists in data source "${dataSource.alias}"`)
-
-    return f
-}
-
-async function compileAction(action) {
-    if (!action || (action.type === 'script' && (!action.script || action.script === '')))
-        return null
-
-    try {
-        return await compileScript(action.script, 'ctx')
-    } catch (e) {
-        console.error(e)
-        return null
-    }
-}
-
-async function execAction(action: CompiledFunc, additionalContext?: object) {
-    try {
-        let ctx = Object.assign(props.context, additionalContext)
-         ctx.currentId = currentId.value
-         ctx.currentItem = await dataSource.getById(currentId.value)
-        action.exec(ctx)
-    } catch (e) {
-        console.error(`Execution error in action`)
-        console.error(e);
-    }
-}
-
-function selectionChange(rows: Array<any>) {
-    let ids: string[] = []
-    rows.forEach(row => {
-        ids.push(row.id)
-    })
-    selectedIds.value = ids;
-}
-
-function onTableRowClick(row) {
-    emit('rowClick', { id: row.id })
-    if (actions.value.onRowClick) {
-        execAction(actions.value.onRowClick, { row: row })
-    }
-}
-
-function onTableRowDblClick(row) {
-    if (editingCell.value)
-        return;
-
-    emit('rowDblClick', { id: row.id })
-
-    if (actions.value.onRowDoubleClick) {
-        execAction(actions.value.onRowDoubleClick, { row: row })
-    }
-}
-
-function getColumn(id: string) {
-    for(let i in _columns.value) {
-        if (_columns.value[i].id === id) {
-            return _columns.value[i]
-        }
-    }
-
-    return undefined
-}
-
-function headerResized(newWidth, oldWidth, column) {
-
-    for(let i in _columns.value) {
-        let col = _columns.value[i]
-        if (col.id === column.rawColumnKey) {
-            col.width = newWidth
-        }
-    }
-
-    let widths = {}
-    for(let i in _columns.value) {
-        let col = _columns.value[i]
-        widths[col.id] = col.width
-    }
-
-    sync.setValue(configAlias, widths);
-}
-
-function currentRowChanged(row: any) {
-    currentId.value = row ? row.id : undefined
-
-    emit('update:currentId', currentId.value)
-}
-
-function onCellInput(scope: any, value: any) {
-    dataSource.setValue(scope.row.id, scope.column.property, value)
-}
-
-async function getFieldReadonly(field:string, scope: any):Promise<boolean> {
-    let fGetReadonly = await dataSource.getFieldByAlias(field).getReadonlyFunc()
-    if (fGetReadonly) {
-        return await fGetReadonly.exec(getRowContext(scope))
-    }
-    return false
-}
-
-async function handleCellClick(scope:any) {
-    //console.log(dataSource.readonly, props.readonly, (await getFieldReadonly(scope.column.property, scope)))
-    if (!dataSource.readonly &&
-        !props.readonly &&
-        !getColumn(scope.column.rawColumnKey).readonly &&
-        !(await getFieldReadonly(scope.column.property, scope))
-        )
-        setCurrentCell({
-            row: scope.$index,
-            col: scope.cellIndex
-        })
-}
-
-function inputKeyDown(e:KeyboardEvent) {
-    if (e.code === 'Enter') {
-        cellFocusedOut()
-    }
-}
-
-function cellFocusedOut() {
-    setCurrentCell(null)
-}
-
-let getCellClass = (scope: any) => {
-    if (editingCell.value &&
-        scope.rowIndex === editingCell.value.row &&
-        scope.columnIndex === editingCell.value.col) {
-        return "table-cell-edit"
-    }
-
-    return "table-cell"
-}
-
-let getHeaderCellClass = (column: any) => {
-    let classes: string = 'table-cell-header';
-    if (column.column.order === '' || !column.column.order)
-        classes += ` hidden-sort-wrapper`
-    return  classes
-}
-
-let getHeaderTitle = (scope: any) => {
-    let idx = scope.$index -1
-    let col = props.columns[idx];
-    if (!col)
-        return t('error')
-
-    return col.title
-}
-
-async function getCellData(scope: any) {
-    //console.log('getCellData', dataSource.alias)
-
-    let field = getField(scope.column.property)
-    if (!dataSource || !field)
-        return '';
-
-    let value = scope.row[scope.column.property]
-
-    if (field.config.getValue) {
-        try {
-            value = await getValueFunc()
-        } catch (e) {
-            console.error(e)
-            return 'Error'
-        }
-    }
-
-    if (value === undefined || value === null)
-        return ""
-
-    let display
-    switch(field.type) {
-        case "text":
-        case "bool":
-        case "string": display = value; break;
-        case "enum": display = getEnumValue(); break;
-        case "link": display = await getLinkValue(); break;
-        case "number": display = formatNumber(value, field.precision, field.config.format); break;
-        case "date": display = dayjs(value).format('DD.MM.YYYY'); break;
-        case "time": display = dayjs(value).format('hh:mm:ss'); break;
-        case "datetime": display = dayjs(value).format('DD.MM.YYYY hh:mm:ss'); break;
-        default: display = 'Error'
-    }
-
-    return display
-
-    async function getLinkValue() {
-        if (field.config.getValue)
-            return value
-
-        if (value && scope.row[`_${field.alias}_title`]) {
-            return scope.row[`_${field.alias}_title`]
-        }
-
-        if (value && scope.row[`${field.alias}_title`]) {
-            return scope.row[`${field.alias}_title`]
-        }
-
-        //displayProp.value = props.field.displayProp ? props.field.displayProp : 'name';
-        let ds = await dsService.getByAlias(field.datasource);
-
-        if (!ds) {
-            console.warn(`DataSource for link data for field "${field.alias}" doesn't set`)
-            return ""
-        }
-
-        if (field.isMultiple) {
-            return value
-        } else {
-
-            let link_entity = await ds.getById(value)
-            if (!link_entity)
-                return t('notFound')
-            return link_entity[field.displayProp ? field.displayProp : 'name']
-        }
-    }
-
-    function getEnumValue() {
-        if (field.config.getValue)
-            return value
-
-        for(const i in field.values) {
-            if (field.values[i].key === value) {
-                return field.values[i].title
-            }
-        }
-        return t('notFound')
-    }
-
-    function formatNumber(value: any, precision: number, format: any) {
-        if (value === undefined || value === null || value === "")
-            return "";
-
-        if (format && format !== 'none') {
-            return Number.parseFloat(Number(value).toFixed(precision)).toLocaleString('ru-RU')
-        }
-
-        return value
-    }
-
-
-
-    async function getValueFunc() {
-
-        let getValueFunc = await field.getValueFunc()
-
-        if (getValueFunc) {
-            try {
-                return await getValueFunc.exec(getRowContext(scope))
-            } catch (e) {
-                console.error(`Error while evaluating field ${field.alias} getValue function `)
-                console.error(e)
-                return null
-            }
-        }
-        return null;
-    }
-}
-
-
-
-
-function getRowClass() {
-    return "table-row"
-}
-
-function getHeaderClass() {
-    return "table-header"
-}
-
-async function initColumns() {
-    _columns.value = props.columns || []
-    let widths = await sync.getValue(configAlias)
-
-    for(let i in _columns.value) {
-        const col = _columns.value[i]
-
-
-        if (widths && widths[col.id]) {
-            col.width = widths[col.id]
-        }
-    }
-}
-
-let onItemUpdated = async (id, item) => {
-
-    if (!id || !item)
-        return;
-
-    //console.log('item-updated', id, item)
-
-    // if (dataSource.isTree) {
-    //     let path = await getTreePath(id)
-    //     _.set(data.value, path, item)
-    // } else {
-    //     let idx = _.findIndex(data.value, (o:any) => { return o && o.id == id; })
-    //     if (idx >= 0)
-    //         data.value[idx] = item
-    // }
-
-    data.value = dataSource.data
-
-    emit('update:modelValue', dataSource.data)
-    emit('change', dataSource.data)
-}
-
-let onItemInserted = async (id, item) => {
-    console.log('item-inserted', id, item)
-
-    data.value = dataSource.data
-    emit('update:modelValue', dataSource.data)
-    emit('change', dataSource.data)
-}
-
-let onItemRemoved = async (id, item) => {
-    console.log('item-removed', id, item)
-
-    data.value = dataSource.data
-    emit('update:modelValue', dataSource.data)
-    emit('change', dataSource.data)
-}
-
-let onDataSourceUpdate = async () => {
-    console.log('>>>> DS updated', dataSource.alias)
-
-    data.value = dataSource.data
-
-    emit('update:modelValue', dataSource.data)
-    emit('change', dataSource.data)
-}
 
 async function init() {
-    setCurrentCell(null)
+    let cols = props.columns || []
+    columnDefs.value = []
 
-    data.value = []
+    if (props.datasource) {
+        dataSource = await dsService.getByAlias(props.datasource)
 
+        if (!dataSource) {
+            console.warn(`DataSource ${props.datasource} not found`)
+            return
+        }
+
+        if (dataSource instanceof CustomDataSource) {
+            dataSource.setContext(props.context)
+        }
+    }
+
+    isTree.value = dataSource.isTree
 
     actions.value.onRowDoubleClick = await compileAction(props.onRowDoubleClick)
     actions.value.onRowClick = await compileAction(props.onRowClick)
@@ -837,24 +622,169 @@ async function init() {
     actions.value.onEdit = await compileAction(props.onEdit)
     actions.value.onRemove = await compileAction(props.onRemove)
 
-    if (props.datasource) {
+    dataSource.on('item-updated', onItemUpdated)
+    dataSource.on('item-inserted', onItemInserted)
+    dataSource.on('item-removed', onItemRemoved)
+    dataSource.on('update', onDataSourceUpdate)
 
-        dataSource = await dsService.getByAlias(props.datasource)
-    }
-
-    if (dataSource) {
-        isTree.value = dataSource.isTree
-
-        canSearch.value = dataSource.source !== 'custom'
-
-        //dataSource.on('item-updated', onItemUpdated)
-        //dataSource.on('item-inserted', onItemInserted)
-        //dataSource.on('item-removed', onItemRemoved)
-        dataSource.on('update', onDataSourceUpdate)
-
-        if (dataSource instanceof CustomDataSource) {
-            dataSource.setContext(props.context)
+    for(let i in cols) {
+        let col = cols[i]
+        let field = dataSource.getFieldByAlias(col.field)
+        let colDef: ColDef = {
+            field: col.field,
+            sortable: col.sortable,
+            headerName: col.title,
+            width: col.width,
+            resizable: true,
+            editable: isEditable,
+            cellDataType: field.type,
+            wrapText: col.wordwrap,
+            autoHeight: true,
+            cellEditorParams: {
+                field: field,
+                context: props.context,
+                readonly: col.readonly,
+            }
         }
+
+        if (dataSource.isTree) {
+            colDef.cellRendererParams = {
+                suppressCount: true
+            }
+        }
+
+        colDef.cellRendererParams = {}
+        if (field.isMultiple) {
+            colDef.cellRenderer = 'multipleCellRenderer'
+        }
+
+        if (field.config.getValue) {
+            colDef.cellRenderer = 'customCellRenderer'
+            colDef.cellRendererParams = {
+                getValueFunc: field.getValueFunc()
+            }
+        }
+
+        colDef.cellRendererParams.field = field
+        colDef.cellRendererParams.context = props.context
+
+        switch (field.type) {
+            case "number":
+                colDef.cellEditor = 'numberCellEditor';
+                colDef.valueSetter = params => {
+                    params.data[field.alias] = params.newValue ? Number(params.newValue) : null
+                    return true
+                }
+                break;
+            case "date":
+            case "time":
+            case "datetime":
+                colDef.cellEditor = 'datetimeCellEditor';
+                colDef.valueSetter = params => {
+                    params.data[field.alias] = params.newValue ? new Date(params.newValue).toISOString() : null
+                    return true
+                }
+
+                break;
+            case "enum":
+                colDef.cellEditor = 'enumCellEditor';
+                break;
+            case "link":
+                colDef.cellEditor = field.isTree ? 'treeCellEditor' : 'linkCellEditor';
+
+                let datasource = await dsService.getByAlias(field.datasource)
+
+                colDef.cellEditorParams.dataSource = datasource
+
+                colDef.valueSetter = params => {
+                    if (params.oldValue === params.newValue)
+                        return;
+
+                    if (!datasource) {
+                        params.data[field.alias] = params.newValue
+                        return true
+                    }
+
+                    let data = params.data
+                    let value = params.newValue
+                    if (value === null) {
+
+                        data[field.alias] = value
+                        if (field.isMultiple) {
+                            data[`__${field.alias}_title`] = null
+                        } else {
+                            data[`__${field.alias}_entities`] = null
+                        }
+                    } else {
+                        let id = field.isMultiple ? value : [value]
+
+                        if (!id.length)
+                            return;
+
+                        let displayProp = field.displayProp ? field.displayProp : 'name'
+
+                        datasource.getMany({
+                            id: id,
+                            fields: [displayProp]
+                        }).then(res => {
+
+                            if (field.isMultiple) {
+                                data[`__${field.alias}_entities`] = res.data
+                            } else {
+                                data[`__${field.alias}_title`] = res.data[0][displayProp]
+                            }
+
+                            data[field.alias] = value
+                            params.node.setData(data)
+                            dataSource.setValue(data.id, field.alias, value)
+
+                            console.log(data)
+
+                        }).catch(e => {
+                            console.error(e)
+
+                            //return value to old
+                            data[field.alias] = params.oldValue
+                            params.node.setData(data)
+                        })
+                    }
+
+                    data[field.alias] = null //this for that grid will recofnize changes after loading new data from server
+                    return true
+                }
+
+                break;
+        }
+
+        if (Number(i) === 0) {
+
+            if (dataSource.isTree) {
+
+                colDef.cellRenderer = 'agGroupCellRenderer'
+
+                colDef.showRowGroup = true
+                colDef.cellRendererParams = {
+                    checkbox: true,
+                    context: props.context,
+                    "suppressDoubleClickExpand": true,
+                    "suppressEnterExpand": true
+                }
+
+                if (field.config.getValue) {
+                    colDef.cellRendererParams.innerRenderer = 'customCellRenderer'
+                    colDef.cellRendererParams.innerRendererParams = {
+                        getValueFunc: field.getValueFunc(),
+                        field: field
+                    }
+
+                }
+
+            } else {
+                colDef.checkboxSelection = true
+            }
+        }
+
+        columnDefs.value.push(colDef)
     }
 
     for(let i in props.customActions) {
@@ -882,92 +812,151 @@ async function init() {
             //console.error(e)
         }
     }
+
+    console.log(`${props.id}_columns_state`)
+    let state = localStorage.getItem(`${props.id}_columns_state`)
+    if (state) {
+        gridColumnApi.applyColumnState({
+            state: JSON.parse(state),
+            applyOrder: true,
+        })
+    }
+}
+
+async function compileAction(action) {
+    if (!action || (action.type === 'script' && (!action.script || action.script === '')))
+        return null
+
+    try {
+        return await compileScript(action.script, 'ctx')
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+}
+
+async function execAction(action: CompiledFunc, additionalContext?: object) {
+    try {
+        let ctx = Object.assign(props.context, additionalContext)
+        let selected = gridApi.getSelectedNodes()
+        if (selected.length) {
+            ctx.currentId = selected[0].data.id
+            ctx.currentItem = selected[0].data
+        }
+
+        ctx.dataSource = dataSource
+
+        action.exec(ctx)
+    } catch (e) {
+        console.error(`Execution error in action`)
+        console.error(e);
+    }
+}
+
+function isEditable(params) {
+    if (dataSource.readonly ||
+        props.readonly ||
+        params.colDef.cellEditorParams.readonly)
+        return false
+
+    if (!params.colDef.cellEditorParams.field || !params.colDef.cellEditorParams.field.config.getReadonly)
+        return true
+
+    let fGetReadonly = params.colDef.cellEditorParams.field.getReadonlyFunc()
+
+
+    if (fGetReadonly) {
+        let ctx = Object.assign({}, props.context)
+
+        ctx.row = params.data
+        ctx.column = params.column
+
+        let val = fGetReadonly.exec(ctx)
+        return !val
+    }
+
+    return true
+}
+
+function cellValueChanged(params) {
+    //console.log('cellValueChanged', params)
+    if (params.newValue === params.oldValue)
+        return
+
+    dataSource.setValue(params.data.id, params.colDef.field, params.newValue)
+
+    //console.log('cellValueChanged', params)
+}
+
+function getRowId(params) {
+    return params.data.id
+}
+
+function getServerSideGroupKey(item) {
+    return item.id
+}
+
+function isServerSideGroup(item) {
+    return item.hasChildren || (item.children && item.children.length)
+}
+
+let onItemUpdated = async (params) => {
+    console.log('item-updated', params)
+
+    gridApi.applyServerSideTransaction({
+        update: [params.data],
+        route: params.route
+    })
+}
+
+let onItemInserted = async (params) => {
+    console.log('item-inserted', params)
+
+    gridApi.applyServerSideTransaction({
+        add: [params.data],
+        route: params.route
+    })
+}
+
+let onItemRemoved = async (params) => {
+    console.log('item-removed', params)
+
+    gridApi.applyServerSideTransaction({
+        remove: [params.data],
+        route: params.route
+    })
+}
+
+let onDataSourceUpdate = async () => {
+    //console.log('>>>> DS updated', dataSource.alias)
+
+    gridApi.refreshServerSide({
+        purge: true
+    })
+}
+
+function cellClicked(params) {
+    emit('rowClick', { id: params.node.id })
+    if (actions.value.onRowClick) {
+        execAction(actions.value.onRowClick, { row: params.node.data })
+    }
+}
+
+function cellDoubleClicked(params) {
+    emit('rowDblClick', { id: params.node.id })
+
+    if (actions.value.onRowDoubleClick) {
+        execAction(actions.value.onRowDoubleClick, { row: params.node.data })
+    }
+}
+
+function selectionChanged() {
+    emit('update:currentId', gridApi.getSelectedRows()[0]?.id)
+
 }
 
 </script>
 
-<style lang="scss">
-
-.hidden-sort-wrapper {
-    .cell {
-        .caret-wrapper {
-            visibility: hidden !important;
-        }
-    }
-}
-
-.table-header {
-    .el-table__cell {
-        padding: 4px;
-    }
-
-    .cell {
-        padding: 4px 8px 4px 8px !important;
-    }
-}
-
-.table-row {
-    height: 34px;
-    text-overflow: ellipsis !important;
-}
-
-.table-cell-header {
-    .cell {
-        white-space: nowrap !important;
-        font-weight: 500 !important;
-    }
-}
-
-.adv-column {
-    .cell {
-        white-space: nowrap;
-        text-overflow: clip;
-    }
-}
-
-.table-cell {
-    .cell {
-        display: flex;
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-        padding-bottom: 4px;
-        padding-top: 4px;
-        white-space: nowrap;
-        align-items: center;
-    }
-}
-
-.table-cell-text {
-    min-height: 22px;
-    text-overflow: ellipsis;
-    width: 100%;
-    white-space: nowrap;
-}
-
-.el-table .el-table__cell {
-    padding: 0 !important;
-}
-
-
-.table-cell:hover {
-    box-shadow:0 0 0 1px var(--el-color-primary-light-5) inset;
-}
-
-.table-cell-edit {
-    box-shadow:0 0 0 1px var(--el-color-primary) inset;
-    .cell {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .el-table__cell{
-        padding: 1px;
-        margin: 1px;
-    }
-}
-
-.adv-column-cell:focus {
-    background: red;
-}
+<style scoped>
 
 </style>

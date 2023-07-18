@@ -28,7 +28,7 @@ export class DataSourceService {
     functionDataSource = new FunctionsConfigDataSource(null)
     reportDataSource = new ReportConfigDataSource(null)
 
-    async getByAlias(alias: string) {
+    async getByAlias(alias: string) : Promise<DataSourceInterface> {
         if (this.dataSources.has(alias)) {
             return this.dataSources.get(alias)
         }
@@ -109,7 +109,7 @@ export class DataSourceService {
 
 
     async registerAll() {
-        let items = await this.dsDataSource.getMany()
+        let items = (await this.dsDataSource.getMany()).data
 
         items.forEach(ds => {
             this.dataSourceConfigs.set(ds.alias, <DataSourceConfigInterface>ds)

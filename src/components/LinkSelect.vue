@@ -189,7 +189,7 @@ async function getData(query?: string) {
         opt['search'] = query
     }
 
-    data.value = await dataSource.getMany(opt)
+    data.value = (await dataSource.getMany(opt)).data
     isLoading.value = false;
 }
 

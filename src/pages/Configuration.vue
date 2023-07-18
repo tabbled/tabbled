@@ -1,5 +1,5 @@
 <template>
-    <el-page-header style="padding: 16px;" @back="$router.back()">
+    <el-page-header style="padding: 16px;" @back="$router.back()" >
         <template #content>
             <span> {{$t('configuration')}} </span>
         </template>
@@ -62,6 +62,8 @@
                    :readonly="true"
                    :on-click-add="addPage"
                    :filters-visible="false"
+                   :fill-height="true"
+                   :height="height"
             />
         </el-tab-pane>
 
@@ -74,6 +76,7 @@
                    @row-dbl-click="editDataSource"
                    :on-click-add="addDataSource"
                    :filters-visible="false"
+                   :height="height"
 
             />
         </el-tab-pane>
@@ -87,6 +90,7 @@
                    :readonly="true"
                    :on-click-add="addFunc"
                    :filters-visible="false"
+                   :height="height"
             />
         </el-tab-pane>
 
@@ -100,6 +104,7 @@
                    :readonly="true"
                    :on-click-add="addReport"
                    :filters-visible="true"
+                   :height="height"
             />
 
         </el-tab-pane>
@@ -128,6 +133,8 @@ const dsService = useDataSourceService()
 let activeTab = ref('')
 let sync = useSyncService()
 const settings = useSettings()
+
+let height = ref(500)
 
 const pagesColumns:ColumnConfigInterface[] = [
     {
@@ -222,6 +229,8 @@ onMounted(async () => {
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
 
     setAppTitle()
+
+    height.value = window.innerHeight - 200
 });
 
 

@@ -12,6 +12,8 @@
                      show-checkbox
                      @check="checked"
                      :multiple="multiple"
+                     lazy
+                     :load="load"
             >
             </el-tree>
         </el-card>
@@ -44,7 +46,7 @@
 import {onMounted, ref} from "vue";
 import {FieldConfigInterface} from "../model/field";
 import {Filters} from "../model/filter";
-import {DataSourceInterface} from "../model/datasource";
+import {DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 
 interface Props {
@@ -83,6 +85,7 @@ let dsService = useDataSourceService()
 const treeProps = {
     children: props.childrenProp,
     label: props.titleProp,
+    isLeaf: 'isLeaf',
 }
 
 onMounted(async () => {
@@ -90,6 +93,7 @@ onMounted(async () => {
 });
 
 async function init() {
+    console.log('init')
     if (!props.fieldConfig) {
         return
     }
@@ -101,29 +105,47 @@ async function init() {
             console.warn(`Link source "${props.fieldConfig.datasource}" for field "${props.fieldConfig.alias}" not found`)
             return
         }
-        await getData()
     } else {
         console.warn(`Field "${props.fieldConfig.alias}" is not a link type`)
     }
 }
 
-async function getData() {
-    if (!props.fieldConfig) {
-        return
+const load = async (node, resolve) => {
+    console.log('load', dataSource)
+    if (!dataSource) {
+        await init()
     }
 
-    isLoading.value = true;
-
-    let opt = {
-        filter: [],
-        take: 200
+    let opt:GetDataManyOptions = {
+        fields: [props.titleProp],
+        parentId: node.parent ? node.data.id : null
     }
 
-
-    treeData.value = await dataSource.getMany(opt)
-
-    isLoading.value = false;
+    dataSource.getMany(opt).then(res => {
+        for (let i in res.data) {
+            res.data[i].isLeaf = !res.data[i].hasChildren
+        }
+        resolve(res.data)
+    })
 }
+
+// async function getData() {
+//     if (!props.fieldConfig) {
+//         return
+//     }
+//
+//     isLoading.value = true;
+//
+//     let opt = {
+//         filter: [],
+//         take: 200
+//     }
+//
+//
+//     treeData.value = (await dataSource.getMany(opt)).data
+//
+//     isLoading.value = false;
+// }
 
 function checked(val, prop) {
     if (props.multiple) {

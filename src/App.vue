@@ -153,7 +153,7 @@ function logout() {
 async function registerPages() {
     pagesByAlias.value.clear()
 
-    let pages = await dsService.pageDataSource.getMany()
+    let pages = (await dsService.pageDataSource.getMany()).data
 
     pages.forEach((item: PageConfigInterface) => {
         addRoute(item.path, item);

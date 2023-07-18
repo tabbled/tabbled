@@ -27,6 +27,11 @@ export interface EntityInterface {
     [name: string]: any | never
 }
 
+export interface GetManyResponse {
+    data: EntityInterface[],
+    count: number
+}
+
 
 
 export interface GetDataManyOptions {
@@ -40,7 +45,9 @@ export interface GetDataManyOptions {
         ask: boolean
     }
     include?: string[]
-
+    parentId?: string,
+    id?: string[],
+    route?:string[]
 }
 
 export interface DataSourceInterface extends EventEmitter {
@@ -54,17 +61,10 @@ export interface DataSourceInterface extends EventEmitter {
     source: DataSourceSource
 
     /**
-     * @deprecated
-     * Get all data store from the data source
-     * @returns {EntityInterface[]} all data from data source
-     */
-    getAll(): Promise<EntityInterface[]>
-
-    /**
      * Get data with filters and pagination
      * @returns {EntityInterface[]} data from data source
      */
-    getMany(options?: GetDataManyOptions): Promise<EntityInterface[]>
+    getMany(options?: GetDataManyOptions): Promise<GetManyResponse>
     getManyRaw(options?: GetDataManyOptions): Promise<DataItemInterface[]>
 
     /**
@@ -76,24 +76,19 @@ export interface DataSourceInterface extends EventEmitter {
     //getByKey(key: string | number) : Promise<EntityInterface | undefined>
 
     //onCellChange?: (row: number, newValue: any, oldValue?: any) => void;
-    onChange?: (id: string, newValue: any) => void;
+    //onChange?: (id: string, newValue: any) => void;
 
     insert(id: string, value: any, parentId?: string): Promise<EntityInterface>
     updateById(id: string, value: object): Promise<EntityInterface>
     removeById(id: string): Promise<boolean>
 
-    getChildren(id: string) : Promise<EntityInterface | undefined>
-
     // Sync Service use this method when got data from server
     setRemoteChanges?(item: DataItemInterface[]): Promise<boolean>
 
     // Set items
-    get data(): EntityInterface[]
+    //get data(): EntityInterface[]
     setData?(items: EntityInterface[]): Promise<void>
     setValue(id: string, field: string, value: any): Promise<void>
-
-    hasNext() : boolean
-    count(): number
 
     getFieldByAlias(alias: string): FieldInterface | undefined
 
@@ -151,28 +146,19 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     isTree: boolean
     title: string
     _data: EntityInterface[] = []
-    _count: 0
 
+    async getMany(options: GetDataManyOptions = {}): Promise<GetManyResponse> {
 
-    async getChildren(id: string) : Promise<EntityInterface | undefined> {
-        return undefined
-    }
-
-    async getAll(): Promise<EntityInterface[]> {
-        return await this.getMany()
-    }
-
-    get data(): EntityInterface[] {
-        return _.cloneDeep(this._data)
-    }
-
-    async getMany(options: GetDataManyOptions = {}): Promise<EntityInterface[]> {
-        let items
 
         if (this.cached) {
-            let dt = items = await this.getManyRaw(options)
+            let dt = await this.getManyRaw(options)
 
-            items = dt.map(item => item.data)
+            let items = dt.map(item => item.data)
+
+            return {
+                data: items,
+                count: items.length
+            }
         } else {
             let dt = new Date().getMilliseconds()
             console.log("getMany from server, options: ", options)
@@ -180,17 +166,15 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 alias: this.alias,
                 options: options
             })
-            items = data.items
-            console.log(`${this.alias}, got items: ${items.length}; timing, ms: ${new Date().getMilliseconds() - dt}`)
-            //return res
-            this._count = data.count
+            console.log(`${this.alias}, got items: ${data.items.length}; timing, ms: ${new Date().getMilliseconds() - dt}`)
 
+            return {
+                data: data.items,
+                count: data.count
+            }
         }
 
-        this._data = !options.skip ? items : this._data.concat( items )
 
-        this.emit('update')
-        return this._data;
     }
 
     async getManyRaw(options: GetDataManyOptions = {}): Promise<DataItemInterface[]> {
@@ -307,7 +291,9 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
                 await syncService.push(this.type, [item]);
                 this.emit('update')
-                this.emit('item-inserted', id, value)
+                this.emit('item-inserted', {
+                    data: value
+                })
                 return value
             } catch (e) {
                 throw e
@@ -332,7 +318,9 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             this._data.push(res.data)
 
             this.emit('update')
-            this.emit('item-inserted', id, res.data, res.parentId)
+            this.emit('item-inserted', {
+                data: value
+            })
             return res
         }
 
@@ -361,7 +349,9 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 await db.database.ref(`/${this.type}/${this.alias}/${id}`).update(item)
                 await syncService.push(this.type, [item]);
                 this.emit('update')
-                this.emit('item-updated', id, item.data)
+                this.emit('item-updated', {
+                    data: item.data
+                })
             } catch (e) {
                 console.log(value)
                 throw e
@@ -383,7 +373,10 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 this._data[idx] = res.data
             }
 
-            this.emit('item-updated', id, res.data)
+            this.emit('update')
+            this.emit('item-updated', {
+                data: res.data
+            })
             return res
         }
     }
@@ -417,7 +410,9 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).set(item)
             await syncService.push(this.type, [item]);
             this.emit('update')
-            this.emit('item-removed', id, item.data)
+            this.emit('item-removed', {
+                data: item.data
+            })
             return true;
         } else {
             let dt = new Date().getMilliseconds()
@@ -432,9 +427,10 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 this._data.splice(idx, 1)
             }
 
-            this.emit('item-removed', id, res.data)
             this.emit('update')
-
+            this.emit('item-removed', {
+                data: res.data
+            })
 
             return true
         }
@@ -454,12 +450,18 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
 
             if (!current_item) {
-                this.emit('item-inserted', item.id, item.data)
+                this.emit('item-inserted', {
+                    data: current_item.data
+                })
             } else {
-                this.emit('item-updated', item.id, item.data)
+                this.emit('item-updated', {
+                    data: item.data
+                })
 
                 if (item.deletedAt && !current_item.deletedAt) {
-                    this.emit('item-removed', item.id, item.data)
+                    this.emit('item-removed', {
+                        data: item.data
+                    })
                 }
             }
         }
@@ -493,8 +495,11 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 this._data[idx] = res.data
             }
 
-            this.emit('item-updated', id, res.data)
             this.emit('update')
+            this.emit('item-updated', {
+                data: res.data
+            })
+
         }
     }
 
@@ -508,14 +513,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                 compare: null
             })
         return f
-    }
-
-    hasNext():boolean {
-        return this._data.length < this._count
-    }
-
-    count(): number {
-        return this._count
     }
 }
 
@@ -556,28 +553,6 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
             this.fields = [...this.fieldByAlias.values()]
     }
 
-    async getChildren(id: string) : Promise<EntityInterface | undefined> {
-        if (!this.model)
-            return
-
-        return await this.model.getChildren(id)
-    }
-
-    async getAll(): Promise<EntityInterface[]> {
-        if (!this.model)
-            return []
-
-        let data = await this.model.getAll()
-        return _.cloneDeep(data)
-    }
-
-    get data() : EntityInterface[] {
-        if (!this.model)
-            return []
-
-        return this.model.data
-    }
-
     async setData(items: EntityInterface[]):Promise<void> {
         if (!this.model)
             return
@@ -598,8 +573,6 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     emitHandler(event: string, ...args) {
-        //console.log('emitHandler', event, ...args)
-
         switch (event) {
             case 'update': this.emit('update', ...args); break;
             case 'item-inserted': this.emit('item-inserted', ...args);break;
@@ -612,7 +585,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         await this.setScript(this.script)
         await this.compile()
 
-        if (this.model)
+        if (this.model && this.model.init instanceof Function)
             await this.model.init()
     }
 
@@ -640,11 +613,11 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
         return this.fieldByAlias.get(alias)
     }
 
-    async getMany(options: GetDataManyOptions): Promise<EntityInterface[]> {
+    async getMany(options: GetDataManyOptions): Promise<GetManyResponse> {
         if (!this.model || !(this.model.getMany instanceof Function))
-            return [];
+            return {data: [], count: 0};
 
-        return await this.model.getMany(options)
+        return  _.cloneDeep(await this.model.getMany(options))
     }
 
     async getManyRaw(options: GetDataManyOptions): Promise<DataItemInterface[]> {
@@ -681,20 +654,6 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
         await this.model.setValue(id, field, value)
     }
-
-    hasNext():boolean {
-        if (!this.model || !(this.model.hasNext instanceof Function))
-            return false;
-
-        return this.model.hasNext()
-    }
-
-    count(): number {
-        if (!this.model || !(this.model.count instanceof Function))
-            return 0;
-
-        return this.model.count()
-    }
 }
 
 export class FieldDataSource extends EventEmitter implements DataSourceInterface {
@@ -706,7 +665,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     readonly: boolean;
     source: DataSourceSource.field;
     type: DataSourceType = DataSourceType.data;
-    _data: any[] = []
+    _data: EntityInterface[] = []
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
@@ -727,14 +686,6 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
             this.fields = [...this.fieldByAlias.values()]
     }
 
-    async getChildren(id: string) : Promise<EntityInterface | undefined> {
-        return undefined
-    }
-
-    getAll(): Promise<EntityInterface[]> {
-        return this.getMany()
-    }
-
     get data(): EntityInterface[] {
         return this._data
     }
@@ -752,19 +703,23 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         return this.fieldByAlias.get(alias)
     }
 
-    async getMany(options?: GetDataManyOptions): Promise<EntityInterface[]> {
-        return await this.getManyRaw(options)
+    async getMany(options?: GetDataManyOptions): Promise<GetManyResponse> {
+        return {
+            data: _.cloneDeep(this._data),
+            count: this._data.length
+        }
     }
 
     async getManyRaw(options?: GetDataManyOptions): Promise<DataItemInterface[]> {
-        return _.cloneDeep(this._data)
+        return []
     }
 
     async insert(id: string, value: any): Promise<EntityInterface> {
-        console.log(id, this)
         value.id = id
         this._data.push(value)
-        this.emit('item-inserted', id, value)
+        this.emit('item-inserted', {
+            data: value
+        })
         this.emit('update', this._data)
 
         return value
@@ -775,7 +730,9 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
             let item = this._data[i]
             if (item.id === id) {
                 this._data.splice(Number(i), 1);
-                this.emit('item-removed', id, item)
+                this.emit('item-removed', {
+                    data: item
+                })
                 this.emit('update', this._data)
                 return true;
             }
@@ -789,7 +746,9 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
             let item = this._data[i]
             if (item.id === id) {
                 this._data[i] = value
-                this.emit('item-updated', id, value)
+                this.emit('item-updated', {
+                    data: value
+                })
                 this.emit('update', this._data)
                 return item;
             }
@@ -807,14 +766,6 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 
     async setData(items: EntityInterface[]):Promise<void> {
         this._data = !items ? [] : _.cloneDeep(items)
-    }
-
-    hasNext():boolean {
-        return false
-    }
-
-    count(): number {
-        return this._data.length
     }
 }
 

@@ -13,7 +13,7 @@ export class FunctionScriptHelper {
 
         let dsService = await useDataSourceService()
         let ds = dsService.functionDataSource
-        let functions = await  ds.getMany( {filter: [{key: 'data/alias', op: "==", compare: alias}]} )
+        let functions = (await ds.getMany( {filter: [{key: 'data/alias', op: "==", compare: alias}]} )).data
 
         if (!functions.length) {
             console.error(`No function with alias "${alias}"`)

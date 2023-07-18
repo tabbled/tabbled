@@ -209,7 +209,7 @@ async function getLinkData(query?: string) {
     }
 
     isLoading.value = true
-    linkData.value = await ds.getMany(opt)
+    linkData.value = (await ds.getMany(opt)).data
 
     isLoading.value = false
 }
