@@ -4,7 +4,7 @@
          @mouseup="endResizeSettingPanel"
          @mousemove="onResizeSettingPanel">
 
-        <div style="padding-bottom: 16px; display: flex; flex-flow: column;">
+        <div style="padding-bottom: 16px; display: flex; flex-flow: column; width: 100%;">
 
             <div  style="display: flex; flex-flow: wrap; justify-content: space-between">
                 <div style="display: flex; flex-flow: wrap; align-items: center">

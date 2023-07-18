@@ -28,7 +28,9 @@
 
             <el-input style="margin-left: 8px; margin-right: 8px"
                       size="small"
+                      :id="id"
                       :placeholder="$t('search')"
+                      :autofocus="false"
                       @input="searchChange"
                       :model-value="searchText"/>
 
@@ -92,6 +94,8 @@
             @columnResized="saveColumnState"
             @columnMoved="saveColumnState"
             @columnVisible="saveColumnState"
+            @sortChanged="saveColumnState"
+            @columnPinned="saveColumnState"
             :treeData="true"
             :getDataPath="getDataPath"
             groupDisplayType='custom'
@@ -106,6 +110,7 @@
             @cellClicked="cellClicked"
             @cellDoubleClicked="cellDoubleClicked"
             @selectionChanged="selectionChanged"
+            @componentStateChanged="onGridColumnsChanged"
 
         />
     </div>
@@ -224,6 +229,10 @@ watch(() => props.datasource, async () => {
     gridApi.refreshServerSide({
         purge: true
     })
+})
+
+onMounted(() => {
+    console.log('mounted')
 })
 
 class GridDataSource implements IServerSideDatasource {
@@ -425,10 +434,6 @@ const debouncedSearch = useDebounceFn(() => {
         purge: true
     })
 }, 200, {maxWait: 1000})
-
-onMounted(async () => {
-
-});
 
 onUnmounted( () => {
     if (dataSource) {
@@ -812,8 +817,9 @@ async function init() {
             //console.error(e)
         }
     }
+}
 
-    console.log(`${props.id}_columns_state`)
+function restoreCols() {
     let state = localStorage.getItem(`${props.id}_columns_state`)
     if (state) {
         gridColumnApi.applyColumnState({
@@ -953,6 +959,11 @@ function cellDoubleClicked(params) {
 function selectionChanged() {
     emit('update:currentId', gridApi.getSelectedRows()[0]?.id)
 
+}
+
+function onGridColumnsChanged() {
+    console.log('componentStateChanged')
+    restoreCols()
 }
 
 </script>
