@@ -50,6 +50,7 @@
                    :readonly="true"
                    :on-click-add="addMenu"
                    :filters-visible="false"
+                   :height="height"
             />
         </el-tab-pane>
 
@@ -230,7 +231,9 @@ onMounted(async () => {
 
     setAppTitle()
 
-    height.value = window.innerHeight - 200
+    console.log()
+
+    //height.value = window.innerHeight - 200
 });
 
 

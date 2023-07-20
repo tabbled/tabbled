@@ -306,22 +306,23 @@ async function init() {
                     if (ds instanceof CustomDataSource)
                         ds.setContext(scriptContext.value)
 
+                    ds.removeAllListeners('update')
+                    ds.removeAllListeners('item-updated')
+                    ds.removeAllListeners('item-inserted')
+                    ds.removeAllListeners('item-removed')
+
                     await ds.setData(editEntity.value[f.alias])
 
                     ds.on('update', async () => {
-                        //console.log('ds update', ds.alias)
                         await setEntityValue(f.alias, (await ds.getMany()).data)
                     })
                     ds.on('item-updated', async () => {
-                        //console.log('ds update', ds.alias)
                         await setEntityValue(f.alias, (await ds.getMany()).data)
                     })
                     ds.on('item-inserted', async () => {
-                        //console.log('ds update', ds.alias)
                         await setEntityValue(f.alias, (await ds.getMany()).data)
                     })
                     ds.on('item-removed', async () => {
-                        //console.log('ds update', ds.alias)
                         await setEntityValue(f.alias, (await ds.getMany()).data)
                     })
                 }
