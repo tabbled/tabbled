@@ -34,6 +34,8 @@
                       @input="searchChange"
                       :model-value="searchText"/>
 
+            <el-input size="small" style="height: 0; width: 0; opacity: 0"/>
+
 
             <el-button v-for="action in _customActions"
                        size="small"
@@ -49,7 +51,6 @@
                 :title="$t('filters.title')"
                 :width="400"
                 :visible="filtersPopoverVisible"
-                content="this is content, this is content, this is content"
             >
                 <template #reference>
                     <el-badge style="margin-bottom: 1px; height: 10px" :value="customFiltersCount" :hidden="!customFiltersCount">
@@ -80,7 +81,7 @@
         <ag-grid-vue
             ref="grid"
             class="ag-theme-balham"
-            :style="{ height: '100%'}"
+            :style="{ height: `calc(100% - ${ actionButtonsVisible ? 40 : 0 }px)`}"
             :columnDefs="columnDefs"
             :defaultColDef="defaultColumnDef"
             rowSelection="multiple"
@@ -294,9 +295,9 @@ const tableBounding = useElementBounding(grid)
 
 function getHeight() {
     if (props.fillHeight) {
-        return (props.height ? props.height : 200) - tableBounding.top.value
+        return (props.height ? props.height : 100) - tableBounding.top.value + 50
     }
-    return props.height ? props.height : 200
+    return props.height ? props.height : 100
 }
 
 
