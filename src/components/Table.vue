@@ -463,7 +463,6 @@ async function add() {
     }
 
     let selected = gridApi.getSelectedNodes()
-    let index = selected.length ? selected[0].rowIndex : 0
 
     let parentId = null
     if (selected.length && selected[0].parent.key) {
@@ -471,12 +470,12 @@ async function add() {
     }
 
     let item = await generateEntityWithDefault(dataSource.fields)
-    let s_item = await dataSource.insert(item.id, item, parentId)
+    await dataSource.insert(item.id, item, parentId)
 
-    gridApi.applyServerSideTransaction({
-        addIndex: index,
-        add: [s_item]
-    })
+    // gridApi.applyServerSideTransaction({
+    //     addIndex: index,
+    //     add: [s_item]
+    // })
 }
 
 async function addChild() {
@@ -495,26 +494,8 @@ async function addChild() {
     if (!selected.length)
         return;
 
-    let route = getRouteToNode(selected[0])
-
     let item = await generateEntityWithDefault(dataSource.fields)
-    let s_item = await dataSource.insert(item.id, item, selected[0].id)
-
-    if (route.length && !selected[0].data.hasChildren) {
-        selected[0].data.hasChildren = true
-
-        gridApi.applyServerSideTransaction({
-            route: route.slice(0, route.length - 1),
-            update: [selected[0].data],
-        });
-
-
-    } else {
-        gridApi.applyServerSideTransaction({
-            add: [s_item],
-            route: route
-        })
-    }
+    await dataSource.insert(item.id, item, selected[0].id)
 
     selected[0].setExpanded(true)
 }
@@ -919,6 +900,18 @@ let onItemUpdated = async (params) => {
 let onItemInserted = async (params) => {
     console.log('item-inserted', params)
 
+    let parent = gridApi.getRowNode(params.data.parentId)
+
+    if (isTree.value && params.route.length && !parent.data.hasChildren) {
+        parent.data.hasChildren = true
+
+        gridApi.applyServerSideTransaction({
+            route: params.route.slice(0, params.route.length - 1),
+            update: [parent.data],
+        });
+        return
+    }
+
     gridApi.applyServerSideTransaction({
         add: [params.data],
         route: params.route
@@ -935,7 +928,7 @@ let onItemRemoved = async (params) => {
 }
 
 let onDataSourceUpdate = async () => {
-    //console.log('>>>> DS updated', dataSource.alias)
+    console.log('>>>> DS updated', dataSource.alias)
 
     gridApi.refreshServerSide({
         purge: true
