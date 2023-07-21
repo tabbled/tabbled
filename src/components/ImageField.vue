@@ -1,12 +1,13 @@
 <template>
 
-    <el-upload class="avatar-uploader"
-               :show-file-list="false"
-               дш
+    <el-upload  v-if="!fieldConfig.isMultiple"
+                :show-file-list="false"
+                class="avatar-uploader"
                :action="actionUrl"
                :on-success="uploaded"
                :on-error="handleError"
                :on-remove="handleRemove"
+               list-type="picture"
     >
         <div v-if="imageUrl" class="avatar">
             <el-image  :src="imageUrl"
@@ -31,11 +32,23 @@
             <Icon  icon="mdi:plus" width="24"/>
         </el-icon>
 
-        <el-dialog v-model="dialogVisible">
-            <el-image  :src="imageUrl" alt="" fit="cover"/>
-        </el-dialog>
-
     </el-upload>
+    <el-upload  v-else
+                class="avatar-uploader"
+                :action="actionUrl"
+                :on-success="uploaded"
+                :on-error="handleError"
+                :on-remove="handleRemove"
+                list-type="picture-card"
+                :file-list="images"
+                :on-preview="handlePreview"
+    >
+    </el-upload>
+
+    <el-dialog v-model="dialogVisible">
+        <el-image  :src="previewImageUrl" alt="" fit="cover"/>
+    </el-dialog>
+
 
 </template>
 
@@ -61,13 +74,19 @@ const props = defineProps<{
 }>()
 
 let imageUrl = ref(null)
+let previewImageUrl = ref(null)
 let actionUrl = ref("")
 let type: 'text' | 'textarea' = 'text'
 let dialogVisible = ref(false)
+let images = ref([])
 
 
 async function getValue() {
-    imageUrl.value = props.modelValue
+    if (props.fieldConfig.isMultiple) {
+        images.value = props.modelValue ? props.modelValue : []
+    } else {
+        imageUrl.value = props.modelValue
+    }
 }
 
 onMounted(async () => {
@@ -76,7 +95,16 @@ onMounted(async () => {
 })
 
 function uploaded(res) {
-    change(`${actionUrl.value}/${res.filename}`)
+    if (props.fieldConfig.isMultiple) {
+        images.value.push({
+            name: res.filename,
+            url: `${actionUrl.value}/${res.filename}`
+        })
+        change(images.value)
+    } else {
+        change(`${actionUrl.value}/${res.filename}`)
+    }
+
 }
 
 watch(() => props.modelValue,
@@ -98,8 +126,14 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
     console.log(uploadFile, uploadFiles)
 }
 
+const handlePreview: UploadProps['onPreview'] = (file) => {
+    dialogVisible.value = true
+    previewImageUrl.value = file.url
+}
+
 function preview() {
     dialogVisible.value = true
+    previewImageUrl.value = imageUrl.value
 }
 
 function remove() {

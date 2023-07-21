@@ -295,9 +295,9 @@ const tableBounding = useElementBounding(grid)
 
 function getHeight() {
     if (props.fillHeight) {
-        return (props.height ? props.height : 100) - tableBounding.top.value + 50
+        return (props.height ? props.height : 300) - tableBounding.top.value + 50
     }
-    return props.height ? props.height : 100
+    return props.height ? props.height : 300
 }
 
 

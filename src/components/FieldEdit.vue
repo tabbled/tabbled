@@ -51,7 +51,8 @@
                     <el-input-number v-model="modelValue.precision" controls-position="right" :min="0" :max="9" style="text-align: start"></el-input-number>
                 </el-form-item>
 
-                <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'list' || modelValue.type === 'string'" :label="t('fieldConfig.isMultiple')">
+                <el-form-item v-if="modelValue.type === 'link' || modelValue.type === 'list' || modelValue.type === 'string' || modelValue.type === 'image'"
+                              :label="t('fieldConfig.isMultiple')">
                     <el-checkbox v-model="modelValue.isMultiple"></el-checkbox>
                 </el-form-item>
 
@@ -176,7 +177,7 @@ onMounted(async () => {
     let items = (await dsService.dsDataSource.getMany()).data
 
     items.forEach(item => {
-        console.log(item)
+        //console.log(item)
         dataSources.value.push({
             key: item.alias,
             label: item.alias
