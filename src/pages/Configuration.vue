@@ -119,9 +119,7 @@ import {ColumnConfigInterface} from "../model/column";
 import {onMounted, ref} from "vue";
 import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
-import {useSyncService} from "../services/sync.service";
 import {ElMessage} from "element-plus";
-import {DataSourceType} from "../model/datasource";
 import {useSettings} from "../services/settings.service";
 
 const props = defineProps<{
@@ -132,7 +130,6 @@ const route = useRoute()
 const router = useRouter()
 const dsService = useDataSourceService()
 let activeTab = ref('')
-let sync = useSyncService()
 const settings = useSettings()
 
 let height = ref(500)
@@ -270,7 +267,7 @@ async function importConfig(config: any) {
     console.log('Start load configuration with version ' + config.version)
 
     try {
-        await sync.import(DataSourceType.config, config)
+        //await sync.import(DataSourceType.config, config)
         console.log("Loading configuration have finished. Reload the page")
         ElMessage.success('Imported successfully')
     } catch (e) {
@@ -281,7 +278,7 @@ async function importConfig(config: any) {
 
 async function importData(data: any) {
     try {
-        await sync.import(DataSourceType.data, data)
+        //await sync.import(DataSourceType.data, data)
         console.log("Loading data have finished.")
         ElMessage.success('Imported successfully')
     } catch (e) {

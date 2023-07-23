@@ -378,7 +378,9 @@ function setValue(alias, val) {
 async function save() {
     try {
         if (isNew.value) {
-            await datasource.insert(dataSourceEntity.value.id, dataSourceEntity.value)
+            let item = await datasource.insert(dataSourceEntity.value.id, dataSourceEntity.value)
+            await router.replace({ params: {id: item.id} })
+            await load()
         } else {
             await datasource.updateById(dataSourceEntity.value.id, dataSourceEntity.value)
         }

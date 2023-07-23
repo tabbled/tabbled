@@ -347,7 +347,9 @@ async function save() {
         if (pageConfig.value.id === null) {
             let id = (await flakeId.generateId()).toString()
             pageConfig.value.id = id
-            await ds.insert(id, pageConfig.value)
+            let item = await ds.insert(id, pageConfig.value)
+            await router.replace({params: { id: item.id }})
+            await init()
         } else {
             await ds.updateById(pageConfig.value.id, pageConfig.value)
         }

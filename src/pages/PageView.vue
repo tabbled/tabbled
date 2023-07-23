@@ -150,7 +150,10 @@ function setAppTitle() {
 async function save() {
     try {
         if (isNew.value) {
-            await editDataSource.insert(editEntity.value.id, editEntity.value)
+            let item = await editDataSource.insert(editEntity.value.id, editEntity.value)
+
+            await router.replace({ params: { id: item.id }})
+            await init()
         } else {
             await editDataSource.updateById(editEntity.value.id, editEntity.value)
         }
@@ -288,8 +291,6 @@ async function init() {
             isNew.value = true
         }
 
-        console.log('editEntity', editEntity.value)
-
         scriptContext.value.item = editEntity.value
 
         // Need to set data of table fields to those datasource
@@ -360,6 +361,8 @@ async function init() {
         if (elProps.properties)
             elements.value.push(el)
     })
+    setComponentAvailableHeight()
+
     pageHeader.actions = []
 
     for(let i in props.pageConfig.headerActions) {
@@ -396,10 +399,11 @@ async function init() {
     let reports = (await dsService.reportDataSource.getMany({
         fields: ['title', 'pages']
     })).data
+
     for(let i in reports) {
         let rep = reports[i]
 
-        if (rep.pages.includes(props.pageConfig.alias)) {
+        if (rep.pages && rep.pages.includes(props.pageConfig.alias)) {
             reportMenu.value.push({
                 id: rep.id,
                 title: rep.title
@@ -407,7 +411,7 @@ async function init() {
         }
     }
 
-    setComponentAvailableHeight()
+
 }
 
 function getLabelElement(el) {

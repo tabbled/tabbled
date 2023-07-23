@@ -127,7 +127,7 @@ import {
     IServerSideDatasource
 } from "ag-grid-community"
 import {onMounted, onUnmounted, ref, watch} from "vue";
-import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css";
 import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
 import {ColumnConfigInterface} from "../model/column";
@@ -224,7 +224,6 @@ watch(() => props.filters?.filters, () => gridApi.refreshServerSide({
     purge: true
 }))
 
-//watch(() => props.field, init)
 watch(() => props.datasource, async () => {
     await init()
     gridApi.refreshServerSide({
@@ -233,17 +232,14 @@ watch(() => props.datasource, async () => {
 })
 
 onMounted(() => {
-    console.log('mounted')
 })
 
 class GridDataSource implements IServerSideDatasource {
 
     destroy(): void {
-        console.log("destroy")
     }
 
     getRows(params: IServerSideGetRowsParams): void {
-        //console.log('getRows', params)
 
         if (!dataSource) {
             console.warn(`Datasource for Table2 doesn't set`)
@@ -471,11 +467,6 @@ async function add() {
 
     let item = await generateEntityWithDefault(dataSource.fields)
     await dataSource.insert(item.id, item, parentId)
-
-    // gridApi.applyServerSideTransaction({
-    //     addIndex: index,
-    //     add: [s_item]
-    // })
 }
 
 async function addChild() {
@@ -571,7 +562,7 @@ function searchChange(e) {
 }
 
 async function onGridReady(params) {
-    console.log('onGridReady')
+    //console.log('onGridReady')
     gridApi = params.api;
     gridColumnApi = params.columnApi
     gridApi.setServerSideDatasource(new GridDataSource())
@@ -867,13 +858,10 @@ function isEditable(params) {
 }
 
 function cellValueChanged(params) {
-    //console.log('cellValueChanged', params)
     if (params.newValue === params.oldValue)
         return
 
     dataSource.setValue(params.data.id, params.colDef.field, params.newValue)
-
-    //console.log('cellValueChanged', params)
 }
 
 function getRowId(params) {
@@ -889,7 +877,7 @@ function isServerSideGroup(item) {
 }
 
 let onItemUpdated = async (params) => {
-    console.log('item-updated', params)
+    //console.log('item-updated', params)
 
     gridApi.applyServerSideTransaction({
         update: [params.data],
@@ -898,7 +886,7 @@ let onItemUpdated = async (params) => {
 }
 
 let onItemInserted = async (params) => {
-    console.log('item-inserted', params)
+    //console.log('item-inserted', params)
 
     let parent = gridApi.getRowNode(params.data.parentId)
 
@@ -919,7 +907,7 @@ let onItemInserted = async (params) => {
 }
 
 let onItemRemoved = async (params) => {
-    console.log('item-removed', params)
+    //console.log('item-removed', params)
 
     gridApi.applyServerSideTransaction({
         remove: [params.data],
@@ -928,7 +916,7 @@ let onItemRemoved = async (params) => {
 }
 
 let onDataSourceUpdate = async () => {
-    console.log('>>>> DS updated', dataSource.alias)
+    //console.log('DataSource updated', dataSource.alias)
 
     gridApi.refreshServerSide({
         purge: true
@@ -956,7 +944,7 @@ function selectionChanged() {
 }
 
 function onGridColumnsChanged() {
-    console.log('componentStateChanged')
+    //console.log('componentStateChanged')
     restoreCols()
 }
 

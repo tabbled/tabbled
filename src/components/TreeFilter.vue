@@ -76,7 +76,6 @@ const emit = defineEmits(['update:modelValue', 'change'])
 
 let tree = ref(null)
 let selected = ref(props.multiple ? [] : null)
-let isLoading = ref(false)
 let treeData = ref([])
 let dataSource: DataSourceInterface = null
 let dsService = useDataSourceService()
@@ -93,7 +92,6 @@ onMounted(async () => {
 });
 
 async function init() {
-    console.log('init')
     if (!props.fieldConfig) {
         return
     }
@@ -111,7 +109,6 @@ async function init() {
 }
 
 const load = async (node, resolve) => {
-    console.log('load', dataSource)
     if (!dataSource) {
         await init()
     }
@@ -128,24 +125,6 @@ const load = async (node, resolve) => {
         resolve(res.data)
     })
 }
-
-// async function getData() {
-//     if (!props.fieldConfig) {
-//         return
-//     }
-//
-//     isLoading.value = true;
-//
-//     let opt = {
-//         filter: [],
-//         take: 200
-//     }
-//
-//
-//     treeData.value = (await dataSource.getMany(opt)).data
-//
-//     isLoading.value = false;
-// }
 
 function checked(val, prop) {
     if (props.multiple) {

@@ -26,8 +26,6 @@ import {useStore} from "vuex";
 import {DataSourceType} from "./model/datasource";
 import {PageConfigInterface, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
-import {useDatabase} from "./services/database.service";
-import {useSyncService} from "./services/sync.service";
 import PageView from "./pages/PageView.vue";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
@@ -50,8 +48,6 @@ let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
 
 const dsService = useDataSourceService();
-const db = useDatabase();
-const syncService = useSyncService()
 const settings = useSettings()
 let dialogVisible = ref(false)
 let dialogOptions = ref()
@@ -62,21 +58,17 @@ let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
 store.subscribe(async (payload) => {
     if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
-        console.log('auth/userLoaded')
         await loadConfig()
     }
 
     if (payload.type === 'auth/loggedOut') {
         configLoadState.value = ConfigLoadState.NotLoaded
-        await db.close()
         await dsService.clear(DataSourceType.config)
         await dsService.clear(DataSourceType.data)
     }
 })
 
 onMounted(async () => {
-    console.log('App mounted')
-
     await settings.refresh();
     favicon.value = settings.favicon
 
@@ -104,7 +96,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-    console.log('App unmounted')
     window.removeEventListener('resize', handleResize);
     configLoadState.value = ConfigLoadState.NotLoaded
 })
@@ -120,15 +111,12 @@ function handleResize() {
 }
 
 async function loadConfig() {
-    console.log('loadConfig', configLoadState.value)
     if (configLoadState.value === ConfigLoadState.Loading)
         return
 
     configLoadState.value = ConfigLoadState.Loading
     try {
-        await db.open(store.getters["auth/account"], store.getters["auth/user"]);
         await dsService.registerConfig();
-        await syncService.sync(DataSourceType.config)
     } catch (e) {
         console.error(e)
     }

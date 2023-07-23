@@ -121,7 +121,9 @@ async function load() {
 async function save() {
     try {
         if (isNew.value) {
-            await datasource.insert(functionEntity.value.id, functionEntity.value)
+            let item = await datasource.insert(functionEntity.value.id, functionEntity.value)
+            await router.replace({params: {id: item.id}})
+            await load()
         } else {
             await datasource.updateById(functionEntity.value.id, functionEntity.value)
         }

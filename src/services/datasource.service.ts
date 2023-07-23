@@ -9,24 +9,30 @@ import {
     MenuConfigDataSource, PageConfigDataSource, ReportConfigDataSource
 } from "../model/datasource";
 
-import {useSyncService} from "./sync.service";
-import {useSocketClient} from "./socketio.service";
+import {ServerInterface, useSocketClient} from "./socketio.service";
 
-let syncService = useSyncService()
 let socketClient = useSocketClient()
 
 export class DataSourceService {
-    constructor() { }
+    constructor() {
+        this.server = useSocketClient()
+        this.pageDataSource = new PageConfigDataSource(this.server)
+        this.dsDataSource = new DataSourceConfigDataSource(this.server)
+        this.menuDataSource = new MenuConfigDataSource(this.server)
+        this.functionDataSource = new FunctionsConfigDataSource(this.server)
+        this.reportDataSource = new ReportConfigDataSource(this.server)
+    }
+    private readonly server: ServerInterface
 
     private dataSourceConfigs: Map<string, DataSourceConfigInterface> = new Map()
     private dataSources: Map<string, DataSourceInterface> = new Map()
     private configDataSources: Map<string, DataSourceInterface> = new Map()
+    pageDataSource = null
+    dsDataSource = null
+    menuDataSource = null
+    functionDataSource = null
+    reportDataSource = null
 
-    pageDataSource = new PageConfigDataSource(null)
-    dsDataSource = new DataSourceConfigDataSource(null)
-    menuDataSource = new MenuConfigDataSource(null)
-    functionDataSource = new FunctionsConfigDataSource(null)
-    reportDataSource = new ReportConfigDataSource(null)
 
     async getByAlias(alias: string) : Promise<DataSourceInterface> {
         if (this.dataSources.has(alias)) {
@@ -122,8 +128,6 @@ export class DataSourceService {
         this.addDataSource(this.menuDataSource);
         this.addDataSource(this.functionDataSource);
         this.addDataSource(this.reportDataSource)
-
-        syncService.setConfigDataSources(this.configDataSources)
     }
 }
 
