@@ -6,11 +6,11 @@
 </h1>
 
 <div align="center" width="100%">
-<img src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
+<img alt="" src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
 <a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /></a>
 </div>
 
-It's a low-code platform for building web application for enterprise, to manage internal processes of business.
+It's a low-code platform for building web application for enterprise, to manage internal processes of business like ERP, CRM, WMS, etc.
 
 
 ## ⭐ Features
@@ -29,7 +29,6 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Table editor
 - [x] Page designer
 - [x] View editor
-- [x] Store user data and config in IndexedDB
 - [x] DataSource setting page
 - [x] Menu setting page
 - [x] Table cell editor widgets

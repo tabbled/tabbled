@@ -126,12 +126,19 @@
 
     </item-list>
 
-    <div>
-        <el-button v-if="closeButton" @click="emit('close')" size="small">
-            {{$t('close')}}
-        </el-button>
-        <el-button type="primary" @click="apply()" size="small">
-            {{$t('apply')}}
+    <div style="display: flex; flex-direction: row; justify-content: space-between">
+        <div>
+            <el-button v-if="closeButton" @click="emit('close')" size="small">
+                {{$t('close')}}
+            </el-button>
+            <el-button type="primary" @click="apply()" size="small">
+                {{$t('apply')}}
+            </el-button>
+        </div>
+
+
+        <el-button @click="clear()" size="small">
+            {{$t('clear')}}
         </el-button>
     </div>
 </template>
@@ -213,6 +220,11 @@ function apply() {
 
     props.filters.setGroup(props.id, filters)
     emit('apply', filters.length)
+}
+
+function clear() {
+    _filters.value = []
+    apply()
 }
 
 async function insertFilter() {

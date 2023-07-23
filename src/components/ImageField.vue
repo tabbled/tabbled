@@ -1,6 +1,5 @@
 <template>
-
-    <el-upload  v-if="!fieldConfig.isMultiple"
+    <el-upload  v-if="fieldConfig && !fieldConfig.isMultiple"
                 :show-file-list="false"
                 class="avatar-uploader"
                :action="actionUrl"
@@ -33,7 +32,7 @@
         </el-icon>
 
     </el-upload>
-    <el-upload  v-else
+    <el-upload  v-else-if="fieldConfig"
                 class="avatar-uploader"
                 :action="actionUrl"
                 :on-success="uploaded"

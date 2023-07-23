@@ -1,4 +1,8 @@
 <template>
+    <el-input
+        v-if="!fieldConfig"
+        disabled
+    />
     <div v-if="fieldConfig && fieldConfig.isMultiple" style="width: 100%">
         <ItemList key-prop="alias"
                   title-prop="title"
