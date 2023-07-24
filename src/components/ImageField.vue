@@ -121,8 +121,15 @@ const handleError: UploadProps['onError'] = (res) => {
     ElMessage.error(JSON.parse(res.message).message)
 }
 
-const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
-    console.log(uploadFile, uploadFiles)
+const handleRemove: UploadProps['onRemove'] = (uploadFile) => {
+    for(let i in images.value) {
+        if ((uploadFile.response &&  images.value[i].name === uploadFile.response['filename']) ||
+            images.value[i].name === uploadFile.name)  {
+            images.value.splice(Number(i), 1)
+        }
+    }
+
+    change(images.value)
 }
 
 const handlePreview: UploadProps['onPreview'] = (file) => {
