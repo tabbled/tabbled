@@ -27,13 +27,15 @@
         <el-tree-select v-else-if="fieldConfig.type === 'link' && isTree"
                         :model-value="value"
                         style="width: 100%"
-                        :data="data"
                         :node-key="keyProp"
                         :props="treeProps"
                         show-checkbox
                         check-strictly
                         :multiple="fieldConfig.isMultiple"
                         @check="treeChanged"
+                        lazy
+                        :load="load"
+                        :cache-data="data"
         />
         <el-select v-else-if=" fieldConfig.type === 'enum'"
                    filterable
@@ -70,7 +72,7 @@
 <script setup lang="ts">
 import {FieldInterface} from "../model/field";
 import {onMounted, ref, watch} from "vue";
-import {DataSourceInterface} from "../model/datasource";
+import {DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import DialogView from "./DialogView.vue";
 import {ScreenSize} from "../model/page";
@@ -146,7 +148,12 @@ async function init() {
         }
 
         isTree.value = dataSource.isTree
-        await getData()
+        if (isTree.value) {
+            await getCacheData()
+        } else {
+            await getData()
+        }
+
         await getValue()
     }
 
@@ -173,6 +180,34 @@ function treeChanged(node, prop) {
     }
 }
 
+const getRouteToNode = (node) => {
+    if (!node.parent) {
+        return [];
+    }
+
+    return [
+        ...getRouteToNode(node.parent),
+        node.data.id,
+    ];
+}
+
+async function load(node, resolve) {
+    let opt = {
+        take: 50,
+        include: null,
+        route: getRouteToNode(node),
+        fields: [props.displayProp],
+        parentId: node.parent ? node.data.id : null,
+    }
+
+    if (value.value) {
+        opt.include = props.fieldConfig.isMultiple ? value.value : [value.value]
+    }
+
+    let data = await dataSource.getMany(opt)
+    resolve(data.data)
+}
+
 async function getData(query?: string) {
     isLoading.value = true;
 
@@ -197,6 +232,23 @@ function change(val: string) {
     value.value = val
     emit('update:modelValue', val)
     emit('change', val)
+}
+
+const getCacheData = async () => {
+    console.log('getCacheData', props)
+
+    if (!dataSource)
+        return
+
+    let opt:GetDataManyOptions = {
+        filter: [],
+        take: 20,
+        fields: [props.displayProp],
+        id: props.fieldConfig.isMultiple ? value.value : [value.value]
+    }
+
+    data.value = (await dataSource.getMany(opt)).data
+    return data.value
 }
 
 

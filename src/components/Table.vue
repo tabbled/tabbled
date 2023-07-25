@@ -447,7 +447,6 @@ async function add() {
         return;
     }
 
-
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
         return
@@ -480,15 +479,16 @@ async function addChild() {
         props.onClickAdd()
         return;
     }
-
+    console.log('insert')
     let selected = gridApi.getSelectedNodes()
-    if (!selected.length)
-        return;
 
     let item = await generateEntityWithDefault(dataSource.fields)
-    await dataSource.insert(item.id, item, selected[0].id)
 
-    selected[0].setExpanded(true)
+    await dataSource.insert(item.id, item, selected.length ? selected[0].id : null, getRouteToNode(selected[0]))
+
+
+    if (selected.length)
+        selected[0].setExpanded(true)
 }
 
 function edit() {
@@ -521,31 +521,32 @@ function remove() {
 
                 for (let i in selected) {
                     const data = selected[i]
-                    if (await dataSource.removeById(data.id)) {
-
-                        console.log(selected[i])
-
-                        if (isTree.value) {
-                            let route = getRouteToNode(selected[i])
-
-                            gridApi.refreshServerSide({
-                                route: route.slice(0, route.length - 1),
-                                purge: true
-                            })
-                        } else {
-                            gridApi.applyServerSideTransaction({
-                                remove: [data.id]
-                            })
-                        }
-
-                    }
+                    await dataSource.removeById(data.id, getRouteToNode(selected[i]))
+                    // if (await dataSource.removeById(data.id)) {
+                    //
+                    //     console.log(selected[i])
+                    //
+                    //     if (isTree.value) {
+                    //         let route = getRouteToNode(selected[i])
+                    //
+                    //         gridApi.refreshServerSide({
+                    //             route: route.slice(0, route.length - 1),
+                    //             purge: true
+                    //         })
+                    //     } else {
+                    //         gridApi.applyServerSideTransaction({
+                    //             remove: [data.id]
+                    //         })
+                    //     }
+                    //
+                    // }
                 }
             }
         })
 }
 
 function getRouteToNode(rowNode) {
-    if (!rowNode.parent) {
+    if (!rowNode || !rowNode.parent) {
         return [];
     }
 
@@ -877,8 +878,6 @@ function isServerSideGroup(item) {
 }
 
 let onItemUpdated = async (params) => {
-    //console.log('item-updated', params)
-
     gridApi.applyServerSideTransaction({
         update: [params.data],
         route: params.route
@@ -890,7 +889,9 @@ let onItemInserted = async (params) => {
 
     let parent = gridApi.getRowNode(params.data.parentId)
 
-    if (isTree.value && params.route.length && !parent.data.hasChildren) {
+    console.log(params)
+
+    if (isTree.value && params.route && params.route.length && !parent.data.hasChildren) {
         parent.data.hasChildren = true
 
         gridApi.applyServerSideTransaction({
@@ -907,11 +908,9 @@ let onItemInserted = async (params) => {
 }
 
 let onItemRemoved = async (params) => {
-    //console.log('item-removed', params)
-
     gridApi.applyServerSideTransaction({
         remove: [params.data],
-        route: params.route
+        route: params.route.slice(0, params.route.length - 1)
     })
 }
 

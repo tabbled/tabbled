@@ -75,7 +75,6 @@ const props = defineProps<{
 let imageUrl = ref(null)
 let previewImageUrl = ref(null)
 let actionUrl = ref("")
-let type: 'text' | 'textarea' = 'text'
 let dialogVisible = ref(false)
 let images = ref([])
 

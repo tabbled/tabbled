@@ -70,9 +70,9 @@ export interface DataSourceInterface extends EventEmitter {
     getById(id: string | number) : Promise<EntityInterface | undefined>
 
 
-    insert(id: string, value: any, parentId?: string): Promise<EntityInterface>
+    insert(id: string, value: any, parentId?: string, route?: string[]): Promise<EntityInterface>
     updateById(id: string, value: object): Promise<EntityInterface>
-    removeById(id: string): Promise<boolean>
+    removeById(id: string, route?: string[]): Promise<boolean>
 
     // Sync Service use this method when got data from server
     //setRemoteChanges?(item: DataItemInterface[]): Promise<boolean>
@@ -180,7 +180,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         })
     }
 
-    async insert(id: string, value: any, parentId?: string): Promise<EntityInterface> {
+    async insert(id: string, value: any, parentId?: string, route?: string[]): Promise<EntityInterface> {
 
         let dt = new Date().getMilliseconds()
         console.log(this.alias, " insert")
@@ -193,16 +193,17 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             alias: this.alias,
             id: id,
             parentId: this.isTree ? parentId : null,
-            value: value
+            value: value,
+            route: route
         })
         console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
 
         this.emit('item-inserted', {
-            data: value
+            data: value,
+            route: route
         })
+
         return res
-
-
     }
 
     async updateById(id: string, value: object): Promise<EntityInterface> {
@@ -220,7 +221,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     }
 
-    async removeById(id: string): Promise<boolean> {
+    async removeById(id: string, route?: string[]): Promise<boolean> {
         let dt = new Date().getMilliseconds()
         let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/removeById`, {
             alias: this.alias,
@@ -229,7 +230,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
 
         this.emit('item-removed', {
-            data: res.data
+            data: res.data,
+            route: route
         })
 
         return true
