@@ -20,7 +20,9 @@
                   :disabled="isDisabled"
                   @input="change"
                   :model-value="value"
-                  :type="type"/>
+                  :type="type"
+                  :autosize="autosize ? { minRows: 2, maxRows: 100} : false"
+        />
         <el-input-number v-if="fieldConfig.type === 'number'"
                          :disabled="isDisabled"
                          @input="change"
@@ -44,7 +46,8 @@ const props = defineProps<{
     modelValue?: any,
     field: string,
     fieldConfig: FieldConfigInterface,
-    context?:any
+    context?:any,
+    autosize?: boolean
 }>()
 
 let value = ref<string | Array<string>>()
