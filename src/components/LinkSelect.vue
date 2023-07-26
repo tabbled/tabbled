@@ -61,7 +61,8 @@
             <Icon icon="mdi:magnify" width="24"/>
         </el-button>
     </div>
-    <DialogView :screen-size="screenSize"
+    <DialogView v-if="fieldConfig && fieldConfig.config && fieldConfig.config.searchDialog"
+                :screen-size="screenSize"
                 v-model:visible="searchDialogVisible"
                 :options="{modal: true, page: fieldConfig && fieldConfig.config.searchDialog}"
                 @selected="change"

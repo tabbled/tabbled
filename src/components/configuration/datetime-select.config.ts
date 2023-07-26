@@ -19,7 +19,32 @@ export class Config implements ComponentInterface {
             title: "Format",
             alias: "format",
             type: "string"
-        }]
+        },
+        {
+            title: "Type",
+            alias: "type",
+            type: "enum",
+            values: [
+                {
+                    key: 'datetime',
+                    title: "Datetime"
+                },
+                {
+                    key: 'date',
+                    title: "Date"
+                },{
+                    key: 'month',
+                    title: "Month"
+                },{
+                    key: 'year',
+                    title: "Year"
+                },{
+                    key: 'week',
+                    title: "Week"
+                },
+            ]
+        },
+    ]
     defaultPosition = {
         rows: 1,
         cols: 6

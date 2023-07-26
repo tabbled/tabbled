@@ -2,11 +2,12 @@
     <el-date-picker
         v-model="value"
         style="width: 100%"
-        :type="fieldConfig ? fieldConfig.type : 'datetime'"
+        :type="type"
         placeholder="Select date and time"
         @change="change"
         :disabled="isDisabled"
         :format="format"
+
     />
 </template>
 
@@ -15,7 +16,6 @@ import {FieldConfigInterface} from "../model/field";
 import {onMounted, ref, watch} from "vue";
 import {DataSourceInterface} from "../model/datasource";
 
-let isLoading = ref(false)
 let source: DataSourceInterface = null
 let value = ref(null)
 let isDisabled = ref(true)
@@ -25,11 +25,13 @@ interface Props {
     field: string,
     fieldConfig: FieldConfigInterface,
     context?:any,
-    format?: string
+    format?: string,
+    type?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    format: ""
+    format: "",
+    type: 'datetime'
 })
 
 const emit = defineEmits(['change', 'update:modelValue'])
