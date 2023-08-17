@@ -178,10 +178,6 @@ socketClient.socket.on("disconnect", () => {
     isConnected.value = false;
 })
 
-socketClient.socket.on("login_needed", () => {
-    logout();
-})
-
 let sidebarMenu = ref<Array<MenuConfigInterface>>(null)
 
 function getMainViewWidth(): number {

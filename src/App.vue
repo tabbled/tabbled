@@ -11,9 +11,10 @@
         />
         <div>{{$t('loading')}}</div>
     </div>
-    <Main v-else :screen-size="screenSize" />
+    <Main v-else  :screen-size="screenSize" />
 
-    <DialogView  v-model:visible="dialogVisible"
+    <DialogView ref="dialogRef"
+                 v-model:visible="dialogVisible"
                  :screen-size="screenSize"
                  :options="dialogOptions"/>
 </template>
@@ -31,6 +32,7 @@ import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import DialogView from "./components/DialogView.vue";
+import {useSocketClient} from "./services/socketio.service";
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -47,10 +49,12 @@ const favicon = useFavicon()
 let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
 
+let socketClient = useSocketClient()
 const dsService = useDataSourceService();
 const settings = useSettings()
 let dialogVisible = ref(false)
 let dialogOptions = ref()
+let dialogRef = ref(null)
 
 const { t, locale } = useI18n();
 
@@ -101,9 +105,10 @@ onUnmounted(() => {
 })
 
 function openDialog(options) {
-    console.log(options)
     dialogOptions.value = options
     dialogVisible.value = true
+
+    return dialogRef
 }
 
 function handleResize() {
@@ -149,6 +154,11 @@ async function registerPages() {
 
     await router.replace(router.currentRoute.value.path)
 }
+
+socketClient.socket.on("login_needed", () => {
+    console.log('login_needed')
+    logout();
+})
 
 function addRoute(path: string, page: PageConfigInterface) {
     if (!path || !page)
