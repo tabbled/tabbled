@@ -133,12 +133,17 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile) => {
 
 const handlePreview: UploadProps['onPreview'] = (file) => {
     dialogVisible.value = true
-    previewImageUrl.value = file.url
+
+        previewImageUrl.value = file.response
+            ? `${actionUrl.value}/${file.response['filename']}/big`
+            : `${file.url}/big`
+
+
 }
 
 function preview() {
     dialogVisible.value = true
-    previewImageUrl.value = imageUrl.value
+    previewImageUrl.value = imageUrl.value  + '/big'
 }
 
 function remove() {
