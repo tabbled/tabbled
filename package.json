@@ -1,7 +1,7 @@
 {
   "name": "tabbled-web",
   "private": true,
-  "version": "0.4.2",
+  "version": "0.4.4",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -33,6 +33,7 @@
     "sass": "^1.56.1",
     "simple-code-editor": "^1.2.2",
     "socket.io-client": "^4.5.4",
+    "v-runtime-template": "^1.10.0",
     "vue": "^3.2.41",
     "vue-codemirror": "^6.1.1",
     "vue-i18n": "^9.2.2",

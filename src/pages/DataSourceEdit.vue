@@ -69,7 +69,7 @@
                 />
             </el-form-item>
 
-            <el-form-item :label="$t('isTree')" style="padding-left: 8px; width: 100px">
+            <el-form-item :label="$t('isTree')" style="padding-left: 8px;">
                 <CheckboxField field="isTree"
                                :field-config="getField('isTree')"
                                :model-value="getValue('isTree')"
@@ -84,7 +84,52 @@
                                @change="(val) => setValue('readonly', val)"
                 />
             </el-form-item>
+
+            <el-form-item :label="$t('isAggregator')" style="padding-left: 8px; width: 100px">
+                <CheckboxField field="isAggregator"
+                               :field-config="getField('isAggregator')"
+                               :model-value="getValue('isAggregator')"
+                               @change="(val) => setValue('isAggregator', val)"
+                />
+            </el-form-item>
         </div>
+
+        <div v-if="dataSourceEntity && dataSourceEntity.isAggregator" style="display: flex; flex-direction: row">
+            <el-form-item :label="$t('keyFields')" style="padding-left: 8px;">
+                <el-select
+                           :model-value="getValue('keyFields')"
+                           clearable
+                           @change="(val) => setValue('keyFields', val)"
+                           multiple
+                           style="width: 100%;"
+                >
+                    <el-option
+                        v-for="item in dataSourceEntity.fields"
+                        :key="item['alias']"
+                        :label="item['title']"
+                        :value="item['alias']"
+                    />
+                </el-select>
+            </el-form-item>
+
+            <el-form-item :label="$t('aggFields')" style="padding-left: 8px;">
+                <el-select
+                    :model-value="getValue('aggFields')"
+                    clearable
+                    @change="(val) => setValue('aggFields', val)"
+                    multiple
+                    style="width: 100%;"
+                >
+                    <el-option
+                        v-for="item in dataSourceEntity.fields"
+                        :key="item['alias']"
+                        :label="item['title']"
+                        :value="item['alias']"
+                    />
+                </el-select>
+            </el-form-item>
+        </div>
+
 
         <el-tabs v-model="activeTab" class="demo-tabs">
             <el-tab-pane :label="$t('fields')" name="fields">

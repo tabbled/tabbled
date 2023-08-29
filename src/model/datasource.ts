@@ -55,7 +55,9 @@ export interface DataSourceInterface extends EventEmitter {
     keyField: string,
     type: DataSourceType
     source: DataSourceSource
-
+    keyFields: string[] // for aggregation datasource
+    aggFields: string[] // for aggregation datasource
+    isAggregator: boolean
     /**
      * Get data with filters and pagination
      * @returns {EntityInterface[]} data from data source
@@ -137,6 +139,9 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     source: DataSourceSource
     isTree: boolean
     title: string
+    keyFields: string[] // for aggregation datasource
+    aggFields: string[] // for aggregation datasource
+    isAggregator: boolean
 
     async getMany(options: GetDataManyOptions = {}): Promise<GetManyResponse> {
 
@@ -298,6 +303,9 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     source: DataSourceSource = DataSourceSource.custom;
     type: DataSourceType = DataSourceType.data;
     context: any = {}
+    keyFields: string[] // for aggregation datasource
+    aggFields: string[] // for aggregation datasource
+    isAggregator: boolean
     model: any = null
     script: string = ""
     _emitHandler = this.emitHandler.bind(this)
@@ -431,6 +439,9 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     source: DataSourceSource.field;
     type: DataSourceType = DataSourceType.data;
     _data: EntityInterface[] = []
+    keyFields: string[] // for aggregation datasource
+    aggFields: string[] // for aggregation datasource
+    isAggregator: boolean
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
@@ -754,6 +765,24 @@ export class DataSourceConfigDataSource extends DataSource {
                     type: "bool",
                     required: false,
                     default: false
+                },{
+                    title: "Is aggregator",
+                    alias: "isAggregator",
+                    type: "bool",
+                    required: false,
+                    default: false
+                },{
+                    title: "Key fields",
+                    alias: "keyFields",
+                    type: "list",
+                    required: false,
+                    default: []
+                },{
+                    title: "Aggregation fields",
+                    alias: "aggFields",
+                    type: "list",
+                    required: false,
+                    default: []
                 },{
                     title: "Event handlers",
                     alias: "eventHandlers",

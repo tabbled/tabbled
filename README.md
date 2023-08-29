@@ -16,7 +16,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 ## ⭐ Features
 
 * Drag-and-drop Form Builder to configure user interface
-* Built-in data sources or connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
+* Built-in data sources and connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
 * Scripting - customize application anywhere with JavaScript
 * Functions - cloud functions to evaluating business logic
 * Permission - user access limitation for any data or element of interface
@@ -37,6 +37,7 @@ It's a low-code platform for building web application for enterprise, to manage 
   - [x] Internal DataSource
   - [x] Custom DataSource
   - [x] Field DataSource
+  - [x] Aggregation DataSource
   - [ ] REST API
   - [ ] Databases:
     - [ ] PostgresSQL

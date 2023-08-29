@@ -135,7 +135,7 @@ import {Filters} from "../model/filter";
 import {PageActionConfigInterface} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
-import {dayjs, ElMessageBox} from "element-plus";
+import {dayjs, ElMessage, ElMessageBox} from "element-plus";
 import {useI18n} from "vue-i18n";
 import EnumCellEditor from "./table/EnumCellEditor.vue";
 import LinkCellEditor from "./table/LinkCellEditor.vue";
@@ -281,6 +281,7 @@ class GridDataSource implements IServerSideDatasource {
             })
         }).catch(e => {
             console.error(e)
+            ElMessage.error(`Error while loading data in table: ${e.toString()}`)
             params.fail()
         })
 

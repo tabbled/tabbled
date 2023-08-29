@@ -151,6 +151,7 @@ const footer = ref(null)
 const mainHeader = ref(null);
 const rView = ref(null)
 
+
 let mainViewHeight = ref(0)
 let mainMenuHeight = ref(0)
 let mainViewWidth = ref(0)

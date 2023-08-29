@@ -62,6 +62,9 @@
     "close": "Close",
     "clear": "Clear",
     "select": "Select",
+    "isAggregator": "Aggregator",
+    "keyFields": "Key fields",
+    "aggFields": "Aggregation fields",
     "fieldConfig": {
         "editField": "Edit field",
         "editEventHandler": "Edit event handler",

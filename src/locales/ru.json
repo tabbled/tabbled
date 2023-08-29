@@ -49,6 +49,9 @@
     "close": "Закрыть",
     "clear": "Очистить",
     "select": "Выбрать",
+    "isAggregator": "Агрегатор",
+    "keyFields": "Ключевое поле",
+    "aggFields": "Поля накопления",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"
