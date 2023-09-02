@@ -687,7 +687,8 @@ async function init() {
 
                     let data = params.data
                     let value = params.newValue
-                    if (value === null) {
+
+                    if (!value) {
 
                         data[field.alias] = value
                         if (field.isMultiple) {
@@ -911,7 +912,7 @@ let onItemInserted = async (params) => {
 let onItemRemoved = async (params) => {
     gridApi.applyServerSideTransaction({
         remove: [params.data],
-        route: params.route.slice(0, params.route.length - 1)
+        route: isTree.value && params.route ? params.route.slice(0, params.route.length - 1) : null
     })
 }
 
