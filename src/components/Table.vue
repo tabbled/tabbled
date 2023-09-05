@@ -97,7 +97,7 @@
             @columnVisible="saveColumnState"
             @sortChanged="saveColumnState"
             @columnPinned="saveColumnState"
-            :treeData="true"
+            :treeData="false"
             :getDataPath="getDataPath"
             groupDisplayType='custom'
             :isServerSideGroup="isServerSideGroup"
@@ -112,7 +112,7 @@
             @cellDoubleClicked="cellDoubleClicked"
             @selectionChanged="selectionChanged"
             @componentStateChanged="onGridColumnsChanged"
-
+            :pinnedBottomRowData="totalData"
         />
     </div>
 </template>
@@ -143,6 +143,7 @@ import DatetimeCellEditor from "./table/DatetimeCellEditor.vue";
 import NumberCellEditor from "./table/NumberCellEditor.vue";
 import TreeCellEditor from "./table/TreeCellEditor.vue";
 import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
+import TotalsRenderer from "./table/TotalsRenderer.vue"
 
 import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
 import { ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
@@ -219,6 +220,7 @@ let isTree = ref(false)
 let _customActions = ref<PageActionsInterface[]>([])
 let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
+let totalData = ref([])
 
 watch(() => props.filters?.filters, () => gridApi.refreshServerSide({
     purge: true
@@ -275,6 +277,8 @@ class GridDataSource implements IServerSideDatasource {
         }
 
         dataSource.getMany(options).then(res => {
+            totalData.value = res.totals
+
             params.success({
                 rowData: res.data,
                 rowCount: res.count
@@ -310,7 +314,8 @@ let gridComponents = {
     numberCellEditor: NumberCellEditor,
     treeCellEditor: TreeCellEditor,
     multipleCellRenderer: MultipleCellRenderer,
-    customCellRenderer: CustomCellRenderer
+    customCellRenderer: CustomCellRenderer,
+    totalsRenderer: TotalsRenderer
 }
 
 
@@ -480,7 +485,6 @@ async function addChild() {
         props.onClickAdd()
         return;
     }
-    console.log('insert')
     let selected = gridApi.getSelectedNodes()
 
     let item = await generateEntityWithDefault(dataSource.fields)
@@ -523,24 +527,6 @@ function remove() {
                 for (let i in selected) {
                     const data = selected[i]
                     await dataSource.removeById(data.id, getRouteToNode(selected[i]))
-                    // if (await dataSource.removeById(data.id)) {
-                    //
-                    //     console.log(selected[i])
-                    //
-                    //     if (isTree.value) {
-                    //         let route = getRouteToNode(selected[i])
-                    //
-                    //         gridApi.refreshServerSide({
-                    //             route: route.slice(0, route.length - 1),
-                    //             purge: true
-                    //         })
-                    //     } else {
-                    //         gridApi.applyServerSideTransaction({
-                    //             remove: [data.id]
-                    //         })
-                    //     }
-                    //
-                    // }
                 }
             }
         })
@@ -615,6 +601,7 @@ async function init() {
             sortable: col.sortable,
             headerName: col.title,
             width: col.width,
+            minWidth: 60,
             resizable: true,
             editable: isEditable,
             cellDataType: field.type,
@@ -624,6 +611,18 @@ async function init() {
                 field: field,
                 context: props.context,
                 readonly: col.readonly,
+            },
+            cellRendererSelector: (params) =>{
+                if (params.node.rowPinned) {
+                    return {
+                        component: 'totalsRenderer',
+                        params: {
+                            total: col.total
+                        },
+                    };
+                } else {
+                    return undefined;
+                }
             }
         }
 
@@ -836,7 +835,8 @@ async function execAction(action: CompiledFunc, additionalContext?: object) {
 }
 
 function isEditable(params) {
-    if (dataSource.readonly ||
+    if (params.node.rowPinned ||
+        dataSource.readonly ||
         props.readonly ||
         params.colDef.cellEditorParams.readonly)
         return false

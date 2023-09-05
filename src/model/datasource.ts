@@ -25,6 +25,7 @@ export interface EntityInterface {
 
 export interface GetManyResponse {
     data: EntityInterface[],
+    totals: EntityInterface[],
     count: number
 }
 
@@ -155,6 +156,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
         return {
             data: data.items,
+            totals: data.totals,
             count: data.count
         }
 
@@ -395,7 +397,7 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
     async getMany(options: GetDataManyOptions): Promise<GetManyResponse> {
         if (!this.model || !(this.model.getMany instanceof Function))
-            return {data: [], count: 0};
+            return {data: [], count: 0, totals: []};
 
         return  _.cloneDeep(await this.model.getMany(options))
     }
@@ -482,7 +484,9 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     async getMany(options?: GetDataManyOptions): Promise<GetManyResponse> {
         return {
             data: _.cloneDeep(this._data),
-            count: this._data.length
+            count: this._data.length,
+            // TODO column aggregation implementation needed
+            totals: [],
         }
     }
 

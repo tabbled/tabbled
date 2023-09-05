@@ -8,7 +8,8 @@ export interface ColumnConfigInterface {
     sortable?: boolean,
     visible?: boolean,
     readonly?: boolean,
-    wordwrap?: boolean
+    wordwrap?: boolean,
+    total?: string
 }
 
 export const columnProperties:FieldConfigInterface[] = [
@@ -54,4 +55,35 @@ export const columnProperties:FieldConfigInterface[] = [
         alias: 'wordwrap',
         type: "bool",
         default: false
+    },
+    {
+        title: 'Total',
+        alias: 'total',
+        type: "enum",
+        default: 'none',
+        values: [{
+            key: 'none',
+            title: 'None'
+        },{
+            key: 'sum',
+            title: 'Sum'
+        },{
+            key: 'min',
+            title: 'Min'
+        },{
+            key: 'max',
+            title: 'Max'
+        },{
+            key: 'count',
+            title: 'Count'
+        },{
+            key: 'avg',
+            title: 'Avg'
+        },{
+            key: 'first',
+            title: 'First'
+        },{
+            key: 'last',
+            title: 'Last'
+        }]
     }]
