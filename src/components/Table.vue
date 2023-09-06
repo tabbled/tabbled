@@ -442,6 +442,7 @@ onUnmounted( () => {
     if (dataSource) {
         dataSource.removeListener('item-inserted', onItemInserted)
         dataSource.removeListener('item-updated', onItemUpdated)
+        dataSource.removeListener('totals-updated', onTotalsUpdated)
         dataSource.removeListener('item-removed', onItemRemoved)
         dataSource.removeListener('update', onDataSourceUpdate)
     }
@@ -589,6 +590,7 @@ async function init() {
     actions.value.onRemove = await compileAction(props.onRemove)
 
     dataSource.on('item-updated', onItemUpdated)
+    dataSource.on('totals-updated', onTotalsUpdated)
     dataSource.on('item-inserted', onItemInserted)
     dataSource.on('item-removed', onItemRemoved)
     dataSource.on('update', onDataSourceUpdate)
@@ -756,7 +758,6 @@ async function init() {
                         getValueFunc: field.getValueFunc(),
                         field: field
                     }
-
                 }
 
             } else {
@@ -886,12 +887,14 @@ let onItemUpdated = async (params) => {
     })
 }
 
+let onTotalsUpdated = async (params) => {
+    totalData.value = params.data
+}
+
 let onItemInserted = async (params) => {
     //console.log('item-inserted', params)
 
     let parent = gridApi.getRowNode(params.data.parentId)
-
-    console.log(params)
 
     if (isTree.value && params.route && params.route.length && !parent.data.hasChildren) {
         parent.data.hasChildren = true

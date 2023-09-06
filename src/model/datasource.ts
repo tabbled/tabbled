@@ -359,7 +359,9 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
             case 'update': this.emit('update', ...args); break;
             case 'item-inserted': this.emit('item-inserted', ...args);break;
             case 'item-updated': this.emit('item-updated', ...args);break;
+            case 'totals-updated': this.emit('totals-updated', ...args);break;
             case 'item-removed': this.emit('item-removed', ...args);break;
+
         }
     }
 
