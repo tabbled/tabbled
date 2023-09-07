@@ -97,7 +97,7 @@
             @columnVisible="saveColumnState"
             @sortChanged="saveColumnState"
             @columnPinned="saveColumnState"
-            :treeData="false"
+            :treeData="true"
             :getDataPath="getDataPath"
             groupDisplayType='custom'
             :isServerSideGroup="isServerSideGroup"
@@ -399,7 +399,6 @@ let dataTypeDefinitions = {
             if (!params.value)
                 return ''
 
-
             if (params.value && params.data[`__${field.alias}_title`]) {
                 return params.data[`__${field.alias}_title`]
             }
@@ -689,6 +688,8 @@ async function init() {
                     let data = params.data
                     let value = params.newValue
 
+                    console.log('VALUE', value)
+
                     if (!value) {
 
                         data[field.alias] = value
@@ -701,37 +702,11 @@ async function init() {
                         let id = field.isMultiple ? value : [value]
 
                         if (!id.length)
-                            return;
+                            return false;
 
-                        let displayProp = field.displayProp ? field.displayProp : 'name'
-
-                        datasource.getMany({
-                            id: id,
-                            fields: [displayProp]
-                        }).then(res => {
-
-                            if (field.isMultiple) {
-                                data[`__${field.alias}_entities`] = res.data
-                            } else {
-                                data[`__${field.alias}_title`] = res.data[0][displayProp]
-                            }
-
-                            data[field.alias] = value
-                            params.node.setData(data)
-                            dataSource.setValue(data.id, field.alias, value)
-
-                            console.log(data)
-
-                        }).catch(e => {
-                            console.error(e)
-
-                            //return value to old
-                            data[field.alias] = params.oldValue
-                            params.node.setData(data)
-                        })
+                        data[field.alias] = value
                     }
 
-                    data[field.alias] = null //this for that grid will recofnize changes after loading new data from server
                     return true
                 }
 
@@ -881,6 +856,7 @@ function isServerSideGroup(item) {
 }
 
 let onItemUpdated = async (params) => {
+    console.log(params)
     gridApi.applyServerSideTransaction({
         update: [params.data],
         route: params.route
