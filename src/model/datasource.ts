@@ -85,6 +85,8 @@ export interface DataSourceInterface extends EventEmitter {
     setData?(items: EntityInterface[]): Promise<void>
     setValue(id: string, field: string, value: any): Promise<void>
 
+    setVariable?(alias: string, value: any)
+
     getFieldByAlias(alias: string): FieldInterface | undefined
 
 }
@@ -430,6 +432,13 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
             return;
 
         await this.model.setValue(id, field, value)
+    }
+
+    setVariable(alias: string, value: any) {
+        if (!this.model  || !(this.model.setVariable instanceof Function))
+            return;
+
+        this.model.setVariable(alias, value)
     }
 }
 
