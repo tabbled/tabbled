@@ -120,13 +120,22 @@ export default function (store: any, settings:Settings) {
         window.document.title = `${to.meta && to.meta.title ? to.meta.title : ''}${ settings.title ? ' | ' + settings.title : '' }`;
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
-                next();
-                return
-            }
-            next('/login')
+
+                if (!canActivate(to))
+                    next('/404')
+                else next();
+            } else
+                next('/login')
         } else
             next()
     });
+
+    function canActivate(to) {
+        console.log(to)
+        return !(to.path === '/configuration' && !store.getters['auth/account'].permissions.admin);
+
+
+    }
 
     return router
 }

@@ -65,7 +65,7 @@
 
                 <div class="footer " ref="footer">
 
-                    <div style="width: 100%;">
+                    <div v-if="isAdmin" style="width: 100%;">
                         <el-button text @click="router.push('/configuration')" :style="{width: isSideBarCollapsed ? '64px' : '100%', 'justify-content': 'left'}" size="large">
                             <Icon style="padding: 4px" icon="ic:outline-display-settings" width="20"/>
                             <div v-if="!isSideBarCollapsed" style="text-align: start;">{{$t('configuration')}}</div>
@@ -157,7 +157,7 @@ let mainMenuHeight = ref(0)
 let mainViewWidth = ref(0)
 let mainSideBarWidth = ref(250)
 let settings = useSettings()
-
+let isAdmin = ref(false)
 
 let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
@@ -165,6 +165,7 @@ const store = useStore();
 const router = useRouter();
 const route = useRoute()
 const dsService = useDataSourceService();
+
 
 const pageHeader = usePageHeader()
 
@@ -205,6 +206,8 @@ onMounted(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
     loadMenu();
+
+    isAdmin.value = store.getters['auth/account'] && store.getters['auth/account'].permissions.admin
 })
 
 onUnmounted(() => {
