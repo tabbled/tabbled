@@ -131,10 +131,7 @@ export default function (store: any, settings:Settings) {
     });
 
     function canActivate(to) {
-        console.log(to)
         return !(to.path === '/configuration' && !store.getters['auth/account'].permissions.admin);
-
-
     }
 
     return router
