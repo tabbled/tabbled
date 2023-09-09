@@ -13,8 +13,9 @@ export class Settings {
     async refresh() {
         let res = await socket.emit('getSettings')
 
-        this.favicon = res.favicon
-        this.title = res.title
+
+        this.favicon = res.favicon ? res.favicon : '/favicon.png'
+        this.title = res.title ? res.title : 'Tabbled'
         this.version = _package.version
         this.serverVersion = res.version
 
