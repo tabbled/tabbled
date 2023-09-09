@@ -14,6 +14,10 @@ export class Config implements ComponentInterface {
         title: "Title",
         alias: "title",
         type: "string"
+    },{
+        title: "Disabled",
+        alias: "disabled",
+        type: "bool"
     }]
     defaultPosition = {
         rows: 1,

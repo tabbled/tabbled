@@ -17,18 +17,20 @@
     </div>
     <div v-else-if="fieldConfig" style="width: 100%">
         <el-input v-if="fieldConfig.type === 'string' || fieldConfig.type === 'text'"
-                  :disabled="isDisabled"
+                  :disabled="disabled || isDisabled"
                   @input="change"
                   :model-value="value"
                   :type="type"
+                  :readonly="!!readonly"
                   :autosize="autosize ? { minRows: 2, maxRows: 100} : false"
         />
         <el-input-number v-if="fieldConfig.type === 'number'"
-                         :disabled="isDisabled"
+                         :disabled="disabled || isDisabled"
                          @input="change"
                          :controls="false"
                          :precision="fieldConfig.precision ? fieldConfig.precision : 0"
                          :model-value="value"
+                         :readonly="!!readonly"
                          style="width: 100%"
                          type="type"/>
     </div>
@@ -47,7 +49,9 @@ const props = defineProps<{
     field: string,
     fieldConfig: FieldConfigInterface,
     context?:any,
-    autosize?: boolean
+    autosize?: boolean,
+    disabled?: boolean,
+    readonly?: boolean
 }>()
 
 let value = ref<string | Array<string>>()

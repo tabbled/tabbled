@@ -1,12 +1,12 @@
 <template>
     <div style="display: flex; flex-direction: row; width: 100%; padding-top: 1px">
         <el-select v-if="!fieldConfig"
-                   :disabled="isDisabled"
+                   disabled
         />
         <el-select v-else-if="fieldConfig.type === 'link' && !isTree"
                    filterable
                    :model-value="value"
-                   :disabled="isDisabled"
+                   :disabled="disabled || isDisabled"
                    remote
                    clearable
                    remote-show-suffix
@@ -26,6 +26,7 @@
 
         <el-tree-select v-else-if="fieldConfig.type === 'link' && isTree"
                         :model-value="value"
+                        :disabled="disabled || isDisabled"
                         style="width: 100%"
                         :node-key="keyProp"
                         :props="treeProps"
@@ -40,7 +41,7 @@
         <el-select v-else-if=" fieldConfig.type === 'enum'"
                    filterable
                    :model-value="value"
-                   :disabled="isDisabled"
+                   :disabled="disabled || isDisabled"
                    clearable
                    @change="(val) => change(val)"
                    style="width: 100%"
@@ -99,7 +100,8 @@ interface Props {
     context?:any,
     title?:string,
     id?: string,
-    screenSize?: ScreenSize
+    screenSize?: ScreenSize,
+    disabled?: boolean
 }
 
 
@@ -140,6 +142,8 @@ async function init() {
         return
     }
 
+    isDisabled.value = false
+
     if (props.fieldConfig.type == 'link') {
         dataSource = await dsService.getByAlias(props.fieldConfig.datasource)
 
@@ -158,7 +162,6 @@ async function init() {
         await getValue()
     }
 
-    isDisabled.value = false
 }
 
 async function getValue() {

@@ -15,6 +15,14 @@ export class Config implements ComponentInterface {
         alias: "title",
         type: "string"
     },{
+        title: "Disabled",
+        alias: "disabled",
+        type: "bool"
+    },{
+        title: "Readonly",
+        alias: "readonly",
+        type: "bool"
+    },{
         title: "Autosize",
         alias: "autosize",
         type: "bool"
