@@ -11,7 +11,8 @@ export default defineConfig({
     })],
     resolve: {
         alias: {
-            buffer: 'buffer/'
+            buffer: 'buffer/',
+            vue: 'vue/dist/vue.esm-bundler.js'
         }
-    }
+    },
 })

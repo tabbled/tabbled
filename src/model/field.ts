@@ -192,8 +192,8 @@ export async function generateEntityWithDefault(fields: FieldConfigInterface[]):
 
         switch (f.type) {
             case "bool": item[f.alias] = f.default ? f.default : false; break;
-            case "string":
             case "number": item[f.alias] = f.default ? Number(f.default) : null; break;
+            case "string":
             case "enum":
             case "text": item[f.alias] = f.default ? f.default : ""; break;
             case "list":
