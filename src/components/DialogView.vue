@@ -42,7 +42,7 @@
 import {ElementInterface, PositionElementInterface, ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {ref, watch} from "vue";
-import {DataSourceInterface, EntityInterface} from "../model/datasource";
+import {CustomDataSource, DataSourceInterface, EntityInterface} from "../model/datasource";
 import _ from "lodash";
 import {useComponentService} from "../services/component.service";
 import {Filters, useFilters} from "../model/filter";
@@ -116,7 +116,31 @@ async function init() {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
             isNew.value = true
         }
+
+        console.log('isNew', isNew.value, 'id', id)
+        console.log('editEntity', editEntity.value)
+
+        if (editDataSource) {
+            for(let i in editDataSource.fields) {
+                let f = editDataSource.fields[i]
+                if (f.type === 'table') {
+                    let ds = await dsService.getByAlias(f.datasource)
+                    if (!ds) {
+                        console.warn(`DataSource ${f.datasource} for field ${f.alias} not found`)
+                        continue
+                    }
+
+                    if (ds instanceof CustomDataSource)
+                        ds.setContext(scriptContext.value)
+
+                    await ds.setData(editEntity.value[f.alias])
+
+                }
+            }
+        }
     }
+
+
 
     pageConfig.value.elements.forEach(element => {
         let el:ElementInterface = {
@@ -146,7 +170,6 @@ async function init() {
         }
 
         if (elProps.properties)
-
             elements.value.push(el)
     })
 }
@@ -191,7 +214,7 @@ function getField(el:ElementInterface) {
 }
 
 function getValue(el: ElementInterface) {
-    //console.log('getValue', el.field, editEntity.value[el.field])
+    console.log('getValue', el.field, editEntity.value[el.field])
     if (editEntity.value)
         return editEntity.value[el.field]
 
