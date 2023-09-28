@@ -172,7 +172,7 @@ interface Props {
     columns: ColumnConfigInterface[],
     readonly ?: boolean,
     actionButtonsVisible?: boolean,
-    context: any,
+    context?: any,
     onRowClick?: EventHandlerConfigInterface,
     onRowDoubleClick?: EventHandlerConfigInterface,
     onEdit?: EventHandlerConfigInterface,
@@ -303,7 +303,7 @@ function getHeight() {
 
 
 function getDataPath(data) {
-    console.log('getDataPath',data)
+    //console.log('getDataPath',data)
     return [data.id];
 }
 
@@ -550,7 +550,6 @@ function searchChange(e) {
 }
 
 async function onGridReady(params) {
-    //console.log('onGridReady')
     gridApi = params.api;
     gridColumnApi = params.columnApi
     gridApi.setServerSideDatasource(new GridDataSource())
@@ -558,8 +557,16 @@ async function onGridReady(params) {
     await init()
 }
 
-function saveColumnState() {
-    localStorage.setItem(`${props.id}_columns_state`, JSON.stringify(gridColumnApi.getColumnState()))
+function saveColumnState(e) {
+    let sources = [
+        "uiColumnMoved",
+        "uiColumnSorted",
+        "uiColumnResized",
+        "contextMenu",
+        "toolPanelUi"
+    ]
+    if (sources.includes(e.source))
+        localStorage.setItem(`${props.id}_columns_state`, JSON.stringify(gridColumnApi.getColumnState()))
 }
 
 
@@ -856,7 +863,6 @@ function isServerSideGroup(item) {
 }
 
 let onItemUpdated = async (params) => {
-    console.log(params)
     gridApi.applyServerSideTransaction({
         update: [params.data],
         route: params.route
