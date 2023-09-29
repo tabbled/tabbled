@@ -126,7 +126,6 @@ onMounted(async () => {
 
 watch(() => props.modelValue,
     async () => {
-        //await init()
         await getValue()
     })
 
@@ -239,7 +238,7 @@ function change(val: string) {
 }
 
 const getCacheData = async () => {
-    console.log('getCacheData', props)
+    //console.log('getCacheData', props, value.value)
 
     if (!dataSource)
         return
@@ -248,7 +247,7 @@ const getCacheData = async () => {
         filter: [],
         take: 20,
         fields: [props.displayProp],
-        id: props.fieldConfig.isMultiple ? value.value : [value.value]
+        id: value.value ?  (props.fieldConfig.isMultiple ? value.value : [value.value]) : null
     }
 
     data.value = (await dataSource.getMany(opt)).data
