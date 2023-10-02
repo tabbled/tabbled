@@ -222,9 +222,12 @@ let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
 let totalData = ref([])
 
-watch(() => props.filters?.filters, () => gridApi.refreshServerSide({
-    purge: true
-}))
+watch(() => props.filters?.filters, () => {
+    gridApi.refreshServerSide({
+        purge: true
+    })
+    console.log('><<<')
+} )
 
 watch(() => props.datasource, async () => {
     await init()
@@ -337,6 +340,7 @@ let dataTypeDefinitions = {
             return params.newValue === null ? null : Number(params.newValue)
         },
         valueFormatter: params => {
+            console.log(params)
             let field = dataSource.getFieldByAlias(params.colDef.field)
             if (params.value === undefined || params.value === null || params.value === "")
                 return "";
@@ -554,6 +558,7 @@ async function onGridReady(params) {
     gridColumnApi = params.columnApi
     gridApi.setServerSideDatasource(new GridDataSource())
 
+    console.log('onGridReady')
     await init()
 }
 
@@ -571,7 +576,21 @@ function saveColumnState(e) {
 
 
 async function init() {
-    let cols = props.columns || []
+    let item = localStorage.getItem(`${props.id}_columns_state`)
+    let state:[] = item ? JSON.parse(item) : null
+    let stateByField:Map<string, ColumnConfigInterface> = new Map()
+    state?.forEach(item => {
+        stateByField.set(item['colId'], item)
+    })
+
+    let cols = state ? state.map(item => item['colId']) : props.columns.map(item => item.field)
+    let columnByField:Map<string, ColumnConfigInterface> = new Map()
+
+    props.columns.forEach(col => columnByField.set(col.field, col))
+
+
+
+
     columnDefs.value = []
 
     if (props.datasource) {
@@ -601,14 +620,23 @@ async function init() {
     dataSource.on('item-removed', onItemRemoved)
     dataSource.on('update', onDataSourceUpdate)
 
+
+
     for(let i in cols) {
-        let col = cols[i]
+        let col = columnByField.get(cols[i])
+        let st = stateByField.get(cols[i])
         let field = dataSource.getFieldByAlias(col.field)
+
+        if (!field) {
+            console.warn('Field for table not found', col.field)
+            continue
+        }
+
         let colDef: ColDef = {
             field: col.field,
             sortable: col.sortable,
             headerName: col.title,
-            width: col.width,
+            width: st ? st.width : col.width,
             minWidth: 60,
             resizable: true,
             editable: isEditable,
@@ -659,7 +687,7 @@ async function init() {
             case "number":
                 colDef.cellEditor = 'numberCellEditor';
                 colDef.valueSetter = params => {
-                    params.data[field.alias] = params.newValue ? Number(params.newValue) : null
+                    params.data[field.alias] = params.newValue !== undefined && params.newValue !== null ? Number(params.newValue) : null
                     return true
                 }
                 break;
@@ -774,16 +802,6 @@ async function init() {
             //console.error(`Compilation error in script for action "${action.title}"`)
             //console.error(e)
         }
-    }
-}
-
-function restoreCols() {
-    let state = localStorage.getItem(`${props.id}_columns_state`)
-    if (state) {
-        gridColumnApi.applyColumnState({
-            state: JSON.parse(state),
-            applyOrder: true,
-        })
     }
 }
 
@@ -929,9 +947,9 @@ function selectionChanged() {
 
 }
 
-function onGridColumnsChanged() {
-    //console.log('componentStateChanged')
-    restoreCols()
+function onGridColumnsChanged(e) {
+    console.log('componentStateChanged', e)
+    //restoreCols()
 }
 
 </script>

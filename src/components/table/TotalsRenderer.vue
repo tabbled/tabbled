@@ -14,7 +14,7 @@ export default defineComponent({
         const field = props.params.field
         const totalFunc = props.params.total
 
-        if (!props.params.value)
+        if (props.params.value === null || props.params.value === undefined)
             return
 
         if (totalFunc && totalFunc !== 'none') {
