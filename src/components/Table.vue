@@ -186,7 +186,8 @@ interface Props {
     fillHeight?: boolean,
     showCount?: boolean,
     filtersVisible?: boolean,
-    customActions?: PageActionConfigInterface[]
+    customActions?: PageActionConfigInterface[],
+    persistingColumnState?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -195,6 +196,7 @@ const props = withDefaults(defineProps<Props>(), {
     fillHeight: false,
     showCount: false,
     filtersVisible: true,
+    persistingColumnState: true,
     filters: () => {
         return new Filters(null)
     }
@@ -226,7 +228,6 @@ watch(() => props.filters?.filters, () => {
     gridApi.refreshServerSide({
         purge: true
     })
-    console.log('><<<')
 } )
 
 watch(() => props.datasource, async () => {
@@ -236,7 +237,15 @@ watch(() => props.datasource, async () => {
     })
 })
 
+watch(() => props.columns, async () => {
+    await init()
+    gridApi.refreshServerSide({
+        purge: true
+    })
+}, {deep: true})
+
 onMounted(() => {
+    console.log(columnDefs.value, props.columns)
 })
 
 class GridDataSource implements IServerSideDatasource {
@@ -577,7 +586,7 @@ function saveColumnState(e) {
 
 async function init() {
     let item = localStorage.getItem(`${props.id}_columns_state`)
-    let state:[] = item ? JSON.parse(item) : null
+    let state:[] = item && props.persistingColumnState ? JSON.parse(item) : null
     let stateByField:Map<string, ColumnConfigInterface> = new Map()
     state?.forEach(item => {
         stateByField.set(item['colId'], item)
@@ -588,10 +597,9 @@ async function init() {
 
     props.columns.forEach(col => columnByField.set(col.field, col))
 
-
-
-
     columnDefs.value = []
+
+    console.log(props.columns, state)
 
     if (props.datasource) {
         dataSource = await dsService.getByAlias(props.datasource)

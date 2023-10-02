@@ -198,8 +198,6 @@ function getValue(el: ElementInterface) {
 }
 
 async function setValue(el:ElementInterface, value: any) {
-    //console.log('setValue', el, value)
-
     if (isEditPage.value) {
         if (!editEntity.value)
             return false
