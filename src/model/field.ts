@@ -108,12 +108,22 @@ export class Field implements FieldInterface {
         this.default = config.default
         this.isTree = config.isTree
         this.config = config
+
+        if (this.config.setValue && !this._setValueFunc) {
+            try {
+                this._setValueFunc = compileScript(this.config.setValue, 'ctx')
+            } catch (e) {
+                this._setValueFunc = null
+                console.error(`Error while compiling field ${this.alias} function setValue`)
+                console.error(e)
+            }
+        }
+
     }
 
-    private _getValueFunc: CompiledFunc = null
-    private _setValueFunc: CompiledFunc = null
-    private _getListFunc: CompiledFunc = null
-    private _getReadonlyFunc: CompiledFunc = null
+    readonly _getValueFunc: CompiledFunc = null
+    readonly _setValueFunc: CompiledFunc = null
+    readonly _getReadonlyFunc: CompiledFunc = null
 
 
     alias: string;
@@ -130,62 +140,51 @@ export class Field implements FieldInterface {
     config: FieldConfigInterface
 
     getValueFunc(): CompiledFunc | undefined {
-        if (this.config.getValue && !this._getValueFunc) {
+
+        if (this.config.getValue) {
             try {
-                this._getValueFunc = compileScript(this.config.getValue, 'ctx')
+                return compileScript(this.config.getValue, 'ctx')
             } catch (e) {
-                this._getValueFunc = null
                 console.error(`Error while compile field ${this.alias} function getValue`)
                 console.error(e)
             }
         }
-
-        return this._getValueFunc
+        return undefined
     }
 
     setValueFunc(): CompiledFunc | undefined {
-        if (this.config.setValue && !this._setValueFunc) {
-            try {
-                this._setValueFunc = compileScript(this.config.setValue, 'ctx')
-            } catch (e) {
-                this._setValueFunc = null
-                console.error(`Error while compiling field ${this.alias} function setValue`)
-                console.error(e)
-            }
-        }
+
 
         return this._setValueFunc
     }
     getListFunc() : CompiledFunc | undefined {
-        if (this.config.getListValues && !this._getListFunc) {
+        if (this.config.getListValues) {
             try {
-                this._getListFunc = compileScript(this.config.getListValues, 'ctx')
+                return compileScript(this.config.getListValues, 'ctx')
             } catch (e) {
-                this._getListFunc = null
                 console.error(`Error while compile field ${this.alias} function getListValues`)
                 console.error(e)
             }
         }
-
-        return this._getListFunc
+        return undefined
     }
     getReadonlyFunc() : CompiledFunc | undefined {
-        if (this.config.getReadonly && !this._getReadonlyFunc) {
+
+        if (this.config.getReadonly) {
             try {
-                this._getReadonlyFunc = compileScript(this.config.getReadonly, 'ctx')
+                return compileScript(this.config.getReadonly, 'ctx')
             } catch (e) {
-                this._getReadonlyFunc = null
                 console.error(`Error while compile field ${this.alias} function getReadonly`)
                 console.error(e)
             }
         }
-        return this._getReadonlyFunc
+        return undefined
     }
 }
 
 export async function generateEntityWithDefault(fields: FieldConfigInterface[]): Promise<EntityInterface> {
     let item = {
-        id: (await flakeId.generateId()).toString()
+        id: flakeId.generateId().toString()
     }
     for (let i in fields) {
         const f = fields[i]

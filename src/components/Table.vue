@@ -111,8 +111,8 @@
             @cellClicked="cellClicked"
             @cellDoubleClicked="cellDoubleClicked"
             @selectionChanged="selectionChanged"
-            @componentStateChanged="onGridColumnsChanged"
             :pinnedBottomRowData="totalData"
+            :context="context_"
         />
     </div>
 </template>
@@ -154,6 +154,7 @@ import {useDebounceFn, useElementBounding} from "@vueuse/core";
 import {PageActionsInterface} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import CustomCellRenderer from "./table/CustomCellRenderer.vue";
+import _ from "lodash";
 
 LicenseManager.setLicenseKey("abc")
 
@@ -223,6 +224,8 @@ let _customActions = ref<PageActionsInterface[]>([])
 let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
 let totalData = ref([])
+let context_ = {
+}
 
 watch(() => props.filters?.filters, () => {
     gridApi.refreshServerSide({
@@ -244,8 +247,7 @@ watch(() => props.columns, async () => {
     })
 }, {deep: true})
 
-onMounted(() => {
-    console.log(columnDefs.value, props.columns)
+onMounted(async () => {
 })
 
 class GridDataSource implements IServerSideDatasource {
@@ -349,7 +351,6 @@ let dataTypeDefinitions = {
             return params.newValue === null ? null : Number(params.newValue)
         },
         valueFormatter: params => {
-            console.log(params)
             let field = dataSource.getFieldByAlias(params.colDef.field)
             if (params.value === undefined || params.value === null || params.value === "")
                 return "";
@@ -568,7 +569,17 @@ async function onGridReady(params) {
     gridApi.setServerSideDatasource(new GridDataSource())
 
     console.log('onGridReady')
+
+    //Rebuild the context for passing it to the ag-grid for columns
+    context_ = {
+        item: props.context.item,
+        page: props.context.page,
+        //pages: props.context.pages, // this calls a max stack overflow in ag grid
+        openDialog: props.context.openDialog
+    }
+
     await init()
+    restoreCols()
 }
 
 function saveColumnState(e) {
@@ -583,23 +594,32 @@ function saveColumnState(e) {
         localStorage.setItem(`${props.id}_columns_state`, JSON.stringify(gridColumnApi.getColumnState()))
 }
 
+function restoreCols() {
+    let state = localStorage.getItem(`${props.id}_columns_state`)
+    if (state) {
+        gridColumnApi.applyColumnState({
+            state: JSON.parse(state),
+            applyOrder: true,
+        })
+    }
+}
+
 
 async function init() {
-    let item = localStorage.getItem(`${props.id}_columns_state`)
-    let state:[] = item && props.persistingColumnState ? JSON.parse(item) : null
-    let stateByField:Map<string, ColumnConfigInterface> = new Map()
-    state?.forEach(item => {
-        stateByField.set(item['colId'], item)
-    })
+    // let item = localStorage.getItem(`${props.id}_columns_state`)
+    // let state:[] = item && props.persistingColumnState ? JSON.parse(item) : null
+    // let stateByField:Map<string, ColumnConfigInterface> = new Map()
+    // state?.forEach(item => {
+    //     stateByField.set(item['colId'], item)
+    // })
+    //
+    // let cols = state ? state.map(item => item['colId']) : props.columns.map(item => item.field)
+    // let columnByField:Map<string, ColumnConfigInterface> = new Map()
+    //
+    // props.columns.forEach(col => columnByField.set(col.field, col))
 
-    let cols = state ? state.map(item => item['colId']) : props.columns.map(item => item.field)
-    let columnByField:Map<string, ColumnConfigInterface> = new Map()
-
-    props.columns.forEach(col => columnByField.set(col.field, col))
-
+    let cols = props.columns || []
     columnDefs.value = []
-
-    console.log(props.columns, state)
 
     if (props.datasource) {
         dataSource = await dsService.getByAlias(props.datasource)
@@ -629,10 +649,8 @@ async function init() {
     dataSource.on('update', onDataSourceUpdate)
 
 
-
     for(let i in cols) {
-        let col = columnByField.get(cols[i])
-        let st = stateByField.get(cols[i])
+        let col = cols[i]
         let field = dataSource.getFieldByAlias(col.field)
 
         if (!field) {
@@ -644,7 +662,7 @@ async function init() {
             field: col.field,
             sortable: col.sortable,
             headerName: col.title,
-            width: st ? st.width : col.width,
+            width: col.width,
             minWidth: 60,
             resizable: true,
             editable: isEditable,
@@ -653,10 +671,9 @@ async function init() {
             autoHeight: true,
             cellEditorParams: {
                 field: field,
-                context: props.context,
                 readonly: col.readonly,
             },
-            cellRendererSelector: (params) =>{
+            cellRendererSelector: (params) => {
                 if (params.node.rowPinned) {
                     return {
                         component: 'totalsRenderer',
@@ -684,12 +701,11 @@ async function init() {
         if (field.config.getValue) {
             colDef.cellRenderer = 'customCellRenderer'
             colDef.cellRendererParams = {
-                getValueFunc: field.getValueFunc()
+                getValueFunc: compileScript(field.config.getValue, 'ctx')
             }
         }
 
         colDef.cellRendererParams.field = field
-        colDef.cellRendererParams.context = props.context
 
         switch (field.type) {
             case "number":
@@ -717,7 +733,8 @@ async function init() {
 
                 let datasource = await dsService.getByAlias(field.datasource)
 
-                colDef.cellEditorParams.dataSource = datasource
+                colDef.cellEditorParams.dataSource = dsService.getByAlias(field.datasource)
+                colDef.cellEditorParams.getListFunc =  compileScript(_.cloneDeep(field.config.getListValues), 'ctx')
 
                 colDef.valueSetter = params => {
                     if (params.oldValue === params.newValue)
@@ -730,8 +747,6 @@ async function init() {
 
                     let data = params.data
                     let value = params.newValue
-
-                    console.log('VALUE', value)
 
                     if (!value) {
 
@@ -765,7 +780,6 @@ async function init() {
                 colDef.showRowGroup = true
                 colDef.cellRendererParams = {
                     checkbox: true,
-                    context: props.context,
                     "suppressDoubleClickExpand": true,
                     "suppressEnterExpand": true
                 }
@@ -889,6 +903,7 @@ function isServerSideGroup(item) {
 }
 
 let onItemUpdated = async (params) => {
+    //console.log('onItemUpdated', params)
     gridApi.applyServerSideTransaction({
         update: [params.data],
         route: params.route
@@ -896,6 +911,7 @@ let onItemUpdated = async (params) => {
 }
 
 let onTotalsUpdated = async (params) => {
+    //console.log('onTotalsUpdated', params)
     totalData.value = params.data
 }
 
@@ -921,6 +937,7 @@ let onItemInserted = async (params) => {
 }
 
 let onItemRemoved = async (params) => {
+    //console.log('onItemRemoved', params)
     gridApi.applyServerSideTransaction({
         remove: [params.data],
         route: isTree.value && params.route ? params.route.slice(0, params.route.length - 1) : null
@@ -952,12 +969,6 @@ function cellDoubleClicked(params) {
 
 function selectionChanged() {
     emit('update:currentId', gridApi.getSelectedRows()[0]?.id)
-
-}
-
-function onGridColumnsChanged(e) {
-    console.log('componentStateChanged', e)
-    //restoreCols()
 }
 
 </script>

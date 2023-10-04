@@ -3,10 +3,10 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from "vue";
+import {ref} from "vue";
 
 
-export default defineComponent({
+export default {
     name: "TotalsRenderer",
     props: ['params'],
     setup(props) {
@@ -28,7 +28,7 @@ export default defineComponent({
     mounted() {
 
     }
-})
+}
 
 </script>
 

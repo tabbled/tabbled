@@ -12,11 +12,10 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from "vue";
-import _ from "lodash";
+import {ref} from "vue";
 
 
-export default defineComponent({
+export default {
     name: "CustomCellRenderer",
     props: ['params'],
     setup(props) {
@@ -24,7 +23,7 @@ export default defineComponent({
         let field = ref(props.params.field)
 
         if (props.params.getValueFunc) {
-            let ctx = props.params.context ? _.cloneDeep(props.params.context) : {}
+            let ctx = props.params.context ? props.params.context : {}
             ctx.row = props.params.data
 
             let val = props.params.getValueFunc.exec(ctx)
@@ -53,7 +52,7 @@ export default defineComponent({
     mounted() {
 
     }
-})
+}
 
 </script>
 

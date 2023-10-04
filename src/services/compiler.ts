@@ -5,7 +5,7 @@ let flakeId = new FlakeId()
 
 class Utils {
     async generateId() {
-        return (await flakeId.generateId()).toString()
+        return flakeId.generateId().toString()
     }
 }
 

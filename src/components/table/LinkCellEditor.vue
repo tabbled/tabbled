@@ -48,7 +48,6 @@ import {useI18n} from "vue-i18n";
 import DialogView from "../DialogView.vue";
 import {ScreenSize} from "../../model/page";
 
-
 export default defineComponent({
     name: "LinkCellEditor",
     computed: {
@@ -59,18 +58,15 @@ export default defineComponent({
     components: {DialogView},
     props: ['params'],
     setup(props) {
-        // the current/initial value of the cell (before editing)
         const { t } = useI18n();
         const field = props.params.field
         const value = ref(props.params.value);
         let linkData = ref([])
         let isLoading = ref(false)
-        let ds = props.params.dataSource
         const displayProp = field.displayProp ? field.displayProp : 'name'
         let initTitle = props.params.data[`__${field.alias}_title`]
         let searchDialogVisible = ref(false)
 
-        //console.log(value.value)
         if (!initTitle)
             initTitle = t('notFound')
 
@@ -79,55 +75,45 @@ export default defineComponent({
             [displayProp]: initTitle
         })
 
-        /* Component Editor Lifecycle methods */
-        // the final value to send to the grid, on completion of editing
         const getValue = () => {
-            // this simple editor doubles any value entered into the input
-            console.log('getValue', value.value)
             return value.value
         };
 
-        // Gets called once before editing starts, to give editor a chance to
-        // cancel the editing before it even starts.
-        const isCancelBeforeStart = () => {
-            return false;
-        };
-
-        // Gets called once when editing is finished (eg if Enter is pressed).
-        // If you return true, then the result of the edit will be ignored.
-        const isCancelAfterEnd = () => {
-            return false
-        };
-
         const getLinkData = async (query?: string) => {
-            let fGetList = await field.getListFunc()
-            if (fGetList) {
-                linkData.value = await fGetList.exec(Object.assign({ query: query, row: props.params.data }))
+            if (props.params.getListFunc) {
+                console.log(props.params.getListFunc)
+                linkData.value =  await props.params.getListFunc.exec(Object.assign({ query: query, row: props.params.data }))
+
                 return;
             }
 
-            if (!ds)
-                return
 
-            let opt:GetDataManyOptions = {
-                filter: [],
-                take: 50,
-                fields: [displayProp],
-                include: null
-            }
+            props.params.dataSource.then(ds => {
 
-            if (value.value) {
-                opt.include = field.isMultiple ? value.value : [value.value]
-            }
+                let opt:GetDataManyOptions = {
+                    filter: [],
+                    take: 50,
+                    fields: [displayProp],
+                    include: null
+                }
 
-            if (query) {
-                opt.search = query
-            }
+                if (value.value) {
+                    opt.include = field.isMultiple ? value.value : [value.value]
+                }
 
-            isLoading.value = true
-            linkData.value = (await ds.getMany(opt)).data
+                if (query) {
+                    opt.search = query
+                }
 
-            isLoading.value = false
+                isLoading.value = true
+                ds.getMany(opt).then(data => {
+                    linkData.value = data.data
+                })
+                    .finally(() => isLoading.value = false)
+            })
+
+
+
         }
 
         const dialogSelected = (val) => {
@@ -143,9 +129,7 @@ export default defineComponent({
             searchDialogVisible,
             dialogSelected,
             getLinkData,
-            getValue,
-            isCancelBeforeStart,
-            isCancelAfterEnd
+            getValue
         }
     },
     mounted() {

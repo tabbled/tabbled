@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from "vue";
+import {ref} from "vue";
 
 
-export default defineComponent({
+export default {
     name: "MultipleCellRenderer",
     props: ['params'],
     setup(props) {
@@ -54,19 +54,9 @@ export default defineComponent({
 
 
     }
-})
+}
 
 </script>
 
 <style lang="scss">
 </style>
-
-<!--export default {-->
-<!--    template: `<span>{{ displayValue }}</span>`,-->
-<!--    setup(props) {-->
-<!--        const displayValue = new Array(props.params.value).fill('#').join('');-->
-<!--        return {-->
-<!--            displayValue-->
-<!--        }-->
-<!--    }-->
-<!--};-->

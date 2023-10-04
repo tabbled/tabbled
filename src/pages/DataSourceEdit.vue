@@ -333,7 +333,8 @@ onMounted(async () => {
     availableHeight.value = window.innerHeight - 260
 
     let ds = dsService.functionDataSource
-    let data = await ds.getMany()
+    let data = (await ds.getMany()).data
+
     for(const i in data) {
         functions.value.set(data[i].id, data[i].title)
     }

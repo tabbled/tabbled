@@ -45,6 +45,7 @@ import ItemList from "./ItemList.vue";
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const props = defineProps<{
+    id?: string,
     modelValue?: any,
     field: string,
     fieldConfig: FieldConfigInterface,

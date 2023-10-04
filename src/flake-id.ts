@@ -21,7 +21,7 @@ export class FlakeId {
     private POW10 = Math.pow(2, 10); // 2 ^ 10
     private POW26 = Math.pow(2, 26); // 2 ^ 26
 
-    async generateId(): Promise<BigInt> {
+    generateId(): BigInt {
         let id = new Buffer(8)
 
         let time = Date.now() - this.epoch;
