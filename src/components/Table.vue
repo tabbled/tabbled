@@ -1,32 +1,34 @@
 <template>
     <div :style="{ height: `${getHeight()}px`, width: '100%'} ">
-        <div v-if="actionButtonsVisible" style="padding-bottom: 16px; display: flex;">
-            <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
-                {{t('add')}}
-            </el-button>
-            <el-dropdown v-else
-                         split-button
-                         type="primary"
-                         @click="add"
-                         size="small"
-                         style="margin-right: 8px; min-width: fit-content;"
-            >
-                {{$t('add')}}
-                <template #dropdown>
-                    <el-dropdown-menu>
-                        <el-dropdown-item @click="add">{{$t('addSibling')}}</el-dropdown-item>
-                        <el-dropdown-item @click="addChild">{{$t('addChild')}}</el-dropdown-item>
-                    </el-dropdown-menu>
-                </template>
-            </el-dropdown>
-            <el-button v-if="actions.onEdit" @click="edit" size="small">
-                {{t('edit')}}
-            </el-button>
-            <el-button @click="remove" size="small">
-                {{t('delete')}}
-            </el-button>
+        <div style="padding-bottom: 16px; display: flex;">
+            <div v-if="actionButtonsVisible" style="display: flex; flex: none">
+                <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
+                    {{t('add')}}
+                </el-button>
+                <el-dropdown v-else
+                             split-button
+                             type="primary"
+                             @click="add"
+                             size="small"
+                             style="margin-right: 8px; min-width: fit-content;"
+                >
+                    {{$t('add')}}
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item @click="addSibling">{{$t('addSibling')}}</el-dropdown-item>
+                            <el-dropdown-item @click="addChild">{{$t('addChild')}}</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
+                <el-button v-if="actions.onEdit" @click="edit" size="small">
+                    {{t('edit')}}
+                </el-button>
+                <el-button @click="remove" size="small">
+                    {{t('delete')}}
+                </el-button>
+            </div>
 
-            <el-input style="margin-left: 8px; margin-right: 8px"
+            <el-input v-if="searchVisible" style="margin-left: 8px;"
                       size="small"
                       :id="id"
                       :placeholder="$t('search')"
@@ -38,6 +40,7 @@
 
 
             <el-button v-for="action in _customActions"
+                       style="margin-left: 8px;"
                        size="small"
                        :type="action.type ? action.type : 'default'"
                        @click="action.func()"
@@ -187,8 +190,10 @@ interface Props {
     fillHeight?: boolean,
     showCount?: boolean,
     filtersVisible?: boolean,
+    searchVisible?:boolean,
     customActions?: PageActionConfigInterface[],
-    persistingColumnState?: boolean
+    persistingColumnState?: boolean,
+    datasourceInst?: DataSourceInterface
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -197,6 +202,7 @@ const props = withDefaults(defineProps<Props>(), {
     fillHeight: false,
     showCount: false,
     filtersVisible: true,
+    searchVisible: true,
     persistingColumnState: true,
     filters: () => {
         return new Filters(null)
@@ -235,12 +241,14 @@ watch(() => props.filters?.filters, () => {
 
 watch(() => props.datasource, async () => {
     await init()
+    console.log('datasource')
     gridApi.refreshServerSide({
         purge: true
     })
 })
 
 watch(() => props.columns, async () => {
+    console.log('columns')
     await init()
     gridApi.refreshServerSide({
         purge: true
@@ -452,6 +460,10 @@ const debouncedSearch = useDebounceFn(() => {
 }, 200, {maxWait: 1000})
 
 onUnmounted( () => {
+    removeListeners()
+})
+
+function removeListeners() {
     if (dataSource) {
         dataSource.removeListener('item-inserted', onItemInserted)
         dataSource.removeListener('item-updated', onItemUpdated)
@@ -459,14 +471,19 @@ onUnmounted( () => {
         dataSource.removeListener('item-removed', onItemRemoved)
         dataSource.removeListener('update', onDataSourceUpdate)
     }
-})
+}
 
-async function add() {
-    if (dataSource.isTree) {
-        await addChild()
-        return;
+function addListeners() {
+    if (dataSource) {
+        dataSource.on('item-updated', onItemUpdated)
+        dataSource.on('totals-updated', onTotalsUpdated)
+        dataSource.on('item-inserted', onItemInserted)
+        dataSource.on('item-removed', onItemRemoved)
+        dataSource.on('update', onDataSourceUpdate)
     }
+}
 
+async function addSibling() {
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
         return
@@ -480,12 +497,25 @@ async function add() {
     let selected = gridApi.getSelectedNodes()
 
     let parentId = null
-    if (selected.length && selected[0].parent.key) {
-        parentId = selected[0].parent.key
+    if (dataSource.isTree) {
+        if (selected.length && selected[0].parent.key) {
+            parentId = selected[0].parent.key
+        }
     }
 
     let item = await generateEntityWithDefault(dataSource.fields)
     await dataSource.insert(item.id, item, parentId)
+}
+
+async function add() {
+    if (dataSource.isTree) {
+        let selected = gridApi.getSelectedNodes()
+        if (!selected.length)
+            await addSibling()
+        else
+            await addChild()
+    } else
+        await addSibling()
 }
 
 async function addChild() {
@@ -604,35 +634,37 @@ function restoreCols() {
     }
 }
 
+let isIniting = false
 
 async function init() {
-    // let item = localStorage.getItem(`${props.id}_columns_state`)
-    // let state:[] = item && props.persistingColumnState ? JSON.parse(item) : null
-    // let stateByField:Map<string, ColumnConfigInterface> = new Map()
-    // state?.forEach(item => {
-    //     stateByField.set(item['colId'], item)
-    // })
-    //
-    // let cols = state ? state.map(item => item['colId']) : props.columns.map(item => item.field)
-    // let columnByField:Map<string, ColumnConfigInterface> = new Map()
-    //
-    // props.columns.forEach(col => columnByField.set(col.field, col))
+    if (isIniting)
+        return
 
+    isIniting = true
     let cols = props.columns || []
     columnDefs.value = []
 
-    if (props.datasource) {
+    console.log('init')
+
+    if (props.datasourceInst) {
+        dataSource = props.datasourceInst
+    } else if (props.datasource) {
         dataSource = await dsService.getByAlias(props.datasource)
-
-        if (!dataSource) {
-            console.warn(`DataSource ${props.datasource} not found`)
-            return
-        }
-
-        if (dataSource instanceof CustomDataSource) {
-            dataSource.setContext(props.context)
-        }
     }
+
+    if (!dataSource) {
+        console.warn(`DataSource ${props.datasource} not found`)
+        isIniting = false
+        return
+    }
+
+    removeListeners()
+    addListeners()
+
+    if (dataSource instanceof CustomDataSource) {
+        dataSource.setContext(props.context)
+    }
+
 
     isTree.value = dataSource.isTree
 
@@ -641,13 +673,6 @@ async function init() {
     actions.value.onAdd = await compileAction(props.onAdd)
     actions.value.onEdit = await compileAction(props.onEdit)
     actions.value.onRemove = await compileAction(props.onRemove)
-
-    dataSource.on('item-updated', onItemUpdated)
-    dataSource.on('totals-updated', onTotalsUpdated)
-    dataSource.on('item-inserted', onItemInserted)
-    dataSource.on('item-removed', onItemRemoved)
-    dataSource.on('update', onDataSourceUpdate)
-
 
     for(let i in cols) {
         let col = cols[i]
@@ -734,7 +759,9 @@ async function init() {
                 let datasource = await dsService.getByAlias(field.datasource)
 
                 colDef.cellEditorParams.dataSource = dsService.getByAlias(field.datasource)
-                colDef.cellEditorParams.getListFunc =  compileScript(_.cloneDeep(field.config.getListValues), 'ctx')
+
+                if (field.config.getListValues)
+                    colDef.cellEditorParams.getListFunc =  compileScript(_.cloneDeep(field.config.getListValues), 'ctx')
 
                 colDef.valueSetter = params => {
                     if (params.oldValue === params.newValue)
@@ -800,6 +827,7 @@ async function init() {
         columnDefs.value.push(colDef)
     }
 
+    _customActions.value = []
     for(let i in props.customActions) {
         const action = props.customActions[i]
 
@@ -825,6 +853,8 @@ async function init() {
             //console.error(e)
         }
     }
+
+    isIniting = false
 }
 
 async function compileAction(action) {

@@ -81,12 +81,9 @@ export default defineComponent({
 
         const getLinkData = async (query?: string) => {
             if (props.params.getListFunc) {
-                console.log(props.params.getListFunc)
                 linkData.value =  await props.params.getListFunc.exec(Object.assign({ query: query, row: props.params.data }))
-
                 return;
             }
-
 
             props.params.dataSource.then(ds => {
 

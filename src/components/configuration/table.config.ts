@@ -52,6 +52,11 @@ export class Config implements ComponentInterface {
             alias: "filtersVisible",
             type: 'bool',
             default: true
+        },{
+            title: "Search are visible",
+            alias: "searchVisible",
+            type: 'bool',
+            default: true
         },
         {
             title: 'Columns',

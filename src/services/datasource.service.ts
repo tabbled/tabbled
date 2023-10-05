@@ -130,7 +130,6 @@ export class DataSourceService {
         items.forEach(ds => {
             this.dataSourceConfigs.set(ds.alias, <DataSourceConfigInterface>ds)
         })
-        console.log('registerAll', this.dataSourceConfigs)
     }
 
     async registerConfig() {
