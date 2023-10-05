@@ -86,7 +86,6 @@ export default defineComponent({
             }
 
             props.params.dataSource.then(ds => {
-
                 let opt:GetDataManyOptions = {
                     filter: [],
                     take: 50,
@@ -115,6 +114,7 @@ export default defineComponent({
 
         const dialogSelected = (val) => {
             value.value = val
+            props.params.stopEditing()
         }
 
         return {

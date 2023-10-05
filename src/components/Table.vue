@@ -1,6 +1,6 @@
 <template>
     <div :style="{ height: `${getHeight()}px`, width: '100%'} ">
-        <div style="padding-bottom: 16px; display: flex;">
+        <div v-if="searchVisible || actionButtonsVisible || filtersVisible" style="padding-bottom: 16px; display: flex;">
             <div v-if="actionButtonsVisible" style="display: flex; flex: none">
                 <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
                     {{t('add')}}
@@ -36,10 +36,11 @@
                       @input="searchChange"
                       :model-value="searchText"/>
 
-            <el-input size="small" style="height: 0; width: 0; opacity: 0"/>
+            <el-input v-if="searchVisible" size="small" style="height: 0; width: 0; opacity: 0"/>
 
 
-            <el-button v-for="action in _customActions"
+            <el-button v-if="actionButtonsVisible"
+                       v-for="action in _customActions"
                        style="margin-left: 8px;"
                        size="small"
                        :type="action.type ? action.type : 'default'"
