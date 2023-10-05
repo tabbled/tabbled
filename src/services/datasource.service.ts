@@ -16,11 +16,11 @@ let socketClient = useSocketClient()
 export class DataSourceService {
     constructor() {
         this.server = useSocketClient()
-        this.pageDataSource = new PageConfigDataSource(this.server)
-        this.dsDataSource = new DataSourceConfigDataSource(this.server)
-        this.menuDataSource = new MenuConfigDataSource(this.server)
-        this.functionDataSource = new FunctionsConfigDataSource(this.server)
-        this.reportDataSource = new ReportConfigDataSource(this.server)
+        this.pageDataSource = new PageConfigDataSource(this.server, this)
+        this.dsDataSource = new DataSourceConfigDataSource(this.server, this)
+        this.menuDataSource = new MenuConfigDataSource(this.server, this)
+        this.functionDataSource = new FunctionsConfigDataSource(this.server, this)
+        this.reportDataSource = new ReportConfigDataSource(this.server, this)
     }
     private readonly server: ServerInterface
 
@@ -35,18 +35,30 @@ export class DataSourceService {
 
 
     async getByAlias(alias: string) : Promise<DataSourceInterface> {
+        if (!alias)
+            return undefined
+
         if (this.dataSources.has(alias)) {
             return this.dataSources.get(alias)
         }
 
+        let ds = await this.create(alias)
+        if (ds)
+            this.addDataSource(ds);
+
+        return ds;
+    }
+
+    async create(alias: string) {
         let config = this.dataSourceConfigs.get(alias);
+
         if (!config)
             return undefined;
 
-        let ds = null
+        let ds
         switch (config.source) {
             case DataSourceSource.internal:
-                ds = new DataSource(config, socketClient)
+                ds = new DataSource(config, socketClient, this)
                 break;
             case DataSourceSource.custom:
                 ds = new CustomDataSource(config)
@@ -59,16 +71,14 @@ export class DataSourceService {
                 }
                 break;
             case DataSourceSource.field:
-                ds = new FieldDataSource(config)
+                ds = new FieldDataSource(config, this)
                 break;
             default:
-                console.log(`DataSource source ${config.source} "${config.alias}" is not implemented yet`)
-                return;
+                console.log(`DataSource source ${config.source} with alias "${config.alias}" is unknown`)
+                return undefined
         }
 
-        this.addDataSource(ds);
-
-        return ds;
+        return ds
     }
 
     getConfigDataSources() {
@@ -120,6 +130,7 @@ export class DataSourceService {
         items.forEach(ds => {
             this.dataSourceConfigs.set(ds.alias, <DataSourceConfigInterface>ds)
         })
+        console.log('registerAll', this.dataSourceConfigs)
     }
 
     async registerConfig() {

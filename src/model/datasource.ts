@@ -4,6 +4,7 @@ import {compileScript} from "../services/compiler";
 import {EventEmitter} from "events";
 import {ServerInterface} from "../services/socketio.service";
 import {FilterItemInterface} from "./filter";
+import {DataSourceService} from "../services/datasource.service";
 
 
 export enum DataSourceType {
@@ -59,6 +60,7 @@ export interface DataSourceInterface extends EventEmitter {
     keyFields: string[] // for aggregation datasource
     aggFields: string[] // for aggregation datasource
     isAggregator: boolean
+
     /**
      * Get data with filters and pagination
      * @returns {EntityInterface[]} data from data source
@@ -105,7 +107,7 @@ export interface DataSourceConfigInterface {
 }
 
 export class DataSource extends EventEmitter implements DataSourceInterface {
-    constructor(config: DataSourceConfigInterface, server: ServerInterface) {
+    constructor(config: DataSourceConfigInterface, server: ServerInterface, service: DataSourceService) {
         super()
         this.fieldByAlias = new Map()
         this.alias = config.alias
@@ -119,6 +121,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         this.cached = config.cached
         this.server = server
         this.title = config.title
+        this.service = service
 
 
         config.fields.forEach(conf => {
@@ -131,7 +134,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
-    private server: ServerInterface = null
+    readonly server: ServerInterface = null
+    protected service: DataSourceService
 
     alias: string;
     fields: FieldInterface[];
@@ -148,9 +152,11 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     async getMany(options: GetDataManyOptions = {}): Promise<GetManyResponse> {
 
+
         //let dt = new Date().getMilliseconds()
         //console.log(this.alias + ".getMany from server, options: ", options)
-        let data = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/getMany`, {
+
+        const data = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/getMany`, {
             alias: this.alias,
             options: options
         })
@@ -357,12 +363,15 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
     }
 
     emitHandler(event: string, ...args) {
+        //console.log(`DataSource ${this.alias} event: ${event}, args: ` )
+        //console.log(args)
+
         switch (event) {
             case 'update': this.emit('update', ...args); break;
             case 'item-inserted': this.emit('item-inserted', ...args);break;
             case 'item-updated': this.emit('item-updated', ...args);break;
-            case 'totals-updated': this.emit('totals-updated', ...args);break;
             case 'item-removed': this.emit('item-removed', ...args);break;
+            case 'totals-updated': this.emit('totals-updated', ...args);break;
 
         }
     }
@@ -458,8 +467,9 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 
     private fieldByAlias: Map<string, FieldInterface>
     private config: DataSourceConfigInterface
+    private readonly service: DataSourceService
 
-    constructor(config: DataSourceConfigInterface) {
+    constructor(config: DataSourceConfigInterface, service: DataSourceService) {
         super()
         this.alias = config.alias
         this.fieldByAlias = new Map()
@@ -467,6 +477,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         this.config = config
         this.readonly = !!config.readonly ? config.readonly : false
         this.fields = []
+        this.service = service
 
         config.fields.forEach(conf => {
             this.fieldByAlias.set(conf.alias, new Field(conf))
@@ -533,10 +544,12 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
             let item = this._data[i]
             if (item.id === id) {
                 this._data[i] = value
+                console.log('item-updated')
                 this.emit('item-updated', {
-                    data: value
+                    data: value,
+                    route: []
                 })
-                this.emit('update', this._data)
+                //this.emit('update', this._data)
                 return item;
             }
         }
@@ -547,6 +560,14 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
         let item = await this.getById(id)
         if (item) {
             item[field]  = value
+            const fConfig = this.fieldByAlias.get(field)
+
+            if (fConfig.type === 'link') {
+                let ds = await this.service.getByAlias(fConfig.datasource)
+                let look_val = await ds.getById(value)
+                item[`__${field}_title`] = look_val ? look_val[fConfig.displayProp ? fConfig.displayProp : 'name'] : ''
+            }
+
             await this.updateById(id, item)
         }
     }
@@ -557,7 +578,7 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 }
 
 export class PageConfigDataSource extends DataSource {
-    constructor(server: ServerInterface) {
+    constructor(server: ServerInterface, service: DataSourceService) {
         super({
             type: DataSourceType.config,
             alias: 'page',
@@ -603,12 +624,12 @@ export class PageConfigDataSource extends DataSource {
                     alias: "onOpen",
                     type: 'handler'
                 }]
-        }, server);
+        }, server, service);
     }
 }
 
 export class MenuConfigDataSource extends DataSource {
-    constructor(server: ServerInterface) {
+    constructor(server: ServerInterface, service: DataSourceService) {
         super({
             type: DataSourceType.config,
             alias: 'menu',
@@ -640,12 +661,12 @@ export class MenuConfigDataSource extends DataSource {
                 type: "list",
                 required: false
             }
-        ]}, server);
+        ]}, server, service);
     }
 }
 
 export class ReportConfigDataSource extends DataSource {
-    constructor(server: ServerInterface) {
+    constructor(server: ServerInterface, service: DataSourceService) {
         super({
             type: DataSourceType.config,
             alias: 'report',
@@ -692,12 +713,12 @@ export class ReportConfigDataSource extends DataSource {
                     displayProp: 'title',
                     keyProp: "alias"
                 },
-            ]}, server);
+            ]}, server, service);
     }
 }
 
 export class DataSourceConfigDataSource extends DataSource {
-    constructor(server: ServerInterface) {
+    constructor(server: ServerInterface, service: DataSourceService) {
         super({
             type: DataSourceType.config,
             alias: 'datasource',
@@ -806,12 +827,12 @@ export class DataSourceConfigDataSource extends DataSource {
                     default: [],
                     isMultiple: true
                 }
-            ]}, server);
+            ]}, server, service);
     }
 }
 
 export class FunctionsConfigDataSource extends DataSource {
-    constructor(server: ServerInterface) {
+    constructor(server: ServerInterface, service: DataSourceService) {
         super({
             type: DataSourceType.config,
             alias: 'function',
@@ -844,6 +865,6 @@ export class FunctionsConfigDataSource extends DataSource {
                     required: true,
                     default: "{}"
                 }
-            ]}, server);
+            ]}, server, service);
     }
 }

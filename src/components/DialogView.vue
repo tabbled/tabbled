@@ -99,7 +99,7 @@ async function init() {
     editEntity.value = null
 
     if (pageConfig.value.datasource) {
-        editDataSource = await dsService.getByAlias(pageConfig.value.datasource)
+        editDataSource = await dsService.create(pageConfig.value.datasource)
         if (!editDataSource) {
             console.warn(`DataSource ${pageConfig.value.datasource} for editing page ${pageConfig.value.alias} not found`)
             return;
@@ -120,29 +120,30 @@ async function init() {
         console.log('isNew', isNew.value, 'id', id)
         console.log('editEntity', editEntity.value)
 
-        if (editDataSource) {
-            for(let i in editDataSource.fields) {
-                let f = editDataSource.fields[i]
-                if (f.type === 'table') {
-                    let ds = await dsService.getByAlias(f.datasource)
-                    if (!ds) {
-                        console.warn(`DataSource ${f.datasource} for field ${f.alias} not found`)
-                        continue
-                    }
-
-                    if (ds instanceof CustomDataSource)
-                        ds.setContext(scriptContext.value)
-
-                    await ds.setData(editEntity.value[f.alias])
-
-                }
-            }
-        }
+        // if (editDataSource) {
+        //     for(let i in editDataSource.fields) {
+        //         let f = editDataSource.fields[i]
+        //         if (f.type === 'table') {
+        //             let ds = await dsService.create(f.datasource)
+        //             if (!ds) {
+        //                 console.warn(`DataSource ${f.datasource} for field ${f.alias} not found`)
+        //                 continue
+        //             }
+        //
+        //             if (ds instanceof CustomDataSource)
+        //                 ds.setContext(scriptContext.value)
+        //
+        //             await ds.setData(editEntity.value[f.alias])
+        //
+        //         }
+        //     }
+        // }
     }
 
 
 
-    pageConfig.value.elements.forEach(element => {
+    for(const i in pageConfig.value.elements) {
+        const element = pageConfig.value.elements[i]
         let el:ElementInterface = {
             id: element.id,
             layout: element.layout,
@@ -158,20 +159,41 @@ async function init() {
             return;
         }
 
-        elProps.properties.forEach(item => {
-            el.props[item.alias] = _.cloneDeep(element[item.alias])
+
+        for(let ii in elProps.properties) {
+            const prop = elProps.properties[ii]
+            el.props[prop.alias] = _.cloneDeep(element[prop.alias])
 
 
-        })
+            if (prop.type === 'datasource') {
+                let ds = await dsService.create(element[prop.alias])
+                if (!ds) {
+                    console.warn(`DataSource ${prop.datasource} for field ${prop.alias} not found`)
+                    continue
+                }
+
+                if (ds instanceof CustomDataSource)
+                    ds.setContext(scriptContext.value)
+
+
+                if (editEntity.value && element.field)
+                    await ds.setData(editEntity.value[element.field])
+
+                el.props['datasourceInst'] = ds
+            }
+        }
         el.props['context'] = scriptContext.value
+
 
         if (elProps.filterable || elProps.group === 'Filters') {
             el.props['filters'] = filters
         }
 
+        console.log(el.props)
+
         if (elProps.properties)
             elements.value.push(el)
-    })
+    }
 }
 
 function getLabelElement(el) {
@@ -214,7 +236,7 @@ function getField(el:ElementInterface) {
 }
 
 function getValue(el: ElementInterface) {
-    console.log('getValue', el.field, editEntity.value[el.field])
+    //console.log('getValue', el.field, editEntity.value[el.field])
     if (editEntity.value)
         return editEntity.value[el.field]
 
