@@ -35,9 +35,8 @@
     <DialogView v-if="field && field.config.searchDialog"
                 :screen-size="ScreenSize.desktop"
                 v-model:visible="searchDialogVisible"
-                :options="{modal: true, page: field && field.config.searchDialog}"
+                :options="{modal: true, page: field && field.config.searchDialog, selecting: true}"
                 @selected="dialogSelected"
-                selecting
     />
 </template>
 
@@ -112,8 +111,8 @@ export default defineComponent({
 
         }
 
-        const dialogSelected = (val) => {
-            value.value = val
+        const dialogSelected = (val: string[]) => {
+            value.value = val.length ? val[0] : null
             props.params.stopEditing()
         }
 

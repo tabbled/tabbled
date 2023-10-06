@@ -217,7 +217,13 @@ let actions = ref({
     onRemove: null
 })
 
-const emit = defineEmits(['rowDblClick', 'rowClick', 'change', 'update:modelValue', 'update:currentId'])
+const emit = defineEmits([
+    'rowDblClick',
+    'rowClick',
+    'change',
+    'update:modelValue',
+    'update:currentId',
+    'update:selected'])
 
 let grid = ref(null)
 let gridApi:GridApi  = null
@@ -1000,6 +1006,7 @@ function cellDoubleClicked(params) {
 
 function selectionChanged() {
     emit('update:currentId', gridApi.getSelectedRows()[0]?.id)
+    emit('update:selected', gridApi.getSelectedRows().map(i => i?.id))
 }
 
 </script>

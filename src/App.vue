@@ -25,7 +25,7 @@ import Main from "./pages/Main.vue"
 import {onMounted, onUnmounted, ref} from "vue";
 import {useStore} from "vuex";
 import {DataSourceType} from "./model/datasource";
-import {PageConfigInterface, ScreenSize} from "./model/page";
+import {OpenDialogOptions, PageConfigInterface, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
 import PageView from "./pages/PageView.vue";
 import { useFavicon } from '@vueuse/core'
@@ -104,7 +104,7 @@ onUnmounted(() => {
     configLoadState.value = ConfigLoadState.NotLoaded
 })
 
-function openDialog(options) {
+function openDialog(options : OpenDialogOptions) {
     dialogOptions.value = options
     dialogVisible.value = true
 

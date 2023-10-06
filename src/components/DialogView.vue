@@ -24,12 +24,12 @@
                            :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
-                           @update:currentId="currentIdChanged"
+                           @update:selected="selectedChanged"
                 />
             </el-form-item>
         </el-form>
         <template #footer>
-            <div v-if="selecting" style="display: flex; flex-direction: row; justify-content: end;">
+            <div v-if="options.selecting" style="display: flex; flex-direction: row; justify-content: end;">
                 <el-button @click="emit('update:visible', false)">{{$t('close')}}</el-button>
                 <el-button :disabled="!selected" type="primary" @click="select">{{$t('select')}}</el-button>
             </div>
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 
-import {ElementInterface, PositionElementInterface, ScreenSize} from "../model/page";
+import {ElementInterface, OpenDialogOptions, PositionElementInterface, ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {ref, watch} from "vue";
 import {CustomDataSource, DataSourceInterface, EntityInterface} from "../model/datasource";
@@ -51,13 +51,12 @@ import {generateEntityWithDefault} from "../model/field";
 const dsService = useDataSourceService();
 let componentService = useComponentService()
 let pageConfig = ref(null)
-let selected = ref(null)
+let selected = ref<string[]>([])
 
 const props = defineProps<{
     screenSize: ScreenSize,
     visible: boolean,
-    options: any,
-    selecting?: boolean
+    options: OpenDialogOptions
 }>()
 
 const scriptContext = ref({
@@ -79,6 +78,10 @@ const emit = defineEmits(['update:visible', 'selected'])
 watch(() => props.visible, () => {
     if (props.visible) {
         init()
+    } else {
+        if (props.options.onClose instanceof Function) {
+            props.options.onClose({ options: props.options, selected: selected.value })
+        }
     }
 })
 
@@ -119,25 +122,6 @@ async function init() {
 
         console.log('isNew', isNew.value, 'id', id)
         console.log('editEntity', editEntity.value)
-
-        // if (editDataSource) {
-        //     for(let i in editDataSource.fields) {
-        //         let f = editDataSource.fields[i]
-        //         if (f.type === 'table') {
-        //             let ds = await dsService.create(f.datasource)
-        //             if (!ds) {
-        //                 console.warn(`DataSource ${f.datasource} for field ${f.alias} not found`)
-        //                 continue
-        //             }
-        //
-        //             if (ds instanceof CustomDataSource)
-        //                 ds.setContext(scriptContext.value)
-        //
-        //             await ds.setData(editEntity.value[f.alias])
-        //
-        //         }
-        //     }
-        // }
     }
 
 
@@ -193,6 +177,10 @@ async function init() {
 
         if (elProps.properties)
             elements.value.push(el)
+    }
+
+    if (props.options.onOpen instanceof Function) {
+        props.options.onOpen({ options: props.options })
     }
 }
 
@@ -272,10 +260,14 @@ function select() {
 
     emit('selected', selected.value)
     emit('update:visible', false)
+
+    if (props.options.onSelect instanceof Function) {
+        props.options.onSelect({ options: props.options, selected: selected.value })
+    }
 }
 
-function currentIdChanged(id) {
-    selected.value = id
+function selectedChanged(sl) {
+    selected.value = sl
 }
 
 </script>

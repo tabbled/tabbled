@@ -15,6 +15,7 @@
                    @change="(val) => change(val)"
                    :multiple="fieldConfig.isMultiple"
                    style="width: 100%;"
+                   ref="select"
         >
             <el-option
                 v-for="item in data"
@@ -65,9 +66,8 @@
     <DialogView v-if="fieldConfig && fieldConfig.config && fieldConfig.config.searchDialog"
                 :screen-size="screenSize"
                 v-model:visible="searchDialogVisible"
-                :options="{modal: true, page: fieldConfig && fieldConfig.config.searchDialog}"
-                @selected="change"
-                selecting
+                :options="{modal: true, page: fieldConfig && fieldConfig.config.searchDialog, selecting: true}"
+                @selected="selectFromDialog"
     />
 </template>
 
@@ -88,6 +88,7 @@ let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
 let isTree = ref(false)
 let searchDialogVisible = ref(false)
+let select = ref(null)
 
 
 interface Props {
@@ -212,6 +213,7 @@ async function load(node, resolve) {
 }
 
 async function getData(query?: string) {
+
     isLoading.value = true;
 
     let opt = {
@@ -231,15 +233,25 @@ async function getData(query?: string) {
     isLoading.value = false;
 }
 
-function change(val: string) {
-    value.value = val
+async function change(val: string[]) {
+    value.value = val.length ? val[0] : null
+
+    emit('update:modelValue', val)
+    emit('change', val)
+}
+
+const selectFromDialog = async (val: string[]) => {
+    value.value = val.length ? val[0] : null
+    await getData()
+
+    //cheat code for update new added value from dialog
+    select.options.set(value.value, { id: value.value })
+
     emit('update:modelValue', val)
     emit('change', val)
 }
 
 const getCacheData = async () => {
-    //console.log('getCacheData', props, value.value)
-
     if (!dataSource)
         return
 
