@@ -39,6 +39,7 @@
                         lazy
                         :load="load"
                         :cache-data="data"
+                        @clear="treeClear"
         />
         <el-select v-else-if=" fieldConfig.type === 'enum'"
                    filterable
@@ -177,7 +178,12 @@ function itemExists(id) : boolean {
     return false
 }
 
+function treeClear() {
+    change(null)
+}
+
 function treeChanged(node, prop) {
+    console.log(node, prop)
     if (props.fieldConfig.isMultiple) {
         change(prop.checkedKeys)
     } else {
@@ -235,7 +241,8 @@ async function getData(query?: string) {
 }
 
 async function change(val: string[]) {
-    value.value = val.length ? val[0] : null
+    console.log(val)
+    value.value = val && val.length ? val[0] : null
 
     emit('update:modelValue', val)
     emit('change', val)
