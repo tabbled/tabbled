@@ -32,6 +32,7 @@
                         :node-key="keyProp"
                         :props="treeProps"
                         show-checkbox
+                        clearable
                         check-strictly
                         :multiple="fieldConfig.isMultiple"
                         @check="treeChanged"
