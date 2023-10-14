@@ -328,7 +328,7 @@ onMounted(async () => {
     await load()
     await initTestDataSource()
 
-    document.title = `${t('datasource')} ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ settings.title }`
+    document.title = `${t('datasource')} ${ isNew.value ? 'new' : ' ' + dataSourceEntity.value.title } | ${ window['env']['appTitle'] }`
 
     availableHeight.value = window.innerHeight - 260
 

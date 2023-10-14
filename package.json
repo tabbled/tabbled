@@ -1,7 +1,7 @@
 {
   "name": "tabbled-web",
   "private": true,
-  "version": "0.4.5",
+  "version": "0.4.7",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -16,6 +16,7 @@
     "@codemirror/lang-javascript": "^6.1.2",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/theme-one-dark": "^6.1.0",
+    "@sentry/vue": "^7.73.0",
     "@tanstack/vue-table": "^8.9.1",
     "@types/events": "^3.0.0",
     "ag-grid-community": "^30.2.0",

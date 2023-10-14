@@ -74,7 +74,7 @@ store.subscribe(async (payload) => {
 
 onMounted(async () => {
     await settings.refresh();
-    favicon.value = settings.favicon
+    favicon.value = window['env']['appFavicon']
 
     let user = store.getters["auth/user"]
     if (user && user.settings && user.settings.lang) {

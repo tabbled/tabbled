@@ -95,7 +95,7 @@ onMounted(async () => {
     }
 
     await load()
-    document.title = `${t('function')} ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${settings.title}`
+    document.title = `${t('function')} ${ isNew.value ? 'new' : ' ' + functionEntity.title } | ${window['env']['appTitle']}`
 });
 
 function getField(alias) {

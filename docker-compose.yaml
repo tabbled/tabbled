@@ -23,6 +23,10 @@ services:
     depends_on:
       - server
     pull_policy: always
+    environment:
+      - SENTRY_DNS=${VITE_SENTRY_DNS}
+      - APP_TITLE=${APP_TITLE}
+      - APP_FAVICON=${APP_FAVICON}
 
   server:
     image: tabbled/server:latest
@@ -44,7 +48,8 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - JSREPORT_URL=${JSREPORT_URL}
       - APP_TITLE=${APP_TITLE}
-      - APP_FAVICON=N=${APP_FAVICON}
+      - APP_FAVICON=${APP_FAVICON}
+      - SENTRY_DNS=${SENTRY_DNS}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

@@ -144,7 +144,7 @@ onMounted(async () => {
 
 
 function setAppTitle() {
-    document.title = `${route.meta.title} | ${ settings.title }`
+    document.title = `${route.meta.title} | ${ window['env']['appTitle'] }`
 }
 
 async function save() {

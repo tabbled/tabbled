@@ -7,7 +7,6 @@ import Configuration from "./pages/Configuration.vue";
 import FunctionEdit from "./pages/FunctionEdit.vue";
 import DataSourceEdit from "./pages/DataSourceEdit.vue";
 import MenuEdit from "./pages/MenuEdit.vue";
-import {Settings} from "./services/settings.service";
 import ReportEdit from "./pages/ReportEdit.vue";
 import UserSettings from "./pages/UserSettings.vue";
 
@@ -108,7 +107,7 @@ const routes: RouteRecordRaw[] = [
 
 
 
-export default function (store: any, settings:Settings) {
+export default function (store: any) {
     const router = createRouter({
         history: createWebHistory(),
         routes,
@@ -117,7 +116,7 @@ export default function (store: any, settings:Settings) {
 
     router.beforeEach(async (to, from, next) => {
         // @ts-ignore
-        window.document.title = `${to.meta && to.meta.title ? to.meta.title : ''}${ settings.title ? ' | ' + settings.title : '' }`;
+        window.document.title = `${to.meta && to.meta.title ? to.meta.title : ''} | ${window['env']['appTitle']}`;
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
 

@@ -219,7 +219,7 @@ const menuColumns:ColumnConfigInterface[] = [
 ]
 
 function setAppTitle() {
-    document.title = `Configuration | ${ settings.title }`
+    document.title = `Configuration | ${ window['env']['appTitle'] }`
 }
 
 onMounted(async () => {
@@ -267,7 +267,7 @@ async function importConfig(config: any) {
     console.log('Start load configuration with version ' + config.version)
 
     try {
-        //await sync.import(DataSourceType.config, config)
+        //await sync.import(DataSourceType.config.json, config.json)
         console.log("Loading configuration have finished. Reload the page")
         ElMessage.success('Imported successfully')
     } catch (e) {
@@ -279,7 +279,7 @@ async function importConfig(config: any) {
 async function importData(data: any) {
     try {
         //await sync.import(DataSourceType.data, data)
-        console.log("Loading data have finished.")
+        console.log("Loading data have finished.", data)
         ElMessage.success('Imported successfully')
     } catch (e) {
         console.error(e)

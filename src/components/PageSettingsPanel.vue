@@ -54,7 +54,6 @@
                                      @change="(val) => onInput(prop.alias, val)"
                         />
                         <LinkSelect v-else-if="prop.type === 'enum'"
-                                    style="width: 100%"
                                     :field="prop.alias"
                                     :field-config="prop"
                                     :model-value="getValue(prop, currentElement)"

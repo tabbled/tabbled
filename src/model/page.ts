@@ -61,6 +61,20 @@ export interface ComponentInterface {
     }
 }
 
+export interface OpenDialogOptions {
+    page: string,
+    title?: string,
+    id?: string,
+    modal?: boolean,
+    width?: number,
+    selecting?: boolean,
+    onClose?: Function,
+    onSelect?: Function,
+    onOpen?: Function
+}
+
+export type PageTemplateType = 'grid' | 'flex'
+
 export interface PageConfigInterface {
     id: string,
     alias: string,
@@ -70,7 +84,8 @@ export interface PageConfigInterface {
     onOpen: EventHandlerConfigInterface,
     headerActions: PageActionConfigInterface[],
     isEditPage: boolean
-    datasource?: string
+    datasource?: string,
+    templateType: PageTemplateType
 }
 
 interface PageListItemTypeInterface {

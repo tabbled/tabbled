@@ -605,7 +605,7 @@ async function onGridReady(params) {
     gridColumnApi = params.columnApi
     gridApi.setServerSideDatasource(new GridDataSource())
 
-    console.log('onGridReady')
+    //console.log('onGridReady')
 
     //Rebuild the context for passing it to the ag-grid for columns
     context_ = {
@@ -651,7 +651,7 @@ async function init() {
     let cols = props.columns || []
     columnDefs.value = []
 
-    console.log('init')
+    //console.log('init')
 
     if (props.datasourceInst) {
         dataSource = props.datasourceInst

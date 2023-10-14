@@ -8,7 +8,8 @@ export default defineConfig({
                 isCustomElement: (tag) => tag.includes('tb-')
             }
         }
-    })],
+    }),
+    ],
     resolve: {
         alias: {
             buffer: 'buffer/',

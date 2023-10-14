@@ -6,8 +6,8 @@
                     <div class="menu-header">
                         <div>
                             <el-row align="middle">
-                                <img height="30" :src="settings.favicon" alt=""/>
-                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{settings.title}}</div>
+                                <img height="30" :src="favicon" alt=""/>
+                                <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{title}}</div>
                             </el-row>
                         </div>
                         <el-tag v-if="!isConnected && !isSideBarCollapsed" effect="light" size="small" type="danger">Offline</el-tag>
@@ -150,6 +150,8 @@ const mainContainer = ref(null);
 const footer = ref(null)
 const mainHeader = ref(null);
 const rView = ref(null)
+let favicon = ref('/favicon.png')
+let title = ref('Tabbled')
 
 
 let mainViewHeight = ref(0)
@@ -201,6 +203,8 @@ const currentPageTitle: ComputedRef<string> = computed((): string =>  {
 
 onMounted(() => {
     console.log('Main mounted')
+    favicon.value = window['env']['appFavicon']
+    title.value = window['env']['appTitle']
     mainViewHeight.value = mainContainer.value.$el.clientHeight
     mainMenuHeight.value = mainContainer.value.$el.clientHeight - 170
     handleResize();
@@ -239,7 +243,7 @@ async function loadMenu() {
 
 
     if (!menus.length) {
-        console.warn('No menu for sideBar in config')
+        console.warn('No menu for sideBar in config.json')
         return;
     }
 

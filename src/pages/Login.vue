@@ -2,9 +2,9 @@
     <div style="max-width: 300px; margin: auto">
 
     <div style="padding-top: 24px;"></div>
-        <div style="display: flex; align-items: center; justify-content: center;">
-            <img height="60" class="logo" :src="settings.favicon" alt=""/>
-            <span style="font-size: 30px; padding-left: 16px">{{settings.title}}</span>
+        <div style="display: flex; align-items: center; justify-content: center; padding-bottom: 24px">
+            <img height="60" class="logo" :src="favicon" alt=""/>
+            <span style="font-size: 30px; padding-left: 16px">{{title}}</span>
         </div>
 
     <h3 style="text-align: center; width: 300px">{{$t('signIn')}}</h3>
@@ -52,6 +52,8 @@ const store = useStore();
 const route = useRoute()
 const settings = useSettings()
 
+let favicon = ref('/favicon.png')
+let title = ref('Tabbled')
 let form = ref(null)
 let user = ref({
     username: "",
@@ -71,7 +73,9 @@ let rules = ref({
 let signing = false
 
 onMounted(async () => {
-    document.title = `${route.meta.title}${ settings.title ? ' | ' + settings.title : '' }`
+    favicon.value = window['env']['appFavicon']
+    title.value = window['env']['appTitle']
+    document.title = `${route.meta.title} | ${ window['env']['appTitle'] }`
 })
 
 

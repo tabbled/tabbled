@@ -1,10 +1,9 @@
 <template>
-
     <div style="display: flex; flex-flow: row; padding: 16px; height: calc(100% - 32px)"
          @mouseup="endResizeSettingPanel"
          @mousemove="onResizeSettingPanel">
 
-        <div style="padding-bottom: 16px; display: flex; flex-flow: column; width: 100%;">
+        <div style="padding-bottom: 16px; display: flex; flex-flow: column; width: 100%; padding-right: 16px">
 
             <div  style="display: flex; flex-flow: wrap; justify-content: space-between">
                 <div style="display: flex; flex-flow: wrap; align-items: center">
@@ -44,15 +43,29 @@
                 </div>
 
 
-                <div style="margin-right: 16px">
+                <div>
                     <el-button size="small" @click="cancel">{{$t('cancel')}}</el-button>
                     <el-button size="small" type="primary" @click="save" :disabled="!isChanged">{{$t('save')}}</el-button>
                 </div>
             </div>
 
+            <div style="align-items: center; display: flex; justify-content: center; flex-direction: column" v-if="pageConfig && !pageConfig.templateType">
+                <div style="margin: 24px">
+                    {{"Select the type of page template"}}
+                </div>
+                <el-radio-group v-model="pageConfig.templateType">
+                    <el-radio-button v-for="i in templateTypes" :label="i.key">{{i.title}} </el-radio-button>
+                </el-radio-group>
+            </div>
 
+            <FlexLayout v-if="pageConfig && pageConfig.templateType === 'flex'"
+                        :screen-size="selectedSize"
+                        :page-config="pageConfig"
+                        @update:pageConfig="flexConfigUpdate"
+                        @select="flexElementSelected"
+            />
 
-            <div style="display: flex; flex-flow: row">
+            <div v-if="pageConfig && pageConfig.templateType === 'grid'" style="display: flex; flex-flow: row">
 
                 <div style="display: flex; flex-flow: column; width: 100%" >
 
@@ -165,7 +178,7 @@ import {
     ComponentInterface,
     ElementInterface,
     getAvailableScreenSizes,
-    PageConfigInterface,
+    PageConfigInterface, PageTemplateType,
     PositionElementInterface,
     ScreenSize
 } from "../model/page";
@@ -179,6 +192,7 @@ import {Icon} from "@iconify/vue";
 import PageSettingsPanel from '../components/PageSettingsPanel.vue'
 import { FlakeId } from '../flake-id'
 import {useSettings} from "../services/settings.service";
+import FlexLayout from "../components/FlexLayoutPage.vue";
 let flakeId = new FlakeId()
 
 interface ComponentDropInterface extends ComponentInterface {
@@ -213,6 +227,17 @@ let settingPanelWidth = ref<number>(getSettingsPanelWidth())
 let isResizingSettingPanel = false
 let startXResizingSettingPanel = 0
 
+let templateTypes: {key: PageTemplateType, title: string}[] = [
+    {
+        key: 'grid',
+        title: 'Grid'
+    },
+    {
+        key: 'flex',
+        title: 'Flex'
+    },
+]
+
 let isChanged = ref(false)
 const settings = useSettings()
 
@@ -235,7 +260,7 @@ onUnmounted(() => {
 })
 
 function setAppTitle() {
-    document.title = `${route.meta.title} | ${ settings.title }`
+    document.title = `${route.meta.title} | ${ window['env']['appTitle'] }`
 }
 
 function getSettingsPanelWidth():number {
@@ -302,7 +327,8 @@ async function init() {
             elements: [],
             onOpen: null,
             headerActions: [],
-            isEditPage: false
+            isEditPage: false,
+            templateType: "flex"
         }
     } else {
         pageConfig.value = await getPageConfig(route.params.id.toString())
@@ -330,6 +356,8 @@ async function init() {
 }
 
 async function onUpdateProperty(path: string, value: any) {
+    console.log(path, value)
+    pageConfig.value.elements[0]['direction'] = 'row'
     _.update(pageConfig.value, path, () => {
         return value
     })
@@ -340,12 +368,12 @@ async function onUpdateProperty(path: string, value: any) {
 async function save() {
     let ds = dsService.pageDataSource
 
-    //gather changes from elements to config after saving
+    //gather changes from elements to config.json after saving
     pageConfig.value.elements = elements.value
 
     try {
         if (pageConfig.value.id === null) {
-            let id = (await flakeId.generateId()).toString()
+            let id = (flakeId.generateId()).toString()
             pageConfig.value.id = id
             let item = await ds.insert(id, pageConfig.value)
             await router.replace({params: { id: item.id }})
@@ -546,7 +574,7 @@ async function dropNewWidget(e:DragEvent) {
     })
 
     elements.value.push({
-        id: (await flakeId.generateId()).toString(),
+        id: (flakeId.generateId()).toString(),
         name: comp.name,
         field: '',
         layout: {
@@ -566,6 +594,17 @@ async function dropNewWidget(e:DragEvent) {
         props: properties
     })
     isChanged.value = true;
+}
+
+
+function flexConfigUpdate(e) {
+    console.log('flexConfigUpdate', e)
+     isChanged.value = true
+}
+
+function flexElementSelected(e) {
+    console.log('flexElementSelected', e)
+    currentConfigPath.value = e
 }
 
 </script>
