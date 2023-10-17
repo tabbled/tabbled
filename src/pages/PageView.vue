@@ -173,11 +173,14 @@ async function loadValue(field) {
 }
 
 async function generateReport(id) {
-    console.log('generateReport', id)
     try {
+
         let rep = await socket.emit('reports/renderById', {
             id: id,
-            context: scriptContext.value
+            context: {
+                item: scriptContext.value.item,
+                page: scriptContext.value.page
+            }
         })
 
         const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: 'application/pdf'}));
