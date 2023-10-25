@@ -154,6 +154,8 @@ async function init() {
             return
         }
 
+        await getValue()
+
         isTree.value = dataSource.isTree
         if (isTree.value) {
             await getCacheData()
@@ -161,7 +163,7 @@ async function init() {
             await getData()
         }
 
-        await getValue()
+
     }
 
 }
@@ -241,7 +243,6 @@ async function getData(query?: string) {
 }
 
 async function change(val: string[]) {
-    console.log(val)
     value.value = val && val.length ? val[0] : null
 
     emit('update:modelValue', val)
@@ -252,14 +253,12 @@ const selectFromDialog = async (val: string[]) => {
     value.value = val.length ? val[0] : null
     await getData()
 
-    //cheat code for update new added value from dialog
-    select.options.set(value.value, { id: value.value })
-
-    emit('update:modelValue', val)
-    emit('change', val)
+    emit('update:modelValue', value.value)
+    emit('change', value.value)
 }
 
 const getCacheData = async () => {
+    console.log('getCacheData')
     if (!dataSource)
         return
 
@@ -269,6 +268,8 @@ const getCacheData = async () => {
         fields: [props.displayProp],
         id: value.value ?  (props.fieldConfig.isMultiple ? value.value : [value.value]) : null
     }
+
+    console.log('getCacheData', opt)
 
     data.value = (await dataSource.getMany(opt)).data
     return data.value

@@ -765,7 +765,8 @@ async function init() {
 
                 let datasource = await dsService.getByAlias(field.datasource)
 
-                colDef.cellEditorParams.dataSource = dsService.getByAlias(field.datasource)
+                if (field.datasource && !field.config.getListValues)
+                    colDef.cellEditorParams.dataSource = dsService.getByAlias(field.datasource)
 
                 if (field.config.getListValues)
                     colDef.cellEditorParams.getListFunc =  compileScript(_.cloneDeep(field.config.getListValues), 'ctx')

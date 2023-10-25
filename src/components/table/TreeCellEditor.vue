@@ -61,8 +61,7 @@ export default defineComponent({
 
         const getCacheData = async () => {
             console.log('getCacheData', props.params)
-            let fGetList = await field.getListFunc()
-            if (fGetList) {
+            if (props.params.getListFunc) {
                 let ctx = props.params.context ? _.cloneDeep(props.params.context) : {}
                 ctx.row = props.params.data
                 ctx.options = {
@@ -73,8 +72,7 @@ export default defineComponent({
                     id: field.isMultiple ? value.value : [value.value]
                 }
 
-                let val = fGetList.exec(ctx)
-
+                let val = props.params.getListFunc.exec(ctx)
                 if (val instanceof Promise) {
                     val.then((val) => {
                         console.log(val)
@@ -88,6 +86,8 @@ export default defineComponent({
             if (!ds)
                 return
 
+            let dataSource = await ds
+
             let opt:GetDataManyOptions = {
                 filter: [],
                 take: 20,
@@ -95,15 +95,15 @@ export default defineComponent({
                 id: field.isMultiple ? value.value : [value.value]
             }
 
-            linkData.value = await ds.getMany(opt)
+            linkData.value = await dataSource.getMany(opt)
+
             return linkData.value
         }
 
         const load = async (node, resolve) => {
             console.log('load', node)
 
-            let fGetList = await field.getListFunc()
-            if (fGetList) {
+            if (props.params.getListFunc) {
 
                 let ctx = props.params.context ? _.cloneDeep(props.params.context) : {}
                 ctx.row = props.params.data
@@ -115,17 +115,20 @@ export default defineComponent({
                     route: getRouteToNode(node)
                 }
 
-                let val = fGetList.exec(ctx)
+                let val = props.params.getListFunc.exec(ctx)
 
                 if (val instanceof Promise) {
                     val.then(val => resolve(val.data))
                 } else {
                     resolve(val.data)
                 }
+
             }
 
             if (!ds)
                 return
+
+            let dataSource = await ds
 
             let opt:GetDataManyOptions = {
                 filter: [],
@@ -135,7 +138,7 @@ export default defineComponent({
                 route: getRouteToNode(node)
             }
 
-            ds.getMany(opt).then(res => {
+            dataSource.getMany(opt).then(res => {
                 for (let i in res.data) {
                     res.data[i].isLeaf = !res.data[i].hasChildren
                 }
