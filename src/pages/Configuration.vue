@@ -39,9 +39,9 @@
         </template>
     </el-page-header>
 
-    <el-tabs tab-position="top" style="height: calc(100% - 64px); padding-left: 16px" v-model="activeTab" @tab-change="tabChange">
+    <el-tabs ref="tabsEl" tab-position="top" style="height: calc(100% - 128px); padding-left: 16px; padding-right: 16px" v-model="activeTab" @tab-change="tabChange">
 
-        <el-tab-pane :label="$t('menu')" name="menu">
+        <el-tab-pane :label="$t('menu')" name="menu" style="height: inherit">
             <Table :columns="menuColumns"
                    id="menu"
                    :context="{}"
@@ -50,11 +50,11 @@
                    :readonly="true"
                    :on-click-add="addMenu"
                    :filters-visible="false"
-                   :height="height"
+                   :height="height ? height : 500"
             />
         </el-tab-pane>
 
-        <el-tab-pane :label="$t('pages')"  name="pages">
+        <el-tab-pane :label="$t('pages')"  name="pages" style="height: inherit">
             <Table :columns="pagesColumns"
                    id="pages"
                    datasource="page"
@@ -63,12 +63,11 @@
                    :readonly="true"
                    :on-click-add="addPage"
                    :filters-visible="false"
-                   :fill-height="true"
-                   :height="height"
+                   :height="height ? height : 500"
             />
         </el-tab-pane>
 
-        <el-tab-pane :label="$t('datasources')" name="datasources">
+        <el-tab-pane :label="$t('datasources')" name="datasources" style="height: inherit">
             <Table :columns="dsColumns"
                    id="ds"
                    :context="{}"
@@ -77,7 +76,7 @@
                    @row-dbl-click="editDataSource"
                    :on-click-add="addDataSource"
                    :filters-visible="false"
-                   :height="height"
+                   :height="height ? height : 500"
 
             />
         </el-tab-pane>
@@ -91,7 +90,7 @@
                    :readonly="true"
                    :on-click-add="addFunc"
                    :filters-visible="false"
-                   :height="height"
+                   :height="height ? height : 500"
             />
         </el-tab-pane>
 
@@ -105,7 +104,22 @@
                    :readonly="true"
                    :on-click-add="addReport"
                    :filters-visible="true"
-                   :height="height"
+                   :height="height ? height : 500"
+            />
+
+        </el-tab-pane>
+
+        <el-tab-pane :label="$t('users')" name="users">
+
+            <Table :columns="usersColumns"
+                   id="users"
+                   :context="{}"
+                   datasource="users"
+                   @row-dbl-click="editUser"
+                   :readonly="true"
+                   :on-click-add="addUser"
+                   :filters-visible="true"
+                   :height="height ? height : 500"
             />
 
         </el-tab-pane>
@@ -121,6 +135,15 @@ import {ScreenSize} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {ElMessage} from "element-plus";
 import {useSettings} from "../services/settings.service";
+import {useI18n} from "vue-i18n";
+import { useElementSize } from '@vueuse/core'
+const { t } = useI18n();
+
+
+
+
+let tabsEl = ref(null)
+const { height } = useElementSize(tabsEl)
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -132,78 +155,73 @@ const dsService = useDataSourceService()
 let activeTab = ref('')
 const settings = useSettings()
 
-let height = ref(500)
-
 const pagesColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
         "field": "alias",
-        "title": "Page alias",
+        "title": t('alias'),
         "width": 150,
         "sortable": true,
     },
     {
         "id": "2",
         "field": "title",
-        "title": "Title",
+        "title": t('title'),
         "width": 350,
         "sortable": true
     }
 ]
-
 const funcColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
         "field": "alias",
-        "title": "alias",
+        "title": t('alias'),
         "width": 150,
         "sortable": true
     },
     {
         "id": "2",
         "field": "title",
-        "title": "Title",
+        "title": t('title'),
         "width": 200,
         "sortable": true
     }
 ]
-
 const reportColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
         "field": "alias",
-        "title": "alias",
+        "title": t('alias'),
         "width": 150,
         "sortable": true
     },
     {
         "id": "2",
         "field": "title",
-        "title": "Title",
+        "title": t('title'),
         "width": 200,
         "sortable": true
     }
 ]
-
 const dsColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
         "field": "alias",
-        "title": "alias",
+        "title": t('alias'),
         "width": 150,
         "sortable": true
     },
     {
         "id": "2",
         "field": "title",
-        "title": "Title",
+        "title": t('title'),
         "width": 200,
         "sortable": true
     },
     {
         "id": "3",
         "field": "source",
-        "title": "Source",
+        "title": t('source'),
         "width": 200,
         "sortable": true,
     }
@@ -212,14 +230,41 @@ const menuColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
         "field": "title",
-        "title": "Title",
+        "title": t('title'),
         "width": 150,
+        "sortable": true
+    }
+]
+const usersColumns:ColumnConfigInterface[] = [
+    {
+        "id": "1",
+        "field": "username",
+        "title": t('username'),
+        "width": 150,
+        "sortable": true
+    },{
+        "id": "1",
+        "field": "active",
+        "title": t('active'),
+        "width": 60,
+        "sortable": true
+    },{
+        "id": "1",
+        "field": "firstname",
+        "title": t('firstname'),
+        "width": 100,
+        "sortable": true
+    },{
+        "id": "1",
+        "field": "lastname",
+        "title": t('lastname'),
+        "width": 100,
         "sortable": true
     }
 ]
 
 function setAppTitle() {
-    document.title = `Configuration | ${ window['env']['appTitle'] }`
+    document.title = `${t('configuration')} | ${ window['env']['appTitle'] }`
 }
 
 onMounted(async () => {
@@ -229,6 +274,8 @@ onMounted(async () => {
     setAppTitle()
 
     console.log()
+
+
 
     //height.value = window.innerHeight - 200
 });
@@ -387,6 +434,13 @@ function editReport(ctx) {
     router.push(`/configuration/reports/${ctx.id}`)
 }
 
+function addUser() {
+    router.push(`/configuration/users/new`)
+}
+
+function editUser(ctx) {
+    router.push(`/configuration/users/${ctx.id}`)
+}
 
 </script>
 

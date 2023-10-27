@@ -86,12 +86,12 @@ export interface FieldInterface {
     default?: string | number |
         object | object[] | null,
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
-    config: FieldConfigInterface
+    config?: FieldConfigInterface
 
-    getValueFunc(): CompiledFunc | undefined,
-    setValueFunc(): CompiledFunc | undefined,
-    getListFunc() : CompiledFunc | undefined
-    getReadonlyFunc() : CompiledFunc | undefined
+    getValueFunc?: () => CompiledFunc | undefined,
+    setValueFunc?: () => CompiledFunc | undefined,
+    getListFunc?: () => CompiledFunc | undefined
+    getReadonlyFunc?: () => CompiledFunc | undefined
 }
 
 export class Field implements FieldInterface {

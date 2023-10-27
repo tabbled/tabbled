@@ -266,8 +266,6 @@ async function init() {
     editDataSource = null
     editEntity.value = null
 
-    //console.log(props)
-
     scriptContext.value.page.params = route.params
     scriptContext.value.openDialog = props.openDialog
 

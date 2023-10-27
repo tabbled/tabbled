@@ -10,6 +10,7 @@ import {
 } from "../model/datasource";
 
 import {ServerInterface, useSocketClient} from "./socketio.service";
+import {UsersConfigDataSource} from "../model/user.datasource";
 
 let socketClient = useSocketClient()
 
@@ -21,6 +22,7 @@ export class DataSourceService {
         this.menuDataSource = new MenuConfigDataSource(this.server, this)
         this.functionDataSource = new FunctionsConfigDataSource(this.server, this)
         this.reportDataSource = new ReportConfigDataSource(this.server, this)
+        this.usersDataSource = new UsersConfigDataSource(this.server, this)
     }
     private readonly server: ServerInterface
 
@@ -32,6 +34,7 @@ export class DataSourceService {
     menuDataSource = null
     functionDataSource = null
     reportDataSource = null
+    usersDataSource = null
 
 
     async getByAlias(alias: string) : Promise<DataSourceInterface> {
@@ -138,6 +141,7 @@ export class DataSourceService {
         this.addDataSource(this.menuDataSource);
         this.addDataSource(this.functionDataSource);
         this.addDataSource(this.reportDataSource)
+        this.addDataSource(this.usersDataSource)
     }
 }
 

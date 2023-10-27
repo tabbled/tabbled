@@ -85,7 +85,7 @@ export interface DataSourceInterface extends EventEmitter {
     // Set items
     //get data(): EntityInterface[]
     setData?(items: EntityInterface[]): Promise<void>
-    setValue(id: string, field: string, value: any): Promise<void>
+    setValue?(id: string, field: string, value: any): Promise<void>
 
     setVariable?(alias: string, value: any)
 
@@ -197,8 +197,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     async insert(id: string, value: any, parentId?: string, route?: string[]): Promise<EntityInterface> {
 
-        let dt = new Date().getMilliseconds()
-        console.log(this.alias, " insert")
+        //let dt = new Date().getMilliseconds()
+        //console.log(this.alias, " insert")
 
         if (this.isTree) {
             value.parentId = parentId
@@ -211,7 +211,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             value: value,
             route: route
         })
-        console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
+        //console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
 
         this.emit('item-inserted', {
             data: value,
@@ -237,12 +237,12 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     }
 
     async removeById(id: string, route?: string[]): Promise<boolean> {
-        let dt = new Date().getMilliseconds()
+        //let dt = new Date().getMilliseconds()
         let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/removeById`, {
             alias: this.alias,
             id: id
         })
-        console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
+        //console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
 
         this.emit('item-removed', {
             data: res.data,
@@ -287,14 +287,14 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     async setValue(id: string, field: string, value: any) {
 
-        let dt = new Date().getMilliseconds()
+        //let dt = new Date().getMilliseconds()
         let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/setValue`, {
             alias: this.alias,
             id: id,
             field: field,
             value: value
         })
-        console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
+        //console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
 
         this.emit('item-updated', {
             data: res.data
