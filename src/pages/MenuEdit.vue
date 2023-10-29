@@ -90,7 +90,7 @@ onMounted(async () => {
 
     await load()
 
-    document.title = `${t('menu')} ${ isNew.value ? 'new' : ' ' + menuEntity.title } | ${ window['env']['appTitle']}`
+    document.title = `${t('menu')} ${ isNew.value ? 'new' : ' ' + menuEntity.value.title } | ${ window['env']['appTitle']}`
 });
 
 function getField(alias) {

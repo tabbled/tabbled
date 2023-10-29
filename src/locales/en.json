@@ -14,6 +14,9 @@
     "page": "Page",
     "menu": "Menu",
     "users": "Users",
+    "user": "User",
+    "admin": "Administrator",
+    "permissions": "Permissions",
     "firstname": "First name",
     "lastname": "Last name",
     "active": "Active",
@@ -100,6 +103,7 @@
     "fieldTypes": {
         "number": "Number",
         "string": "String",
+        "password": "Password",
         "bool": "Boolean",
         "text": "Text",
         "list": "List",

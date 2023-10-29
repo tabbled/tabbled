@@ -136,7 +136,7 @@ onMounted(async () => {
     pages.value = (await dsService.pageDataSource.getMany()).data
 
     await load()
-    document.title = `${t('template')} ${ isNew.value ? 'new' : ' ' + reportEntity.title } | ${window['env']['appTitle']}`
+    document.title = `${t('template')} ${ isNew.value ? 'new' : ' ' + reportEntity.value.title } | ${window['env']['appTitle']}`
 });
 
 function getField(alias) {

@@ -9,6 +9,7 @@ import DataSourceEdit from "./pages/DataSourceEdit.vue";
 import MenuEdit from "./pages/MenuEdit.vue";
 import ReportEdit from "./pages/ReportEdit.vue";
 import UserSettings from "./pages/UserSettings.vue";
+import UserEdit from "./pages/UserEdit.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -75,6 +76,15 @@ const routes: RouteRecordRaw[] = [
             isSingle: false,
             authRequired: true,
             title: "Menu"
+        },
+    },{
+        name: 'userEdit',
+        path: "/configuration/users/:id",
+        component: UserEdit,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "User"
         },
     },
     {

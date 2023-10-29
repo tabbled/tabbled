@@ -5,7 +5,7 @@ let flakeId = new FlakeId()
 
 
 export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements' | 'field'
-export type FieldDataType = 'number' | 'string' | 'bool' | 'text' | 'list' | 'enum' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
+export type FieldDataType = 'number' | 'string' | 'password' | 'bool' | 'text' | 'list' | 'enum' | 'status' | 'image' | 'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
 export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action'
 
@@ -18,6 +18,7 @@ export function getFieldDataTypes():Array<FieldDataType> {
         'string',
         'bool',
         'text',
+        'password',
         //'list',
         'enum',
        // 'status',
@@ -84,7 +85,7 @@ export interface FieldInterface {
     isTree?:boolean,
     precision?: number,                  // Only for type numeric
     default?: string | number |
-        object | object[] | null,
+        object | object[] | null | boolean,
     datasource?: string  // Only for type Table, that can be passed a DataSourceConfig
     config?: FieldConfigInterface
 

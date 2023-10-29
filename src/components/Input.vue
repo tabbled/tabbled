@@ -16,11 +16,12 @@
         </ItemList>
     </div>
     <div v-else-if="fieldConfig" style="width: 100%">
-        <el-input v-if="fieldConfig.type === 'string' || fieldConfig.type === 'text'"
+        <el-input v-if="fieldConfig.type !== 'number'"
                   :disabled="disabled || isDisabled"
                   @input="change"
                   :model-value="value"
                   :type="type"
+                  :show-password="type === 'password'"
                   :readonly="!!readonly"
                   :autosize="autosize ? { minRows: 2, maxRows: 100} : false"
         />
@@ -52,12 +53,13 @@ const props = defineProps<{
     context?:any,
     autosize?: boolean,
     disabled?: boolean,
-    readonly?: boolean
+    readonly?: boolean,
+    password?:boolean
 }>()
 
 let value = ref<string | Array<string>>()
 let multiValue = ref<Array<string>>([])
-let type = ref<'text' | 'textarea'>('text')
+let type = ref<'text' | 'textarea' | 'password'>('text')
 let isDisabled = ref(false)
 
 
@@ -95,6 +97,7 @@ function init() {
     if (props.fieldConfig) {
         switch (props.fieldConfig.type) {
             case "text": type.value = 'textarea'; break;
+            case "password": type.value = 'password'; break;
             default: type.value = 'text';
         }
     }

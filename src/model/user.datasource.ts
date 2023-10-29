@@ -38,10 +38,16 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
         type: "string",
         required: true
     },{
+        title: 'Password',
+        alias: 'password',
+        type: "password",
+        required: true
+    },{
         title: 'Active',
         alias: 'active',
         type: "bool",
-        required: true
+        required: true,
+        default: true
     }];
 
     readonly server: ServerInterface = null
@@ -59,8 +65,14 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
         })
     }
 
-    getById(id: string | number): Promise<EntityInterface | undefined> {
-        return Promise.resolve(undefined);
+    async getById(id: number): Promise<EntityInterface | undefined> {
+        if (!id)
+            return null
+
+        return await this.server.emit(`users/getById`, {
+            id: id
+        })
+
     }
 
     getFieldByAlias(alias: string): FieldInterface | undefined {
@@ -77,16 +89,47 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
         }
     }
 
-    insert(id: string, value: any, parentId?: string, route?: string[]): Promise<EntityInterface> {
-        return Promise.resolve(undefined);
+    async insert(id: string, value: any): Promise<EntityInterface> {
+        console.log(value)
+        let res = await this.server.emit(`users/insert`, {
+            value: value
+        })
+
+        console.log(res)
+
+        this.emit('item-inserted', {
+            data: res,
+            route: []
+        })
+
+        return res
     }
 
-    removeById(id: string, route?: string[]): Promise<boolean> {
-        return Promise.resolve(false);
+    async removeById(id: string): Promise<boolean> {
+        let res = await this.server.emit(`users/removeById`, {
+            id: id
+        })
+
+        this.emit('item-removed', {
+            data: res,
+            route: []
+        })
+
+        return res
     }
 
-    updateById(id: string, value: object): Promise<EntityInterface> {
-        return Promise.resolve(undefined);
+    async updateById(id: string, value: object): Promise<EntityInterface> {
+        let res = await this.server.emit(`users/updateById`, {
+            id: id,
+            value: value
+        })
+
+        this.emit('item-updated', {
+            data: res,
+            route: []
+        })
+
+        return res
     }
 
 }
