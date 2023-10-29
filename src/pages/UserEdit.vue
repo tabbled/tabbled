@@ -54,7 +54,7 @@
         </div>
 
         <el-form-item :label="t('permissions')" >
-                <el-checkbox v-model="userEntity.permissions['admin']" :label="t('admin')"/>
+            <el-checkbox v-model="userEntity.permissions['admin']" :label="t('admin')"/>
         </el-form-item>
 
 
@@ -110,6 +110,9 @@ async function load() {
 
     if (!route.params.id || route.params.id === 'new') {
         userEntity.value = await generateEntityWithDefault(datasource.fields)
+        userEntity.value.permissions = {
+            admin: false
+        }
         isNew.value = true
     } else {
         userEntity.value = await datasource.getById(<string>route.params.id)
