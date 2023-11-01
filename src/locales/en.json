@@ -17,6 +17,8 @@
     "user": "User",
     "admin": "Administrator",
     "permissions": "Permissions",
+    "roles": "Roles",
+    "manageRoles": "Manage roles",
     "firstname": "First name",
     "lastname": "Last name",
     "active": "Active",

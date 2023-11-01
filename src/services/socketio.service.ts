@@ -1,7 +1,6 @@
 import { io } from "socket.io-client";
 import {Socket} from "socket.io-client/build/esm/socket";
 import { ref } from 'vue'
-import * as Sentry from "@sentry/vue";
 
 function getAccountId(): number {
     let acc = localStorage.getItem('account')
@@ -80,23 +79,23 @@ export class SocketIOClient implements ServerInterface {
 
     async emit(topic: string, message?: any) : Promise<any> {
 
-         const transaction = Sentry.startTransaction({ name: `emit /${topic}` });
-         const span = transaction.startChild({ name: `emit /${topic}`, data: { message: message } })
+         //const transaction = Sentry.startTransaction({ name: `emit /${topic}` });
+         //const span = transaction.startChild({ name: `emit /${topic}`, data: { message: message } })
 
         try {
             let res = await this.emitting(topic, message)
-            span.setStatus('ok')
-            transaction.setStatus('ok')
+            //span.setStatus('ok')
+            //transaction.setStatus('ok')
             return res
         } catch (e) {
-            span.setStatus('error')
-            transaction.setStatus('error')
-            Sentry.captureException(e)
+            //span.setStatus('error')
+            //transaction.setStatus('error')
+            //Sentry.captureException(e)
             throw e
         }
         finally {
-            span.finish()
-            transaction.finish()
+            //span.finish()
+            //transaction.finish()
         }
     }
 

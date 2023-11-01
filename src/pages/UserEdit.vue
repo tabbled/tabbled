@@ -31,7 +31,7 @@
             />
         </el-form-item>
 
-        <el-form-item style="padding-left: 8px; width: 100px">
+        <el-form-item v-if="userEntity" style="padding-left: 8px; width: 100px">
             <el-checkbox v-model="userEntity.active" :label="t('active')"/>
         </el-form-item>
 
@@ -53,13 +53,54 @@
             </el-form-item>
         </div>
 
-        <el-form-item :label="t('permissions')" >
+        <el-form-item v-if="userEntity" :label="t('permissions')" >
             <el-checkbox v-model="userEntity.permissions['admin']" :label="t('admin')"/>
+        </el-form-item>
+
+        <el-form-item :label="t('roles')" v-if="userEntity" style="width: 100%">
+            <UserRoleSelect v-model="userEntity.permissions['roles']" style="width: 100%"/>
+
+            <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between;">
+                    <div>
+                        {{t('roles')}}
+                    </div>
+                    <el-button size="small" @click="manageRolesDialogVisible = true">{{t('manageRoles')}}</el-button>
+                </div>
+
+            </template>
         </el-form-item>
 
 
 
     </el-form>
+
+    <el-dialog
+        v-model="manageRolesDialogVisible"
+        :title="$t('manageRoles')"
+        width="400px"
+    >
+            <ItemList key-prop="alias"
+                      title-prop="title"
+                      :list="roles"
+                      @remove="idx => roles.splice(idx, 1)"
+                      @insert="roles.push({alias: '', title: ''})"
+            >
+                <template #default="{item}">
+                    <div style="display: flex; width: 90%" >
+                        <el-input size="small" style="padding-right: 4px" v-model="item['alias']" placeholder="Alias"></el-input>
+                        <el-input size="small" v-model="item['title']" placeholder="Title"></el-input>
+                    </div>
+                </template>
+            </ItemList>
+
+        <template #footer>
+          <span class="dialog-footer">
+              <el-button @click="manageRolesDialogVisible = false">{{$t('cancel')}}</el-button>
+              <el-button type="primary" @click="saveRoles">{{$t('save')}}</el-button>
+          </span>
+        </template>
+    </el-dialog>
 
 </div>
 </template>
@@ -75,6 +116,10 @@ import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
+import _ from "lodash";
+import UserRoleSelect from "../components/UserRoleSelect.vue";
+import ItemList from "../components/ItemList.vue";
+import {useSocketClient} from "../services/socketio.service";
 
 let router = useRouter();
 let route = useRoute();
@@ -84,6 +129,9 @@ let dsService = useDataSourceService()
 let userEntity = ref(null)
 let isNew = ref(false)
 const settings = useSettings()
+let manageRolesDialogVisible = ref(false)
+let roles = ref([])
+let socket = useSocketClient()
 
 
 onMounted(async () => {
@@ -108,31 +156,67 @@ async function load() {
     if (!datasource)
         return;
 
+    await getRoles()
+
     if (!route.params.id || route.params.id === 'new') {
         userEntity.value = await generateEntityWithDefault(datasource.fields)
         userEntity.value.permissions = {
-            admin: false
+            admin: false,
+            roles: []
         }
         isNew.value = true
     } else {
         userEntity.value = await datasource.getById(<string>route.params.id)
+        userEntity.value.password = '*****'
         isNew.value = false
     }
 }
 
 async function save() {
+    console.log(userEntity.value)
     try {
         if (isNew.value) {
             let item = await datasource.insert(userEntity.value.id, userEntity.value)
             await router.replace({params: {id: item.id}})
             await load()
         } else {
-            await datasource.updateById(userEntity.value.id, userEntity.value)
+            let value = _.cloneDeep(userEntity.value)
+            if (value.password === '*****') {
+                value.password = undefined
+            }
+
+            await datasource.updateById(value.id, value)
         }
 
         ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
+        console.error(e)
+    }
+}
+
+async function saveRoles() {
+    console.log(roles.value)
+    try {
+        await socket.emit('config/params/set', {
+            id: 'roles',
+            value: roles.value
+        })
+        manageRolesDialogVisible.value = false
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
+}
+
+async function getRoles() {
+    try {
+        let res = await socket.emit('config/params/get', {
+            id: 'roles'
+        })
+        console.log('getRoles', res)
+        roles.value = res
+    } catch (e) {
         console.error(e)
     }
 }
