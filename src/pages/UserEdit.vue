@@ -173,7 +173,6 @@ async function load() {
 }
 
 async function save() {
-    console.log(userEntity.value)
     try {
         if (isNew.value) {
             let item = await datasource.insert(userEntity.value.id, userEntity.value)

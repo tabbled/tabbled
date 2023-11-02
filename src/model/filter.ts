@@ -39,7 +39,6 @@ export class Filters {
     }
 
     setGroup(id, filters: Array<FilterItemInterface>) {
-        console.log(id, filters)
         if (!filters) {
             this.groupById.delete(id)
         } else {
@@ -62,8 +61,6 @@ export class Filters {
 
             filters = filters.concat(gr)
         })
-
-        console.log(filters)
 
         this._filters = filters
     }

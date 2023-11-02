@@ -36,7 +36,7 @@
     <el-dialog
         v-model="menuEditDialogVisible"
         :title="$t('edit')"
-        width="400px"
+        width="40%"
     >
         <MenuItemEdit :model-value="currentMenu"/>
         <template #footer>
@@ -113,6 +113,7 @@ async function load() {
 }
 
 async function save() {
+    console.log(menuEntity.value)
     try {
         if (isNew.value) {
             let item = await datasource.insert(menuEntity.value.id, menuEntity.value)
@@ -149,7 +150,7 @@ function setValue(alias, val) {
 
 async function insert(parentId) {
     let _items =  _.cloneDeep(menuEntity.value.items)
-    let _id = (await flakeId.generateId()).toString()
+    let _id = flakeId.generateId().toString()
     let child = {
         id: _id,
         title: 'New item',
@@ -179,6 +180,7 @@ async function insert(parentId) {
 
 function edit(id) {
     currentMenu.value = getMenuById(menuEntity.value.items , id)
+    console.log(currentMenu.value)
     menuEditDialogVisible.value = true
 }
 

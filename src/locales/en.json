@@ -18,6 +18,8 @@
     "admin": "Administrator",
     "permissions": "Permissions",
     "roles": "Roles",
+    "all": "Anyone",
+    "nobody": "Nobody",
     "manageRoles": "Manage roles",
     "firstname": "First name",
     "lastname": "Last name",
@@ -100,7 +102,8 @@
         "title": "Title",
         "icon": "Icon",
         "path": "Path",
-        "page": "Page"
+        "page": "Page",
+        "visibility": "Visibility"
     },
     "fieldTypes": {
         "number": "Number",

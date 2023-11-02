@@ -637,30 +637,43 @@ export class MenuConfigDataSource extends DataSource {
             keyField: 'alias',
             cached: true,
             fields: [
-            {
-                title: 'Title',
-                alias: 'title',
-                type: "string",
-                required: true
-            },
-            {
-                title: 'Path',
-                alias: 'path',
-                type: "string",
-                required: true
-            },
-            {
-                title: 'Icon',
-                alias: 'icon',
-                type: "string",
-                required: false
-            },
-            {
-                title: "Items",
-                alias: "items",
-                type: "list",
-                required: false
-            }
+                {
+                    title: 'Title',
+                    alias: 'title',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Path',
+                    alias: 'path',
+                    type: "string",
+                    required: true
+                },
+                {
+                    title: 'Icon',
+                    alias: 'icon',
+                    type: "string",
+                    required: false
+                },
+                {
+                    title: "Items",
+                    alias: "items",
+                    type: "list",
+                    required: false
+                },
+                {
+                    title: "Visibility",
+                    alias: "visibility",
+                    type: "string",
+                    required: true,
+                    default: 'all'
+                },
+                {
+                    title: "Visibility roles",
+                    alias: "visibilityRoles",
+                    type: "list",
+                    required: false
+                }
         ]}, server, service);
     }
 }

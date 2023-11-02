@@ -22,7 +22,7 @@
                          :router="true"
                 >
                     <div v-for="menu in sidebarMenu" :key="menu.id">
-                        <el-sub-menu v-if="menu.items && menu.items.length"
+                        <el-sub-menu v-if="menu.items && menu.items.length && isMenuVisible(menu)"
                                      :index="menu.id"
                         >
                             <template #title>
@@ -34,7 +34,7 @@
 
                             </template>
 
-                            <el-menu-item v-for="item in menu.items"
+                            <el-menu-item v-for="item in menu.items.filter(m => isMenuVisible(m))"
                                           :key="item.id"
                                           :index="item.path">
                                 <template #title>
@@ -49,7 +49,7 @@
 
                             </el-menu-item>
                         </el-sub-menu>
-                        <el-menu-item v-else :index="menu.path" >
+                        <el-menu-item v-else-if="isMenuVisible(menu)" :index="menu.path" >
                             <el-icon>
                                 <Icon width="24" :icon=menu.icon color="gray" style="min-width: 24px;"/>
                             </el-icon>
@@ -152,6 +152,10 @@ const mainHeader = ref(null);
 const rView = ref(null)
 let favicon = ref('/favicon.png')
 let title = ref('Tabbled')
+let permissions = {
+    admin: false,
+    roles: []
+}
 
 
 let mainViewHeight = ref(0)
@@ -212,6 +216,8 @@ onMounted(() => {
     loadMenu();
 
     isAdmin.value = store.getters['auth/account'] && store.getters['auth/account'].permissions.admin
+
+    permissions = store.getters['auth/account'].permissions
 })
 
 onUnmounted(() => {
@@ -232,6 +238,16 @@ function openInNewWindow(to: string) {
     window.open(route.href);
 }
 
+function isMenuVisible(menu) {
+    switch (menu.visibility) {
+        case 'all': return true;
+        case 'nobody': return false;
+        case 'roles':
+            return menu.visibilityRoles.some(r=> permissions.roles.includes(r))
+        default: return false
+    }
+}
+
 async function loadMenu() {
     let menus
     try {
@@ -243,7 +259,7 @@ async function loadMenu() {
 
 
     if (!menus.length) {
-        console.warn('No menu for sideBar in config.json')
+        console.warn('No menu for sideBar in config')
         return;
     }
 

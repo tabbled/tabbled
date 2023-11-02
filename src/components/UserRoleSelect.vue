@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useSocketClient} from "../services/socketio.service";
 let socket = useSocketClient()
 
@@ -23,6 +23,8 @@ onMounted(async () => {
     await getRoles()
     value.value = props.modelValue
 })
+
+watch(() => props.modelValue,() => value.value = props.modelValue)
 
 let props = defineProps<Props>()
 let value = ref(null)

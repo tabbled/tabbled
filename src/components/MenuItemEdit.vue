@@ -17,6 +17,21 @@
             <el-input v-model="modelValue.icon"></el-input>
         </el-form-item>
 
+        <el-form-item :label="t('menuConfig.visibility')">
+            <div style="display: flex; flex-direction: row">
+                <el-select v-model="modelValue.visibility" style="max-width: 100px; padding-right: 8px">
+                    <el-option
+                        v-for="item in getAccessTypes(t)"
+                        :key="item.alias"
+                        :label="item.title"
+                        :value="item.alias"
+                    />
+                </el-select>
+                <UserRoleSelect v-if="modelValue.visibility === 'roles'" v-model="modelValue.visibilityRoles"/>
+            </div>
+
+        </el-form-item>
+
     </el-form>
 
 </template>
@@ -26,10 +41,14 @@
 import {onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {MenuConfigInterface} from "../model/menu";
+import UserRoleSelect from "./UserRoleSelect.vue";
+import {getAccessTypes} from "../model/permissions";
 const { t } = useI18n();
+
 
 onMounted(async () => {
 });
+
 
 const props = defineProps<{
     modelValue: MenuConfigInterface
