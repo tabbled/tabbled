@@ -189,5 +189,26 @@ export const pageProperties:FieldConfigInterface[] = [
         title: "onOpen",
         alias: "onOpen",
         type: 'handler'
+    },
+    {
+        title: "Access",
+        alias: "access",
+        type: 'enum',
+        default: 'all',
+        values: [{
+            key: 'all',
+            title: "All"
+        },{
+            key: 'roles',
+            title: "Roles"
+        },{
+            key: 'nobody',
+            title: "Nobody"
+        }]
+    },{
+        title: "Roles",
+        alias: "accessRoles",
+        type: 'role',
+        isMultiple: true
     }
 ]

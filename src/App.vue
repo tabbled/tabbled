@@ -55,6 +55,10 @@ const settings = useSettings()
 let dialogVisible = ref(false)
 let dialogOptions = ref()
 let dialogRef = ref(null)
+let permissions = {
+    admin: false,
+    roles: []
+}
 
 const { t, locale } = useI18n();
 
@@ -97,6 +101,8 @@ onMounted(async () => {
 
         await loadConfig()
     }
+
+    permissions = store.getters['auth/account'].permissions
 })
 
 onUnmounted(() => {
@@ -160,6 +166,16 @@ socketClient.socket.on("login_needed", () => {
     logout();
 })
 
+function canPageAccess(page) {
+    switch (page.access) {
+        case 'all': return true;
+        case 'nobody': return false;
+        case 'roles':
+            return page.accessRoles.some(r=> permissions.roles.includes(r))
+        default: return false
+    }
+}
+
 function addRoute(path: string, page: PageConfigInterface) {
     if (!path || !page)
         return;
@@ -168,6 +184,9 @@ function addRoute(path: string, page: PageConfigInterface) {
         console.error(`Page ${page.alias} path should start with /`)
         return
     }
+
+    if (!canPageAccess(page))
+        return
 
     router.addRoute({
         path: path,

@@ -1,5 +1,5 @@
 <template>
-    <el-select multiple @change="changed" :model-value="value">
+    <el-select multiple @change="changed" :model-value="value" style="width: 100%">
         <el-option
             v-for="item in roles"
             :key="item.alias"

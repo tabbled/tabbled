@@ -82,6 +82,10 @@
                                      :data-source="getDataSource()"
                                      :model-value="getValue(prop, currentElement)"
                                      @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
+                        <UserRoleSelect v-else-if="prop.type === 'role'"
+                                        :model-value="getValue(prop, currentElement)"
+                                        @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
+
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>
                     </el-form-item>
                 </el-form>
@@ -101,6 +105,7 @@ import {useComponentService} from "../services/component.service";
 import DataSourceSelect from "./DataSourceSelect.vue";
 import FieldSelect from "./FieldSelect.vue";
 import { FlakeId } from '../flake-id'
+import UserRoleSelect from "./UserRoleSelect.vue";
 let flakeId = new FlakeId()
 
 let componentService = useComponentService()
