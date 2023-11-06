@@ -223,6 +223,59 @@
                 </ItemList>
 
             </el-tab-pane>
+
+            <el-tab-pane v-if="dataSourceEntity"
+                         :label="$t('permissions')"
+                         name="permissions"
+                         style="padding-right: 2px"
+            >
+
+
+                <el-form label-position="top" label-width="30">
+                    <el-form-item :label="t('canAdd')">
+                        <div style="display: flex; flex-direction: row">
+                            <el-select v-model="dataSourceEntity.permissions.canAdd" style="padding-right: 8px">
+                                <el-option
+                                    v-for="item in getAccessTypes(t)"
+                                    :key="item.alias"
+                                    :label="item.title"
+                                    :value="item.alias"
+                                />
+                            </el-select>
+                            <UserRoleSelect style="width: 100%" v-if="dataSourceEntity.permissions.canAdd === 'roles'" v-model="dataSourceEntity.permissions.canAddRoles"/>
+                        </div>
+                    </el-form-item>
+
+                    <el-form-item :label="t('canEdit')">
+                        <div style="display: flex; flex-direction: row">
+                            <el-select v-model="dataSourceEntity.permissions.canEdit" style="padding-right: 8px">
+                                <el-option
+                                    v-for="item in getAccessTypes(t)"
+                                    :key="item.alias"
+                                    :label="item.title"
+                                    :value="item.alias"
+                                />
+                            </el-select>
+                            <UserRoleSelect style="width: 100%" v-if="dataSourceEntity.permissions.canEdit === 'roles'" v-model="dataSourceEntity.permissions.canEditRoles"/>
+                        </div>
+                    </el-form-item>
+
+                    <el-form-item :label="t('canRemove')">
+                        <div style="display: flex; flex-direction: row">
+                            <el-select v-model="dataSourceEntity.permissions.canRemove" style="padding-right: 8px">
+                                <el-option
+                                    v-for="item in getAccessTypes(t)"
+                                    :key="item.alias"
+                                    :label="item.title"
+                                    :value="item.alias"
+                                />
+                            </el-select>
+                            <UserRoleSelect style="width: 100%" v-if="dataSourceEntity.permissions.canRemove === 'roles'" v-model="dataSourceEntity.permissions.canRemoveRoles"/>
+                        </div>
+                    </el-form-item>
+                </el-form>
+
+            </el-tab-pane>
         </el-tabs>
 
 
@@ -294,6 +347,8 @@ import EventHandlerEdit from "../components/EventHandlerEdit.vue";
 import {useSettings} from "../services/settings.service";
 import ImportData from "../components/ImportData.vue";
 import CodeEditor from "../components/CodeEditor.vue";
+import {getAccessTypes} from "../model/permissions";
+import UserRoleSelect from "../components/UserRoleSelect.vue";
 
 let router = useRouter();
 let route = useRoute()
@@ -349,8 +404,12 @@ async function load() {
         isNew.value = true
     } else {
         dataSourceEntity.value = await datasource.getById(<string>route.params.id)
+
         isNew.value = false
     }
+
+    if(!dataSourceEntity.value.permissions)
+        dataSourceEntity.value.permissions = {}
 }
 
 async  function initTestDataSource() {

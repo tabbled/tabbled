@@ -132,4 +132,7 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
         return res
     }
 
+    hasPermission(action: string, userPermissions: any) {
+        return userPermissions.admin
+    }
 }

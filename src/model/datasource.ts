@@ -91,6 +91,7 @@ export interface DataSourceInterface extends EventEmitter {
 
     getFieldByAlias(alias: string): FieldInterface | undefined
 
+    hasPermission(action: string, userPermissions: any)
 }
 
 export interface DataSourceConfigInterface {
@@ -103,7 +104,8 @@ export interface DataSourceConfigInterface {
     isTree?: boolean,
     source?: DataSourceSource,
     script?: string,
-    cached?: boolean
+    cached?: boolean,
+    permissions?: any
 }
 
 export class DataSource extends EventEmitter implements DataSourceInterface {
@@ -250,6 +252,10 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         })
 
         return true
+    }
+
+    hasPermission(action: string, userPermissions: any) {
+        return hasPermission(this.config, action, userPermissions)
     }
 
     //async setRemoteChanges(items: DataItemInterface[]):Promise<boolean> {
@@ -449,6 +455,13 @@ export class CustomDataSource extends EventEmitter implements DataSourceInterfac
 
         this.model.setVariable(alias, value)
     }
+
+    hasPermission(action: string, userPermissions: any) {
+        if (!this.model  || !(this.model.hasPermission instanceof Function))
+            return true;
+
+        return this.model.hasPermission(action, userPermissions)
+    }
 }
 
 export class FieldDataSource extends EventEmitter implements DataSourceInterface {
@@ -574,6 +587,32 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
 
     async setData(items: EntityInterface[]):Promise<void> {
         this._data = !items ? [] : _.cloneDeep(items)
+    }
+
+    hasPermission(action: string, userPermissions: any) {
+        return hasPermission(this.config, action, userPermissions)
+    }
+}
+
+function hasPermission(config, action: string, userPermissions: any) {
+    if (userPermissions.admin)
+        return true;
+
+    if (!config.permissions)
+        return true
+
+    let t = 'can' + action
+    let perm = config.permissions[t]
+
+    if (perm === undefined)
+        return true
+
+    switch (perm) {
+        case 'all': return true;
+        case 'nobody': return false;
+        case 'roles':
+            return config.permissions[`can${action}Roles`].some(r=> userPermissions.roles.includes(r))
+        default: return false
     }
 }
 

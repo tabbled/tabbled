@@ -2,10 +2,10 @@
     <div :style="{ height: `${getHeight()}px`, width: '100%'} ">
         <div v-if="searchVisible || actionButtonsVisible || filtersVisible" style="padding-bottom: 16px; display: flex;">
             <div v-if="actionButtonsVisible" style="display: flex; flex: none">
-                <el-button v-if="(actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
+                <el-button v-if="hasPermission('Add') && (actions.onAdd || (!actions.onAdd && !isTree) || onClickAdd) " type="primary" @click="add" size="small">
                     {{t('add')}}
                 </el-button>
-                <el-dropdown v-else
+                <el-dropdown v-else-if="hasPermission('Add')"
                              split-button
                              type="primary"
                              @click="add"
@@ -20,10 +20,10 @@
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
-                <el-button v-if="actions.onEdit" @click="edit" size="small">
+                <el-button v-if="hasPermission('Edit') && actions.onEdit" @click="edit" size="small">
                     {{t('edit')}}
                 </el-button>
-                <el-button @click="remove" size="small">
+                <el-button v-if="hasPermission('Remove')" @click="remove" size="small">
                     {{t('delete')}}
                 </el-button>
             </div>
@@ -159,6 +159,7 @@ import {PageActionsInterface} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import CustomCellRenderer from "./table/CustomCellRenderer.vue";
 import _ from "lodash";
+import {useStore} from "vuex";
 
 LicenseManager.setLicenseKey("abc")
 
@@ -237,7 +238,12 @@ let _customActions = ref<PageActionsInterface[]>([])
 let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
 let totalData = ref([])
+const store = useStore();
 let context_ = {
+}
+let permissions = {
+    admin: false,
+    roles: []
 }
 
 watch(() => props.filters?.filters, () => {
@@ -263,7 +269,18 @@ watch(() => props.columns, async () => {
 }, {deep: true})
 
 onMounted(async () => {
+    permissions = store.getters['auth/account'].permissions
+
+    console.log(permissions)
 })
+
+function hasPermission(action) {
+    if (dataSource) {
+        return dataSource.hasPermission(action, permissions)
+    }
+
+    return false
+}
 
 class GridDataSource implements IServerSideDatasource {
 
@@ -491,6 +508,9 @@ function addListeners() {
 }
 
 async function addSibling() {
+    if (dataSource && !dataSource.hasPermission('Add', permissions))
+        return
+
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
         return
@@ -515,6 +535,9 @@ async function addSibling() {
 }
 
 async function add() {
+    if (dataSource && !dataSource.hasPermission('Add', permissions))
+        return
+
     if (dataSource.isTree) {
         let selected = gridApi.getSelectedNodes()
         if (!selected.length)
@@ -526,6 +549,8 @@ async function add() {
 }
 
 async function addChild() {
+    if (dataSource && !dataSource.hasPermission('Add', permissions))
+        return
 
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
@@ -548,6 +573,9 @@ async function addChild() {
 }
 
 function edit() {
+    if (dataSource && !dataSource.hasPermission('Edit', permissions))
+        return
+
     if (actions.value.onEdit) {
         execAction(actions.value.onEdit)
     } else {
@@ -556,6 +584,9 @@ function edit() {
 }
 
 function remove() {
+    if (dataSource && !dataSource.hasPermission('Remove', permissions))
+        return
+
     let selected = gridApi.getSelectedNodes()
     if (!selected.length)
         return
@@ -896,6 +927,9 @@ async function execAction(action: CompiledFunc, additionalContext?: object) {
 }
 
 function isEditable(params) {
+    if (dataSource && !dataSource.hasPermission('Edit', permissions))
+        return
+
     if (params.node.rowPinned ||
         dataSource.readonly ||
         props.readonly ||

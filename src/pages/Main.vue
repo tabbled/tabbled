@@ -218,6 +218,8 @@ onMounted(() => {
     isAdmin.value = store.getters['auth/account'] && store.getters['auth/account'].permissions.admin
 
     permissions = store.getters['auth/account'].permissions
+    if (!permissions.roles)
+        permissions.roles = []
 })
 
 onUnmounted(() => {
