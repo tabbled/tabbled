@@ -145,7 +145,7 @@
 
 <script setup lang="ts">
 
-import {FieldConfigInterface, getFieldDataTypes} from "../model/field";
+import {getFieldDataTypes} from "../model/field";
 import {useI18n} from "vue-i18n";
 import {onMounted, ref} from "vue";
 import {useDataSourceService} from "../services/datasource.service";
@@ -177,7 +177,6 @@ onMounted(async () => {
     let items = (await dsService.dsDataSource.getMany()).data
 
     items.forEach(item => {
-        //console.log(item)
         dataSources.value.push({
             key: item.alias,
             label: item.alias
@@ -186,7 +185,7 @@ onMounted(async () => {
 });
 
 const props = defineProps<{
-    modelValue: FieldConfigInterface
+    modelValue: any
 }>()
 
 const emit = defineEmits(['update:modelValue'])

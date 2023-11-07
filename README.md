@@ -18,7 +18,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 * Drag-and-drop Form Builder to configure user interface
 * Built-in data sources and connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
 * Scripting - customize application anywhere with JavaScript
-* Functions - cloud functions to evaluating business logic
+* Functions - cloud functions to evaluating business logic and integrations
 * Permission - user access limitation for any data or element of interface
 * Live data - each device gets synchronized data in real-time
 
@@ -28,10 +28,12 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Types implementation
 - [x] Table editor
 - [x] Page designer
+- [ ] Flex drag&drop designer without grid
 - [x] View editor
 - [x] DataSource setting page
 - [x] Menu setting page
 - [x] Table cell editor widgets
+- [x] User and access management
 - [x] Functions
 - [ ] DataSources 
   - [x] Internal DataSource

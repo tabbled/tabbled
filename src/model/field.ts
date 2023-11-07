@@ -96,7 +96,7 @@ export interface FieldInterface {
 }
 
 export class Field implements FieldInterface {
-    constructor(config: FieldConfigInterface) {
+    constructor(config: FieldConfigInterface | FieldInterface) {
         this.alias = config.alias;
         this.title = config.title
         this.type = config.type;
@@ -183,7 +183,7 @@ export class Field implements FieldInterface {
     }
 }
 
-export async function generateEntityWithDefault(fields: FieldConfigInterface[]): Promise<EntityInterface> {
+export async function generateEntityWithDefault(fields: FieldConfigInterface[] | FieldInterface[]): Promise<EntityInterface> {
     let item = {
         id: flakeId.generateId().toString()
     }
