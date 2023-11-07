@@ -8,7 +8,7 @@ import {
     GetDataManyOptions,
     GetManyResponse
 } from "./datasource";
-import {Field, FieldInterface} from "./field";
+import {EnumValuesInterface, Field, FieldInterface} from "./field";
 import {EventEmitter} from "events";
 
 export class UsersConfigDataSource extends EventEmitter implements DataSourceInterface {
@@ -48,6 +48,12 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
         type: "bool",
         required: true,
         default: true
+    },{
+        title: 'Roles',
+        alias: 'roles',
+        type: "enum",
+        isMultiple: true,
+        values: this.getRoles.bind(this),
     }];
 
     readonly server: ServerInterface = null
@@ -75,6 +81,18 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
 
     }
 
+    async getRoles() : Promise<EnumValuesInterface[]> {
+        try {
+            let res = await this.server.emit('config/params/get', {
+                id: 'roles'
+            })
+            return res ? res : []
+        } catch (e) {
+            console.error(e)
+            return []
+        }
+    }
+
     getFieldByAlias(alias: string): FieldInterface | undefined {
         return this.fieldByAlias.get(alias)
     }
@@ -82,20 +100,24 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
     async getMany(options?: GetDataManyOptions): Promise<GetManyResponse> {
         const data = await this.server.emit(`${'users/getMany'}`, options)
 
+        let items = []
+        data.items.forEach(item => {
+            items.push(Object.assign(item, {
+                roles: item.permissions.roles
+            }))
+        })
+
         return {
-            data: data.items,
+            data: items,
             totals: data.totals,
             count: data.count
         }
     }
 
     async insert(id: string, value: any): Promise<EntityInterface> {
-        console.log(value)
         let res = await this.server.emit(`users/insert`, {
             value: value
         })
-
-        console.log(res)
 
         this.emit('item-inserted', {
             data: res,

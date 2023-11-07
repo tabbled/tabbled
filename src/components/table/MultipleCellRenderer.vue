@@ -21,7 +21,6 @@ export default {
         let notFound = ref(false)
         const field = props.params.field
         const displayProp = field.displayProp ? field.displayProp : 'name'
-
         if (!props.params.value)
             return
 
@@ -41,6 +40,27 @@ export default {
                 value.value = props.params.value.split(',')
             } else if(props.params.value instanceof Array) {
                 value.value = props.params.value
+            }
+        }
+
+        if (field.type === 'enum') {
+            if (field.values instanceof Function) {
+                field.values().then(items => {
+                    value.value = getEnumTitles(items, props.params.value)
+                })
+            } else {
+                value.value = getEnumTitles(field.values, props.params.value)
+            }
+
+            function getEnumTitles(fieldEnum, value) {
+                let list = []
+
+                value.forEach(item => {
+                    let v = fieldEnum.find(i => i.key === item)
+                    list.push(v ? v.title : item)
+                })
+
+                return list
             }
         }
 

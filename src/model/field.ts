@@ -53,7 +53,7 @@ export interface FieldConfigInterface {
     keyProp?: string,
     displayProp?: string,
     link?: string,                      // Data source alias
-    values?: EnumValuesInterface[],       // Only for types
+    values?: EnumValuesInterface[] | (() => Promise<EnumValuesInterface[]>),       // Only for types
     isMultiple?: boolean,
     isTree?:boolean,
     precision?: number,                  // Only for type numeric
@@ -80,7 +80,7 @@ export interface FieldInterface {
     keyProp?: string,
     displayProp?: string,
     link?: string,                      // Data source alias
-    values?: EnumValuesInterface[],       // Only for types
+    values?: EnumValuesInterface[] | (() => Promise<EnumValuesInterface[]>),       // Only for types
     isMultiple?: boolean,
     isTree?:boolean,
     precision?: number,                  // Only for type numeric
@@ -137,7 +137,7 @@ export class Field implements FieldInterface {
     required: boolean;
     title: string;
     datasource?: string;
-    values: EnumValuesInterface[]
+    values: EnumValuesInterface[] | (() => Promise<EnumValuesInterface[]>)
     config: FieldConfigInterface
 
     getValueFunc(): CompiledFunc | undefined {

@@ -270,8 +270,6 @@ watch(() => props.columns, async () => {
 
 onMounted(async () => {
     permissions = store.getters['auth/account'].permissions
-
-    console.log(permissions)
 })
 
 function hasPermission(action) {

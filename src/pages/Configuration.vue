@@ -243,22 +243,28 @@ const usersColumns:ColumnConfigInterface[] = [
         "width": 150,
         "sortable": true
     },{
-        "id": "1",
+        "id": "2",
         "field": "active",
         "title": t('active'),
         "width": 60,
         "sortable": true
     },{
-        "id": "1",
+        "id": "2",
         "field": "firstname",
         "title": t('firstname'),
         "width": 100,
         "sortable": true
     },{
-        "id": "1",
+        "id": "3",
         "field": "lastname",
         "title": t('lastname'),
         "width": 100,
+        "sortable": true
+    },{
+        "id": "4",
+        "field": "roles",
+        "title": t('Roles'),
+        "width": 250,
         "sortable": true
     }
 ]
@@ -272,12 +278,6 @@ onMounted(async () => {
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
 
     setAppTitle()
-
-    console.log()
-
-
-
-    //height.value = window.innerHeight - 200
 });
 
 

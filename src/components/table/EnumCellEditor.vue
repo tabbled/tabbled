@@ -31,6 +31,7 @@ export default defineComponent({
     setup(props) {
         // the current/initial value of the cell (before editing)
 
+        console.log('EnumCellEditor')
         const field = props.params.field
         const value = ref(props.params.value);
 
