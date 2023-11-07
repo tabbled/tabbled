@@ -195,7 +195,6 @@ async function save() {
 }
 
 async function saveRoles() {
-    console.log(roles.value)
     try {
         await socket.emit('config/params/set', {
             id: 'roles',
@@ -213,8 +212,7 @@ async function getRoles() {
         let res = await socket.emit('config/params/get', {
             id: 'roles'
         })
-        console.log('getRoles', res)
-        roles.value = res
+        roles.value = res ? res : []
     } catch (e) {
         console.error(e)
     }
