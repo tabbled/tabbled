@@ -38,14 +38,15 @@ export default {
         }
 
         //Formatting numbers
-        if (value.value &&
-            field.value &&
-            field.value.type === 'number'
+        if (value.value
+            && field.value
+            && field.value.type === 'number'
+            && field.value.config
             && field.value.config.format
             && field.value.config.format !== 'none') {
 
 
-            value.value =  numeral(value.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
+            value.value =  numeral(value.value).format('0,0.' + '0'.repeat(field.value.config.precision ? field.value.config.precision : 0) + (field.value.config.format === 'currency' ? ' $' : ''))
 
         }
 
