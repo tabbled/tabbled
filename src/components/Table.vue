@@ -151,7 +151,6 @@ import TotalsRenderer from "./table/TotalsRenderer.vue"
 
 import numeral from 'numeral';
 import 'numeral/locales';
-numeral.locale('ru')
 
 import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
 import { ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
@@ -166,6 +165,7 @@ import _ from "lodash";
 import {useStore} from "vuex";
 
 LicenseManager.setLicenseKey("abc")
+numeral.locale('ru')
 
 ModuleRegistry.registerModules([ RowGroupingModule, ServerSideRowModelModule ]);
 
