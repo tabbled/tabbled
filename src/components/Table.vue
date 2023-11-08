@@ -149,6 +149,10 @@ import TreeCellEditor from "./table/TreeCellEditor.vue";
 import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
 import TotalsRenderer from "./table/TotalsRenderer.vue"
 
+import numeral from 'numeral';
+import 'numeral/locales';
+numeral.locale('ru')
+
 import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
 import { ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
 import {IServerSideGetRowsParams} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
@@ -386,7 +390,7 @@ let dataTypeDefinitions = {
                 return "";
 
             if (field.config.format && field.config.format !== 'none') {
-                return Number.parseFloat(Number(params.value).toFixed(field.config.precision)).toLocaleString('ru-RU')
+                return numeral(params.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
             }
             return params.value
         },

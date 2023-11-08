@@ -13,7 +13,9 @@
 
 <script lang="ts">
 import {ref} from "vue";
-
+import numeral from "numeral";
+import 'numeral/locales';
+numeral.locale('ru')
 
 export default {
     name: "CustomCellRenderer",
@@ -41,7 +43,10 @@ export default {
             field.value.type === 'number'
             && field.value.config.format
             && field.value.config.format !== 'none') {
-            value.value = Number.parseFloat(Number(value.value).toFixed(field.value.config.precision)).toLocaleString('ru-RU')
+
+
+            value.value =  numeral(value.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
+
         }
 
         return {

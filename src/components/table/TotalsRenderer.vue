@@ -4,6 +4,7 @@
 
 <script lang="ts">
 import {ref} from "vue";
+import numeral from "numeral";
 
 
 export default {
@@ -18,7 +19,7 @@ export default {
             return
 
         if (totalFunc && totalFunc !== 'none') {
-            value = Number.parseFloat(Number(props.params.value).toFixed(field.config.precision)).toLocaleString('ru-RU')
+            value = numeral(props.params.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
         }
 
         return {
