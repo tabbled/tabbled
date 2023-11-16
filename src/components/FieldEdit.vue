@@ -182,6 +182,11 @@ onMounted(async () => {
             label: item.alias
         })
     })
+
+    dataSources.value.push({
+        key: 'users',
+        label: 'users'
+    })
 });
 
 const props = defineProps<{

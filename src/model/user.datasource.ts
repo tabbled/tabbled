@@ -103,7 +103,8 @@ export class UsersConfigDataSource extends EventEmitter implements DataSourceInt
         let items = []
         data.items.forEach(item => {
             items.push(Object.assign(item, {
-                roles: item.permissions.roles
+                roles: item.permissions.roles,
+                name: `${item.firstname} ${item.lastname} (${item.username})`
             }))
         })
 
