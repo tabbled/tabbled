@@ -41,19 +41,6 @@
 
     <el-tabs ref="tabsEl" tab-position="top" style="height: calc(100% - 128px); padding-left: 16px; padding-right: 16px" v-model="activeTab" @tab-change="tabChange">
 
-        <el-tab-pane :label="$t('menu')" name="menu" style="height: inherit">
-            <Table :columns="menuColumns"
-                   id="menu"
-                   :context="{}"
-                   datasource="menu"
-                   @row-dbl-click="editMenu"
-                   :readonly="true"
-                   :on-click-add="addMenu"
-                   :filters-visible="false"
-                   :height="height ? height : 500"
-            />
-        </el-tab-pane>
-
         <el-tab-pane :label="$t('pages')"  name="pages" style="height: inherit">
             <Table :columns="pagesColumns"
                    id="pages"
@@ -123,7 +110,59 @@
             />
 
         </el-tab-pane>
+
+        <el-tab-pane :label="$t('settings')" name="settings">
+            <div style="display: flex; justify-content: end;">
+                <el-button type="primary" @click="saveSettings">{{$t('save')}}</el-button>
+            </div>
+
+            <el-form label-position="top">
+                <el-form-item :label="t('menu')">
+                    <MenuEdit v-model:menuEntity="menuEntity"/>
+                </el-form-item>
+            </el-form>
+
+        </el-tab-pane>
+
     </el-tabs>
+    <el-dialog class="dialog"
+               :model-value="importConfigSettingsVisible"
+               style="padding: 16px"
+               @close="importConfigSettingsVisible = false"
+               :title="t('Import')"
+               :modal="true"
+               draggable
+               :width="'60%'"
+               :append-to-body="true"
+
+    >
+        <div style="display: flex; flex-direction: column; margin-left: 24px">
+            <el-checkbox  v-model="importEntireConfig">Import entire config</el-checkbox>
+            <el-text v-if="importEntireConfig"
+                     class="mx-1"
+                     type="warning"
+                     style="margin-right: 16px; align-self: flex-start;"
+            >
+                Current config while be replaced
+            </el-text>
+        </div>
+        <el-tree v-if="!importEntireConfig"
+                 ref="configTree"
+                 :data="importConfigData"
+                 node-key="key"
+                 :props="treeProps"
+                 show-checkbox
+                 check-on-click-node
+        >
+        </el-tree>
+        <template #footer>
+            <span>
+                <el-text class="mx-1" style="margin-right: 16px;  ">{{'Version: ' +  importConfigVersion + '; rev: ' + importConfigRev}}</el-text>
+                <el-button @click="importConfigSettingsVisible = false">{{$t('cancel')}}</el-button>
+                <el-button type="primary" @click="importConfig">{{$t('import')}}</el-button>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -137,9 +176,27 @@ import {ElMessage} from "element-plus";
 import {useSettings} from "../services/settings.service";
 import {useI18n} from "vue-i18n";
 import { useElementSize } from '@vueuse/core'
+import { useSocketClient } from "../services/socketio.service";
+import MenuEdit from "./MenuEdit.vue";
+
 const { t } = useI18n();
+const server = useSocketClient()
 
+let configTree = ref(null)
+let importConfigVersion = ref(null)
+let importConfigRev = ref(null)
+let importConfigData = ref(null)
+let importConfigSettingsVisible = ref(false)
+let importEntireConfig = ref(true)
+let importConfigFile = null
 
+const treeProps = {
+    children: 'children',
+    label: 'label',
+    disabled: 'disabled'
+}
+
+let menuEntity = ref([])
 
 
 let tabsEl = ref(null)
@@ -226,15 +283,6 @@ const dsColumns:ColumnConfigInterface[] = [
         "sortable": true,
     }
 ]
-const menuColumns:ColumnConfigInterface[] = [
-    {
-        "id": "1",
-        "field": "title",
-        "title": t('title'),
-        "width": 150,
-        "sortable": true
-    }
-]
 const usersColumns:ColumnConfigInterface[] = [
     {
         "id": "1",
@@ -277,8 +325,27 @@ onMounted(async () => {
     activeTab.value = route.query.activeTab ? <string>route.query.activeTab : 'pages'
     await router.replace({path: '/configuration', query: {activeTab: activeTab.value}})
 
+    let menu = await server.emit('config/params/get', {
+        id: 'menu'
+    })
+
+    menuEntity.value = menu ? menu : []
+
     setAppTitle()
 });
+
+async function saveSettings() {
+    try {
+        await server.emit('config/params/set', {
+            id: 'menu',
+            value: menuEntity.value
+        })
+        ElMessage.success('Saved successfully')
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
+}
 
 
 function loadFile() : Promise<any> {
@@ -297,10 +364,60 @@ function loadFile() : Promise<any> {
     })
 }
 
+function prepareConfigTree(config) {
+    if (!config.version || !config.rev)
+        return null
+
+    importConfigVersion.value = config.version
+    importConfigRev.value = config.rev
+
+    return [
+        prepareItem('page',t('pages')),
+        prepareItem('datasource',t('datasources')),
+        prepareItem('function',t('functions')),
+        prepareItem('report',t('reportTemplates')),
+        {
+            key: 'params',
+            label: t('params')
+        }
+    ]
+
+    function prepareItem(alias, title) {
+        let item = {
+            key: alias,
+            label: title,
+            children: [],
+            disabled: false
+        }
+
+        if (config[alias] && Array.isArray(config[alias])) {
+            for(const i in config[alias]) {
+                let it = config[alias][i]
+                item.children.push({
+                    key: `${it.alias}.${it.data.alias}`,
+                    label: `${it.data.title} (${it.data.alias})`,
+                })
+            }
+        }
+
+        item.disabled = !item.children.length
+
+
+        return item
+    }
+}
 
 function loadConfigFile() {
     loadFile().then(data => {
-        importConfig(JSON.parse(data.toString()))
+        importConfigFile = JSON.parse(data.toString())
+        importConfigData.value = prepareConfigTree(importConfigFile)
+
+        if (!importConfigData.value) {
+            ElMessage.error('Config is not valid')
+            return
+        }
+
+        importConfigSettingsVisible.value = true
     })
 }
 
@@ -312,9 +429,13 @@ function loadDataFile() {
 
 async function importConfig(config: any) {
     console.log('Start load configuration with version ' + config.version)
-
+    //console.log(configTree.value.getCheckedKeys())
     try {
-        //await sync.import(DataSourceType.config.json, config.json)
+        await server.emit('config/import', {
+            entire: importEntireConfig.value,
+            entities: !importEntireConfig.value ? configTree.value.getCheckedKeys() : undefined,
+            config: importConfigFile
+        })
         console.log("Loading configuration have finished. Reload the page")
         ElMessage.success('Imported successfully')
     } catch (e) {
@@ -351,8 +472,8 @@ function saveFile(data: any, filename: string) {
 }
 
 async function exportConfig() {
-    let data = JSON.stringify(await gatherConfig(), null, 4)
-    saveFile(data, 'configuration.json')
+    let config = await server.emit('config/export', {})
+    saveFile(JSON.stringify(config), 'configuration.json')
 }
 
 async function exportData() {
@@ -369,16 +490,6 @@ async function gatherData() {
     }
 
     return data
-}
-
-async function gatherConfig() {
-    return {
-        version: 1,
-        function: await gatherFromDataSource('function'),
-        page: await gatherFromDataSource('page'),
-        datasource: await gatherFromDataSource('datasource'),
-        menu: await gatherFromDataSource('menu')
-    }
 }
 
 async function gatherFromDataSource(alias: string) {

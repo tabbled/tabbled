@@ -1,5 +1,5 @@
 <template>
-    <el-form ref="formRef" :model="modelValue" label-width="100px">
+    <el-form ref="formRef" :model="modelValue" label-width="100px" label-position="left">
 
         <el-form-item :label="t('menuConfig.title')" prop="alias">
             <el-input v-model="modelValue.title"></el-input>

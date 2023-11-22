@@ -251,24 +251,17 @@ function isMenuVisible(menu) {
 }
 
 async function loadMenu() {
-    let menus
     try {
-        menus = (await dsService.menuDataSource.getMany()).data
+        let menu = await socketClient.emit('config/params/get', {
+            id: 'menu'
+        })
+        sidebarMenu.value = (menu as MenuConfigInterface[])
+
+        console.log(sidebarMenu.value)
     } catch (e) {
         console.error(e)
         return;
     }
-
-
-    if (!menus.length) {
-        console.warn('No menu for sideBar in config')
-        return;
-    }
-
-    sidebarMenu.value = (menus[0].items as MenuConfigInterface[])
-
-    if (menus.length > 1)
-        console.warn('Number of menu over the 1, for sideBar menu has taken first item')
 }
 
 function logout() {

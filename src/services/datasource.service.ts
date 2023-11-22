@@ -6,7 +6,7 @@ import {
     DataSourceConfigInterface,
     DataSourceInterface, DataSourceSource,
     DataSourceType, FieldDataSource, FunctionsConfigDataSource,
-    MenuConfigDataSource, PageConfigDataSource, ReportConfigDataSource
+    PageConfigDataSource, ReportConfigDataSource
 } from "../model/datasource";
 
 import {ServerInterface, useSocketClient} from "./socketio.service";
@@ -19,7 +19,6 @@ export class DataSourceService {
         this.server = useSocketClient()
         this.pageDataSource = new PageConfigDataSource(this.server, this)
         this.dsDataSource = new DataSourceConfigDataSource(this.server, this)
-        this.menuDataSource = new MenuConfigDataSource(this.server, this)
         this.functionDataSource = new FunctionsConfigDataSource(this.server, this)
         this.reportDataSource = new ReportConfigDataSource(this.server, this)
         this.usersDataSource = new UsersConfigDataSource(this.server, this)
@@ -31,7 +30,6 @@ export class DataSourceService {
     private configDataSources: Map<string, DataSourceInterface> = new Map()
     pageDataSource = null
     dsDataSource = null
-    menuDataSource = null
     functionDataSource = null
     reportDataSource = null
     usersDataSource = null
@@ -138,7 +136,6 @@ export class DataSourceService {
     async registerConfig() {
         this.addDataSource(this.dsDataSource);
         this.addDataSource(this.pageDataSource);
-        this.addDataSource(this.menuDataSource);
         this.addDataSource(this.functionDataSource);
         this.addDataSource(this.reportDataSource)
         this.addDataSource(this.usersDataSource)
