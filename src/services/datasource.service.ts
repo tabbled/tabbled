@@ -9,7 +9,7 @@ import {
     PageConfigDataSource, ReportConfigDataSource
 } from "../model/datasource";
 
-import {ServerInterface, useSocketClient} from "./socketio.service";
+import {useSocketClient} from "./socketio.service";
 import {UsersConfigDataSource} from "../model/user.datasource";
 
 let socketClient = useSocketClient()
@@ -23,7 +23,7 @@ export class DataSourceService {
         this.reportDataSource = new ReportConfigDataSource(this.server, this)
         this.usersDataSource = new UsersConfigDataSource(this.server, this)
     }
-    private readonly server: ServerInterface
+    private readonly server: any
 
     private dataSourceConfigs: Map<string, DataSourceConfigInterface> = new Map()
     private dataSources: Map<string, DataSourceInterface> = new Map()

@@ -167,16 +167,16 @@
 
 <script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
-import Table from "../components/Table.vue";
-import {ColumnConfigInterface} from "../model/column";
+import Table from "../../components/Table.vue";
+import {ColumnConfigInterface} from "../../model/column";
 import {onMounted, ref} from "vue";
-import {ScreenSize} from "../model/page";
-import {useDataSourceService} from "../services/datasource.service";
+import {ScreenSize} from "../../model/page";
+import {useDataSourceService} from "../../services/datasource.service";
 import {ElMessage} from "element-plus";
-import {useSettings} from "../services/settings.service";
+import {useSettings} from "../../services/settings.service";
 import {useI18n} from "vue-i18n";
 import { useElementSize } from '@vueuse/core'
-import { useSocketClient } from "../services/socketio.service";
+import { useSocketClient } from "../../services/socketio.service";
 import MenuEdit from "./MenuEdit.vue";
 
 const { t } = useI18n();

@@ -102,15 +102,15 @@
 import {ElMessage} from "element-plus";
 import {useRoute, useRouter} from "vue-router";
 import {computed, ComputedRef, onMounted, ref} from "vue";
-import CodeEditor from "../components/CodeEditor.vue";
-import Input from "../components/Input.vue";
-import {generateEntityWithDefault} from "../model/field";
-import {DataSourceInterface} from "../model/datasource";
-import {useDataSourceService} from "../services/datasource.service";
-import {useSocketClient} from "../services/socketio.service";
-import {useSettings} from "../services/settings.service";
+import CodeEditor from "../../components/CodeEditor.vue";
+import Input from "../../components/Input.vue";
+import {generateEntityWithDefault} from "../../model/field";
+import {DataSourceInterface} from "../../model/datasource";
+import {useDataSourceService} from "../../services/datasource.service";
+import {useSocketClient} from "../../services/socketio.service";
+import {useSettings} from "../../services/settings.service";
 import {useI18n} from 'vue-i18n'
-import LinkSelect from "../components/LinkSelect.vue";
+import LinkSelect from "../../components/LinkSelect.vue";
 
 let router = useRouter();
 let route = useRoute()

@@ -331,24 +331,24 @@
 import {ElMessage, ElMessageBox} from "element-plus";
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
-import Input from "../components/Input.vue";
-import ItemList from "../components/ItemList.vue";
+import Input from "../../components/Input.vue";
+import ItemList from "../../components/ItemList.vue";
 import {useI18n} from "vue-i18n";
-import FieldEdit from "../components/FieldEdit.vue";
-import {FieldConfigInterface, generateEntityWithDefault} from "../model/field";
+import FieldEdit from "../../components/FieldEdit.vue";
+import {FieldConfigInterface, generateEntityWithDefault} from "../../model/field";
 import _ from 'lodash'
-import {CustomDataSource, DataSourceInterface, DataSourceType} from "../model/datasource";
-import CheckboxField from "../components/CheckboxField.vue";
-import {ColumnConfigInterface} from "../model/column";
-import {useDataSourceService} from "../services/datasource.service";
-import LinkSelect from "../components/LinkSelect.vue";
-import {EventHandlerInterface} from "../model/eventHandler";
-import EventHandlerEdit from "../components/EventHandlerEdit.vue";
-import {useSettings} from "../services/settings.service";
-import ImportData from "../components/ImportData.vue";
-import CodeEditor from "../components/CodeEditor.vue";
-import {getAccessTypes} from "../model/permissions";
-import UserRoleSelect from "../components/UserRoleSelect.vue";
+import {CustomDataSource, DataSourceInterface, DataSourceType} from "../../model/datasource";
+import CheckboxField from "../../components/CheckboxField.vue";
+import {ColumnConfigInterface} from "../../model/column";
+import {useDataSourceService} from "../../services/datasource.service";
+import LinkSelect from "../../components/LinkSelect.vue";
+import {EventHandlerInterface} from "../../model/eventHandler";
+import EventHandlerEdit from "../../components/EventHandlerEdit.vue";
+import {useSettings} from "../../services/settings.service";
+import ImportData from "../../components/ImportData.vue";
+import CodeEditor from "../../components/CodeEditor.vue";
+import {getAccessTypes} from "../../model/permissions";
+import UserRoleSelect from "../../components/UserRoleSelect.vue";
 
 let router = useRouter();
 let route = useRoute()

@@ -2,14 +2,14 @@ import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 import Login from "./pages/Login.vue";
 import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
-import PageDesigner from "./pages/PageDesigner.vue";
-import Configuration from "./pages/Configuration.vue";
-import FunctionEdit from "./pages/FunctionEdit.vue";
-import DataSourceEdit from "./pages/DataSourceEdit.vue";
-import MenuEdit from "./pages/MenuEdit.vue";
-import ReportEdit from "./pages/ReportEdit.vue";
+import PageDesigner from "./pages/configuration/PageDesigner.vue";
+import Configuration from "./pages/configuration/Configuration.vue";
+import FunctionEdit from "./pages/configuration/FunctionEdit.vue";
+import DataSourceEdit from "./pages/configuration/DataSourceEdit.vue";
+import MenuEdit from "./pages/configuration/MenuEdit.vue";
+import ReportEdit from "./pages/configuration/ReportEdit.vue";
 import UserSettings from "./pages/UserSettings.vue";
-import UserEdit from "./pages/UserEdit.vue";
+import UserEdit from "./pages/configuration/UserEdit.vue";
 
 const routes: RouteRecordRaw[] = [
     {

@@ -181,18 +181,18 @@ import {
     PageConfigInterface, PageTemplateType,
     PositionElementInterface,
     ScreenSize
-} from "../model/page";
+} from "../../model/page";
 import {useRoute, useRouter} from "vue-router";
-import {useDataSourceService} from "../services/datasource.service";
-import {usePageHeader} from "../services/page.service";
+import {useDataSourceService} from "../../services/datasource.service";
+import {usePageHeader} from "../../services/page.service";
 import _ from 'lodash'
-import {ComponentTitle, useComponentService} from "../services/component.service";
+import {ComponentTitle, useComponentService} from "../../services/component.service";
 import {ElMessage} from "element-plus";
 import {Icon} from "@iconify/vue";
-import PageSettingsPanel from '../components/PageSettingsPanel.vue'
-import { FlakeId } from '../flake-id'
-import {useSettings} from "../services/settings.service";
-import FlexLayout from "../components/FlexLayoutPage.vue";
+import PageSettingsPanel from '../../components/PageSettingsPanel.vue'
+import { FlakeId } from '../../flake-id'
+import {useSettings} from "../../services/settings.service";
+import FlexLayout from "../../components/FlexLayoutPage.vue";
 let flakeId = new FlakeId()
 
 interface ComponentDropInterface extends ComponentInterface {

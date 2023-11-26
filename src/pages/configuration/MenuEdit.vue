@@ -28,15 +28,15 @@
 import {ElMessageBox} from "element-plus";
 import {useRoute, useRouter} from "vue-router";
 import {ref} from "vue";
-import Tree from "../components/Tree.vue"
+import Tree from "../../components/Tree.vue"
 import _ from "lodash"
-import { FlakeId } from '../flake-id'
+import { FlakeId } from '../../flake-id'
 import {useI18n} from "vue-i18n";
-import MenuItemEdit from "../components/MenuItemEdit.vue";
-import {MenuConfigInterface} from "../model/menu";
-import {DataSourceInterface} from "../model/datasource";
-import {useDataSourceService} from "../services/datasource.service";
-import {useSettings} from "../services/settings.service";
+import MenuItemEdit from "../../components/MenuItemEdit.vue";
+import {MenuConfigInterface} from "../../model/menu";
+import {DataSourceInterface} from "../../model/datasource";
+import {useDataSourceService} from "../../services/datasource.service";
+import {useSettings} from "../../services/settings.service";
 let flakeId = new FlakeId()
 
 let router = useRouter();

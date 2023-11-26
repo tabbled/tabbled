@@ -109,7 +109,7 @@ export interface DataSourceConfigInterface {
 }
 
 export class DataSource extends EventEmitter implements DataSourceInterface {
-    constructor(config: DataSourceConfigInterface, server: ServerInterface, service: DataSourceService) {
+    constructor(config: DataSourceConfigInterface, server: any, service: DataSourceService) {
         super()
         this.fieldByAlias = new Map()
         this.alias = config.alias
@@ -132,6 +132,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         if (this.fieldByAlias.size > 0)
             this.fields = [...this.fieldByAlias.values()]
 
+        server.socket.on('updates', this.onServerUpdates.bind(this))
     }
 
     private fieldByAlias: Map<string, FieldInterface>
@@ -235,7 +236,6 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             data: res.data
         })
         return res
-
     }
 
     async removeById(id: string, route?: string[]): Promise<boolean> {
@@ -258,38 +258,40 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         return hasPermission(this.config, action, userPermissions)
     }
 
-    //async setRemoteChanges(items: DataItemInterface[]):Promise<boolean> {
-        // if (!db.database)
-        //     return false;
-        //
-        // console.log(`DataSource ${this.alias} got remote changes, count: ${items.length}`)
-        //
-        // for(const i in items) {
-        //     const item = items[i]
-        //     let current_item = await this.getByIdRaw(item.id)
-        //
-        //     await db.database.ref(`/${this.type}/${this.alias}/${item.id}`).update(item)
-        //
-        //
-        //     if (!current_item) {
-        //         this.emit('item-inserted', {
-        //             data: current_item.data
-        //         })
-        //     } else {
-        //         this.emit('item-updated', {
-        //             data: item.data
-        //         })
-        //
-        //         if (item.deletedAt && !current_item.deletedAt) {
-        //             this.emit('item-removed', {
-        //                 data: item.data
-        //             })
-        //         }
-        //     }
-        // }
-        // this.emit('update')
-    //     return true
-    // }
+    async getCurrentRevisionId(id) {
+        return await this.server.emit('dataSources/data/getCurrentRevisionId', {
+            alias: this.alias,
+            id: id
+        })
+    }
+
+    async onServerUpdates(msg) {
+        if (!msg || msg.type !== 'data' || !msg.entity || msg.entity.alias !== this.alias)
+            return
+
+        switch (msg.action) {
+            case 'add':
+                this.emit('item-inserted', {
+                    data: msg.entity.data,
+                    route: []
+                })
+                break;
+            case 'update':
+                this.emit('item-updated', {
+                    data: msg.entity.data,
+                    route: []
+                })
+                break
+            case 'remove':
+                this.emit('item-removed', {
+                    data: {
+                        id: msg.entity.data
+                    },
+                    route: []
+                })
+                break
+        }
+    }
 
     async setValue(id: string, field: string, value: any) {
 

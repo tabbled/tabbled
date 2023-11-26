@@ -110,16 +110,16 @@
 import {ElMessage} from "element-plus";
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
-import Input from "../components/Input.vue";
+import Input from "../../components/Input.vue";
 import {useI18n} from "vue-i18n";
-import {DataSourceInterface} from "../model/datasource";
-import {useDataSourceService} from "../services/datasource.service";
-import {generateEntityWithDefault} from "../model/field";
-import {useSettings} from "../services/settings.service";
+import {DataSourceInterface} from "../../model/datasource";
+import {useDataSourceService} from "../../services/datasource.service";
+import {generateEntityWithDefault} from "../../model/field";
+import {useSettings} from "../../services/settings.service";
 import _ from "lodash";
-import UserRoleSelect from "../components/UserRoleSelect.vue";
-import ItemList from "../components/ItemList.vue";
-import {useSocketClient} from "../services/socketio.service";
+import UserRoleSelect from "../../components/UserRoleSelect.vue";
+import ItemList from "../../components/ItemList.vue";
+import {useSocketClient} from "../../services/socketio.service";
 
 let router = useRouter();
 let route = useRoute();

@@ -9,6 +9,7 @@ function getAccountId(): number {
 
 export interface ServerInterface {
     emit(topic: string, message?: any) : Promise<any>
+    socket: Socket
 }
 
 export class SocketIOClient implements ServerInterface {
@@ -26,6 +27,8 @@ export class SocketIOClient implements ServerInterface {
                 })
             }
         })
+
+
 
         this.socket.on("exception", (err) => {
             console.error(err);
@@ -46,6 +49,11 @@ export class SocketIOClient implements ServerInterface {
 
         this.socket.on('functions/console.log', async (...args) => {
             console.log('Func console.log: ', ...args)
+        })
+
+        this.socket.on('updates', async(msg) => {
+
+            console.log('updates',msg)
         })
     }
 

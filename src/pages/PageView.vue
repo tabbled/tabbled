@@ -72,7 +72,7 @@ import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {ElMessage} from "element-plus";
 import {useComponentService} from "../services/component.service";
-import {CustomDataSource, DataSourceInterface, EntityInterface} from "../model/datasource";
+import {CustomDataSource, DataSource, DataSourceInterface, EntityInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
@@ -101,6 +101,8 @@ let reportMenu = ref([])
 const socket = useSocketClient()
 
 let editEntity = ref<EntityInterface>(null)
+let editEntityRevisionId = -1
+let isSaving = false
 let editDataSource: DataSourceInterface = null
 let update = ref(0)
 let isNew = ref(false)
@@ -149,6 +151,7 @@ function setAppTitle() {
 
 async function save() {
     try {
+        isSaving = true
         if (isNew.value) {
             let item = await editDataSource.insert(editEntity.value.id, editEntity.value)
 
@@ -157,11 +160,14 @@ async function save() {
         } else {
             await editDataSource.updateById(editEntity.value.id, editEntity.value)
         }
+        await updateRevision()
+        isSaving = false
 
         ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
+        isSaving = false
     }
 }
 
@@ -277,7 +283,6 @@ async function init() {
         }
 
 
-
         filters = useFilters(editDataSource)
 
         let id = <string>route.params.id
@@ -285,16 +290,19 @@ async function init() {
         if (id && id !== 'new') {
             editEntity.value = await editDataSource.getById(id)
             isNew.value = false
+
+            await updateRevision()
         } else {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
             isNew.value = true
+            editEntityRevisionId = -1
         }
 
         scriptContext.value.item = editEntity.value
 
         // Need to set data of table fields to those datasource
         if (editDataSource) {
-            for(let i in editDataSource.fields) {
+            for (let i in editDataSource.fields) {
                 let f = editDataSource.fields[i]
                 if (f.type === 'table') {
                     let ds = await dsService.getByAlias(f.datasource)
@@ -331,7 +339,7 @@ async function init() {
     }
 
     props.pageConfig.elements.forEach(element => {
-        let el:ElementInterface = {
+        let el: ElementInterface = {
             id: element.id,
             layout: element.layout,
             name: element.name,
@@ -352,7 +360,6 @@ async function init() {
         el.props['context'] = scriptContext.value
 
 
-
         if (elProps.filterable || elProps.group === 'Filters') {
             el.props['filters'] = filters
         }
@@ -364,7 +371,7 @@ async function init() {
 
     pageHeader.actions = []
 
-    for(let i in props.pageConfig.headerActions) {
+    for (let i in props.pageConfig.headerActions) {
         const action = props.pageConfig.headerActions[i]
 
         let compiledFunc: CompiledFunc
@@ -399,7 +406,7 @@ async function init() {
         fields: ['title', 'pages']
     })).data
 
-    for(let i in reports) {
+    for (let i in reports) {
         let rep = reports[i]
 
         if (rep.pages && rep.pages.includes(props.pageConfig.alias)) {
@@ -410,7 +417,29 @@ async function init() {
         }
     }
 
+    socket.socket.off('updates', onUpdates)
+    if (isEditPage.value){
+        socket.socket.on('updates', onUpdates)
+    }
+}
 
+async function updateRevision() {
+    editEntityRevisionId = await (editDataSource as DataSource).getCurrentRevisionId(editEntity.value.id)
+}
+
+async function onUpdates(msg: any) {
+    if (isSaving)
+        return
+
+    if (!msg || msg.type !== 'data' || !msg.entity || msg.entity.alias !== editDataSource.alias)
+        return
+
+    if (editEntityRevisionId !== msg.entity.rev) {
+        ElMessage.warning({
+            message: t('entityUpdated'),
+            duration: 0
+        })
+    }
 }
 
 function getLabelElement(el) {
