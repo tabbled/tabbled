@@ -7,13 +7,10 @@ export class FunctionScriptHelper {
     }
 
     async invoke(alias: string, context: any) {
-        console.log('invoking function ', alias, this.socket)
-        let value = await this.socket.emit('functions/call', {
+        return await this.socket.emit('functions/call', {
             alias: alias,
             context: context
         })
-        console.log(value)
-        return value
     }
 }
 
