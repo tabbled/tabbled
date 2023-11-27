@@ -431,10 +431,12 @@ async function onUpdates(msg: any) {
     if (isSaving)
         return
 
-    if (!msg || msg.type !== 'data' || !msg.entity || msg.entity.alias !== editDataSource.alias)
+    if (!msg || msg.type !== 'data' || !msg.entity
+        || msg.entity.alias !== editDataSource.alias)
         return
 
-    if (editEntityRevisionId !== msg.entity.rev) {
+    if (msg.entity.id === editEntity.value.id
+        && editEntityRevisionId !== msg.entity.rev) {
         ElMessage.warning({
             message: t('entityUpdated'),
             duration: 0

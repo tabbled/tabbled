@@ -256,8 +256,6 @@ async function loadMenu() {
             id: 'menu'
         })
         sidebarMenu.value = (menu as MenuConfigInterface[])
-
-        console.log(sidebarMenu.value)
     } catch (e) {
         console.error(e)
         return;

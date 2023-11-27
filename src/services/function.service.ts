@@ -1,34 +1,27 @@
 import {ref, UnwrapRef} from "vue";
-import {compileScript} from "./compiler";
-import {useDataSourceService} from "./datasource.service";
-
+import {SocketIOClient} from "./socketio.service";
 
 
 export class FunctionScriptHelper {
-    constructor() {
+    constructor(private socket: SocketIOClient) {
     }
 
     async invoke(alias: string, context: any) {
-        console.log('invoking function ', alias)
-
-        let dsService = await useDataSourceService()
-        let ds = dsService.functionDataSource
-        let functions = (await ds.getMany( {filter: [{key: 'data/alias', op: "==", compare: alias}]} )).data
-
-        if (!functions.length) {
-            console.error(`No function with alias "${alias}"`)
-            return;
-        }
-        let funcSrc = functions[0]
-
-        let func = await compileScript(funcSrc.script, 'ctx')
-        console.log(funcSrc)
-        return await func.exec(context)
+        console.log('invoking function ', alias, this.socket)
+        let value = await this.socket.emit('functions/call', {
+            alias: alias,
+            context: context
+        })
+        console.log(value)
+        return value
     }
 }
 
-let funcScriptHelper = ref<FunctionScriptHelper>(new FunctionScriptHelper())
+let funcScriptHelper = ref<FunctionScriptHelper>(null)
 
-export function useFunctionScriptHelper(): UnwrapRef<any> {
+export function useFunctionScriptHelper(socket): UnwrapRef<any> {
+    if (!funcScriptHelper.value)
+        funcScriptHelper.value = new FunctionScriptHelper(socket)
+
     return funcScriptHelper.value
 }

@@ -917,6 +917,7 @@ async function execAction(action: CompiledFunc, additionalContext?: object) {
         if (selected.length) {
             ctx.currentId = selected[0].data.id
             ctx.currentItem = selected[0].data
+            ctx.selected = selected.map(item => item.data.id)
         }
 
         ctx.dataSource = dataSource

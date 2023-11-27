@@ -2,6 +2,7 @@ import {useDataSourceScriptHelper} from "./datasource.service";
 import { FlakeId } from '../flake-id'
 import {useFunctionScriptHelper} from "./function.service";
 let flakeId = new FlakeId()
+import { useSocketClient } from "./socketio.service";
 
 class Utils {
     async generateId() {
@@ -15,11 +16,15 @@ export class CompiledFunc {
     private source: string = ""
     private func: Function | undefined = undefined
     private utils = new Utils()
-    private funcService = useFunctionScriptHelper()
+    private socketClient = useSocketClient()
+    private funcService = useFunctionScriptHelper(this.socketClient)
+
+
 
     exec(...args: any[]) {
         if (!this.func)
             return;
+
         return this.func(this.dsService, this.utils, this.funcService, ...args)
     }
 
