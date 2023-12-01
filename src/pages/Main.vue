@@ -245,7 +245,7 @@ function isMenuVisible(menu) {
         case 'all': return true;
         case 'nobody': return false;
         case 'roles':
-            return menu.visibilityRoles.some(r=> permissions.roles.includes(r))
+            return menu.visibilityRoles ? menu.visibilityRoles.some(r=> permissions.roles.includes(r)) : false
         default: return false
     }
 }
