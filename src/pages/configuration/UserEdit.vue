@@ -84,11 +84,11 @@
                       title-prop="title"
                       :list="roles"
                       @remove="idx => roles.splice(idx, 1)"
-                      @insert="roles.push({key: '', title: ''})"
+                      @insert="roles.push({alias: '', title: ''})"
             >
                 <template #default="{item}">
                     <div style="display: flex; width: 90%" >
-                        <el-input size="small" style="padding-right: 4px" v-model="item['key']" placeholder="Key"></el-input>
+                        <el-input size="small" style="padding-right: 4px" v-model="item['alias']" placeholder="Key"></el-input>
                         <el-input size="small" v-model="item['title']" placeholder="Title"></el-input>
                     </div>
                 </template>
@@ -213,6 +213,8 @@ async function getRoles() {
             id: 'roles'
         })
         roles.value = res ? res : []
+
+        console.log(roles.value)
     } catch (e) {
         console.error(e)
     }

@@ -439,7 +439,9 @@ async function onUpdates(msg: any) {
         && editEntityRevisionId !== msg.entity.rev) {
         ElMessage.warning({
             message: t('entityUpdated'),
-            duration: 0
+            duration: 0,
+            showClose: true,
+            grouping: true
         })
     }
 }

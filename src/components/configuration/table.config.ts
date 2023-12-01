@@ -59,6 +59,12 @@ export class Config implements ComponentInterface {
             default: true
         },
         {
+            title: "Select all",
+            alias: "canSelectAll",
+            type: 'bool',
+            default: false
+        },
+        {
             title: 'Columns',
             alias: 'columns',
             type: 'list',
@@ -93,7 +99,7 @@ export class Config implements ComponentInterface {
             listOf: 'action',
             keyProp: 'alias',
             displayProp: 'alias',
-        },]
+        }]
     defaultPosition = {
         rows: 1,
         cols: 12

@@ -117,6 +117,7 @@
             @selectionChanged="selectionChanged"
             :pinnedBottomRowData="totalData"
             :context="context_"
+            @first-data-rendered="onFirstDataRendered"
         />
     </div>
 </template>
@@ -199,7 +200,9 @@ interface Props {
     searchVisible?:boolean,
     customActions?: PageActionConfigInterface[],
     persistingColumnState?: boolean,
-    datasourceInst?: DataSourceInterface
+    datasourceInst?: DataSourceInterface,
+    selectAll: boolean,
+    canSelectAll: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -210,6 +213,8 @@ const props = withDefaults(defineProps<Props>(), {
     filtersVisible: true,
     searchVisible: true,
     persistingColumnState: true,
+    selectAll: false,
+    canSelectAll: false,
     filters: () => {
         return new Filters(null)
     }
@@ -228,7 +233,9 @@ const emit = defineEmits([
     'change',
     'update:modelValue',
     'update:currentId',
-    'update:selected'])
+    'update:selected',
+    'update:selectAll'
+])
 
 let grid = ref(null)
 let gridApi:GridApi  = null
@@ -258,14 +265,14 @@ watch(() => props.filters?.filters, () => {
 
 watch(() => props.datasource, async () => {
     await init()
-    console.log('datasource')
+    //console.log('datasource')
     gridApi.refreshServerSide({
         purge: true
     })
 })
 
 watch(() => props.columns, async () => {
-    console.log('columns')
+    //console.log('columns')
     await init()
     gridApi.refreshServerSide({
         purge: true
@@ -652,6 +659,9 @@ async function onGridReady(params) {
     restoreCols()
 }
 
+async function onFirstDataRendered(/*params*/) {
+}
+
 function saveColumnState(e) {
     let sources = [
         "uiColumnMoved",
@@ -862,6 +872,7 @@ async function init() {
 
             } else {
                 colDef.checkboxSelection = true
+                colDef.headerCheckboxSelection = !!props.canSelectAll
             }
         }
 
@@ -913,12 +924,13 @@ async function compileAction(action) {
 async function execAction(action: CompiledFunc, additionalContext?: object) {
     try {
         let ctx = Object.assign(props.context, additionalContext)
-        let selected = gridApi.getSelectedNodes()
-        if (selected.length) {
-            ctx.currentId = selected[0].data.id
-            ctx.currentItem = selected[0].data
-            ctx.selected = selected.map(item => item.data.id)
-        }
+        let selected = gridApi.getServerSideSelectionState().toggledNodes
+
+        ctx.currentId = selected[0]
+        ctx.selected = selected
+        ctx.selectAll = gridApi.getServerSideSelectionState()['selectAll']
+        ctx.filter = props.filters.filters
+
 
         ctx.dataSource = dataSource
 
@@ -1043,8 +1055,10 @@ function cellDoubleClicked(params) {
 }
 
 function selectionChanged() {
-    emit('update:currentId', gridApi.getSelectedRows()[0]?.id)
-    emit('update:selected', gridApi.getSelectedRows().map(i => i?.id))
+    let selected = gridApi.getServerSideSelectionState().toggledNodes
+    emit('update:currentId', selected.length ? selected[0] : null)
+    emit('update:selected', selected)
+    emit('update:selectAll', gridApi.getServerSideSelectionState()['selectAll'])
 }
 
 </script>

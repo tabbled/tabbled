@@ -129,7 +129,7 @@
                :model-value="importConfigSettingsVisible"
                style="padding: 16px"
                @close="importConfigSettingsVisible = false"
-               :title="t('Import')"
+               :title="t('import')"
                :modal="true"
                draggable
                :width="'60%'"
