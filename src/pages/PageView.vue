@@ -120,7 +120,8 @@ const scriptContext = ref({
         params: {}
     },
     item: null,
-    openDialog: null
+    openDialog: null,
+    message: ElMessage
 })
 
 let actions = ref({
@@ -274,6 +275,7 @@ async function init() {
 
     scriptContext.value.page.params = route.params
     scriptContext.value.openDialog = props.openDialog
+    scriptContext.value.message = ElMessage
 
     if (props.pageConfig.datasource) {
         editDataSource = await dsService.getByAlias(props.pageConfig.datasource)
