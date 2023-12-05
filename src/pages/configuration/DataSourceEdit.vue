@@ -69,7 +69,7 @@
                 />
             </el-form-item>
 
-            <el-form-item :label="$t('isTree')" style="padding-left: 8px;">
+            <el-form-item :label="$t('isTree')" style="padding-left: 8px; width: 200px">
                 <CheckboxField field="isTree"
                                :field-config="getField('isTree')"
                                :model-value="getValue('isTree')"
@@ -77,7 +77,7 @@
                 />
             </el-form-item>
 
-            <el-form-item :label="$t('readonly')" style="padding-left: 8px; width: 100px">
+            <el-form-item :label="$t('readonly')" style="padding-left: 8px; width: 250px">
                 <CheckboxField field="readonly"
                                :field-config="getField('readonly')"
                                :model-value="getValue('readonly')"
@@ -94,8 +94,8 @@
             </el-form-item>
         </div>
 
-        <div v-if="dataSourceEntity && dataSourceEntity.isAggregator" style="display: flex; flex-direction: row">
-            <el-form-item :label="$t('keyFields')" style="padding-left: 8px;">
+        <div v-if="dataSourceEntity && dataSourceEntity.isAggregator" style="display: flex; flex-direction: row;">
+            <el-form-item :label="$t('keyFields')" style="padding-left: 8px;min-width: 300px;">
                 <el-select
                            :model-value="getValue('keyFields')"
                            clearable
@@ -112,7 +112,7 @@
                 </el-select>
             </el-form-item>
 
-            <el-form-item :label="$t('aggFields')" style="padding-left: 8px;">
+            <el-form-item :label="$t('aggFields')" style="padding-left: 8px;min-width: 300px">
                 <el-select
                     :model-value="getValue('aggFields')"
                     clearable

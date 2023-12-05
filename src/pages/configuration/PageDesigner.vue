@@ -328,7 +328,7 @@ async function init() {
             onOpen: null,
             headerActions: [],
             isEditPage: false,
-            templateType: "flex"
+            templateType: null
         }
     } else {
         pageConfig.value = await getPageConfig(route.params.id.toString())
@@ -357,7 +357,7 @@ async function init() {
 
 async function onUpdateProperty(path: string, value: any) {
     console.log(path, value)
-    pageConfig.value.elements[0]['direction'] = 'row'
+    //pageConfig.value.elements[0]['direction'] = 'row'
     _.update(pageConfig.value, path, () => {
         return value
     })

@@ -201,7 +201,6 @@ interface Props {
     customActions?: PageActionConfigInterface[],
     persistingColumnState?: boolean,
     datasourceInst?: DataSourceInterface,
-    selectAll: boolean,
     canSelectAll: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -233,8 +232,7 @@ const emit = defineEmits([
     'change',
     'update:modelValue',
     'update:currentId',
-    'update:selected',
-    'update:selectAll'
+    'update:selected'
 ])
 
 let grid = ref(null)
@@ -1058,7 +1056,6 @@ function selectionChanged() {
     let selected = gridApi.getServerSideSelectionState().toggledNodes
     emit('update:currentId', selected.length ? selected[0] : null)
     emit('update:selected', selected)
-    emit('update:selectAll', gridApi.getServerSideSelectionState()['selectAll'])
 }
 
 </script>
