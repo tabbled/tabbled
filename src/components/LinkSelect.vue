@@ -162,8 +162,6 @@ async function init() {
         } else {
             await getData()
         }
-
-
     }
 
 }
