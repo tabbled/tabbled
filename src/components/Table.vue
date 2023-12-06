@@ -201,7 +201,7 @@ interface Props {
     customActions?: PageActionConfigInterface[],
     persistingColumnState?: boolean,
     datasourceInst?: DataSourceInterface,
-    canSelectAll: boolean
+    canSelectAll?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -515,8 +515,10 @@ function addListeners() {
 }
 
 async function addSibling() {
-    if (dataSource && !dataSource.hasPermission('Add', permissions))
+    if (dataSource && !dataSource.hasPermission('Add', permissions)){
+        console.error('No permissions for add new row')
         return
+    }
 
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
@@ -542,8 +544,10 @@ async function addSibling() {
 }
 
 async function add() {
-    if (dataSource && !dataSource.hasPermission('Add', permissions))
+    if (dataSource && !dataSource.hasPermission('Add', permissions)){
+        console.error('No permissions for add new row')
         return
+    }
 
     if (dataSource.isTree) {
         let selected = gridApi.getSelectedNodes()
@@ -556,8 +560,13 @@ async function add() {
 }
 
 async function addChild() {
-    if (dataSource && !dataSource.hasPermission('Add', permissions))
+    if (dataSource && !dataSource.hasPermission('Add', permissions)) {
+        console.error('No permissions for add new row')
         return
+    }
+
+
+
 
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
@@ -572,6 +581,8 @@ async function addChild() {
 
     let item = await generateEntityWithDefault(dataSource.fields)
 
+    console.log('addChild', item)
+
     await dataSource.insert(item.id, item, selected.length ? selected[0].id : null, getRouteToNode(selected[0]))
 
 
@@ -580,8 +591,10 @@ async function addChild() {
 }
 
 function edit() {
-    if (dataSource && !dataSource.hasPermission('Edit', permissions))
+    if (dataSource && !dataSource.hasPermission('Edit', permissions)){
+        console.error('No permissions for edit row')
         return
+    }
 
     if (actions.value.onEdit) {
         execAction(actions.value.onEdit)
@@ -591,8 +604,10 @@ function edit() {
 }
 
 function remove() {
-    if (dataSource && !dataSource.hasPermission('Remove', permissions))
+    if (dataSource && !dataSource.hasPermission('Remove', permissions)){
+        console.error('No permissions for remove row')
         return
+    }
 
     let selected = gridApi.getSelectedNodes()
     if (!selected.length)

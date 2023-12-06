@@ -74,6 +74,7 @@ export interface DataSourceInterface extends EventEmitter {
      */
     getById(id: string | number) : Promise<EntityInterface | undefined>
 
+    getByKeys?(keys: any) : Promise<EntityInterface | undefined>
 
     insert(id: string, value: any, parentId?: string, route?: string[]): Promise<EntityInterface>
     updateById(id: string, value: object): Promise<EntityInterface>
@@ -185,7 +186,16 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             alias: this.alias,
             id: id
         })
+    }
 
+    async getByKeys(keys: any): Promise<EntityInterface | undefined> {
+        if (!keys || this.type === 'config')
+            return null
+
+        return await this.server.emit(`dataSources/data/getByKeys`, {
+            alias: this.alias,
+            keys: keys
+        })
     }
 
     async getByKey(key: string | number) : Promise<EntityInterface | undefined> {
