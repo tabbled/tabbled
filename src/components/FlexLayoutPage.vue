@@ -1,5 +1,5 @@
 <template>
-    <el-page-header ref="mainHeader" class="page-header" @back="$router.back()">
+    <el-page-header v-if="mode === 'design'" ref="mainHeader" class="page-header" @back="$router.back()">
         <template #content>
             <span class="text-large font-600 mr-3"> {{pageConfig ? pageConfig.title : ""}} </span>
         </template>
@@ -18,24 +18,28 @@
         </template>
     </el-page-header>
 
-    <FlexLayoutDropZone
-                        :elements="pageConfig.elements"
-                        :screen-size="screenSize"
-                        mode="design"
-                        direction="column"
-                        parent=""
-                        @remove="removeWidget"
-                        @select="onSelect"
-                        id="0"
-                        :selected="selected"
-                        @update:elements="emit('update:pageConfig', props.pageConfig)"
-    />
+    <el-form label-position="top">
+        <FlexLayoutDropZone
+                            :elements="mode === 'view' ? elements : pageConfig.elements"
+                            :screen-size="screenSize"
+                            :mode="mode"
+                            direction="column"
+                            parent=""
+                            @remove="removeWidget"
+                            @select="onSelect"
+                            id="0"
+                            :selected="selected"
+                            @update:elements="emit('update:pageConfig', props.pageConfig)"
+                            :context="context"
+                            @update:field-value="(element, value) => emit('update:fieldValue', element, value)"
+        />
+    </el-form>
 
 </template>
 
 <script setup lang="ts">
 
-import {ScreenSize} from "../model/page";
+import {ElementInterface, PageConfigInterface, ScreenSize} from "../model/page";
 import {usePageHeader} from "../services/page.service";
 import {FlakeId} from "../flake-id";
 import FlexLayoutDropZone from "./FlexLayoutDropZone.vue";
@@ -53,8 +57,10 @@ let selected = ref<string>('')
 
 interface Props {
     screenSize: ScreenSize,
-    pageConfig: any,
-    mode?: 'design' | 'view'
+    pageConfig: PageConfigInterface,
+    elements: ElementInterface[]
+    mode?: 'design' | 'view',
+    context: any
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -63,7 +69,14 @@ const props = withDefaults(defineProps<Props>(), {
     mode: "design"
 })
 
-const emit = defineEmits(['update:modelValue', 'update:mode', 'update:pageConfig', 'select'])
+
+const emit = defineEmits([
+    'update:modelValue',
+    'update:mode',
+    'update:pageConfig',
+    'select',
+    'update:fieldValue'
+])
 
 function removeWidget(path: string) {
 
@@ -76,8 +89,6 @@ function removeWidget(path: string) {
     let el = _p.length ? _.get(props.pageConfig, __p.substring(1)) : props.pageConfig
     let idxs = path.substring(1).split('.')
     el.elements.splice([idxs[idxs.length - 1]], 1)
-
-    console.log('<<<')
 
     emit('update:pageConfig', props.pageConfig)
 }

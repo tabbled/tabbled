@@ -26,6 +26,10 @@ export class Config implements ComponentInterface {
         title: "Autosize",
         alias: "autosize",
         type: "bool"
+    },{
+        title: 'Style',
+        alias: 'customStyle',
+        type: 'string'
     }]
     defaultPosition = {
         rows: 1,

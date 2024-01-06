@@ -33,6 +33,28 @@
                         </template>
                     </el-dropdown>
 
+                    <el-dropdown type="default"
+                                 size="small"
+                                 trigger="click"
+                                 style="padding-left: 4px"
+                    >
+                        <el-button size="small">
+                            {{$t('pageDesigner.addField')}}
+                            <Icon icon="mdi:chevron-down" style="padding-left: 4px"></Icon>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item v-for="(field) in fields"
+                                                  @dragstart="(e) => startDragNewField(e, field)"
+                                                  draggable="true"
+                                                  style="cursor: move"
+                                >
+                                    {{field.title}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
                     <div style="display: flex; flex-flow: wrap; align-items: center;">
                         <el-button size="small" link @click="selectWidget('')" style="padding-left: 8px">
                             <Icon icon="mdi:cog" width="16" style="padding-right: 4px"/>
@@ -58,11 +80,14 @@
                 </el-radio-group>
             </div>
 
-            <FlexLayout v-if="pageConfig && pageConfig.templateType === 'flex'"
-                        :screen-size="selectedSize"
-                        :page-config="pageConfig"
-                        @update:pageConfig="flexConfigUpdate"
-                        @select="flexElementSelected"
+            <FlexLayoutPage v-if="pageConfig && pageConfig.templateType === 'flex'"
+                            :screen-size="selectedSize"
+                            :page-config="pageConfig"
+                            :elements="pageConfig.elements"
+                            @update:pageConfig="flexConfigUpdate"
+                            @select="flexElementSelected"
+                            mode="design"
+                            :context="{}"
             />
 
             <div v-if="pageConfig && pageConfig.templateType === 'grid'" style="display: flex; flex-flow: row">
@@ -173,7 +198,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted} from "vue";
+import {ref, onMounted, onUnmounted, watch} from "vue";
 import {
     ComponentInterface,
     ElementInterface,
@@ -192,7 +217,7 @@ import {Icon} from "@iconify/vue";
 import PageSettingsPanel from '../../components/PageSettingsPanel.vue'
 import { FlakeId } from '../../flake-id'
 import {useSettings} from "../../services/settings.service";
-import FlexLayout from "../../components/FlexLayoutPage.vue";
+import FlexLayoutPage from "../../components/FlexLayoutPage.vue";
 let flakeId = new FlakeId()
 
 interface ComponentDropInterface extends ComponentInterface {
@@ -226,6 +251,7 @@ let currentConfigPath = ref('')
 let settingPanelWidth = ref<number>(getSettingsPanelWidth())
 let isResizingSettingPanel = false
 let startXResizingSettingPanel = 0
+let fields = ref<{alias: string, title: string, name: string, props: any}[]>([])
 
 let templateTypes: {key: PageTemplateType, title: string}[] = [
     {
@@ -253,6 +279,8 @@ onMounted(async () => {
         console.error(e)
     }
 })
+
+watch(() => pageConfig.value.datasource, () => prepareDataSourceFields())
 
 onUnmounted(() => {
     // pageHeader.actions = []
@@ -291,6 +319,44 @@ function onResizeSettingPanel(e: MouseEvent) {
     //handleResize()
 }
 
+async function prepareDataSourceFields() {
+    console.log('prepareDataSourceFields')
+    fields.value = []
+
+    if (!pageConfig.value || !pageConfig.value.datasource) {
+        fields.value = []
+    }
+
+    let ds = await dsService.getByAlias(pageConfig.value.datasource)
+
+    ds.fields.forEach(field => {
+        let f = {
+            alias: field.alias,
+            title: field.title,
+            name: "",
+            type: field.type,
+            props: {
+                field: field.alias,
+                title: field.title
+            }
+        }
+        switch (field.type) {
+            case "number":
+            case "string": f.name = "Input"; break;
+            case "enum":
+            case "link": f.name = "LinkSelect"; break;
+            case "table": f.name = "Table"; f.props['datasource'] = field.datasource; break;
+            case "date":
+            case "time":
+            case "datetime": f.name = "DatetimeInputConfig"; break;
+            case "image": f.name = "ImageField"; break;
+            case "bool": f.name = "CheckboxField"; break;
+        }
+
+        fields.value.push(f)
+    })
+}
+
 function getElementProperties(element: ElementInterface) {
     let component = componentService.getByName(element.name)
     if (!component)
@@ -318,7 +384,6 @@ async function init() {
     }
 
     if (route.params.id === 'new') {
-        // TODO need to use generateEntityWithDefault(...)
         pageConfig.value = {
             id: null,
             alias: '',
@@ -328,7 +393,8 @@ async function init() {
             onOpen: null,
             headerActions: [],
             isEditPage: false,
-            templateType: null
+            templateType: null,
+            datasource: null
         }
     } else {
         pageConfig.value = await getPageConfig(route.params.id.toString())
@@ -529,6 +595,14 @@ function getGridElStyle(element:ElementInterface) {
     return style;
 }
 
+function startDragNewField(e:any, field) {
+    let it = Object.assign({
+        layerX: e.layerX,
+        layerY: e.layerY
+    }, field)
+    e.dataTransfer?.setData('item', JSON.stringify(it))
+}
+
 function startDragNewElement(e:any, item: ComponentTitle) {
     let it = Object.assign({
         layerX: e.layerX,
@@ -540,6 +614,8 @@ function startDragNewElement(e:any, item: ComponentTitle) {
 async function dropNewWidget(e:DragEvent) {
     let item = <ComponentDropInterface>JSON.parse(e.dataTransfer.getData('item'));
     let comp = componentService.getByName(item.name);
+
+    console.log(e)
 
     let relatedX = e.offsetX
     let relatedY = e.offsetY
@@ -562,16 +638,24 @@ async function dropNewWidget(e:DragEvent) {
     let properties = {}
     comp.properties.forEach(prop => {
         let val:any = null
-        switch (prop.type) {
-            case "bool": val = prop.default ? prop.default : false; break;
-            case "string": val = prop.default ? prop.default : ""; break;
-            case "number": val = prop.default ? prop.default : 0; break;
-            case "list":
-            case "table": val = []; break;
-            default: prop.default ? prop.default : null;
+
+        if (item['props'][prop.alias]) {
+            val = item['props'][prop.alias]
+        } else {
+            switch (prop.type) {
+                case "bool": val = prop.default ? prop.default : false; break;
+                case "string": val = prop.default ? prop.default : ""; break;
+                case "number": val = prop.default ? prop.default : 0; break;
+                case "list":
+                case "table": val = []; break;
+                default: prop.default ? prop.default : null;
+            }
         }
+
         properties[prop.alias] = val
     })
+
+
 
     elements.value.push({
         id: (flakeId.generateId()).toString(),
@@ -597,13 +681,11 @@ async function dropNewWidget(e:DragEvent) {
 }
 
 
-function flexConfigUpdate(e) {
-    console.log('flexConfigUpdate', e)
+function flexConfigUpdate() {
      isChanged.value = true
 }
 
 function flexElementSelected(e) {
-    console.log('flexElementSelected', e)
     currentConfigPath.value = e
 }
 

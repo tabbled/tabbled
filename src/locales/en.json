@@ -146,7 +146,8 @@
     },
     "pageDesigner": {
         "pageSettings": "Page settings",
-        "addElement": "Add element"
+        "addElement": "Add element",
+        "addField": "Add field"
     },
     "entityUpdated": "Entity was updated in another device, please refresh the page"
 }

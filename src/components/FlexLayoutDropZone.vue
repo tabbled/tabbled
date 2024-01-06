@@ -1,19 +1,22 @@
 <template>
     <div
-        class="drop-zone"
+        :class="{ 'drop-zone-design': mode === 'design', 'drop-zone': true}"
         @drop="drop($event)"
         @dragover.prevent
         @dragenter.prevent
         :style="{ 'flex-direction': direction }"
     >
-        <div v-for="(element, idx) in elements"
-             :class="{ draggable: true, 'selected': selected === element.id, 'element-wrapper': true  }"
-             draggable="true"
-             @dragstart.self="(e) => dragStart(e, element, idx)"
-             @dragover="(e) => onDragover(e, element, idx)"
-             @dragend="dragEnd"
+        <el-form-item v-for="(element, idx) in elements"
+                      :class="{ draggable: mode === 'design', 'selected': mode === 'design' && selected === element.id, 'element-wrapper': !element.props.customStyle  }"
+                      :draggable="mode === 'design'"
+                      @dragstart.self="(e) => dragStart(e, element, idx)"
+                      @dragover="(e) => onDragover(e, element, idx)"
+                      @dragend="dragEnd"
+                      :label="getLabelElement(element)"
+            :style="element.props.customStyle ? JSON.parse(element.props.customStyle) : {padding: '8px 16px'}"
         >
-            <div :class="{'settings-drag-panel': true, 'prevent-select': true, 'selected': selected === element.id }"
+            <div v-if="mode === 'design'"
+                 :class="{'settings-drag-panel': mode === 'design', 'prevent-select': true, 'selected': selected === element.id }"
                  @click.stop="(e) => onElementClick(e, element, idx)"
             >
                 {{element.name}}
@@ -23,22 +26,27 @@
             </div>
             <component :is="element.name"
                        :id="element.id"
-                       v-bind="element"
-                       :elements="element.elements"
+                       v-bind="mode === 'design' ? element : element.props"
                        :parent="`${props.parent}.${idx}`"
+                       :mode="mode"
                        @remove="(e) => emit('remove', e)"
                        @select="(e) => emit('select', e)"
                        :selected="selected"
                        @click.stop="(e) => onElementClick(e, element, idx)"
+                       :context="context"
+                       :fieldConfig="element.fieldConfig"
+                       @change="(value) => emit('update:fieldValue', element, value)"
+                       :model-value="element.fieldValue"
+
             />
-        </div>
+        </el-form-item>
     </div>
 </template>
 
 <script setup lang="ts">
 
 import {generateEntityWithDefault} from "../model/field";
-import {ScreenSize} from "../model/page";
+import {ElementInterface, ScreenSize} from "../model/page";
 import {FlakeId} from "../flake-id";
 import {useComponentService} from "../services/component.service";
 
@@ -52,16 +60,17 @@ let dragElement = {
 interface Props {
     id: string,
     screenSize: ScreenSize,
-    elements: any,
-    mode?: 'design' | 'view',
+    elements: ElementInterface[],
+    mode: 'design' | 'view',
     direction: 'row' | 'column',
     parent: string,
-    selected: string
+    selected: string,
+    context: any
 }
 
 const props = withDefaults(defineProps<Props>(), {
     screenSize: ScreenSize.desktop,
-    elements: [],
+    elements: () => [],
     mode: "design",
     direction: "column",
     parent: '',
@@ -73,35 +82,25 @@ const emit = defineEmits([
     'update:elements',
     'update:mode',
     'remove',
-    'select'
+    'select',
+    'update:fieldValue'
 ])
 
 function dragStart(event, item, idx) {
-    console.log('dragStart', event, item)
-    //event.preventDefault();
-
-
     event.dataTransfer.setData('item', JSON.stringify(item))
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.setData('from', `${props.parent}.${idx}`)
 }
 
-function dragEnd(e) {
-    console.log(e)
+function dragEnd() {
     dragElement.idx = -1
     dragElement.item = null
 }
-
-// function onDrag(e) {
-//     console.log('onDrag', e)
-//     //let item = <ComponentDropInterface>JSON.parse(e.dataTransfer.getData('item'));console.log(e)
-// }
 
 function onDragover(e, element, idx) {
     dragElement.idx = idx
     dragElement.item = element
 }
-
 
 async function drop(e:DragEvent) {
     e.stopPropagation()
@@ -125,11 +124,14 @@ async function drop(e:DragEvent) {
     } else {
         let comp = componentService.getByName(item.name);
 
+        console.log(comp, item)
+
         let properties = await generateEntityWithDefault(comp.properties)
         properties.screenSize = props.screenSize
         properties.selected = ''
 
-        console.log(properties)
+        console.log(item)
+        properties = Object.assign(properties, item['props'])
 
         props.elements.push({
             id: (flakeId.generateId()).toString(),
@@ -137,8 +139,8 @@ async function drop(e:DragEvent) {
             field: '',
             elements: [],
             layout: {
-                [ScreenSize.desktop]: {},
-                [ScreenSize.mobile]: {}
+                'desktop': {},
+                'mobile': {}
             },
             props: properties,
             ...properties
@@ -149,21 +151,27 @@ async function drop(e:DragEvent) {
 
 function onElementClick(event, element, idx) {
     event.preventDefault()
-    console.log(event)
-    console.log(element.id)
     emit('select', `${props.parent}.${idx}`)
+}
 
+function getLabelElement(el) {
+    if (el['title'] || (el.props && el.props['title'] && el.props['title'] !== "")) {
+        return el['title'] || el.props['title'].toString()
+    }
+    return ""
 }
 
 </script>
 
 <style lang="scss">
 
-.drop-zone {
+.drop-zone-design {
     min-height: 200px;
-    display: flex;
-    padding: 4px;
     border: #747bff 1px solid;
+}
+
+.drop-zone {
+    display: flex;
     position: relative;
 }
 
@@ -201,7 +209,7 @@ function onElementClick(event, element, idx) {
 }
 
 .element-wrapper {
-    padding: 8px;
+    padding: 8px 16px;
 }
 
 </style>

@@ -4,7 +4,12 @@
                         :direction="direction"
                         :selected="selected"
                         :id="id"
-                        :parent="parent"/>
+                        :context="context"
+                        :parent="parent"
+                        v-bind="props"
+                        :mode="mode"
+                        :style="customStyle ? JSON.parse(customStyle) : style_"
+    />
 </template>
 
 <script setup lang="ts">
@@ -19,7 +24,9 @@ interface Props {
     direction: 'row' | 'column'
     selected: string,
     parent: string,
-    id: string
+    id: string,
+    context: any
+    customStyle?: any
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -28,8 +35,15 @@ const props = withDefaults(defineProps<Props>(), {
     mode: "design",
     direction: "column",
     selected: '',
-    parent: ''
+    parent: '',
+    style: {
+        padding: "16px"
+    }
 })
+
+let style_ = {
+    padding: "16px"
+}
 
 </script>
 

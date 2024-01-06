@@ -13,7 +13,6 @@ import {Config as StatusFilterProps} from '../components/configuration/status.fi
 import {Config as TreeFilterProps} from '../components/configuration/tree.filter.config'
 
 
-
 export interface ComponentTitle {
     name: string,
     title: string,
@@ -58,7 +57,6 @@ export class ComponentService {
         this.registerComponent(new ImageFieldProps)
         this.registerComponent(new StatusFilterProps)
         this.registerComponent(new TreeFilterProps)
-
     }
 }
 

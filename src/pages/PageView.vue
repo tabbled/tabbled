@@ -40,12 +40,12 @@
             </template>
         </el-page-header>
 
-        <el-form ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
+        <el-form v-if="pageConfig && pageConfig.templateType === 'grid'"
+                 ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
 
             <el-form-item v-for="(element, idx) in elements"
                           :label="getLabelElement(element)"
                           :style="getGridElementStyle(element.layout)"
-
                           class="element">
 
                 <component :id="element.id || idx.toString()"
@@ -58,6 +58,16 @@
                 />
             </el-form-item>
         </el-form>
+
+        <FlexLayoutPage v-if="pageConfig && pageConfig.templateType === 'flex'"
+                        id="flex"
+                        :screen-size="screenSize"
+                        :page-config="pageConfig"
+                        :elements="elements"
+                        mode="view"
+                        :context="scriptContext"
+                        @update:field-value="(element, value) => setValue(element, value)"
+        />
     </div>
 </template>
 
@@ -77,7 +87,7 @@ import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
 import {Filters, useFilters} from "../model/filter";
-
+import FlexLayoutPage from "../components/FlexLayoutPage.vue";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "../services/socketio.service";
 const { t } = useI18n();
@@ -104,7 +114,6 @@ let editEntity = ref<EntityInterface>(null)
 let editEntityRevisionId = -1
 let isSaving = false
 let editDataSource: DataSourceInterface = null
-let update = ref(0)
 let isNew = ref(false)
 let filters = ref<Filters>(null)
 
@@ -200,7 +209,7 @@ async function generateReport(id) {
 }
 
 function getValue(el: ElementInterface) {
-    //console.log('getValue', el.field, editEntity.value[el.field])
+    console.log('getValue', el.field, editEntity.value[el.field])
     if (editEntity.value)
         return editEntity.value[el.field]
 
@@ -208,6 +217,7 @@ function getValue(el: ElementInterface) {
 }
 
 async function setValue(el:ElementInterface, value: any) {
+    console.log(el, value)
     if (isEditPage.value) {
         if (!editEntity.value)
             return false
@@ -223,7 +233,6 @@ async function setValue(el:ElementInterface, value: any) {
 
 async function setEntityValue(alias, value) {
     editEntity.value[alias] = value
-    update.value++
 
     let fSetValue = await editDataSource.getFieldByAlias(alias).setValueFunc()
     if (fSetValue) {
@@ -340,35 +349,8 @@ async function init() {
         }
     }
 
-    props.pageConfig.elements.forEach(element => {
-        let el: ElementInterface = {
-            id: element.id,
-            layout: element.layout,
-            name: element.name,
-            field: element.field,
-            props: {},
-            filterable: element.filterable
-        }
+    elements.value = processElements(props.pageConfig.elements)
 
-        let elProps = componentService.getByName(el.name)
-        if (!elProps) {
-            console.warn(`Component "${el.name}" not registered`)
-            return;
-        }
-
-        elProps.properties.forEach(item => {
-            el.props[item.alias] = _.cloneDeep(element[item.alias])
-        })
-        el.props['context'] = scriptContext.value
-
-
-        if (elProps.filterable || elProps.group === 'Filters') {
-            el.props['filters'] = filters
-        }
-
-        if (elProps.properties)
-            elements.value.push(el)
-    })
     setComponentAvailableHeight()
 
     pageHeader.actions = []
@@ -423,6 +405,45 @@ async function init() {
     if (isEditPage.value){
         socket.socket.on('updates', onUpdates)
     }
+}
+
+function processElements(elements): ElementInterface[] {
+    let els = []
+    elements.forEach(element => {
+        let el: ElementInterface = {
+            id: element.id,
+            layout: element.layout,
+            name: element.name,
+            field: element.field,
+            props: {},
+            filterable: element.filterable,
+            fieldConfig: getField(element),
+            elements: [],
+            fieldValue: undefined
+        }
+
+        let elProps = componentService.getByName(el.name)
+        if (!elProps) {
+            console.warn(`Component "${el.name}" not registered`)
+            return;
+        }
+
+        elProps.properties.forEach(item => {
+            el.props[item.alias] = _.cloneDeep(element[item.alias])
+        })
+        el.props['context'] = scriptContext.value
+
+        if (elProps.filterable || elProps.group === 'Filters') {
+            el.props['filters'] = filters
+        }
+
+        el.elements = processElements(element.elements)
+        el.fieldValue = getValue(el)
+
+        els.push(el)
+    })
+
+    return els
 }
 
 async function updateRevision() {

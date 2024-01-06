@@ -30,10 +30,10 @@ export function getAvailableScreenSizes($t: any):ScreenSizeItemInterface[] {
 }
 
 export interface PositionElementInterface {
-    colFrom: number,
-    colTo: number,
-    rowFrom: number,
-    rowTo: number,
+    colFrom?: number,
+    colTo?: number,
+    rowFrom?: number,
+    rowTo?: number,
     visible?: boolean
 }
 
@@ -44,8 +44,11 @@ export interface ElementInterface {
     },
     name: string,
     field: string,
+    fieldConfig?: FieldConfigInterface,
+    fieldValue?: any
     props: any,
-    filterable?: boolean
+    filterable?: boolean,
+    elements?: ElementInterface[]
 }
 
 export interface ComponentInterface {

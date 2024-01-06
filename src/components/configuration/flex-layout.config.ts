@@ -26,6 +26,11 @@ export class Config implements ComponentInterface {
             listOf: 'element',
             keyProp: 'name',
             displayProp: 'name'
+        },
+        {
+            title: 'Style',
+            alias: 'customStyle',
+            type: 'string'
         }]
     defaultPosition = {
         rows: 1,
