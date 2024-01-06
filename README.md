@@ -28,7 +28,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Types implementation
 - [x] Table editor
 - [x] Page designer
-- [ ] Flex drag&drop designer without grid
+- [x] Flex drag&drop designer without grid
 - [x] View editor
 - [x] DataSource setting page
 - [x] Menu setting page
