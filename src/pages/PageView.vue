@@ -209,7 +209,6 @@ async function generateReport(id) {
 }
 
 function getValue(el: ElementInterface) {
-    console.log('getValue', el.field, editEntity.value[el.field])
     if (editEntity.value)
         return editEntity.value[el.field]
 
@@ -349,6 +348,8 @@ async function init() {
         }
     }
 
+    console.log(props.pageConfig.elements)
+
     elements.value = processElements(props.pageConfig.elements)
 
     setComponentAvailableHeight()
@@ -437,7 +438,9 @@ function processElements(elements): ElementInterface[] {
             el.props['filters'] = filters
         }
 
-        el.elements = processElements(element.elements)
+        if (element.elements)
+            el.elements = processElements(element.elements)
+
         el.fieldValue = getValue(el)
 
         els.push(el)

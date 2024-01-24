@@ -12,6 +12,12 @@
 
 It's a low-code platform for building web application for enterprise, to manage internal processes of business like ERP, CRM, WMS, etc.
 
+## ✍ Communities
+
+* [Discord](https://github.com/tabbled/tabbled) 
+* [X(Twitter)](https://twitter.com/the_tabbled)
+* [YouTube](https://youtube.com/@Tabbled-platform)
+* [Telegram](https://t.me/tabbled)
 
 ## ⭐ Features
 
@@ -47,7 +53,6 @@ It's a low-code platform for building web application for enterprise, to manage 
 - [x] Dockerized entire project in the one image
 - [ ] Desktop version
 - [ ] Mobile version
-- [ ] PWA implementation
 
 ## 🚀 How to Install
 
