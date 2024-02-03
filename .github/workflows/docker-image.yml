@@ -38,4 +38,4 @@ jobs:
         file: ./Dockerfile
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: tabbled/web:latest, tabbled/${{ steps.package-version.outputs.current-version}}
+        tags: tabbled/web:latest, tabbled/web:${{ steps.package-version.outputs.current-version}}
