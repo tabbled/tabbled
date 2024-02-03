@@ -31,7 +31,7 @@
 
 
         <el-row>
-            <el-button type="primary" style="width: 100%" @click="login">Login</el-button>
+            <el-button type="primary" style="width: 100%" @click="login">{{$t('login')}}</el-button>
         </el-row>
     </el-card>
     </div>
