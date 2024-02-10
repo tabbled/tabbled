@@ -124,7 +124,7 @@ let pageListTypesProperties = new PageTypesProperties()
 
 const emit = defineEmits(['update', 'path-changed'])
 const props = defineProps<{
-    pageConfig: PageConfigInterface,
+    pageConfig: PageConfigInterface | any,
     currentPath: string
 }>()
 
@@ -169,7 +169,6 @@ function back() {
 
 function onPathChanged(path) {
     //currentConfigPath.value = path
-    console.log(path)
     emit('path-changed', path)
 
     _currentPathArray.value = path !== "" ? path.split('.') : []

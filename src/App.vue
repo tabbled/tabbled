@@ -167,6 +167,9 @@ socketClient.socket.on("login_needed", () => {
 })
 
 function canPageAccess(page) {
+    if (!permissions || !permissions.roles)
+        return false
+
     switch (page.access) {
         case 'all': return true;
         case 'nobody': return false;

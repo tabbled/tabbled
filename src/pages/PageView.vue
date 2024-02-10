@@ -43,7 +43,7 @@
         <el-form v-if="pageConfig && pageConfig.templateType === 'grid'"
                  ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
 
-            <el-form-item v-for="(element, idx) in elements"
+            <el-form-item v-for="(element, idx) in elements.filter(el => el.isVisible === true )"
                           :label="getLabelElement(element)"
                           :style="getGridElementStyle(element.layout)"
                           class="element">
@@ -55,6 +55,7 @@
                            :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
+
                 />
             </el-form-item>
         </el-form>
@@ -74,7 +75,6 @@
 <script setup lang="ts">
 
 import _ from 'lodash'
-import {useStore} from "vuex"
 import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
 import {useRouter, useRoute} from 'vue-router';
@@ -92,7 +92,6 @@ import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "../services/socketio.service";
 const { t } = useI18n();
 
-let store = useStore();
 let router = useRouter();
 let route = useRoute();
 const pageService = usePageScriptHelper(router)
@@ -208,14 +207,38 @@ async function generateReport(id) {
     }
 }
 
-function getValue(el: ElementInterface) {
+function getValue(el: ElementInterface | any) {
     if (editEntity.value)
         return editEntity.value[el.field]
 
     return undefined
 }
 
-async function setValue(el:ElementInterface, value: any) {
+function getVisible(el) {
+    console.log('getVisible', el)
+    return true
+}
+
+
+async function processVisibleAllElements() {
+    for(let i in elements.value) {
+        let el = elements.value[i]
+        await processVisible(el)
+    }
+}
+
+async function processVisible(element: ElementInterface | any) {
+    if (element.visibleFunc) {
+        let val = await element.visibleFunc.exec(scriptContext.value)
+        element.isVisible = val === undefined || val === null ? true : val
+    } else if (element.elements) {
+        for(let i in element.elements) {
+            await processVisible(element.elements[i])
+        }
+    }
+}
+
+async function setValue(el:ElementInterface | any, value: any) {
     console.log(el, value)
     if (isEditPage.value) {
         if (!editEntity.value)
@@ -228,6 +251,8 @@ async function setValue(el:ElementInterface, value: any) {
             return false
         }
     }
+
+    await processVisibleAllElements()
 }
 
 async function setEntityValue(alias, value) {
@@ -239,7 +264,7 @@ async function setEntityValue(alias, value) {
     }
 }
 
-function getField(el:ElementInterface) {
+function getField(el:ElementInterface | any) {
     if (!editDataSource) {
         return undefined
     }
@@ -348,8 +373,6 @@ async function init() {
         }
     }
 
-    console.log(props.pageConfig.elements)
-
     elements.value = processElements(props.pageConfig.elements)
 
     setComponentAvailableHeight()
@@ -406,6 +429,8 @@ async function init() {
     if (isEditPage.value){
         socket.socket.on('updates', onUpdates)
     }
+
+    await processVisibleAllElements()
 }
 
 function processElements(elements): ElementInterface[] {
@@ -420,7 +445,8 @@ function processElements(elements): ElementInterface[] {
             filterable: element.filterable,
             fieldConfig: getField(element),
             elements: [],
-            fieldValue: undefined
+            fieldValue: undefined,
+            isVisible: true
         }
 
         let elProps = componentService.getByName(el.name)
@@ -431,6 +457,11 @@ function processElements(elements): ElementInterface[] {
 
         elProps.properties.forEach(item => {
             el.props[item.alias] = _.cloneDeep(element[item.alias])
+
+            if (item.alias === 'visible' && element['visible']) {
+                console.log('visible!', element['visible'].script)
+                el.visibleFunc = compileScript(element['visible'].script, 'ctx')
+            }
         })
         el.props['context'] = scriptContext.value
 
@@ -484,7 +515,7 @@ async function compileAction(action) {
         return null
 
     try {
-        return await compileScript(action.script, 'ctx')
+        return compileScript(action.script, 'ctx')
     } catch (e) {
         console.error(e)
         return null

@@ -21,6 +21,11 @@ export class Config implements ComponentInterface {
             alias: "readonly",
             type: 'bool',
             default: false
+        },
+        {
+            title: 'Visibility',
+            alias: 'visible',
+            type: 'handler'
         }]
     defaultPosition = {
         rows: 1,

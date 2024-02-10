@@ -15,6 +15,11 @@ export class Config implements ComponentInterface {
             title: "Multiple",
             alias: "multiple",
             type: "bool"
+        },
+        {
+            title: 'Visibility',
+            alias: 'visible',
+            type: 'handler'
         }]
     defaultPosition = {
         rows: 1,

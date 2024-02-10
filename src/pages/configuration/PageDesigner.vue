@@ -357,7 +357,7 @@ async function prepareDataSourceFields() {
     })
 }
 
-function getElementProperties(element: ElementInterface) {
+function getElementProperties(element: ElementInterface | any) {
     let component = componentService.getByName(element.name)
     if (!component)
         return undefined
@@ -573,7 +573,7 @@ function endDrag() {
     dragDirection.value = ""
 }
 
-function getGridElStyle(element:ElementInterface) {
+function getGridElStyle(element:ElementInterface | any) {
     let style = {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",

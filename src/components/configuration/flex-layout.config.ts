@@ -7,18 +7,23 @@ export class Config implements ComponentInterface {
     icon: string = "ri:layout-4-line"
     group: string = 'Layout'
     properties:FieldConfigInterface[] = [{
-        title: "Direction",
-        alias: "direction",
-        type: "enum",
-        default: 'column',
-        values: [{
-            key: 'row',
-            title: 'Row'
-        },{
-            key: 'column',
-            title: 'Column'
-        }]
-    },
+            title: "Direction",
+            alias: "direction",
+            type: "enum",
+            default: 'column',
+            values: [{
+                key: 'row',
+                title: 'Row'
+            },{
+                key: 'column',
+                title: 'Column'
+            }]
+        },
+        {
+            title: 'Visibility',
+            alias: 'visible',
+            type: 'handler'
+        },
         {
             title: 'Elements',
             alias: 'elements',

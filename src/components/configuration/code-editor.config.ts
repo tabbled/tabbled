@@ -23,7 +23,11 @@ export class Config implements ComponentInterface {
         title: "Runnable",
         alias: "runnable",
         type: "bool"
-    }
+    }, {
+            title: 'Visibility',
+            alias: 'visible',
+            type: 'handler'
+        }
     ]
     defaultPosition = {
         rows: 4,

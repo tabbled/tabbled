@@ -1,5 +1,6 @@
 import {EventHandlerConfigInterface, FieldConfigInterface, FieldListOfType} from "./field";
 import {columnProperties} from "./column";
+import {CompiledFunc} from "../services/compiler";
 
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
 
@@ -49,6 +50,8 @@ export interface ElementInterface {
     props: any,
     filterable?: boolean,
     elements?: ElementInterface[]
+    isVisible?: boolean
+    visibleFunc?:  CompiledFunc
 }
 
 export interface ComponentInterface {

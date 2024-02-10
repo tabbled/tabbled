@@ -6,7 +6,7 @@
         @dragenter.prevent
         :style="{ 'flex-direction': direction }"
     >
-        <el-form-item v-for="(element, idx) in elements"
+        <el-form-item v-for="(element, idx) in elements.filter(el => el.isVisible)"
                       :class="{ draggable: mode === 'design', 'selected': mode === 'design' && selected === element.id, 'element-wrapper': !element.props.customStyle  }"
                       :draggable="mode === 'design'"
                       @dragstart.self="(e) => dragStart(e, element, idx)"
@@ -142,6 +142,7 @@ async function drop(e:DragEvent) {
                 'desktop': {},
                 'mobile': {}
             },
+            isVisible: true,
             props: properties,
             ...properties
         })

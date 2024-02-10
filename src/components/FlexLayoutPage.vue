@@ -57,8 +57,8 @@ let selected = ref<string>('')
 
 interface Props {
     screenSize: ScreenSize,
-    pageConfig: PageConfigInterface,
-    elements: ElementInterface[]
+    pageConfig: PageConfigInterface | any,
+    elements: ElementInterface[] | any[]
     mode?: 'design' | 'view',
     context: any
 }

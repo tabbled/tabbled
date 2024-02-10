@@ -34,6 +34,11 @@ export class Config implements ComponentInterface {
             title: "Show root item",
             alias: "rootItem",
             type: "bool"
+        },
+        {
+            title: 'Visibility',
+            alias: 'visible',
+            type: 'handler'
         }]
     defaultPosition = {
         rows: 1,

@@ -134,7 +134,8 @@ async function init() {
             name: element.name,
             field: element.field,
             props: {},
-            filterable: element.filterable
+            filterable: element.filterable,
+            isVisible: true
         }
 
         let elProps = componentService.getByName(el.name)
@@ -216,14 +217,14 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
     return style;
 }
 
-function getField(el:ElementInterface) {
+function getField(el:ElementInterface | any) {
     if (!editDataSource) {
         return undefined
     }
     return editDataSource.getFieldByAlias(el.field)
 }
 
-function getValue(el: ElementInterface) {
+function getValue(el: ElementInterface | any) {
     //console.log('getValue', el.field, editEntity.value[el.field])
     if (editEntity.value)
         return editEntity.value[el.field]
@@ -231,7 +232,7 @@ function getValue(el: ElementInterface) {
     return undefined
 }
 
-async function setValue(el:ElementInterface, value: any) {
+async function setValue(el:ElementInterface | any, value: any) {
     //console.log('setValue', el, value)
 
     if (pageConfig.value.isEditPage.value) {

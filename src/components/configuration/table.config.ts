@@ -99,6 +99,11 @@ export class Config implements ComponentInterface {
             listOf: 'action',
             keyProp: 'alias',
             displayProp: 'alias',
+        },
+        {
+            title: 'Visibility',
+            alias: 'visible',
+            type: 'handler'
         }]
     defaultPosition = {
         rows: 1,
