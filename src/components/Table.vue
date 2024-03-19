@@ -565,9 +565,6 @@ async function addChild() {
         return
     }
 
-
-
-
     if (actions.value.onAdd) {
         await execAction(actions.value.onAdd)
         return
@@ -669,10 +666,11 @@ async function onGridReady(params) {
     }
 
     await init()
-    restoreCols()
+
 }
 
 async function onFirstDataRendered(/*params*/) {
+    restoreCols()
 }
 
 function saveColumnState(e) {
@@ -1037,7 +1035,7 @@ let onItemInserted = async (params) => {
 }
 
 let onItemRemoved = async (params) => {
-    //console.log('onItemRemoved', params)
+    console.log('onItemRemoved', params)
     gridApi.applyServerSideTransaction({
         remove: [params.data],
         route: isTree.value && params.route ? params.route.slice(0, params.route.length - 1) : null

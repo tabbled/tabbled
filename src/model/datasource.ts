@@ -250,17 +250,11 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
 
     async removeById(id: string, route?: string[]): Promise<boolean> {
         //let dt = new Date().getMilliseconds()
-        let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/removeById`, {
+        await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/removeById`, {
             alias: this.alias,
             id: id
         })
         //console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
-
-        this.emit('item-removed', {
-            data: res.data,
-            route: route
-        })
-
         return true
     }
 
@@ -279,6 +273,8 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         if (!msg || msg.type !== 'data' || !msg.entity || msg.entity.alias !== this.alias)
             return
 
+        console.log(msg)
+
         switch (msg.action) {
             case 'add':
                 this.emit('item-inserted', {
@@ -295,7 +291,7 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
             case 'remove':
                 this.emit('item-removed', {
                     data: {
-                        id: msg.entity.data
+                        id: msg.entity.id
                     },
                     route: []
                 })

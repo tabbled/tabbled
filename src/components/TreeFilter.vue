@@ -1,6 +1,6 @@
 <template>
     <div v-if="fieldConfig" style="width: 100%;">
-        <el-card v-if="type === 'list'"  shadow="never" body-style="padding: 0" style="width: 100%">
+        <el-card v-if="type === 'list'"  shadow="never" body-style="padding: 0" :style="{width: '100%', height: height + 'px'}">
             <el-tree ref="tree"
                      style="width: 100%"
                      :data="treeData"
@@ -60,7 +60,8 @@ interface Props {
     rootItem: boolean,
     keyProp?: string,
     titleProp?: string,
-    childrenProp?: string
+    childrenProp?: string,
+    height?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {

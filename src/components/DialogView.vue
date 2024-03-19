@@ -1,7 +1,6 @@
 <template>
     <el-dialog class="dialog"
                :model-value="visible"
-               style="padding: 0"
                @close="emit('update:visible', false)"
                :title="pageConfig ? pageConfig.title : 'Dialog'"
                :modal="options && options.modal ? options.modal : true"
@@ -9,8 +8,9 @@
                :width="options && options.width ? options.width : '60%'"
                :fullscreen="screenSize === ScreenSize.mobile"
                :append-to-body="true"
+
     >
-        <el-form ref="grid"  class="grid-wrap" :model="editEntity" label-position="top" style="padding: 0">
+        <el-form ref="grid"  class="grid-wrap" :model="editEntity" label-position="top" style="padding: 0; height: 100%">
 
             <el-form-item v-for="(element, idx) in elements"
                           :label="getLabelElement(element)"
@@ -72,6 +72,7 @@ let editDataSource: DataSourceInterface = null
 let isNew = ref(false)
 let elements = ref<Array<ElementInterface>>([])
 let filters = ref<Filters>(null)
+let maxHeight = ref('')
 
 const emit = defineEmits(['update:visible', 'selected'])
 
@@ -100,6 +101,7 @@ async function init() {
     elements.value = []
     editDataSource = null
     editEntity.value = null
+    maxHeight.value = '200px'
 
     if (pageConfig.value.datasource) {
         editDataSource = await dsService.create(pageConfig.value.datasource)
@@ -279,6 +281,8 @@ function selectedChanged(sl) {
     .el-dialog__body {
         padding: 0;
         padding-bottom: 16px;
+        overflow: auto;
+        max-height: calc(100vh - 300px);
     }
 }
 
