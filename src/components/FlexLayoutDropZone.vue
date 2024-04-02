@@ -124,13 +124,13 @@ async function drop(e:DragEvent) {
     } else {
         let comp = componentService.getByName(item.name);
 
-        console.log(comp, item)
+        //console.log(comp, item)
 
         let properties = await generateEntityWithDefault(comp.properties)
         properties.screenSize = props.screenSize
         properties.selected = ''
 
-        console.log(item)
+       //console.log(item)
         properties = Object.assign(properties, item['props'])
 
         props.elements.push({

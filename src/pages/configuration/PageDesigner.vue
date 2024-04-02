@@ -218,6 +218,7 @@ import PageSettingsPanel from '../../components/PageSettingsPanel.vue'
 import { FlakeId } from '../../flake-id'
 import {useSettings} from "../../services/settings.service";
 import FlexLayoutPage from "../../components/FlexLayoutPage.vue";
+import {generateEntityWithDefault} from "../../model/field";
 let flakeId = new FlakeId()
 
 interface ComponentDropInterface extends ComponentInterface {
@@ -320,11 +321,11 @@ function onResizeSettingPanel(e: MouseEvent) {
 }
 
 async function prepareDataSourceFields() {
-    console.log('prepareDataSourceFields')
     fields.value = []
 
     if (!pageConfig.value || !pageConfig.value.datasource) {
         fields.value = []
+        return;
     }
 
     let ds = await dsService.getByAlias(pageConfig.value.datasource)
@@ -394,7 +395,9 @@ async function init() {
             headerActions: [],
             isEditPage: false,
             templateType: null,
-            datasource: null
+            datasource: null,
+            access: "all",
+            accessRoles: []
         }
     } else {
         pageConfig.value = await getPageConfig(route.params.id.toString())
@@ -422,8 +425,6 @@ async function init() {
 }
 
 async function onUpdateProperty(path: string, value: any) {
-    console.log(path, value)
-    //pageConfig.value.elements[0]['direction'] = 'row'
     _.update(pageConfig.value, path, () => {
         return value
     })
@@ -615,8 +616,6 @@ async function dropNewWidget(e:DragEvent) {
     let item = <ComponentDropInterface>JSON.parse(e.dataTransfer.getData('item'));
     let comp = componentService.getByName(item.name);
 
-    console.log(e)
-
     let relatedX = e.offsetX
     let relatedY = e.offsetY
     let grid = e.target
@@ -635,27 +634,7 @@ async function dropNewWidget(e:DragEvent) {
     }
     startRow = startRow >= 1 ? startRow : 1
 
-    let properties = {}
-    comp.properties.forEach(prop => {
-        let val:any = null
-
-        if (item['props'][prop.alias]) {
-            val = item['props'][prop.alias]
-        } else {
-            switch (prop.type) {
-                case "bool": val = prop.default ? prop.default : false; break;
-                case "string": val = prop.default ? prop.default : ""; break;
-                case "number": val = prop.default ? prop.default : 0; break;
-                case "list":
-                case "table": val = []; break;
-                default: prop.default ? prop.default : null;
-            }
-        }
-
-        properties[prop.alias] = val
-    })
-
-
+    let properties = await generateEntityWithDefault(comp.properties)
 
     elements.value.push({
         id: (flakeId.generateId()).toString(),
@@ -675,8 +654,11 @@ async function dropNewWidget(e:DragEvent) {
                 rowTo: startRow + comp.defaultPosition.rows,
             }
         },
-        props: properties
+        props: properties,
+        ...properties
     })
+
+    console.log(properties)
     isChanged.value = true;
 }
 

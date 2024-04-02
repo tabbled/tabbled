@@ -66,7 +66,8 @@ async function insert(parentId) {
         title: 'New item',
         path: "/",
         page: "",
-        icon: ""
+        icon: "",
+        visibility: 'all'
     }
 
     if (!parentId) {

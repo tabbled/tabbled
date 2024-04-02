@@ -1,6 +1,7 @@
 import {EventHandlerConfigInterface, FieldConfigInterface, FieldListOfType} from "./field";
 import {columnProperties} from "./column";
 import {CompiledFunc} from "../services/compiler";
+import {AccessType} from "./permissions";
 
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
 
@@ -91,7 +92,9 @@ export interface PageConfigInterface {
     headerActions: PageActionConfigInterface[],
     isEditPage: boolean
     datasource?: string,
-    templateType: PageTemplateType
+    templateType: PageTemplateType,
+    access: AccessType,
+    accessRoles: string[]
 }
 
 interface PageListItemTypeInterface {
