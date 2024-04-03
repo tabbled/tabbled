@@ -92,7 +92,7 @@
 
             <div v-if="pageConfig && pageConfig.templateType === 'grid'" style="display: flex; flex-flow: row">
 
-                <div style="display: flex; flex-flow: column; width: 100%" >
+                <div style="display: flex; flex-flow: column; width: 100%;" >
 
 
 
@@ -685,6 +685,18 @@ function flexElementSelected(e) {
     gap: 10px;
     grid-auto-rows: minmax(40px, auto);
     padding-right: 16px;
+    border: var(--el-border-color-lighter) dashed 1px;
+    .grid__item {
+        border-left: 1px solid #000;
+    }
+
+    .grid__item::before,
+    .grid__item::after {
+        content: '';
+        position: absolute;
+        background-color: var(--line-color);
+        z-index: 1;
+    }
 }
 
 .settings-panel{
