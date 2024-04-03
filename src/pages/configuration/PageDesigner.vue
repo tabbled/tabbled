@@ -636,6 +636,8 @@ async function dropNewWidget(e:DragEvent) {
 
     let properties = await generateEntityWithDefault(comp.properties)
 
+    properties = Object.assign(properties, item['props'])
+
     elements.value.push({
         id: (flakeId.generateId()).toString(),
         name: comp.name,
