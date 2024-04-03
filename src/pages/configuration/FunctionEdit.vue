@@ -32,29 +32,40 @@
             </el-form-item>
         </div>
 
-        <el-form-item :label="$t('context')">
-            <CodeEditor :field-config="getField('context')"
-                        field="context"
-                        format="json"
-                        :runnable="false"
-                        :model-value="getValue('context')"
-                        @change="(val) => setValue('context', val)"
-            />
-        </el-form-item>
+        <el-tabs v-model="activeTab" class="demo-tabs">
 
-        <el-form-item :label="$t('script')">
-            <el-button text type="primary" style="margin-bottom: 8px"  @click="run();">
-                <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
-                {{$t('run')}}
-            </el-button>
-            <CodeEditor :context="context"
-                        :field-config="getField('script')"
-                        field="script"
-                        format="javascript"
-                        :model-value="getValue('script')"
-                        @change="(val) => setValue('script', val)"
-            />
-        </el-form-item>
+            <el-tab-pane :label="$t('script')" name="script">
+
+                <el-form-item>
+                    <el-button text type="primary" style="margin-bottom: 8px"  @click="run();">
+                        <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
+                        {{$t('run')}}
+                    </el-button>
+                    <CodeEditor :context="context"
+                                :field-config="getField('script')"
+                                field="script"
+                                format="javascript"
+                                :model-value="getValue('script')"
+                                @change="(val) => setValue('script', val)"
+                    />
+                </el-form-item>
+            </el-tab-pane>
+
+            <el-tab-pane :label="$t('context')" name="context">
+
+                <el-form-item>
+                    <CodeEditor :field-config="getField('context')"
+                                field="context"
+                                format="json"
+                                :runnable="false"
+                                :model-value="getValue('context')"
+                                @change="(val) => setValue('context', val)"
+                    />
+                </el-form-item>
+            </el-tab-pane>
+
+
+        </el-tabs>
     </el-form>
 
 </div>
@@ -81,6 +92,7 @@ let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
 let updateKey = ref(0)
+let activeTab = 'script'
 
 const socket = useSocketClient()
 const settings = useSettings()
