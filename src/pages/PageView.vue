@@ -155,7 +155,7 @@ onMounted(async () => {
 
 
 function setAppTitle() {
-    document.title = `${route.meta.title} | ${ window['env']['appTitle'] }`
+    document.title = `${route.meta.title} | ${ window['env']['appTitle'] ? window['env']['appTitle'] : 'Tabbled' }`
 }
 
 async function save() {

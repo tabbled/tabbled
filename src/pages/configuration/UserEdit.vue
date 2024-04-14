@@ -143,7 +143,7 @@ onMounted(async () => {
 
     await load()
 
-    document.title = `${t('user')} ${ isNew.value ? 'new' : ' ' + userEntity.value.username } | ${ window['env']['appTitle']}`
+    document.title = `${t('user')} ${ isNew.value ? 'new' : ' ' + userEntity.value.username } | ${ window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled" }`
 });
 
 function getField(alias) {

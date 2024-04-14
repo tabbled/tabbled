@@ -318,7 +318,7 @@ const usersColumns:ColumnConfigInterface[] = [
 ]
 
 function setAppTitle() {
-    document.title = `${t('configuration')} | ${ window['env']['appTitle'] }`
+    document.title = `${t('configuration')} | ${ window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled" }`
 }
 
 onMounted(async () => {

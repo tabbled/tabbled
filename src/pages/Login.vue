@@ -70,12 +70,10 @@ let rules = ref({
     }]
 })
 
-let signing = false
-
 onMounted(async () => {
-    favicon.value = window['env']['appFavicon']
-    title.value = window['env']['appTitle']
-    document.title = `${route.meta.title} | ${ window['env']['appTitle'] }`
+    favicon.value = window['env']['appFavicon'] ? window['env']['appFavicon'] : "./favicon.png"
+    title.value = window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled"
+    document.title = `${route.meta.title} | ${ title.value }`
 })
 
 
