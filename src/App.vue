@@ -17,6 +17,8 @@
                  v-model:visible="dialogVisible"
                  :screen-size="screenSize"
                  :options="dialogOptions"/>
+
+    <FirstStartDialog :visible="firstStart" @selected="firstStartSetup"/>
 </template>
 
 <script setup lang="ts">
@@ -33,6 +35,7 @@ import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import DialogView from "./components/DialogView.vue";
 import {useSocketClient} from "./services/socketio.service";
+import FirstStartDialog from "./pages/configuration/FirstStartDialog.vue";
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -55,6 +58,8 @@ const settings = useSettings()
 let dialogVisible = ref(false)
 let dialogOptions = ref()
 let dialogRef = ref(null)
+let firstStart = ref(false)
+let pagesCount = ref(0)
 let permissions = {
     admin: false,
     roles: []
@@ -135,11 +140,19 @@ async function loadConfig() {
     await Promise.all([
         registerPages(),
         dsService.registerAll(),
-    ]).then(() => {
+    ]).then(async () => {
         configLoadState.value = ConfigLoadState.Loaded
+
+        let start = await isFirstStart()
+        firstStart.value = !pagesCount.value && start
     }).catch(e => {
         console.error(e)
     })
+}
+
+function firstStartSetup() {
+    firstStart.value = false
+    router.go(0)
 }
 
 function logout() {
@@ -153,6 +166,7 @@ async function registerPages() {
     pagesByAlias.value.clear()
 
     let pages = (await dsService.pageDataSource.getMany()).data
+    pagesCount.value = pages.length
 
     pages.forEach((item: PageConfigInterface) => {
         addRoute(item.path, item);
@@ -167,7 +181,15 @@ socketClient.socket.on("login_needed", () => {
 })
 
 function canPageAccess(page) {
-    if (!permissions || !permissions.roles)
+    if (!permissions) {
+        console.warn('No permissions for user')
+        return false
+    }
+
+    if (permissions.admin)
+        return true
+
+    if (!permissions.roles)
         return false
 
     switch (page.access) {
@@ -208,6 +230,13 @@ function addRoute(path: string, page: PageConfigInterface) {
     })
     pagesByAlias.value.set(path, page);
     console.info('Route ' + path + ' added')
+}
+
+async function isFirstStart() {
+    let res = await socketClient.emit('config/params/get', {
+        id: '__installedConfig'
+    })
+    return !res
 }
 
 </script>

@@ -133,5 +133,15 @@
         "addElement": "Добавить элемент",
         "addField": "Добавить поле"
     },
-    "entityUpdated": "Данные были изменены на другом устройстве, обновите страницу"
+    "entityUpdated": "Данные были изменены на другом устройстве, обновите страницу",
+    "firstStartDialogTitle": "Выбор начальной настройки",
+    "firstStartSetup": "Настроить",
+    "importConfigSelectItems": "Выбрать блоки для импорта",
+    "importSuccess": "Импортировано успешно",
+    "importError": "Ошибка импорта",
+    "clearConfig": "Очистить конфигурацию",
+    "clearData": "Очистить данные",
+    "conflictResolveType": "При конфликте",
+    "conflictResolveReplace": "Заменить",
+    "conflictResolveSkip": "Пропустить"
 }

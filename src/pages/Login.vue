@@ -71,7 +71,7 @@ let rules = ref({
 })
 
 onMounted(async () => {
-    favicon.value = window['env']['appFavicon'] ? window['env']['appFavicon'] : "./favicon.png"
+    favicon.value = window['env']['appFavicon'] ? window['env']['appFavicon'] : "/favicon.png"
     title.value = window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled"
     document.title = `${route.meta.title} | ${ title.value }`
 })

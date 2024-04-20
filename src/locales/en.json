@@ -150,5 +150,15 @@
         "addElement": "Add element",
         "addField": "Add field"
     },
-    "entityUpdated": "Entity was updated in another device, please refresh the page"
+    "entityUpdated": "Entity was updated in another device, please refresh the page",
+    "firstStartDialogTitle": "First setup configuration",
+    "firstStartSetup": "Set up",
+    "importConfigSelectItems": "Select items for importing",
+    "importSuccess": "Imported successfully",
+    "importError": "Error while importing",
+    "clearConfig": "Clear configuration",
+    "clearData": "Clear data",
+    "conflictResolveType": "On conflict",
+    "conflictResolveReplace": "Replace",
+    "conflictResolveSkip": "Skip"
 }

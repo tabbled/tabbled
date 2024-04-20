@@ -31,6 +31,7 @@ It's a low-code platform for building web application for enterprise, to manage 
 ## 🌿 Roadmap
 
 - [x] Sign in and sign on
+- [ ] Self user registration
 - [x] Types implementation
 - [x] Table editor
 - [x] Page designer

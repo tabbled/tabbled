@@ -4,38 +4,14 @@
             <span> {{$t('configuration')}} </span>
         </template>
         <template #extra >
-            <div style="display: flex; align-self: center;">
-                <el-dropdown
-                    style="margin-right: 24px; "
-                >
-                <span class="dropdown-link">
-                            {{$t('import')}}
-                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-download"></Icon>
-                </span>
-                    <template #dropdown>
-                        <el-dropdown-menu>
-                            <el-dropdown-item @click="loadConfigFile">{{$t('configuration')}}</el-dropdown-item>
-                            <el-dropdown-item @click="loadDataFile">{{$t('importData')}}</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
-                </el-dropdown>
-
-                <el-dropdown
-                    style="margin-right: 8px"
-                >
-                <span class="dropdown-link">
-                            {{$t('export')}}
-                           <Icon width="16" style="padding-left: 4px" icon="ic:outline-file-upload"></Icon>
-                </span>
-                    <template #dropdown>
-                        <el-dropdown-menu>
-                            <el-dropdown-item @click="exportConfig">{{$t('configuration')}}</el-dropdown-item>
-                            <el-dropdown-item @click="exportData">{{$t('exportData')}}</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
-                </el-dropdown>
-            </div>
-
+            <el-button type="text" @click="importDialogVisible = true">
+                <Icon width="16" style="padding-right: 4px" icon="ic:outline-file-download"></Icon>
+                {{$t('import')}}
+            </el-button>
+            <el-button type="text" @click="exportDialogVisible = true">
+                <Icon width="16" style="padding-right: 4px" icon="ic:outline-file-upload"></Icon>
+                {{$t('export')}}
+            </el-button>
         </template>
     </el-page-header>
 
@@ -125,44 +101,9 @@
         </el-tab-pane>
 
     </el-tabs>
-    <el-dialog class="dialog"
-               :model-value="importConfigSettingsVisible"
-               style="padding: 16px"
-               @close="importConfigSettingsVisible = false"
-               :title="t('import')"
-               :modal="true"
-               draggable
-               :width="'60%'"
-               :append-to-body="true"
 
-    >
-        <div style="display: flex; flex-direction: column; margin-left: 24px">
-            <el-checkbox  v-model="importEntireConfig">Import entire config</el-checkbox>
-            <el-text v-if="importEntireConfig"
-                     class="mx-1"
-                     type="warning"
-                     style="margin-right: 16px; align-self: flex-start;"
-            >
-                Current config while be replaced
-            </el-text>
-        </div>
-        <el-tree v-if="!importEntireConfig"
-                 ref="configTree"
-                 :data="importConfigData"
-                 node-key="key"
-                 :props="treeProps"
-                 show-checkbox
-                 check-on-click-node
-        >
-        </el-tree>
-        <template #footer>
-            <span>
-                <el-text class="mx-1" style="margin-right: 16px;  ">{{'Version: ' +  importConfigVersion + '; rev: ' + importConfigRev}}</el-text>
-                <el-button @click="importConfigSettingsVisible = false">{{$t('cancel')}}</el-button>
-                <el-button type="primary" @click="importConfig">{{$t('import')}}</el-button>
-            </span>
-        </template>
-    </el-dialog>
+    <ImportDialog v-model:visible="importDialogVisible"></ImportDialog>
+    <ExportDialog v-model:visible="exportDialogVisible"/>
 </template>
 
 <script setup lang="ts">
@@ -178,6 +119,8 @@ import {useI18n} from "vue-i18n";
 import { useElementSize } from '@vueuse/core'
 import { useSocketClient } from "../../services/socketio.service";
 import MenuEdit from "./MenuEdit.vue";
+import ExportDialog from "./ExportDialog.vue";
+import ImportDialog from "./ImportDialog.vue";
 
 const { t } = useI18n();
 const server = useSocketClient()
@@ -186,9 +129,10 @@ let configTree = ref(null)
 let importConfigVersion = ref(null)
 let importConfigRev = ref(null)
 let importConfigData = ref(null)
-let importConfigSettingsVisible = ref(false)
+let importDialogVisible = ref(false)
 let importEntireConfig = ref(true)
 let importConfigFile = null
+let exportDialogVisible = ref(false)
 
 const treeProps = {
     children: 'children',
@@ -345,159 +289,6 @@ async function saveSettings() {
         ElMessage.error(e.toString())
         console.error(e)
     }
-}
-
-
-function loadFile() : Promise<any> {
-    return new Promise( (resolve) => {
-        let input = document.createElement('input');
-        input.type = 'file';
-        input.onchange = _ => {
-            let files =   Array.from(input.files);
-            const fr = new FileReader();
-            fr.readAsText(files[0]);
-            fr.addEventListener('load', (e) => {
-                resolve(e.target.result)
-            })
-        };
-        input.click();
-    })
-}
-
-function prepareConfigTree(config) {
-    if (!config.version || !config.rev)
-        return null
-
-    importConfigVersion.value = config.version
-    importConfigRev.value = config.rev
-
-    return [
-        prepareItem('page',t('pages')),
-        prepareItem('datasource',t('datasources')),
-        prepareItem('function',t('functions')),
-        prepareItem('report',t('reportTemplates')),
-        {
-            key: 'params',
-            label: t('params')
-        }
-    ]
-
-    function prepareItem(alias, title) {
-        let item = {
-            key: alias,
-            label: title,
-            children: [],
-            disabled: false
-        }
-
-        if (config[alias] && Array.isArray(config[alias])) {
-            for(const i in config[alias]) {
-                let it = config[alias][i]
-                item.children.push({
-                    key: `${it.alias}.${it.data.alias}`,
-                    label: `${it.data.title} (${it.data.alias})`,
-                })
-            }
-        }
-
-        item.disabled = !item.children.length
-
-
-        return item
-    }
-}
-
-function loadConfigFile() {
-    loadFile().then(data => {
-        importConfigFile = JSON.parse(data.toString())
-        importConfigData.value = prepareConfigTree(importConfigFile)
-
-        if (!importConfigData.value) {
-            ElMessage.error('Config is not valid')
-            return
-        }
-
-        importConfigSettingsVisible.value = true
-    })
-}
-
-function loadDataFile() {
-    loadFile().then(data => {
-        importData(JSON.parse(data.toString()))
-    })
-}
-
-async function importConfig(config: any) {
-    console.log('Start load configuration with version ' + config.version)
-    //console.log(configTree.value.getCheckedKeys())
-    try {
-        await server.emit('config/import', {
-            entire: importEntireConfig.value,
-            entities: !importEntireConfig.value ? configTree.value.getCheckedKeys() : undefined,
-            config: importConfigFile
-        })
-        console.log("Loading configuration have finished. Reload the page")
-        ElMessage.success('Imported successfully')
-    } catch (e) {
-        console.error(e)
-        ElMessage.error('Import error')
-    }
-}
-
-async function importData(data: any) {
-    try {
-        //await sync.import(DataSourceType.data, data)
-        console.log("Loading data have finished.", data)
-        ElMessage.success('Imported successfully')
-    } catch (e) {
-        console.error(e)
-        ElMessage.error('Import error')
-    }
-}
-
-function saveFile(data: any, filename: string) {
-    let file = new Blob([data]);
-    let a = document.createElement("a"),
-        url = URL.createObjectURL(file)
-
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-
-    setTimeout(function() {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-    }, 0);
-}
-
-async function exportConfig() {
-    let config = await server.emit('config/export', {})
-    saveFile(JSON.stringify(config), 'configuration.json')
-}
-
-async function exportData() {
-    let data = JSON.stringify(await gatherData(), null, 4)
-    saveFile(data, 'data.json')
-}
-
-async function gatherData() {
-    let data = {}
-    let sources = dsService.dsDataSource.getMany()
-    for(const i in sources) {
-        const source = sources[i]
-        data[source.alias] = await gatherFromDataSource(source.alias)
-    }
-
-    return data
-}
-
-async function gatherFromDataSource(alias: string) {
-    let ds = await dsService.getByAlias(alias)
-    if (!ds)
-        return undefined;
-
-    return []
 }
 
 function tabChange(d) {

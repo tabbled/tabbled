@@ -213,8 +213,6 @@ async function getRoles() {
             id: 'roles'
         })
         roles.value = res ? res : []
-
-        console.log(roles.value)
     } catch (e) {
         console.error(e)
     }
