@@ -109,12 +109,15 @@ let elems = ref([])
 let reportMenu = ref([])
 const socket = useSocketClient()
 
+
 let editEntity = ref<EntityInterface>(null)
 let editEntityRevisionId = -1
 let isSaving = false
 let editDataSource: DataSourceInterface = null
 let isNew = ref(false)
 let filters = ref<Filters>(null)
+let visibleElements = ref([])
+for(let i = 0; i < 12; i++) visibleElements.value.push([])
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -221,6 +224,7 @@ function getVisible(el) {
 
 
 async function processVisibleAllElements() {
+
     for(let i in elements.value) {
         let el = elements.value[i]
         await processVisible(el)
@@ -239,7 +243,7 @@ async function processVisible(element: ElementInterface | any) {
 }
 
 async function setValue(el:ElementInterface | any, value: any) {
-    console.log(el, value)
+    //console.log(el, value)
     if (isEditPage.value) {
         if (!editEntity.value)
             return false
@@ -431,6 +435,7 @@ async function init() {
     }
 
     await processVisibleAllElements()
+    await shiftElements()
 }
 
 function processElements(elements): ElementInterface[] {
@@ -571,7 +576,8 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
     grid-template-columns: repeat(12, 1fr);
     gap: 10px;
     grid-auto-rows: minmax(20px, auto);
-    grid-auto-flow: dense
+    grid-auto-flow: column;
+
 }
 
 .element {

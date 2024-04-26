@@ -30,7 +30,7 @@ export class Config implements ComponentInterface {
         }
     ]
     defaultPosition = {
-        rows: 4,
+        rows: 1,
         cols: 12
     }
 }

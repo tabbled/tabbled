@@ -38,7 +38,7 @@ export class Config implements ComponentInterface {
         }]
     defaultPosition = {
         rows: 1,
-        cols: 12
+        cols: 4
     }
 }
 export function properties():FieldConfigInterface[] {

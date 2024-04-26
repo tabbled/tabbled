@@ -128,41 +128,59 @@
                             <div v-for="(element, idx) in elements"
                                  class="dragging widget-draggable"
                                  :id="String(idx)"
+
                                  :style="getGridElStyle(element)"
                                  :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}">
 
+                                <div @click="clickComponent" class="item-overlay"
+                                     @mouseup="endDrag"
+                                     :id="String(idx)"
+                                     @mousedown="initDragMove"
+                                >
+                                    <div @click="removeWidget(Number(idx))">
+                                        <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
+                                    </div>
+
+                                </div>
+
+                                <div :class="{ 'resizer-right': true, 'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
+                                     @mousedown="initDragRight" :id="String(idx)">
+
+                                </div>
+                                <div :class="{ 'resizer-bottom': true, 'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
+                                     @mousedown="initDragBottom" :id="String(idx)">
+
+                                </div>
 
                                 <el-form-item
                                     :id="String(idx)"
-
                                 >
+
+
                                     <template #label>
                                         <div
-                                            style="cursor: move; width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" @mousedown="initDragMove"
+                                            style="width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; z-index: 2"
                                             :id="String(idx)">
                                             <span :id="String(idx)">{{getElementTitle(element)}}</span>
-                                            <div @click="removeWidget(Number(idx))">
-                                                <Icon :id="String(idx)" icon="mdi:delete" class="delete-icon"/>
-                                            </div>
+
                                         </div>
                                     </template>
 
+
                                     <component
                                         :id="String(idx)"
-                                        style="width: 100%"
+                                        @click="clickComponent"
+                                        @mousedown="initDragMove"
+                                        @mouseup="endDrag"
+                                        style="z-index: 0"
                                         v-bind="getElementProperties(element)"
                                         :is="element.name"
                                     />
-                                </el-form-item>
 
-                                <div :class="{
-                            'resizer-right': true,
-                            'resizer-activated': (dragDirection === 'right' && dragIdx === String(idx))}"
-                                     @mousedown="initDragRight" :id="String(idx)"></div>
-                                <div :class="{
-                            'resizer-bottom': true,
-                            'resizer-activated': (dragDirection === 'bottom' && dragIdx === String(idx))}"
-                                     @mousedown="initDragBottom" :id="String(idx)"></div>
+
+
+
+                                </el-form-item>
                             </div>
                         </div>
                     </el-form>
@@ -287,6 +305,10 @@ onUnmounted(() => {
     // pageHeader.actions = []
     // pageHeader.title = ""
 })
+
+function clickComponent() {
+    console.log('clickComponent')
+}
 
 function setAppTitle() {
     document.title = `${route.meta.title} | ${ window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled" }`
@@ -469,9 +491,12 @@ async function getPageConfig(id: string):Promise<PageConfigInterface | undefined
 function gridClicked(e:MouseEvent) {
     // @ts-ignore
     selectWidget(e.target?.id)
+
+    console.log()
 }
 
 function initDragMove(e:MouseEvent) {
+    console.log('move')
     dragDirection.value = 'move'
     initDrag(e)
 }
@@ -570,6 +595,7 @@ function onDrag(e: MouseEvent) {
 }
 
 function endDrag() {
+    console.log('endDrag')
     widget = null;
     dragDirection.value = ""
 }
@@ -578,7 +604,8 @@ function getGridElStyle(element:ElementInterface | any) {
     let style = {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",
-        height: 'auto'
+        height: 'auto',
+
     }
 
     let el = element.layout[selectedSize.value] || element.layout[ScreenSize.desktop]
@@ -623,7 +650,9 @@ async function dropNewWidget(e:DragEvent) {
     let colWidth = grid?.clientWidth / 12
 
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)
-    let startRow = Math.round((relatedY - item.layerY)  / 80)
+    let startRow = Math.round((relatedY)  / 76)
+
+    console.log(relatedY, item.layerY)
 
 
     startCol = startCol >= 1 ? startCol : 1
@@ -752,6 +781,16 @@ function flexElementSelected(e) {
     overflow: hidden;
 }
 
+.item-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+    //background: #00B0FF
+}
+
 .new-widget-draggable {
     cursor: move;
     height: auto;
@@ -783,7 +822,7 @@ function flexElementSelected(e) {
 }
 
 .resizer-right {
-    width: 3px;
+    width: 4px;
     background: transparent;
     position: absolute;
     right: -2px;
@@ -794,7 +833,7 @@ function flexElementSelected(e) {
 }
 
 .resizer-bottom {
-    height: 3px;
+    height: 4px;
     background: transparent;
     position: absolute;
     right: 1px;
@@ -825,6 +864,7 @@ function flexElementSelected(e) {
 .resizer-right:hover {
     background: var(--el-color-primary-light-3);
     opacity: 0.5;
+
 }
 
 .resizer-activated {
