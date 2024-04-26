@@ -435,7 +435,6 @@ async function init() {
     }
 
     await processVisibleAllElements()
-    await shiftElements()
 }
 
 function processElements(elements): ElementInterface[] {
