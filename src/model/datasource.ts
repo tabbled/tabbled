@@ -723,6 +723,27 @@ export class ReportConfigDataSource extends DataSource {
                     displayProp: 'title',
                     keyProp: "alias"
                 },
+                {
+                    title: 'Template format',
+                    alias: 'templateFormat',
+                    type: "enum",
+                    required: true,
+                    isMultiple: false,
+                    default: 'excel',
+                    values: [{
+                        key: 'html',
+                        title: "Html"
+                    },{
+                        key: 'excel',
+                        title: "Excel"
+                    }]
+                },
+                {
+                    title: 'templateExcel',
+                    alias: 'templateExcel',
+                    type: "string",
+                    required: false
+                }
             ]}, server, service);
     }
 }

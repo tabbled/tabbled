@@ -1,7 +1,7 @@
 {
   "name": "tabbled-web",
   "private": true,
-  "version": "0.5.11",
+  "version": "0.5.12",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -16,6 +16,7 @@
     "@codemirror/lang-javascript": "^6.1.2",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/theme-one-dark": "^6.1.0",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@sentry/vue": "^7.73.0",
     "@tanstack/vue-table": "^8.9.1",
     "@types/events": "^3.0.0",
@@ -27,9 +28,10 @@
     "codemirror": "^6.0.1",
     "core-js": "^3.30.2",
     "dayjs": "^1.11.7",
-    "element-plus": "^2.7.0",
+    "element-plus": "^2.7.2",
     "events": "^3.3.0",
     "jwt-decode": "^3.1.2",
+    "less": "^4.2.0",
     "lodash": "^4.17.21",
     "numeral": "^2.0.6",
     "sass": "^1.56.1",
@@ -41,7 +43,8 @@
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.1.6",
     "vue3-runtime-template": "^1.0.2",
-    "vuex": "^4.1.0"
+    "vuex": "^4.1.0",
+    "x-data-spreadsheet": "^1.1.9"
   },
   "devDependencies": {
     "@iconify/vue": "^4.0.2",

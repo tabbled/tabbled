@@ -125,13 +125,7 @@ import ImportDialog from "./ImportDialog.vue";
 const { t } = useI18n();
 const server = useSocketClient()
 
-let configTree = ref(null)
-let importConfigVersion = ref(null)
-let importConfigRev = ref(null)
-let importConfigData = ref(null)
 let importDialogVisible = ref(false)
-let importEntireConfig = ref(true)
-let importConfigFile = null
 let exportDialogVisible = ref(false)
 
 const treeProps = {

@@ -143,5 +143,8 @@
     "clearData": "Очистить данные",
     "conflictResolveType": "При конфликте",
     "conflictResolveReplace": "Заменить",
-    "conflictResolveSkip": "Пропустить"
+    "conflictResolveSkip": "Пропустить",
+    "loadFile": "Загрузить файл",
+    "fileLoaded": "Файл загружен",
+    "templateFormat": "Формат шаблона"
 }

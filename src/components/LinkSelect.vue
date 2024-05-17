@@ -8,7 +8,7 @@
                    :model-value="value"
                    :disabled="disabled || isDisabled"
                    remote
-                   clearable
+                   :clearable="clearable"
                    remote-show-suffix
                    :remote-method="getData"
                    :loading="isLoading"
@@ -32,7 +32,7 @@
                         :node-key="keyProp"
                         :props="treeProps"
                         show-checkbox
-                        clearable
+                        :clearable="clearable"
                         check-strictly
                         :multiple="fieldConfig.isMultiple"
                         @check="treeChanged"
@@ -45,7 +45,7 @@
                    filterable
                    :model-value="value"
                    :disabled="disabled || isDisabled"
-                   clearable
+                   :clearable="clearable"
                    @change="(val) => change(val)"
                    style="width: 100%"
         >
@@ -104,7 +104,8 @@ interface Props {
     title?:string,
     id?: string,
     screenSize?: ScreenSize,
-    disabled?: boolean
+    disabled?: boolean,
+    clearable?: boolean
 }
 
 
@@ -112,7 +113,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     keyProp: "id",
     displayProp: "name",
-    childrenProp: "children"
+    childrenProp: "children",
+    clearable: true
 })
 
 const treeProps = {

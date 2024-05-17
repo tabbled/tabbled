@@ -40,24 +40,54 @@
                             @change="(val) => setValue('pages', val)"
                 />
             </el-form-item>
+
+            <el-form-item :label="$t('templateFormat')" style="width: 50%; margin-left: 8px">
+                <LinkSelect field="templateFormat"
+                            :field-config="getField('templateFormat')"
+                            :model-value="getValue('templateFormat')"
+                            @change="(val) => setValue('templateFormat', val)"
+                            :clearable="false"
+                />
+
+            </el-form-item>
         </div>
 
         <el-tabs v-model="activeTab" class="demo-tabs">
 
             <el-tab-pane :label="$t('template')" name="template">
-                <el-form-item >
-                    <el-button text type="primary" style="margin-bottom: 8px"  @click="render();">
-                        <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
-                        {{$t('render')}}
-                    </el-button>
-                    <CodeEditor :context="context"
-                                :field-config="getField('template')"
-                                field="script"
-                                format="html"
-                                :model-value="getValue('template')"
-                                @change="(val) => setValue('template', val)"
-                    />
-                </el-form-item>
+
+
+                    <el-form-item v-if="getValue('templateFormat')">
+                        <el-button text type="primary"  @click="render();">
+                            <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
+                            {{$t('render')}}
+                        </el-button>
+                        <el-button style="margin-right: 16px"
+                                   v-if="getValue('templateFormat') === 'excel'"
+                                   text
+                                   @click="loadFileExcel">
+                            {{$t('loadFile')}}
+                        </el-button>
+
+                        <el-checkbox v-if="getValue('templateFormat') === 'excel'"
+                                     disabled
+                                     :model-value="!!getValue('templateExcel')"
+                                     :label="$t('fileLoaded')"/>
+
+                    </el-form-item>
+
+
+                <CodeEditor v-if="getValue('templateFormat') === 'html'"
+                            :context="context"
+                            :field-config="getField('template')"
+                            field="script"
+                            format="html"
+                            :model-value="getValue('template')"
+                            @change="(val) => setValue('template', val)"
+                />
+
+                <div v-if="!getValue('templateFormat')"><span>Please, select the template format</span></div>
+
             </el-tab-pane>
 
             <el-tab-pane :label="$t('preparingScript')" name="script">
@@ -111,6 +141,7 @@ import {useSocketClient} from "../../services/socketio.service";
 import {useSettings} from "../../services/settings.service";
 import {useI18n} from 'vue-i18n'
 import LinkSelect from "../../components/LinkSelect.vue";
+import {base64ArrayBuffer} from '../../utils/base64ArrayBuffer.js'
 
 let router = useRouter();
 let route = useRoute()
@@ -212,13 +243,52 @@ async function render() {
             id: reportEntity.value.id
         })
 
-        const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: 'application/pdf'}));
-        window.open(objectUrl)
-        URL.revokeObjectURL(objectUrl)
+        const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: `application/${reportEntity.value.outputFormat}`}));
+
+        if (reportEntity.value.outputFormat === 'excel') {
+            let a = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute('style',"display: none")
+            a.href = objectUrl
+            a.download = `${reportEntity.value.alias}.xlsx`
+            a.click()
+        }
+
+        //a.click()
+        if (reportEntity.value.outputFormat === 'pdf') {
+            window.open(objectUrl)
+        }
+
+
     } catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
     }
+}
+
+async function loadFileExcel() {
+    let file = await loadFile()
+
+    if (file) {
+        reportEntity.value.templateExcel =   base64ArrayBuffer(file)
+    }
+}
+
+function loadFile() : Promise<any> {
+    return new Promise( (resolve) => {
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = _ => {
+            let files =   Array.from(input.files);
+            const fr = new FileReader();
+            fr.readAsArrayBuffer(files[0]);
+            fr.addEventListener('load', (e) => {
+                console.log(e.target)
+                resolve(e.target.result)
+            })
+        };
+        input.click();
+    })
 }
 
 

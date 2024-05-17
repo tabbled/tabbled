@@ -19,6 +19,11 @@ export class Config implements ComponentInterface {
             alias: "disabled",
             type: "bool"
         },{
+            title: "Clearable",
+            alias: "clearable",
+            type: "bool",
+            default: true
+        },{
             title: 'Visibility',
             alias: 'visible',
             type: 'handler'

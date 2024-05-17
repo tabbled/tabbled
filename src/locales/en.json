@@ -160,5 +160,8 @@
     "clearData": "Clear data",
     "conflictResolveType": "On conflict",
     "conflictResolveReplace": "Replace",
-    "conflictResolveSkip": "Skip"
+    "conflictResolveSkip": "Skip",
+    "loadFile": "Load file",
+    "fileLoaded": "File loaded",
+    "templateFormat": "Template format"
 }

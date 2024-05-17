@@ -72,7 +72,6 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-//import {useSocketClient} from "../../services/socketio.service";
 import {useApiClient} from '../../services/api.service'
 import {ElMessage} from "element-plus";
 import {useI18n} from "vue-i18n";
