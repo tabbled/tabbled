@@ -401,6 +401,9 @@ async function load() {
 
     if (!route.params.id || route.params.id === 'new') {
         dataSourceEntity.value = await generateEntityWithDefault(datasource.fields)
+
+        console.log(dataSourceEntity.value)
+
         isNew.value = true
     } else {
         dataSourceEntity.value = await datasource.getById(<string>route.params.id)
@@ -409,7 +412,11 @@ async function load() {
     }
 
     if(!dataSourceEntity.value.permissions)
-        dataSourceEntity.value.permissions = {}
+        dataSourceEntity.value.permissions = {
+            canAdd: 'all',
+            canEdit: 'all',
+            canRemove: 'all'
+        }
 }
 
 async  function initTestDataSource() {

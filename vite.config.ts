@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 
 export default defineConfig({
     plugins: [vue({
@@ -9,10 +8,7 @@ export default defineConfig({
                 isCustomElement: (tag) => tag.includes('tb-')
             }
         }
-    }),
-        NodeGlobalsPolyfillPlugin({
-            buffer: true
-        })
+    })
     ],
     resolve: {
         alias: {
