@@ -45,7 +45,7 @@
 
     <el-form label-position="top" :style="{ 'height': availableHeight }" ref="main">
         <div style="display: flex; flex-direction: row; width: 100%;">
-            <el-form-item :label="$t('title')" style="width: 50%; padding-right: 8px">
+            <el-form-item :label="$t('title')" style="width: 30%; padding-right: 8px">
                 <Input field="title"
                        :field-config="getField('title')"
                        :model-value="getValue('title')"
@@ -53,7 +53,7 @@
                 />
             </el-form-item>
 
-            <el-form-item :label="$t('alias')" style="width: 50%">
+            <el-form-item :label="$t('alias')" style="width: 30%">
                 <Input field="alias"
                        :field-config="getField('alias')"
                        :model-value="getValue('alias')"
@@ -61,7 +61,7 @@
                 />
             </el-form-item>
 
-            <el-form-item :label="$t('source')" style="padding-left: 8px">
+            <el-form-item :label="$t('source')" style="padding-left: 8px; width: 30%">
                 <LinkSelect field="source"
                             :field-config="getField('source')"
                             :model-value="getValue('source')"
@@ -234,7 +234,7 @@
                 <el-form label-position="top" label-width="30">
                     <el-form-item :label="t('canAdd')">
                         <div style="display: flex; flex-direction: row">
-                            <el-select v-model="dataSourceEntity.permissions.canAdd" style="padding-right: 8px">
+                            <el-select v-model="dataSourceEntity.permissions.canAdd" style="padding-right: 8px; width: 250px">
                                 <el-option
                                     v-for="item in getAccessTypes(t)"
                                     :key="item.alias"
@@ -248,7 +248,7 @@
 
                     <el-form-item :label="t('canEdit')">
                         <div style="display: flex; flex-direction: row">
-                            <el-select v-model="dataSourceEntity.permissions.canEdit" style="padding-right: 8px">
+                            <el-select v-model="dataSourceEntity.permissions.canEdit" style="padding-right: 8px; width: 250px">
                                 <el-option
                                     v-for="item in getAccessTypes(t)"
                                     :key="item.alias"
@@ -262,7 +262,7 @@
 
                     <el-form-item :label="t('canRemove')">
                         <div style="display: flex; flex-direction: row">
-                            <el-select v-model="dataSourceEntity.permissions.canRemove" style="padding-right: 8px">
+                            <el-select v-model="dataSourceEntity.permissions.canRemove" style="padding-right: 8px; width: 250px">
                                 <el-option
                                     v-for="item in getAccessTypes(t)"
                                     :key="item.alias"
