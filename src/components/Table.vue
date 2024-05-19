@@ -129,8 +129,8 @@ import {
     ColDef,
     GridApi,
     ColumnApi,
-    ModuleRegistry,
-    //IServerSideDatasource, GetContextMenuItemsParams
+    ModuleRegistry, IServerSideDatasource,
+    //GetContextMenuItemsParams
 } from "ag-grid-community"
 import {onMounted, onUnmounted, ref, watch} from "vue";
 import "ag-grid-community/styles/ag-grid.css";
