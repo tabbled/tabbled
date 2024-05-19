@@ -53,7 +53,7 @@
             <el-popover
                 placement="bottom"
                 :title="$t('filters.title')"
-                :width="400"
+                :width="500"
                 :visible="filtersPopoverVisible"
             >
                 <template #reference>
@@ -118,6 +118,7 @@
             :pinnedBottomRowData="totalData"
             :context="context_"
             @first-data-rendered="onFirstDataRendered"
+            :getContextMenuItems="getContextMenuItems"
         />
     </div>
 </template>
@@ -129,7 +130,7 @@ import {
     GridApi,
     ColumnApi,
     ModuleRegistry,
-    IServerSideDatasource
+    //IServerSideDatasource, GetContextMenuItemsParams
 } from "ag-grid-community"
 import {onMounted, onUnmounted, ref, watch} from "vue";
 import "ag-grid-community/styles/ag-grid.css";
@@ -149,6 +150,7 @@ import NumberCellEditor from "./table/NumberCellEditor.vue";
 import TreeCellEditor from "./table/TreeCellEditor.vue";
 import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
 import TotalsRenderer from "./table/TotalsRenderer.vue"
+import {b64toBlob} from "../utils/base64ArrayBuffer.js"
 
 import numeral from 'numeral';
 import 'numeral/locales';
@@ -164,6 +166,7 @@ import {CompiledFunc, compileScript} from "../services/compiler";
 import CustomCellRenderer from "./table/CustomCellRenderer.vue";
 import _ from "lodash";
 import {useStore} from "vuex";
+import {useApiClient} from "../services/api.service";
 
 LicenseManager.setLicenseKey("abc")
 numeral.locale('ru')
@@ -248,6 +251,7 @@ let filtersPopoverVisible = ref(false)
 let customFiltersCount = ref(0)
 let totalData = ref([])
 const store = useStore();
+const api = useApiClient()
 let context_ = {
 }
 let permissions = {
@@ -671,6 +675,47 @@ async function onGridReady(params) {
 
 async function onFirstDataRendered(/*params*/) {
     restoreCols()
+}
+
+function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
+    return [{
+        name: t('export'),
+        subMenu: [{
+            name: `${t('exportTo')} .xlsx`,
+            action: async () => {
+                await exportTo('xlsx')
+            },
+        }, {
+            name: `${t('exportTo')} .csv`,
+            action: async () => {
+                await exportTo('csv')
+            }
+        }, {
+            name: `${t('exportTo')} .json`,
+            action: async () => {
+                await exportTo('json')
+            }
+        }],
+    }]
+}
+
+async function exportTo(format: 'xlsx' | 'csv' | 'json') {
+    let res = await api.post(`/datasources/${dataSource.alias}/data/export`, {
+        format: format,
+        fields: props.columns.map(item => item.field),
+        filter: props.filters?.filters
+    })
+    if (res.data.success) {
+        let a = document.createElement("a");
+        document.body.appendChild(a);
+        a.setAttribute('style',"display: none")
+
+        a.href = window.URL.createObjectURL(b64toBlob(res.data.data, `application/${format}`));
+        a.download = `${dataSource.alias}.${format}`
+        a.click()
+    } else {
+        console.error(res.data.error)
+    }
 }
 
 function saveColumnState(e) {

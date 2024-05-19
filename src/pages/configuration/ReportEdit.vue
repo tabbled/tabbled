@@ -254,7 +254,6 @@ async function render() {
             a.click()
         }
 
-        //a.click()
         if (reportEntity.value.outputFormat === 'pdf') {
             window.open(objectUrl)
         }

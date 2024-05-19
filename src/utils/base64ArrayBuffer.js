@@ -65,3 +65,18 @@ export function base64ArrayBuffer(arrayBuffer) {
 
     return base64
 }
+
+
+export function b64toBlob(b64Data, contentType = '', sliceSize = 512) {
+    let byteCharacters = atob(b64Data);
+    let byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+        const byteNumbers = slice.split('').map(char => char.charCodeAt(0));
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, {type: contentType});
+}

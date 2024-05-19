@@ -8,11 +8,11 @@
                :sortable="false"
     >
         <template #default="{item}">
-            <el-form size="small" label-position="top" label-width="80px" :show-message="false" style="margin: 4px">
+            <el-form size="small" label-position="top" label-width="80px" :show-message="false" style="margin: 4px; width: 100%">
 
-                <div style="display: flex; flex-direction: row">
+                <div style="display: flex; flex-direction: row; width: 100%">
 
-                    <FieldSelect style="padding-right: 4px"
+                    <FieldSelect style="padding-right: 4px; width: 50%"
                                  :placeholder="$t('filters.field')"
                                  size="small"
                                  :data-source="dataSource"
@@ -20,7 +20,7 @@
                                  @update:model-value="fieldChanged(item)"
                     />
 
-                    <el-select :placeholder="$t('filters.operator')" size="small" v-model="item['op']">
+                    <el-select :placeholder="$t('filters.operator')" size="small" v-model="item['op']" style="width: 50%">
                         <el-option
                             v-for="op in getOperators(item['key'])"
                             :key="op.key"
@@ -30,33 +30,38 @@
                     </el-select>
                 </div>
 
-                <div v-if="item['field'] && item['op'] !== 'any' && item['op'] !== 'empty'" style="display: flex; flex-direction: row; margin-top: 4px;">
+                <div v-if="item['field'] && item['op'] !== 'any' && item['op'] !== 'empty'" style="display: flex; flex-direction: row; margin-top: 4px; width: 100%">
 
                     <div style="display: flex; flex-direction: row"  v-if="item['field'].type === 'number'">
 
                         <el-input-number v-model="item['compare']"
                                          :controls="false"
+                                         style="width: 50%"
+                                         :placeholder="$t('value')"
                                          :precision="item['field'].precision ? item['field'].precision : 0"/>
 
                         <div v-if="item['op'] === 'between'" style="margin-left: 4px; margin-right: 4px">-</div>
                         <el-input-number v-if="item['op'] === 'between'"
+                                         style="width: 50%"
                                          v-model="item['compare_2']"
                                          :controls="false"
+                                         :placeholder="$t('value')"
                                          :precision="item['field'].precision ? item['field'].precision : 0"/>
                     </div>
 
-                    <div style="display: flex; flex-direction: row"  v-if="item['field'].type === 'string' || item['field'].type === 'text'">
+                    <div style="display: flex; flex-direction: row; width: 100%"  v-if="item['field'].type === 'string' || item['field'].type === 'text'">
 
-                        <el-input v-model="item['compare']"/>
+                        <el-input v-model="item['compare']" :placeholder="$t('value')" style="width: 100%"/>
 
                     </div>
 
 
-                    <div style="display: flex; flex-direction: row"  v-if="item['field'].type === 'date' || item['field'].type === 'datetime' || getField(item['key'])?.type === 'time'">
+                    <div style="display: flex; flex-direction: row; width: 100%"  v-if="item['field'].type === 'date' || item['field'].type === 'datetime' || getField(item['key'])?.type === 'time'">
 
                         <el-date-picker v-model="item['compare']"
                                         :type="item['field'].type"
                                         :format="format(item['field'].type)"
+                                        style="width: 50%"
                         />
 
                         <div v-if="item['op'] === 'between'" style="margin-left: 4px; margin-right: 4px">-</div>
@@ -65,11 +70,12 @@
                                         v-model="item['compare_2']"
                                         :type="item['field'].type"
                                         :format="format(item['field'].type)"
+                                        style="width: 50%"
                         />
                     </div>
 
 
-                    <div>
+                    <div style="width: 100%">
 
                         <el-select
                             v-if="item['field'].type === 'link'  && !isTree"
@@ -82,6 +88,7 @@
                             :multiple="true"
                             remote-show-suffix
                             :remote-method="getLinkData"
+                            style="width: 100%"
                         >
                             <el-option
                                 v-for="item in linkData"
@@ -99,6 +106,7 @@
                                         show-checkbox
                                         check-strictly
                                         :multiple="true"
+                                        style="width: 100%"
                         />
 
                         <el-select v-else-if=" item['field'].type === 'enum'"

@@ -163,5 +163,7 @@
     "conflictResolveSkip": "Skip",
     "loadFile": "Load file",
     "fileLoaded": "File loaded",
-    "templateFormat": "Template format"
+    "templateFormat": "Template format",
+    "exportTo": "Export to",
+    "duplicate": "Duplicate"
 }

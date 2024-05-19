@@ -146,5 +146,7 @@
     "conflictResolveSkip": "Пропустить",
     "loadFile": "Загрузить файл",
     "fileLoaded": "Файл загружен",
-    "templateFormat": "Формат шаблона"
+    "templateFormat": "Формат шаблона",
+    "exportTo": "Экспорт в",
+    "duplicate": "Дубликат"
 }
