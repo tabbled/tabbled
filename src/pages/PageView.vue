@@ -55,6 +55,7 @@
                            :model-value="getValue(element)"
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
+                           @update:selected="selectedChanged"
 
                 />
             </el-form-item>
@@ -118,6 +119,7 @@ let isNew = ref(false)
 let filters = ref<Filters>(null)
 let visibleElements = ref([])
 for(let i = 0; i < 12; i++) visibleElements.value.push([])
+let selected = ref<string[]>([])
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -197,13 +199,26 @@ async function generateReport(id) {
             id: id,
             context: {
                 item: scriptContext.value.item,
-                page: scriptContext.value.page
+                page: scriptContext.value.page,
+                selected: selected.value
             }
         })
 
-        const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: 'application/pdf'}));
-        window.open(objectUrl)
+        const objectUrl = window.URL.createObjectURL(new Blob([rep.report], {type: `${rep.contentType}`}));
+
+        if (rep.contentType === 'application/pdf') {
+            window.open(objectUrl)
+        } else {
+            let a = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute('style',"display: none")
+            a.href = objectUrl
+            a.download = rep.filename
+            a.click()
+        }
+
         URL.revokeObjectURL(objectUrl)
+
     } catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
@@ -486,6 +501,10 @@ function processElements(elements): ElementInterface[] {
 
 async function updateRevision() {
     editEntityRevisionId = await (editDataSource as DataSource).getCurrentRevisionId(editEntity.value.id)
+}
+
+function selectedChanged(sl) {
+    selected.value = sl
 }
 
 async function onUpdates(msg: any) {

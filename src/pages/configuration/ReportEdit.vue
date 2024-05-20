@@ -243,21 +243,21 @@ async function render() {
             id: reportEntity.value.id
         })
 
-        const objectUrl = window.URL.createObjectURL(new Blob([rep], {type: `application/${reportEntity.value.outputFormat}`}));
+        const objectUrl = window.URL.createObjectURL(new Blob([rep.report], {type: `${rep.contentType}`}));
 
-        if (reportEntity.value.outputFormat === 'excel') {
+        if (reportEntity.value.templateFormat === 'excel') {
             let a = document.createElement("a");
             document.body.appendChild(a);
             a.setAttribute('style',"display: none")
             a.href = objectUrl
-            a.download = `${reportEntity.value.alias}.xlsx`
+            a.download = rep.filename
             a.click()
         }
 
-        if (reportEntity.value.outputFormat === 'pdf') {
+        if (reportEntity.value.templateFormat === 'html') {
             window.open(objectUrl)
         }
-
+        URL.revokeObjectURL(objectUrl)
 
     } catch (e) {
         ElMessage.error(e.toString())
