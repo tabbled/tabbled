@@ -705,13 +705,21 @@ export class ReportConfigDataSource extends DataSource {
                     title: 'Script',
                     alias: 'script',
                     type: "string",
-                    required: true
+                    required: true,
+                    default: "async function prepare() { \n" +
+                             "    let data = [] \n" +
+                             "    return data \n" +
+                             "} \n\n" +
+                             "return prepare()"
                 },
                 {
                     title: 'Test context',
                     alias: 'testContext',
                     type: "string",
-                    required: true
+                    required: true,
+                    default: "{\n"+
+                        '    "data": []\n' +
+                        '}'
                 },
                 {
                     title: 'Pages',
