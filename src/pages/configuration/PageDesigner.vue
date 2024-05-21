@@ -367,7 +367,7 @@ async function prepareDataSourceFields() {
             case "table": f.name = "Table"; f.props['datasource'] = field.datasource; break;
             case "date":
             case "time":
-            case "datetime": f.name = "DatetimeInputConfig"; break;
+            case "datetime": f.name = "DateTimeInput"; break;
             case "image": f.name = "ImageField"; break;
             case "bool": f.name = "CheckboxField"; break;
         }
@@ -644,7 +644,7 @@ async function dropNewWidget(e:DragEvent) {
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)
     let startRow = Math.round((relatedY)  / 76)
 
-    //console.log(item, comp)
+    console.log(item, comp)
 
 
     startCol = startCol >= 1 ? startCol : 1
@@ -681,7 +681,6 @@ async function dropNewWidget(e:DragEvent) {
         ...properties
     })
 
-    //console.log(properties)
     isChanged.value = true;
 }
 
