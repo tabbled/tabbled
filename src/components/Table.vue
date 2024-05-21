@@ -276,9 +276,10 @@ watch(() => props.datasource, async () => {
 watch(() => props.columns, async () => {
     //console.log('columns')
     await init()
-    gridApi.refreshServerSide({
-        purge: true
-    })
+    if (gridApi)
+        gridApi.refreshServerSide({
+            purge: true
+        })
 }, {deep: true})
 
 onMounted(async () => {
@@ -696,6 +697,11 @@ function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
                 await exportTo('json')
             }
         }],
+    },{
+        name: `${t('duplicate')}`,
+        action: async () => {
+            console.log('duplicate')
+        },
     }]
 }
 

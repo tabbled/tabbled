@@ -132,7 +132,7 @@
                                  :style="getGridElStyle(element)"
                                  :class="{'prevent-select': true, 'widget-selected': selectedIdx === String(idx)}">
 
-                                <div @click="clickComponent" class="item-overlay"
+                                <div class="item-overlay"
                                      @mouseup="endDrag"
                                      :id="String(idx)"
                                      @mousedown="initDragMove"
@@ -169,7 +169,6 @@
 
                                     <component
                                         :id="String(idx)"
-                                        @click="clickComponent"
                                         @mousedown="initDragMove"
                                         @mouseup="endDrag"
                                         style="z-index: 0"
@@ -299,16 +298,12 @@ onMounted(async () => {
     }
 })
 
-watch(() => pageConfig.value.datasource, () => prepareDataSourceFields())
+watch(() => pageConfig.value?.datasource, () => prepareDataSourceFields())
 
 onUnmounted(() => {
     // pageHeader.actions = []
     // pageHeader.title = ""
 })
-
-function clickComponent() {
-    console.log('clickComponent')
-}
 
 function setAppTitle() {
     document.title = `${route.meta.title} | ${ window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled" }`
@@ -365,6 +360,7 @@ async function prepareDataSourceFields() {
         }
         switch (field.type) {
             case "number":
+            case "text":
             case "string": f.name = "Input"; break;
             case "enum":
             case "link": f.name = "LinkSelect"; break;
@@ -491,12 +487,9 @@ async function getPageConfig(id: string):Promise<PageConfigInterface | undefined
 function gridClicked(e:MouseEvent) {
     // @ts-ignore
     selectWidget(e.target?.id)
-
-    console.log()
 }
 
 function initDragMove(e:MouseEvent) {
-    console.log('move')
     dragDirection.value = 'move'
     initDrag(e)
 }
@@ -595,7 +588,6 @@ function onDrag(e: MouseEvent) {
 }
 
 function endDrag() {
-    console.log('endDrag')
     widget = null;
     dragDirection.value = ""
 }
@@ -652,7 +644,7 @@ async function dropNewWidget(e:DragEvent) {
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)
     let startRow = Math.round((relatedY)  / 76)
 
-    console.log(relatedY, item.layerY)
+    //console.log(item, comp)
 
 
     startCol = startCol >= 1 ? startCol : 1
@@ -689,7 +681,7 @@ async function dropNewWidget(e:DragEvent) {
         ...properties
     })
 
-    console.log(properties)
+    //console.log(properties)
     isChanged.value = true;
 }
 
