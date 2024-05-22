@@ -18,8 +18,8 @@
         </el-form-item>
 
         <el-form-item :label="t('menuConfig.visibility')">
-            <div style="display: flex; flex-direction: row">
-                <el-select v-model="modelValue.visibility" style="max-width: 100px; padding-right: 8px">
+            <div style="display: flex; flex-direction: row; width: 100%">
+                <el-select v-model="modelValue.visibility" style="padding-right: 8px; width: 100%">
                     <el-option
                         v-for="item in getAccessTypes(t)"
                         :key="item.alias"

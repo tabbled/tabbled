@@ -259,6 +259,9 @@ let permissions = {
     roles: []
 }
 
+let needToSelectRoute = ""
+let needToExpand = null
+
 watch(() => props.filters?.filters, () => {
     gridApi.refreshServerSide({
         purge: true
@@ -545,7 +548,7 @@ async function addSibling() {
     }
 
     let item = await generateEntityWithDefault(dataSource.fields)
-    await dataSource.insert(item.id, item, parentId)
+    await dataSource.insert(item.id, item, parentId, getRouteToNode(selected[0].parent))
 }
 
 async function add() {
@@ -583,13 +586,10 @@ async function addChild() {
 
     let item = await generateEntityWithDefault(dataSource.fields)
 
-    console.log('addChild', item)
-
+    needToSelectRoute = [...getRouteToNode(selected[0]), item.id].join('/')
     await dataSource.insert(item.id, item, selected.length ? selected[0].id : null, getRouteToNode(selected[0]))
 
-
-    if (selected.length)
-        selected[0].setExpanded(true)
+    selected[0]?.setExpanded(true)
 }
 
 function edit() {
@@ -629,7 +629,6 @@ function remove() {
             if (actions.value.onRemove) {
                 await execAction(actions.value.onRemove)
             } else {
-
                 for (let i in selected) {
                     const data = selected[i]
                     await dataSource.removeById(data.id, getRouteToNode(selected[i]))
@@ -679,7 +678,50 @@ async function onFirstDataRendered(/*params*/) {
 }
 
 function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
-    return [{
+    let menu = []
+
+    if (hasPermission('Add')) {
+        if (dataSource.isTree) {
+            menu.push(...[{
+                name: t('addSibling'),
+                action: async () => {
+                    await addSibling()
+                },
+            },{
+                name: t('addChild'),
+                action: async () => {
+                    await addChild()
+                },
+            }])
+        } else
+            menu.push({
+                name: t('add'),
+                action: async () => {
+                   await add()
+                },
+            })
+    }
+
+    if (hasPermission('Edit') && actions.value.onEdit) {
+        menu.push({
+            name: t('edit'),
+            action: async () => {
+                await edit()
+            },
+        })
+    }
+
+    if (hasPermission('Remove')) {
+        menu.push({
+            name: t('delete'),
+            action: async () => {
+                await remove()
+            },
+        })
+    }
+
+
+    menu.push({
         name: t('export'),
         subMenu: [{
             name: `${t('exportTo')} .xlsx`,
@@ -697,12 +739,9 @@ function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
                 await exportTo('json')
             }
         }],
-    },{
-        name: `${t('duplicate')}`,
-        action: async () => {
-            console.log('duplicate')
-        },
-    }]
+    })
+
+    return menu
 }
 
 async function exportTo(format: 'xlsx' | 'csv' | 'json') {
@@ -1065,28 +1104,33 @@ let onTotalsUpdated = async (params) => {
 }
 
 let onItemInserted = async (params) => {
-    //console.log('item-inserted', params)
+    console.log('item-inserted', params)
 
-    let parent = gridApi.getRowNode(params.data.parentId)
-
-    if (isTree.value && params.route && params.route.length && !parent.data.hasChildren) {
-        parent.data.hasChildren = true
-
+    if (isTree.value && params.parent && params.route && params.route.length) {
         gridApi.applyServerSideTransaction({
             route: params.route.slice(0, params.route.length - 1),
-            update: [parent.data],
+            update: [params.parent],
         });
-        return
     }
 
-    gridApi.applyServerSideTransaction({
+    let res = await gridApi.applyServerSideTransaction({
         add: [params.data],
         route: params.route
     })
+
+    if (res.add[0]) {
+        let nodeRoute = getRouteToNode(res.add[0])
+        gridApi.deselectAll()
+        console.log(nodeRoute, needToSelectRoute, nodeRoute.join('/') === needToSelectRoute)
+        gridApi.setNodesSelected({
+            nodes: [res.add[0]],
+            newValue: true
+        })
+    }
 }
 
 let onItemRemoved = async (params) => {
-    console.log('onItemRemoved', params)
+    //console.log('onItemRemoved', params)
     gridApi.applyServerSideTransaction({
         remove: [params.data],
         route: isTree.value && params.route ? params.route.slice(0, params.route.length - 1) : null

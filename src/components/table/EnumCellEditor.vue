@@ -77,10 +77,11 @@ export default defineComponent({
         width: 100%;
         height: 100%;
 
-        .el-input__wrapper {
+        .el-select__wrapper {
             box-shadow: unset !important;
             border-radius: unset;
-            padding-left: 11px !important;
+            padding-left: 11px;
+            padding-bottom: 2px;
         }
     }
 </style>

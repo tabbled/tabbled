@@ -209,53 +209,34 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
     }
 
     async insert(id: string, value: any, parentId?: string, route?: string[]): Promise<EntityInterface> {
-
-        //let dt = new Date().getMilliseconds()
-        //console.log(this.alias, " insert")
-
         if (this.isTree) {
             value.parentId = parentId
         }
 
-        let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/insert`, {
+        return await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/insert`, {
             alias: this.alias,
             id: id,
             parentId: this.isTree ? parentId : null,
             value: value,
             route: route
         })
-        //console.log(this.alias, " inserted; timing, ms: ", new Date().getMilliseconds() - dt)
-
-        this.emit('item-inserted', {
-            data: value,
-            route: route
-        })
-
-        return res
     }
 
-    async updateById(id: string, value: object): Promise<EntityInterface> {
-
-        let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/updateById`, {
+    async updateById(id: string, value: object, route?: string[]): Promise<EntityInterface> {
+        return await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/updateById`, {
             alias: this.alias,
             id: id,
-            value: value
+            value: value,
+            route: route
         })
-
-        this.emit('item-updated', {
-            data: res.data
-        })
-        return res
     }
 
     async removeById(id: string, route?: string[]): Promise<boolean> {
-        //let dt = new Date().getMilliseconds()
-        await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/removeById`, {
+        return await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/removeById`, {
             alias: this.alias,
-            id: id
+            id: id,
+            route: route
         })
-        //console.log(this.alias, "removed; timing, ms: ", new Date().getMilliseconds() - dt)
-        return true
     }
 
     hasPermission(action: string, userPermissions: any) {
@@ -273,19 +254,20 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
         if (!msg || msg.type !== 'data' || !msg.entity || msg.entity.alias !== this.alias)
             return
 
-        console.log(msg)
+        //console.log('onServerUpdates', msg)
 
         switch (msg.action) {
             case 'add':
                 this.emit('item-inserted', {
                     data: msg.entity.data,
-                    route: []
+                    route: msg.route ? msg.route : [],
+                    parent: msg.parent
                 })
                 break;
             case 'update':
                 this.emit('item-updated', {
                     data: msg.entity.data,
-                    route: []
+                    route: msg.route ? msg.route : []
                 })
                 break
             case 'remove':
@@ -293,27 +275,19 @@ export class DataSource extends EventEmitter implements DataSourceInterface {
                     data: {
                         id: msg.entity.id
                     },
-                    route: []
+                    route: msg.route ? msg.route : []
                 })
                 break
         }
     }
 
     async setValue(id: string, field: string, value: any) {
-
-        //let dt = new Date().getMilliseconds()
-        let res = await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/setValue`, {
+        return await this.server.emit(`${this.type === 'config' ? 'config' : 'dataSources/data'}/setValue`, {
             alias: this.alias,
             id: id,
             field: field,
             value: value
         })
-        //console.log(this.alias, "updated; timing, ms: ", new Date().getMilliseconds() - dt)
-
-        this.emit('item-updated', {
-            data: res.data
-        })
-
     }
 }
 
