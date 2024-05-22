@@ -151,6 +151,8 @@ import TreeCellEditor from "./table/TreeCellEditor.vue";
 import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
 import TotalsRenderer from "./table/TotalsRenderer.vue"
 import {b64toBlob} from "../utils/base64ArrayBuffer.js"
+import { FlakeId } from '../flake-id'
+let flakeId = new FlakeId()
 
 import numeral from 'numeral';
 import 'numeral/locales';
@@ -567,6 +569,23 @@ async function add() {
         await addSibling()
 }
 
+async function duplicateSelected() {
+    let selected = gridApi.getSelectedNodes()
+    if (!selected.length)
+        return
+
+    let node = selected[0]
+
+
+    let item = Object.assign(await generateEntityWithDefault(dataSource.fields), node.data)
+    item.id = flakeId.generateId().toString()
+    needToSelectRoute = [...getRouteToNode(node.parent), item.id].join('/')
+
+    await dataSource.insert(item.id, item, node.parent ? node.parent.key : null, getRouteToNode(node.parent))
+
+    selected[0]?.setExpanded(true)
+}
+
 async function addChild() {
     if (dataSource && !dataSource.hasPermission('Add', permissions)) {
         console.error('No permissions for add new row')
@@ -680,27 +699,37 @@ async function onFirstDataRendered(/*params*/) {
 function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
     let menu = []
 
-    if (hasPermission('Add')) {
-        if (dataSource.isTree) {
-            menu.push(...[{
-                name: t('addSibling'),
-                action: async () => {
-                    await addSibling()
-                },
-            },{
-                name: t('addChild'),
-                action: async () => {
-                    await addChild()
-                },
-            }])
-        } else
-            menu.push({
-                name: t('add'),
-                action: async () => {
-                   await add()
-                },
-            })
+    if (hasPermission('Add') && (actions.value.onAdd || (!actions.value.onAdd && !isTree) || props.onClickAdd)) {
+        menu.push({
+            name: t('add'),
+            action: async () => {
+                await add()
+            },
+        })
+    } else {
+        menu.push(...[{
+            name: t('addSibling'),
+            action: async () => {
+                await addSibling()
+            },
+        },{
+            name: t('addChild'),
+            action: async () => {
+                await addChild()
+            },
+        }])
     }
+
+
+    if (hasPermission('Add')) {
+        menu.push({
+            name: t('duplicate'),
+            action: async () => {
+                await duplicateSelected()
+            },
+        })
+    }
+
 
     if (hasPermission('Edit') && actions.value.onEdit) {
         menu.push({
@@ -719,6 +748,8 @@ function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
             },
         })
     }
+
+    //duplicateSelected
 
 
     menu.push({
@@ -1115,7 +1146,8 @@ let onItemInserted = async (params) => {
 
     let res = await gridApi.applyServerSideTransaction({
         add: [params.data],
-        route: params.route
+        route: params.route,
+        addIndex: dataSource.isTree ? undefined : gridApi.getSelectedNodes()[0].rowIndex + 1
     })
 
     if (res.add[0]) {
