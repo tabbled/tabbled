@@ -165,5 +165,6 @@
     "fileLoaded": "File loaded",
     "templateFormat": "Template format",
     "exportTo": "Export to",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "mySettings": "My settings"
 }

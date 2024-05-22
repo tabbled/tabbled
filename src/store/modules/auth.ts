@@ -60,8 +60,8 @@ const actions = {
             socketClient.socket.timeout(300).emit("users/me", {},
                 (err: any, res: any) => {
                 if (!err && res && res.success === true) {
-                    commit('userLoaded', res.user)
-                    resolve(res.user)
+                    commit('userLoaded', res.data)
+                    resolve(res.data)
                 } else {
                     console.error(res)
                     reject((res && res.error_message) || 'Error loading user settings')

@@ -148,5 +148,6 @@
     "fileLoaded": "Файл загружен",
     "templateFormat": "Формат шаблона",
     "exportTo": "Экспорт в",
-    "duplicate": "Дубликат"
+    "duplicate": "Дубликат",
+    "mySettings": "Мои настройки"
 }
