@@ -152,7 +152,7 @@ import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
 import TotalsRenderer from "./table/TotalsRenderer.vue"
 import {b64toBlob} from "../utils/base64ArrayBuffer.js"
 import { FlakeId } from '../flake-id'
-let flakeId = new FlakeId()
+
 
 import numeral from 'numeral';
 import 'numeral/locales';
@@ -176,7 +176,7 @@ numeral.locale('ru')
 ModuleRegistry.registerModules([ RowGroupingModule, ServerSideRowModelModule ]);
 
 const { t } = useI18n();
-
+let flakeId = new FlakeId()
 
 interface Props {
     id: string,
