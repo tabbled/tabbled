@@ -149,5 +149,9 @@
     "templateFormat": "Формат шаблона",
     "exportTo": "Экспорт в",
     "duplicate": "Дубликат",
-    "mySettings": "Мои настройки"
+    "mySettings": "Мои настройки",
+    "newPassword": "Пароль",
+    "newPasswordRepeat": "Пароль (подтверждение)",
+    "currentPassword": "Текущий пароль",
+    "newPasswordNotEqual": "Пароли не совпадают"
 }

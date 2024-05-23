@@ -37,6 +37,16 @@
                 />
             </el-select>
         </el-form-item>
+
+        <el-form-item :label="$t('newPassword')" style="width: 50%">
+            <el-input show-password type="password" v-model="userEntity.newPassword" ></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('newPasswordRepeat')" style="width: 50%">
+            <el-input show-password type="password" v-model="userEntity.newPasswordRepeat" ></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('currentPassword')" style="width: 50%">
+            <el-input show-password type="password" v-model="userEntity.currentPassword" ></el-input>
+        </el-form-item>
     </el-form>
 
 </div>
@@ -59,7 +69,10 @@ let userEntity = ref({
     },
     username: "",
     firstname: "",
-    lastname: ""
+    lastname: "",
+    currentPassword: "",
+    newPassword: "",
+    newPasswordRepeat: ""
 })
 
 const { t } = useI18n();
@@ -79,6 +92,10 @@ async function load() {
 }
 
 async function save() {
+    if (userEntity.value.newPassword && (userEntity.value.newPassword !== userEntity.value.newPasswordRepeat)) {
+        ElMessage.error(t('newPasswordNotEqual'))
+        return;
+    }
     try {
         await server.emit("users/setMe", userEntity.value)
 
