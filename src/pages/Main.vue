@@ -3,7 +3,7 @@
         <el-container>
             <el-aside :width="isSideBarCollapsed ? '64px' : mainSideBarWidth + 'px'" ref="aside">
                 <el-header height="auto" style="margin: 16px; --el-header-padding: 0">
-                    <div class="menu-header">
+                    <div class="menu-header" @click="router.push('/')">
                         <div>
                             <el-row align="middle">
                                 <img height="30" :src="favicon" alt=""/>
@@ -69,7 +69,23 @@
                         <el-button text @click="router.push('/configuration')" :style="{width: isSideBarCollapsed ? '64px' : '100%', 'justify-content': 'left'}" size="large">
                             <Icon style="padding: 4px" icon="ic:outline-display-settings" width="20"/>
                             <div v-if="!isSideBarCollapsed" style="text-align: start;">{{$t('configuration')}}</div>
+                            <div v-if="!isSideBarCollapsed" @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open_new" style="position: absolute; right: 16px;">
+                                <Icon icon="mdi:open-in-new" width="16"/>
+                            </div>
                         </el-button>
+
+<!--                        <el-button text @click="router.push('/configuration')" :style="{width: isSideBarCollapsed ? '64px' : '100%', 'justify-content': 'left'}" size="large">-->
+<!--                            <Icon style="padding: 4px" icon="ic:outline-display-settings" width="20"/>-->
+<!--                            <div v-if="!isSideBarCollapsed" style="text-align: start; display: flex; flex-direction: row; width: 100%">-->
+<!--                                <span style="width: 100%">-->
+<!--                                    {{$t('configuration')}}-->
+<!--                                </span>-->
+<!--                                <div @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open_new" style="position: absolute; right: 10px; top: 16px">-->
+<!--                                    <Icon icon="mdi:open-in-new" width="16"/>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                        </el-button>-->
                     </div>
 
                     <el-popover
@@ -336,6 +352,7 @@ function logout() {
     justify-content: space-between;
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
 </style>

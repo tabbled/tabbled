@@ -9,7 +9,7 @@ export class FunctionScriptHelper {
     async invoke(alias: string, context: any) {
         return await this.socket.emit('functions/call', {
             alias: alias,
-            context: context
+            context: context ? context : {}
         })
     }
 }

@@ -4,12 +4,12 @@
             <span> {{$t('configuration')}} </span>
         </template>
         <template #extra >
-            <el-button type="text" @click="importDialogVisible = true">
-                <Icon width="16" style="padding-right: 4px" icon="ic:outline-file-download"></Icon>
+            <el-button type="text" @click="importDialogVisible = true" style="margin-right: 8px">
+                <Icon width="16" style="margin-right: 8px" icon="ic:outline-file-download"></Icon>
                 {{$t('import')}}
             </el-button>
-            <el-button type="text" @click="exportDialogVisible = true">
-                <Icon width="16" style="padding-right: 4px" icon="ic:outline-file-upload"></Icon>
+            <el-button type="text" @click="exportDialogVisible = true" style="margin-right: 16px">
+                <Icon width="16" style="margin-right: 8px" icon="ic:outline-file-upload"></Icon>
                 {{$t('export')}}
             </el-button>
         </template>

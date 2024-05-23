@@ -595,6 +595,7 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
     gap: 10px;
     grid-auto-rows: minmax(20px, auto);
     grid-auto-flow: column;
+    padding-bottom: 16px;
 
 }
 
