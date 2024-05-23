@@ -576,9 +576,12 @@ async function duplicateSelected() {
 
     let node = selected[0]
 
-
-    let item = Object.assign(await generateEntityWithDefault(dataSource.fields), node.data)
+    let item = await dataSource.getById(node.id);
     item.id = flakeId.generateId().toString()
+    if (item.name) {
+        item.name = `${t('duplicate')} ${item.name}`
+    }
+
     needToSelectRoute = [...getRouteToNode(node.parent), item.id].join('/')
 
     await dataSource.insert(item.id, item, node.parent ? node.parent.key : null, getRouteToNode(node.parent))
