@@ -124,7 +124,8 @@
         "date":  "Date",
         "time": "Time",
         "link": "Link",
-        "table": "Table"
+        "table": "Table",
+        "file": "File"
     },
     "filters": {
         "title": "Filters",

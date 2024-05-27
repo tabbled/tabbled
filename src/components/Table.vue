@@ -1064,7 +1064,7 @@ async function execAction(action: CompiledFunc, additionalContext?: object) {
         ctx.currentId = selected[0]
         ctx.selected = selected
         ctx.selectAll = gridApi.getServerSideSelectionState()['selectAll']
-        ctx.filter = props.filters.filters
+        ctx.filter = props.filters?.filters
 
 
         ctx.dataSource = dataSource

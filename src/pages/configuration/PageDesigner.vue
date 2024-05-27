@@ -370,6 +370,7 @@ async function prepareDataSourceFields() {
             case "datetime": f.name = "DateTimeInput"; break;
             case "image": f.name = "ImageField"; break;
             case "bool": f.name = "CheckboxField"; break;
+            case "file": f.name = "FileField"; break;
         }
 
         fields.value.push(f)

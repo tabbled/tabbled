@@ -37,6 +37,11 @@ export class ApiClient {
         return await this.axios.post(url, data, config)
     }
 
+    async delete(url: string, config?) {
+        this.updateHeaders()
+        return await this.axios.delete(url, config)
+    }
+
     url(): string {
         // @ts-ignore
         let envUrl = import.meta.env.VITE_SERVER_API

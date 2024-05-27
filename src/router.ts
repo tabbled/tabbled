@@ -126,7 +126,7 @@ export default function (store: any) {
 
     router.beforeEach(async (to, from, next) => {
         // @ts-ignore
-        window.document.title = `${to.meta && to.meta.title ? to.meta.title : ''} | ${window['env']['appTitle'] ? window['env']['appTitle'] : 'Tabbled'}`;
+        window.document.title = `${to.meta && to.meta.title ? to.meta.title + ' |' : ''} ${window['env']['appTitle'] ? window['env']['appTitle'] : 'Tabbled'}`;
         if(to.matched.some(record => record.meta.authRequired)) {
             if (store.getters['auth/isAuthenticated']) {
 

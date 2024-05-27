@@ -22,6 +22,7 @@ import ImageField from "./components/ImageField.vue";
 import StatusFilter from "./components/StatusFilter.vue";
 import TreeFilter from "./components/TreeFilter.vue";
 import FlexLayout from "./components/FlexLayout.vue";
+import FileField from './components/FileField.vue'
 
 const i18n = createI18n({
     messages: {
@@ -51,6 +52,7 @@ app.component('ImageField', ImageField)
 app.component('StatusFilter', StatusFilter)
 app.component('TreeFilter', TreeFilter)
 app.component('FlexLayout', FlexLayout)
+app.component('FileField', FileField)
 
 let componentService = useComponentService()
 componentService.registerAllComponents()
