@@ -120,10 +120,14 @@ const handleError: UploadProps['onError'] = (res) => {
     ElMessage.error(JSON.parse(res.message).message)
 }
 
-const handleRemove: UploadProps['onRemove'] = (uploadFile) => {
+const handleRemove: UploadProps['onRemove'] = async (uploadFile) => {
     for(let i in images.value) {
         if ((uploadFile.response &&  images.value[i].name === uploadFile.response['filename']) ||
             images.value[i].name === uploadFile.name)  {
+
+            let url = `${actionUrl.value}/${ uploadFile.response ?  uploadFile.response['filename'] : images.value[i].name}`
+
+            await api.delete(url)
             images.value.splice(Number(i), 1)
         }
     }
@@ -131,19 +135,18 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile) => {
     change(images.value)
 }
 
+
 const handlePreview: UploadProps['onPreview'] = (file) => {
     dialogVisible.value = true
 
-        previewImageUrl.value = file.response
-            ? `${actionUrl.value}/${file.response['filename']}/big`
-            : `${file.url}/big`
-
-
+    previewImageUrl.value = file.response
+        ? `${actionUrl.value}/${file.response['filename']}?size=big`
+        : `${file.url}?size=big`
 }
 
 function preview() {
     dialogVisible.value = true
-    previewImageUrl.value = imageUrl.value  + '/big'
+    previewImageUrl.value = imageUrl.value  + '?size=big'
 }
 
 function remove() {
@@ -157,7 +160,8 @@ function remove() {
             type: 'warning',
         }
     )
-        .then(() => {
+        .then(async () => {
+            await api.delete(imageUrl.value)
             imageUrl.value = ""
             change("")
         })
