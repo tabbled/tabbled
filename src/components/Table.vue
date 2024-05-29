@@ -400,7 +400,7 @@ let dataTypeDefinitions = {
             return params.newValue === null ? null : Number(params.newValue)
         },
         valueFormatter: params => {
-            let field = dataSource.getFieldByAlias(params.colDef.field)
+            let field = params.colDef.cellRendererParams.field
             if (params.value === undefined || params.value === null || params.value === "")
                 return "";
 
@@ -455,7 +455,7 @@ let dataTypeDefinitions = {
         //     return null
         // },
         valueFormatter: params => {
-            let field = dataSource.getFieldByAlias(params.colDef.field)
+            let field = params.colDef.cellRendererParams.field
             if (field.config.getValue)
                 return params.value
 
@@ -479,7 +479,7 @@ let dataTypeDefinitions = {
             if (params.value === null)
                 return ''
 
-            let field = dataSource.getFieldByAlias(params.colDef.field)
+            let field = params.colDef.cellRendererParams.field
 
             if (field.config.getValue)
                 return params.value
@@ -871,8 +871,7 @@ async function init() {
             let link = dataSource.getFieldByAlias(sp[0])
             if (link.type === 'link' && link.datasource) {
                 let ds = await dsService.getByAlias(link.datasource)
-                field = ds.getFieldByAlias(sp[1])
-                field.alias = col.field
+                field =  ds.getFieldByAlias(sp[1])
                 linkData = true
             }
         }

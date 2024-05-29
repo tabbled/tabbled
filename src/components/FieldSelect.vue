@@ -80,10 +80,10 @@ async function getData() {
         if (!ds) continue
 
         ds.fields.forEach(f => {
-            if (['string', 'number', 'date', 'datetime', 'time'].includes(f.type))
+            if (!['link', 'table'].includes(f.type))
                 data.value.push({
                     key: `${link.alias}->${f.alias}`,
-                    title: `${link.title}.${f.title} (${link.alias} -> ${f.alias})`
+                    title: `${link.title} -> ${f.title} (${link.alias}->${f.alias})`
                 })
         })
     }
