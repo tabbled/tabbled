@@ -24,6 +24,7 @@ export default {
         if (!props.params.value)
             return
 
+
         if (field.type === 'link') {
             let data = props.params.data[`__${field.alias}_entities`]
             if (!data || !data.length) {
@@ -37,7 +38,8 @@ export default {
 
         if (field.type === 'string') {
             if (typeof props.params.value === 'string') {
-                value.value = props.params.value.split(',')
+                //value.value = props.params.value.split(',')
+                value.value = JSON.parse(props.params.value)
             } else if(props.params.value instanceof Array) {
                 value.value = props.params.value
             }

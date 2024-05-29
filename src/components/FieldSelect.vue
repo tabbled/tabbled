@@ -71,6 +71,23 @@ async function getData() {
         })
     }
 
+    let links = dataSource.fields.filter((f) => f.type === 'link' && f.datasource)
+
+    for(let i in links) {
+        let link = links[i]
+
+        let ds = await dsService.getByAlias(link.datasource)
+        if (!ds) continue
+
+        ds.fields.forEach(f => {
+            if (['string', 'number', 'date', 'datetime', 'time'].includes(f.type))
+                data.value.push({
+                    key: `${link.alias}->${f.alias}`,
+                    title: `${link.title}.${f.title} (${link.alias} -> ${f.alias})`
+                })
+        })
+    }
+
     isLoading.value = false;
 }
 

@@ -861,7 +861,21 @@ async function init() {
 
     for(let i in cols) {
         let col = cols[i]
-        let field = dataSource.getFieldByAlias(col.field)
+        let field
+        let linkData = false
+
+        let sp = col.field.split('->')
+        if (sp.length < 2) {
+            field = dataSource.getFieldByAlias(col.field)
+        } else {
+            let link = dataSource.getFieldByAlias(sp[0])
+            if (link.type === 'link' && link.datasource) {
+                let ds = await dsService.getByAlias(link.datasource)
+                field = ds.getFieldByAlias(sp[1])
+                field.alias = col.field
+                linkData = true
+            }
+        }
 
         if (!field) {
             console.warn('Field for table not found', col.field)
