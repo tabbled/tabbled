@@ -91,10 +91,9 @@ export class SocketIOClient implements ServerInterface {
          //const span = transaction.startChild({ name: `emit /${topic}`, data: { message: message } })
 
         try {
-            let res = await this.emitting(topic, message)
             //span.setStatus('ok')
             //transaction.setStatus('ok')
-            return res
+            return await this.emitting(topic, message)
         } catch (e) {
             //span.setStatus('error')
             //transaction.setStatus('error')
@@ -118,7 +117,9 @@ export class SocketIOClient implements ServerInterface {
                             reject(res.error_message)
                         else {
                             reject('Unknown error')
-                            console.error(`Unknown error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
+                            console.error(`Error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
+                            console.error('Error:')
+                            console.error(err)
                         }
                     }
                 })

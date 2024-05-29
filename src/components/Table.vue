@@ -404,6 +404,9 @@ let dataTypeDefinitions = {
             if (params.value === undefined || params.value === null || params.value === "")
                 return "";
 
+            if (!field)
+                return params.value
+
             if (field.config.format && field.config.format !== 'none') {
                 return numeral(params.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
             }
@@ -455,7 +458,15 @@ let dataTypeDefinitions = {
         //     return null
         // },
         valueFormatter: params => {
-            let field = params.colDef.cellRendererParams.field
+
+            if (params.colDef.field.split('->').length > 1 && Object.hasOwn(params.data, `__${params.colDef.field}_title`)) {
+                return params.data[`__${params.colDef.field}_title`]
+            }
+
+            let field = dataSource.getFieldByAlias(params.colDef.field)
+
+
+
             if (field.config.getValue)
                 return params.value
 
