@@ -1152,9 +1152,25 @@ function isServerSideGroup(item) {
 
 let onItemUpdated = async (params) => {
     //console.log('onItemUpdated', params)
+
+    let items = await dataSource.getMany({
+        fields: props.columns.map(i => i.field),
+        filter: [{
+            key: "id",
+            op: '==',
+            compare: params.data.id
+        }]
+    })
+
+    if (!items.data.length) {
+        console.error('No data for item on the server')
+        return
+    }
+
     gridApi.applyServerSideTransaction({
-        update: [params.data],
-        route: params.route
+        update: [items.data[0]],
+        route: params.route,
+
     })
 }
 
