@@ -553,6 +553,8 @@ async function addSibling() {
 
     let selected = gridApi.getSelectedNodes()
 
+    console.log(dataSource)
+
     let parentId = null
     if (dataSource.isTree) {
         if (selected.length && selected[0].parent.key) {
@@ -561,7 +563,7 @@ async function addSibling() {
     }
 
     let item = await generateEntityWithDefault(dataSource.fields)
-    await dataSource.insert(item.id, item, parentId, getRouteToNode(selected[0].parent))
+    await dataSource.insert(item.id, item, parentId, getRouteToNode(selected[0] ? selected[0].parent : null))
 }
 
 async function add() {
@@ -1174,7 +1176,7 @@ let onItemInserted = async (params) => {
     let res = await gridApi.applyServerSideTransaction({
         add: [params.data],
         route: params.route,
-        addIndex: dataSource.isTree ? undefined : gridApi.getSelectedNodes()[0].rowIndex + 1
+        addIndex: dataSource.isTree ? undefined : gridApi.getSelectedNodes().length ? gridApi.getSelectedNodes()[0].rowIndex + 1 : 0
     })
 
     if (res.add[0]) {

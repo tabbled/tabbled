@@ -7,7 +7,6 @@
                      :model-value="selected"
                      :node-key="keyProp"
                      :props="treeProps"
-                     default-expand-all
                      check-strictly
                      show-checkbox
                      @check="checked"
