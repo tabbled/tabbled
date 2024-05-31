@@ -117,6 +117,7 @@ function change(val) {
 }
 
 const handleError: UploadProps['onError'] = (res) => {
+    console.error('<<<')
     ElMessage.error(JSON.parse(res.message).message)
 }
 
@@ -151,6 +152,7 @@ function preview() {
 
 function remove() {
 
+
     ElMessageBox.confirm(
         t('confirmDeleteTitle'),
         t('delete'),
@@ -161,7 +163,16 @@ function remove() {
         }
     )
         .then(async () => {
-            await api.delete(imageUrl.value)
+            try {
+                await api.delete(imageUrl.value)
+            } catch (e) {
+                if (e.response.status === 404) {
+                    imageUrl.value = ""
+                    change("")
+                } else
+                    throw e
+            }
+
             imageUrl.value = ""
             change("")
         })
