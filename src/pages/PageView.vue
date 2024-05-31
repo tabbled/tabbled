@@ -130,7 +130,12 @@ const props = defineProps<{
 const scriptContext = ref({
     pages: pageService,
     page: {
-        params: {}
+        params: {},
+        alias: "",
+        path: "",
+        isEditPage: false,
+        id: "",
+        title: ""
     },
     item: null,
     openDialog: null,
@@ -325,7 +330,14 @@ async function init() {
     editDataSource = null
     editEntity.value = null
 
-    scriptContext.value.page.params = route.params
+    scriptContext.value.page = {
+        params: route.params,
+        alias: props.pageConfig.alias,
+        path: props.pageConfig.path,
+        isEditPage: props.pageConfig.isEditPage,
+        id: props.pageConfig.id,
+        title: props.pageConfig.title
+    }
     scriptContext.value.openDialog = props.openDialog
     scriptContext.value.message = ElMessage
 
