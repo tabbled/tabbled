@@ -84,6 +84,8 @@ import {useDataSourceService} from "../../services/datasource.service";
 import {useSocketClient} from "../../services/socketio.service";
 import {useSettings} from "../../services/settings.service";
 import {useI18n} from 'vue-i18n'
+import { FlakeId } from '../../flake-id'
+let flakeId = new FlakeId()
 
 let router = useRouter();
 let route = useRoute()
@@ -98,6 +100,8 @@ const socket = useSocketClient()
 const settings = useSettings()
 
 const { t } = useI18n();
+
+let roomId = ""
 
 
 onMounted(async () => {
@@ -128,6 +132,19 @@ async function load() {
         isNew.value = false
     }
     updateKey.value++
+
+    if (roomId)
+        socket.socket.off(roomId, consoleRoom)
+
+    roomId = `console.${flakeId.generateId().toString()}`
+    socket.socket.on(roomId, consoleRoom)
+}
+
+function consoleRoom(data) {
+    if (data.level === 'error') {
+        console.error(...data.message)
+    } else
+        console.log(...data.message)
 }
 
 async function save() {
@@ -178,13 +195,21 @@ const context: ComputedRef<any> = computed((): any =>  {
     }
 })
 
-function run() {
-    socket.emit('functions/call', {
-        alias: functionEntity.value.alias,
-        context: context.value
-    })
-}
+async function run() {
+    let res
+    try {
+        res = await socket.emit('functions/script/run', {
+            script: functionEntity.value.script,
+            context: context.value,
+            room: roomId
+        })
 
+        console.log('%cFunction result:', 'color: green')
+        console.log(res)
+    } catch (e) {
+        console.error(e)
+    }
+}
 
 </script>
 

@@ -50,6 +50,20 @@
                 />
 
             </el-form-item>
+
+            <el-form-item v-if="reportEntity" :label="$t('canView')" style="width: 50%; margin-left: 8px">
+                <div style="display: flex; flex-direction: row">
+                    <el-select v-model="reportEntity.permissions.canView" style="padding-right: 8px; width: 250px">
+                        <el-option
+                            v-for="item in getAccessTypes(t)"
+                            :key="item.alias"
+                            :label="item.title"
+                            :value="item.alias"
+                        />
+                    </el-select>
+                    <UserRoleSelect style="width: 100%" v-if="reportEntity.permissions.canView === 'roles'" v-model="reportEntity.permissions.canViewRoles"/>
+                </div>
+            </el-form-item>
         </div>
 
         <el-tabs v-model="activeTab" class="demo-tabs">
@@ -92,7 +106,7 @@
 
             <el-tab-pane :label="$t('preparingScript')" name="script">
                 <el-form-item>
-                    <el-button text type="primary" style="margin-bottom: 8px"  @click="render();">
+                    <el-button text type="primary" style="margin-bottom: 8px"  @click="runPrepareScript();">
                         <Icon icon="mdi:play" width="18" style="padding-right: 4px"/>
                         {{$t('run')}}
                     </el-button>
@@ -142,6 +156,11 @@ import {useSettings} from "../../services/settings.service";
 import {useI18n} from 'vue-i18n'
 import LinkSelect from "../../components/LinkSelect.vue";
 import {base64ArrayBuffer} from '../../utils/base64ArrayBuffer.js'
+import {useApiClient} from "../../services/api.service";
+import { FlakeId } from '../../flake-id'
+import UserRoleSelect from "../../components/UserRoleSelect.vue";
+import {getAccessTypes} from "../../model/permissions";
+let flakeId = new FlakeId()
 
 let router = useRouter();
 let route = useRoute()
@@ -156,6 +175,9 @@ const { t } = useI18n();
 
 const socket = useSocketClient()
 const settings = useSettings()
+const api = useApiClient()
+
+let roomId = ""
 
 
 onMounted(async () => {
@@ -187,6 +209,26 @@ async function load() {
         reportEntity.value = await datasource.getById(<string>route.params.id)
         isNew.value = false
     }
+
+
+    if(!reportEntity.value.permissions)
+        reportEntity.value.permissions = {
+            canView: 'all'
+        }
+
+
+    if (roomId)
+        socket.socket.off(roomId, consoleRoom)
+
+    roomId = `console.${flakeId.generateId().toString()}`
+    socket.socket.on(roomId, consoleRoom)
+}
+
+function consoleRoom(data) {
+    if (data.level === 'error') {
+        console.error(...data.message)
+    } else
+        console.log(...data.message)
 }
 
 async function save() {
@@ -236,6 +278,25 @@ const context: ComputedRef<any> = computed((): any =>  {
         return {}
     }
 })
+
+async function runPrepareScript() {
+    console.log('runPrepareScript')
+    let res
+    try {
+       res = await socket.emit('functions/script/run', {
+           script: reportEntity.value.script,
+           context: JSON.parse(reportEntity.value.testContext),
+           room: roomId
+       })
+
+        console.log('%cFunction result:', 'color: green')
+        console.log(res)
+
+
+    } catch (e) {
+        console.error(e.response.data.error)
+    }
+}
 
 async function render() {
     try {

@@ -25,6 +25,7 @@
     "canAdd": "Can add",
     "canEdit": "Can edit",
     "canRemove": "Can remove",
+    "canView": "Can view",
     "manageRoles": "Manage roles",
     "firstname": "First name",
     "lastname": "Last name",

@@ -91,6 +91,8 @@ import {Filters, useFilters} from "../model/filter";
 import FlexLayoutPage from "../components/FlexLayoutPage.vue";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "../services/socketio.service";
+import {hasPermission} from "../model/permissions";
+import store from "../store";
 const { t } = useI18n();
 
 let router = useRouter();
@@ -442,17 +444,18 @@ async function init() {
 
     reportMenu.value = []
     let reports = (await dsService.reportDataSource.getMany({
-        fields: ['title', 'pages']
+        fields: ['title', 'pages', 'permissions']
     })).data
 
     for (let i in reports) {
         let rep = reports[i]
 
-        if (rep.pages && rep.pages.includes(props.pageConfig.alias)) {
-            reportMenu.value.push({
-                id: rep.id,
-                title: rep.title
-            })
+        if (rep.pages && rep.pages.includes(props.pageConfig.alias)
+            && hasPermission(rep, 'View', store.getters['auth/account'].permissions)) {
+                reportMenu.value.push({
+                    id: rep.id,
+                    title: rep.title
+                })
         }
     }
 
