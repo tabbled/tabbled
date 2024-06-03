@@ -79,8 +79,18 @@
                         <el-button style="margin-right: 16px"
                                    v-if="getValue('templateFormat') === 'excel'"
                                    text
-                                   @click="loadFileExcel">
-                            {{$t('loadFile')}}
+                                   @click="uploadFileExcel">
+                            <Icon icon="mdi:upload" width="18" style="padding-right: 4px"/>
+                            {{$t('uploadFile')}}
+                        </el-button>
+
+                        <el-button style="margin-right: 16px"
+                                   v-if="getValue('templateFormat') === 'excel'"
+                                   text
+                                   :disabled="!getValue('templateExcel')"
+                                   @click="downloadFileExcel">
+                            <Icon icon="mdi:download" width="18" style="padding-right: 4px"/>
+                            {{$t('downloadFile')}}
                         </el-button>
 
                         <el-checkbox v-if="getValue('templateFormat') === 'excel'"
@@ -155,7 +165,7 @@ import {useSocketClient} from "../../services/socketio.service";
 import {useSettings} from "../../services/settings.service";
 import {useI18n} from 'vue-i18n'
 import LinkSelect from "../../components/LinkSelect.vue";
-import {base64ArrayBuffer} from '../../utils/base64ArrayBuffer.js'
+import {b64toBlob, base64ArrayBuffer} from '../../utils/base64ArrayBuffer.js'
 import {useApiClient} from "../../services/api.service";
 import { FlakeId } from '../../flake-id'
 import UserRoleSelect from "../../components/UserRoleSelect.vue";
@@ -326,11 +336,24 @@ async function render() {
     }
 }
 
-async function loadFileExcel() {
+async function uploadFileExcel() {
     let file = await loadFile()
 
     if (file) {
         reportEntity.value.templateExcel =   base64ArrayBuffer(file)
+    }
+}
+
+async function downloadFileExcel() {
+    const objectUrl = window.URL.createObjectURL(new Blob([b64toBlob(reportEntity.value.templateExcel)], {type: `application/xlsx`}));
+
+    if (reportEntity.value.templateFormat === 'excel') {
+        let a = document.createElement("a");
+        document.body.appendChild(a);
+        a.setAttribute('style',"display: none")
+        a.href = objectUrl
+        a.download = `${reportEntity.value.title}.xlsx`
+        a.click()
     }
 }
 
