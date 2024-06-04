@@ -207,7 +207,8 @@ async function generateReport(id) {
             context: {
                 item: scriptContext.value.item,
                 page: scriptContext.value.page,
-                selected: selected.value
+                selected: selected.value,
+                filters: filters.value.filters
             }
         })
 

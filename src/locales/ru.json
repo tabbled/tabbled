@@ -172,5 +172,6 @@
     "newPassword": "Пароль",
     "newPasswordRepeat": "Пароль (подтверждение)",
     "currentPassword": "Текущий пароль",
-    "newPasswordNotEqual": "Пароли не совпадают"
+    "newPasswordNotEqual": "Пароли не совпадают",
+    "uploaded": "Загружен"
 }

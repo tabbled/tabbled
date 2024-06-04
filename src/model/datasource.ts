@@ -697,6 +697,9 @@ export class ReportConfigDataSource extends DataSource {
                     },{
                         key: 'excel',
                         title: "Excel"
+                    }, {
+                        key: "html-to-xlsx",
+                        title: "Html to Excel"
                     }]
                 },
                 {

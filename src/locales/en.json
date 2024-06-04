@@ -173,5 +173,6 @@
     "newPassword": "New password",
     "newPasswordRepeat": "New password repeat",
     "currentPassword": "Current password",
-    "newPasswordNotEqual": "New passwords is not equal"
+    "newPasswordNotEqual": "New passwords is not equal",
+    "uploaded": "Uploaded"
 }

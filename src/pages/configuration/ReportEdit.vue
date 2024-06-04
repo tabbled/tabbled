@@ -101,7 +101,7 @@
                     </el-form-item>
 
 
-                <CodeEditor v-if="getValue('templateFormat') === 'html'"
+                <CodeEditor v-if="getValue('templateFormat') === 'html' || getValue('templateFormat') === 'html-to-xlsx'"
                             :context="context"
                             :field-config="getField('template')"
                             field="script"
@@ -316,7 +316,7 @@ async function render() {
 
         const objectUrl = window.URL.createObjectURL(new Blob([rep.report], {type: `${rep.contentType}`}));
 
-        if (reportEntity.value.templateFormat === 'excel') {
+        if (reportEntity.value.templateFormat === 'excel' || reportEntity.value.templateFormat === 'html-to-xlsx') {
             let a = document.createElement("a");
             document.body.appendChild(a);
             a.setAttribute('style',"display: none")
@@ -341,6 +341,7 @@ async function uploadFileExcel() {
 
     if (file) {
         reportEntity.value.templateExcel =   base64ArrayBuffer(file)
+        ElMessage.success(t('uploaded'))
     }
 }
 
