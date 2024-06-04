@@ -693,7 +693,7 @@ export class ReportConfigDataSource extends DataSource {
                     default: 'excel',
                     values: [{
                         key: 'html',
-                        title: "Html"
+                        title: "Html to pdf"
                     },{
                         key: 'excel',
                         title: "Excel"

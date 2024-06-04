@@ -290,7 +290,6 @@ const context: ComputedRef<any> = computed((): any =>  {
 })
 
 async function runPrepareScript() {
-    console.log('runPrepareScript')
     let res
     try {
        res = await socket.emit('functions/script/run', {
@@ -316,6 +315,7 @@ async function render() {
 
         const objectUrl = window.URL.createObjectURL(new Blob([rep.report], {type: `${rep.contentType}`}));
 
+
         if (reportEntity.value.templateFormat === 'excel' || reportEntity.value.templateFormat === 'html-to-xlsx') {
             let a = document.createElement("a");
             document.body.appendChild(a);
@@ -323,12 +323,12 @@ async function render() {
             a.href = objectUrl
             a.download = rep.filename
             a.click()
+            URL.revokeObjectURL(objectUrl)
         }
 
         if (reportEntity.value.templateFormat === 'html') {
             window.open(objectUrl)
         }
-        URL.revokeObjectURL(objectUrl)
 
     } catch (e) {
         ElMessage.error(e.toString())

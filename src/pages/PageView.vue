@@ -223,9 +223,10 @@ async function generateReport(id) {
             a.href = objectUrl
             a.download = rep.filename
             a.click()
+            URL.revokeObjectURL(objectUrl)
         }
 
-        URL.revokeObjectURL(objectUrl)
+
 
     } catch (e) {
         ElMessage.error(e.toString())
