@@ -111,8 +111,6 @@
                 />
 
                 <div v-if="!getValue('templateFormat')"><span>Please, select the template format</span></div>
-
-                <div v-html="testHtml"></div>
             </el-tab-pane>
 
             <el-tab-pane :label="$t('preparingScript')" name="script">
