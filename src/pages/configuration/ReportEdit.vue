@@ -112,6 +112,7 @@
 
                 <div v-if="!getValue('templateFormat')"><span>Please, select the template format</span></div>
 
+                <div v-html="testHtml"></div>
             </el-tab-pane>
 
             <el-tab-pane :label="$t('preparingScript')" name="script">
@@ -188,7 +189,6 @@ const settings = useSettings()
 const api = useApiClient()
 
 let roomId = ""
-
 
 onMounted(async () => {
     datasource = dsService.reportDataSource

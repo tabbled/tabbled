@@ -500,8 +500,18 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     }
 
     async getMany(options?: GetDataManyOptions): Promise<GetManyResponse> {
+        let data = _.cloneDeep(this._data)
+
+        //Filter by id
+        if (options && options.filter?.length) {
+            let filterId = options.filter.filter(i => i.key === 'id')
+            if (filterId.length && filterId[0].op === '==') {
+                data = data.filter(i => i.id === filterId[0].compare)
+            }
+        }
+
         return {
-            data: _.cloneDeep(this._data),
+            data: data,
             count: this._data.length,
             // TODO column aggregation implementation needed
             totals: [],
@@ -536,18 +546,15 @@ export class FieldDataSource extends EventEmitter implements DataSourceInterface
     }
 
     async updateById(id: string, value: object): Promise<EntityInterface> {
-        for(let i in this._data) {
-            let item = this._data[i]
-            if (item.id === id) {
-                this._data[i] = value
-                console.log('item-updated')
-                this.emit('item-updated', {
-                    data: value,
-                    route: []
-                })
-                //this.emit('update', this._data)
-                return item;
-            }
+        let idx = this._data.findIndex(i => i.id === id)
+
+        if (idx > -1) {
+            this._data[idx] = value
+            this.emit('item-updated', {
+                data: value,
+                route: []
+            })
+            return this._data[idx];
         }
         return undefined
     }

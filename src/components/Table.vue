@@ -458,7 +458,7 @@ let dataTypeDefinitions = {
         //     return null
         // },
         valueFormatter: params => {
-
+            console.log(params)
             if (params.colDef.field.split('->').length > 1 && Object.hasOwn(params.data, `__${params.colDef.field}_title`)) {
                 return params.data[`__${params.colDef.field}_title`]
             }
@@ -965,6 +965,7 @@ async function init() {
                 colDef.cellEditor = 'enumCellEditor';
                 break;
             case "link":
+
                 colDef.cellEditor = field.isTree ? 'treeCellEditor' : 'linkCellEditor';
 
                 let datasource = await dsService.getByAlias(field.datasource)
@@ -976,6 +977,7 @@ async function init() {
                     colDef.cellEditorParams.getListFunc =  compileScript(_.cloneDeep(field.config.getListValues), 'ctx')
 
                 colDef.valueSetter = params => {
+                    console.log(params.oldValue, params.newValue)
                     if (params.oldValue === params.newValue)
                         return;
 
