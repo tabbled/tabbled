@@ -12,6 +12,7 @@ import {Config as ImageFieldProps} from '../components/configuration/image-field
 import {Config as StatusFilterProps} from '../components/configuration/status.filter.config'
 import {Config as TreeFilterProps} from '../components/configuration/tree.filter.config'
 import {Config as FileFieldProps} from '../components/configuration/file-field.config'
+import {Config as RichTextEditorProps} from '../components/configuration/rich-text-editor.config'
 
 export interface ComponentTitle {
     name: string,
@@ -58,6 +59,7 @@ export class ComponentService {
         this.registerComponent(new FileFieldProps)
         this.registerComponent(new StatusFilterProps)
         this.registerComponent(new TreeFilterProps)
+        this.registerComponent(new RichTextEditorProps)
     }
 }
 

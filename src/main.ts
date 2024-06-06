@@ -23,6 +23,7 @@ import StatusFilter from "./components/StatusFilter.vue";
 import TreeFilter from "./components/TreeFilter.vue";
 import FlexLayout from "./components/FlexLayout.vue";
 import FileField from './components/FileField.vue'
+import RichTextEditor from './components/RichTextEditor.vue'
 
 const i18n = createI18n({
     messages: {
@@ -53,6 +54,7 @@ app.component('StatusFilter', StatusFilter)
 app.component('TreeFilter', TreeFilter)
 app.component('FlexLayout', FlexLayout)
 app.component('FileField', FileField)
+app.component('RichTextEditor', RichTextEditor)
 
 let componentService = useComponentService()
 componentService.registerAllComponents()
