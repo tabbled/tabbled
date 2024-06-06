@@ -1,5 +1,6 @@
 <template>
-    <div v-if="editor" style="width: 100%" >
+    <div v-if="editor" style="width: 100%; height: fit-content" >
+
         <div class="editor-panel">
             <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleBold().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-bold" width="18" />
@@ -104,7 +105,12 @@ const props = defineProps<{
     autosize?: boolean,
     disabled?: boolean,
     readonly?: boolean
+    minHeight?:number
+    maxHeight?: number
 }>()
+
+let minH = ref(props.minHeight ? props.minHeight + 'px' : 'unset')
+let maxH = ref(props.maxHeight ? props.maxHeight + 'px' : 'unset')
 
 let value = ref<string | Array<string>>()
 
@@ -124,12 +130,6 @@ onMounted(async () => {
     init()
     await getValue()
 })
-
-// watch(() => props.modelValue,
-//     async () => {
-//         init()
-//         await getValue()
-//     })
 
 watch(() => props.fieldConfig,
     async () => {
@@ -178,6 +178,11 @@ function change(val) {
     border: var(--el-input-border);
     font-family: "Roboto", serif;
     padding: 4px 10px 4px 10px;
+    height: inherit;
+    overflow: auto;
+    max-height: v-bind(maxH);
+    min-height: v-bind(minH);
+
     > * + * {
         margin-top: 0.75em;
     }
@@ -263,7 +268,7 @@ function change(val) {
 
 .tiptap:focus {
     outline: none;
-    box-sizing: border-box;
+    //box-sizing: border-box;
     box-shadow: 0 0 0 1px var(--el-color-primary) inset
 }
 

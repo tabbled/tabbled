@@ -17,6 +17,14 @@ export class Config implements ComponentInterface {
             alias: "title",
             type: "string"
         },{
+            title: "Min height",
+            alias: "minHeight",
+            type: 'number'
+        },{
+            title: "Max height",
+            alias: "maxHeight",
+            type: 'number'
+        },{
             title: "Readonly",
             alias: "readonly",
             type: 'bool',
