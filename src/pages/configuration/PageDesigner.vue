@@ -71,26 +71,7 @@
                 </div>
             </div>
 
-            <div style="align-items: center; display: flex; justify-content: center; flex-direction: column" v-if="pageConfig && !pageConfig.templateType">
-                <div style="margin: 24px">
-                    {{"Select the type of page template"}}
-                </div>
-                <el-radio-group v-model="pageConfig.templateType">
-                    <el-radio-button v-for="i in templateTypes" :label="i.key">{{i.title}} </el-radio-button>
-                </el-radio-group>
-            </div>
-
-            <FlexLayoutPage v-if="pageConfig && pageConfig.templateType === 'flex'"
-                            :screen-size="selectedSize"
-                            :page-config="pageConfig"
-                            :elements="pageConfig.elements"
-                            @update:pageConfig="flexConfigUpdate"
-                            @select="flexElementSelected"
-                            mode="design"
-                            :context="{}"
-            />
-
-            <div v-if="pageConfig && pageConfig.templateType === 'grid'" style="display: flex; flex-flow: row">
+            <div v-if="pageConfig" style="display: flex; flex-flow: row">
 
                 <div style="display: flex; flex-flow: column; width: 100%;" >
 
@@ -220,7 +201,7 @@ import {
     ComponentInterface,
     ElementInterface,
     getAvailableScreenSizes,
-    PageConfigInterface, PageTemplateType,
+    PageConfigInterface,
     PositionElementInterface,
     ScreenSize
 } from "../../model/page";
@@ -234,7 +215,6 @@ import {Icon} from "@iconify/vue";
 import PageSettingsPanel from '../../components/PageSettingsPanel.vue'
 import { FlakeId } from '../../flake-id'
 import {useSettings} from "../../services/settings.service";
-import FlexLayoutPage from "../../components/FlexLayoutPage.vue";
 import {generateEntityWithDefault} from "../../model/field";
 let flakeId = new FlakeId()
 
@@ -270,17 +250,6 @@ let settingPanelWidth = ref<number>(getSettingsPanelWidth())
 let isResizingSettingPanel = false
 let startXResizingSettingPanel = 0
 let fields = ref<{alias: string, title: string, name: string, props: any}[]>([])
-
-let templateTypes: {key: PageTemplateType, title: string}[] = [
-    {
-        key: 'grid',
-        title: 'Grid'
-    },
-    {
-        key: 'flex',
-        title: 'Flex'
-    },
-]
 
 let isChanged = ref(false)
 const settings = useSettings()
@@ -413,7 +382,6 @@ async function init() {
             onOpen: null,
             headerActions: [],
             isEditPage: false,
-            templateType: null,
             datasource: null,
             access: "all",
             accessRoles: []
@@ -683,15 +651,6 @@ async function dropNewWidget(e:DragEvent) {
     })
 
     isChanged.value = true;
-}
-
-
-function flexConfigUpdate() {
-     isChanged.value = true
-}
-
-function flexElementSelected(e) {
-    currentConfigPath.value = e
 }
 
 </script>

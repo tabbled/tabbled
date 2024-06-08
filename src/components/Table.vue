@@ -130,9 +130,8 @@ import {
     GridApi,
     ColumnApi,
     ModuleRegistry, IServerSideDatasource,
-    //GetContextMenuItemsParams
 } from "ag-grid-community"
-import {onMounted, onUnmounted, ref, watch} from "vue";
+import {defineAsyncComponent, onMounted, onUnmounted, ref, watch} from "vue";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css";
 import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
@@ -143,13 +142,6 @@ import {useDataSourceService} from "../services/datasource.service";
 import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {dayjs, ElMessage, ElMessageBox} from "element-plus";
 import {useI18n} from "vue-i18n";
-import EnumCellEditor from "./table/EnumCellEditor.vue";
-import LinkCellEditor from "./table/LinkCellEditor.vue";
-import DatetimeCellEditor from "./table/DatetimeCellEditor.vue";
-import NumberCellEditor from "./table/NumberCellEditor.vue";
-import TreeCellEditor from "./table/TreeCellEditor.vue";
-import MultipleCellRenderer from "./table/MultipleCellRenderer.vue";
-import TotalsRenderer from "./table/TotalsRenderer.vue"
 import {b64toBlob} from "../utils/base64ArrayBuffer.js"
 import { FlakeId } from '../flake-id'
 
@@ -161,14 +153,42 @@ import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
 import { ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
 import {IServerSideGetRowsParams} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 import { LicenseManager } from  'ag-grid-enterprise'
-import CustomFilterConstructor from "./CustomFilterConstructor.vue";
 import {useDebounceFn, useElementBounding} from "@vueuse/core";
 import {PageActionsInterface} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
-import CustomCellRenderer from "./table/CustomCellRenderer.vue";
+
 import _ from "lodash";
 import {useStore} from "vuex";
 import {useApiClient} from "../services/api.service";
+
+
+const EnumCellEditor = defineAsyncComponent(() =>
+    import("./table/EnumCellEditor.vue")
+)
+const LinkCellEditor = defineAsyncComponent(() =>
+    import("./table/LinkCellEditor.vue")
+)
+const DatetimeCellEditor = defineAsyncComponent(() =>
+    import("./table/DatetimeCellEditor.vue")
+)
+const NumberCellEditor = defineAsyncComponent(() =>
+    import("./table/NumberCellEditor.vue")
+)
+const TreeCellEditor = defineAsyncComponent(() =>
+    import("./table/TreeCellEditor.vue")
+)
+const MultipleCellRenderer = defineAsyncComponent(() =>
+    import("./table/MultipleCellRenderer.vue")
+)
+const TotalsRenderer = defineAsyncComponent(() =>
+    import("./table/TotalsRenderer.vue")
+)
+const CustomCellRenderer = defineAsyncComponent(() =>
+    import("./table/CustomCellRenderer.vue")
+)
+const CustomFilterConstructor = defineAsyncComponent(() =>
+    import("./CustomFilterConstructor.vue")
+)
 
 LicenseManager.setLicenseKey("abc")
 numeral.locale('ru')

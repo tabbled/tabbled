@@ -1,6 +1,7 @@
 console.log('%cWelcome! This application works on Tabbled low-code platform', 'color: green')
 
 import { createApp, h } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import App from './App.vue'
 import router from "./router";
 import store from './store'
@@ -12,18 +13,44 @@ import ru from './locales/ru.json'
 import en from './locales/en.json'
 import { createI18n } from 'vue-i18n'
 import {useComponentService} from "./services/component.service";
-import Table from "./components/Table.vue";
-import CodeEditor from "./components/CodeEditor.vue";
-import LinkSelect from "./components/LinkSelect.vue";
-import CheckboxField from "./components/CheckboxField.vue";
-import Input from "./components/Input.vue";
-import DateTimeInput from "./components/DateTimeInput.vue";
-import ImageField from "./components/ImageField.vue";
-import StatusFilter from "./components/StatusFilter.vue";
-import TreeFilter from "./components/TreeFilter.vue";
-import FlexLayout from "./components/FlexLayout.vue";
-import FileField from './components/FileField.vue'
-import RichTextEditor from './components/RichTextEditor.vue'
+
+
+
+
+
+const FileField = defineAsyncComponent(() =>
+    import("./components/FileField.vue")
+)
+const TreeFilter = defineAsyncComponent(() =>
+    import("./components/TreeFilter.vue")
+)
+const StatusFilter = defineAsyncComponent(() =>
+    import("./components/StatusFilter.vue")
+)
+const ImageField = defineAsyncComponent(() =>
+    import("./components/ImageField.vue")
+)
+const DateTimeInput = defineAsyncComponent(() =>
+    import("./components/DateTimeInput.vue")
+)
+const Input = defineAsyncComponent(() =>
+    import("./components/Input.vue")
+)
+const CheckboxField = defineAsyncComponent(() =>
+    import( "./components/CheckboxField.vue")
+)
+const LinkSelect = defineAsyncComponent(() =>
+    import( "./components/LinkSelect.vue")
+)
+const RichTextEditor = defineAsyncComponent(() =>
+    import('./components/RichTextEditor.vue')
+)
+const Table = defineAsyncComponent(() =>
+    import("./components/Table.vue")
+)
+const CodeEditor = defineAsyncComponent(() =>
+    import("./components/CodeEditor.vue")
+)
 
 const i18n = createI18n({
     messages: {
@@ -52,7 +79,6 @@ app.component('DateTimeInput', DateTimeInput);
 app.component('ImageField', ImageField)
 app.component('StatusFilter', StatusFilter)
 app.component('TreeFilter', TreeFilter)
-app.component('FlexLayout', FlexLayout)
 app.component('FileField', FileField)
 app.component('RichTextEditor', RichTextEditor)
 

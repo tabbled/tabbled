@@ -40,7 +40,7 @@
             </template>
         </el-page-header>
 
-        <el-form v-if="pageConfig && pageConfig.templateType === 'grid'"
+        <el-form v-if="pageConfig"
                  ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
 
             <el-form-item v-for="(element, idx) in elements.filter(el => el.isVisible === true )"
@@ -60,16 +60,6 @@
                 />
             </el-form-item>
         </el-form>
-
-        <FlexLayoutPage v-if="pageConfig && pageConfig.templateType === 'flex'"
-                        id="flex"
-                        :screen-size="screenSize"
-                        :page-config="pageConfig"
-                        :elements="elements"
-                        mode="view"
-                        :context="scriptContext"
-                        @update:field-value="(element, value) => setValue(element, value)"
-        />
     </div>
 </template>
 
@@ -88,7 +78,6 @@ import {useDataSourceService} from "../services/datasource.service";
 import {generateEntityWithDefault} from "../model/field";
 import {useSettings} from "../services/settings.service";
 import {Filters, useFilters} from "../model/filter";
-import FlexLayoutPage from "../components/FlexLayoutPage.vue";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "../services/socketio.service";
 import {hasPermission} from "../model/permissions";
@@ -108,7 +97,6 @@ let isEditPage = ref(false)
 let componentService = useComponentService()
 let dsService = useDataSourceService()
 let settings = useSettings()
-let elems = ref([])
 let reportMenu = ref([])
 const socket = useSocketClient()
 

@@ -6,7 +6,6 @@ import {Config as LinkSelectConfig} from '../components/configuration/link-selec
 import {Config as CodeEditorConfig} from '../components/configuration/code-editor.config'
 import {Config as CheckboxConfig} from '../components/configuration/checkbox.config'
 import {Config as InputConfig} from '../components/configuration/input.config'
-import {Config as FlexLayoutConfig} from '../components/configuration/flex-layout.config'
 import {Config as DatetimeInputConfig} from '../components/configuration/datetime-select.config'
 import {Config as ImageFieldProps} from '../components/configuration/image-field.config'
 import {Config as StatusFilterProps} from '../components/configuration/status.filter.config'
@@ -48,7 +47,6 @@ export class ComponentService {
     }
 
     registerAllComponents() {
-        this.registerComponent(new FlexLayoutConfig)
         this.registerComponent(new TableConfig)
         this.registerComponent(new LinkSelectConfig)
         this.registerComponent(new CodeEditorConfig)
@@ -62,6 +60,7 @@ export class ComponentService {
         this.registerComponent(new RichTextEditorProps)
     }
 }
+
 
 const instance = ref<ComponentService>(new ComponentService());
 

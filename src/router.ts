@@ -1,15 +1,38 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
-import Login from "./pages/Login.vue";
+
 import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
-import PageDesigner from "./pages/configuration/PageDesigner.vue";
-import Configuration from "./pages/configuration/Configuration.vue";
-import FunctionEdit from "./pages/configuration/FunctionEdit.vue";
-import DataSourceEdit from "./pages/configuration/DataSourceEdit.vue";
-import MenuEdit from "./pages/configuration/MenuEdit.vue";
-import ReportEdit from "./pages/configuration/ReportEdit.vue";
-import UserSettings from "./pages/UserSettings.vue";
-import UserEdit from "./pages/configuration/UserEdit.vue";
+
+
+import { defineAsyncComponent } from 'vue'
+
+const Login = defineAsyncComponent(() =>
+    import("./pages/Login.vue")
+)
+const UserEdit = defineAsyncComponent(() =>
+    import("./pages/configuration/UserEdit.vue")
+)
+const PageDesigner = defineAsyncComponent(() =>
+    import("./pages/configuration/PageDesigner.vue")
+)
+const Configuration = defineAsyncComponent(() =>
+    import("./pages/configuration/Configuration.vue")
+)
+const FunctionEdit = defineAsyncComponent(() =>
+    import("./pages/configuration/FunctionEdit.vue")
+)
+const DataSourceEdit = defineAsyncComponent(() =>
+    import("./pages/configuration/DataSourceEdit.vue")
+)
+const MenuEdit = defineAsyncComponent(() =>
+    import("./pages/configuration/MenuEdit.vue")
+)
+const ReportEdit = defineAsyncComponent(() =>
+    import("./pages/configuration/ReportEdit.vue")
+)
+const UserSettings = defineAsyncComponent(() =>
+    import("./pages/UserSettings.vue")
+)
 
 const routes: RouteRecordRaw[] = [
     {

@@ -80,8 +80,6 @@ export interface OpenDialogOptions {
     onOpen?: Function
 }
 
-export type PageTemplateType = 'grid' | 'flex'
-
 export interface PageConfigInterface {
     id: string,
     alias: string,
@@ -92,7 +90,6 @@ export interface PageConfigInterface {
     headerActions: PageActionConfigInterface[],
     isEditPage: boolean
     datasource?: string,
-    templateType: PageTemplateType,
     access: AccessType,
     accessRoles: string[]
 }

@@ -108,7 +108,7 @@ export class SocketIOClient implements ServerInterface {
 
     private async emitting(topic: string, message?: any) {
         return new Promise((resolve, reject) => {
-            this.socket.timeout(20000).emit(topic, message || {},
+            this.socket.timeout(10000).emit(topic, message || {},
                 (err: any, res: any) => {
                     if (!err && res && res.success === true) {
                         resolve(res.data)

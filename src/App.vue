@@ -29,13 +29,11 @@ import {useStore} from "vuex";
 import {DataSourceType} from "./model/datasource";
 import {OpenDialogOptions, PageConfigInterface, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
-import PageView from "./pages/PageView.vue";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
-import DialogView from "./components/DialogView.vue";
 import {useSocketClient} from "./services/socketio.service";
-import FirstStartDialog from "./pages/configuration/FirstStartDialog.vue";
+import { defineAsyncComponent } from 'vue'
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -43,6 +41,15 @@ enum ConfigLoadState {
     Loaded
 }
 
+const DialogView = defineAsyncComponent(() =>
+    import("./components/DialogView.vue")
+)
+const FirstStartDialog = defineAsyncComponent(() =>
+    import("./pages/configuration/FirstStartDialog.vue")
+)
+const PageView = defineAsyncComponent(() =>
+    import("./pages/PageView.vue")
+)
 
 const store = useStore();
 const route = useRoute();
