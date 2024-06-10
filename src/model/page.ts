@@ -39,6 +39,10 @@ export interface PositionElementInterface {
     visible?: boolean
 }
 
+export interface ConfigField extends FieldConfigInterface{
+    isVisible?: (s: object) => boolean
+}
+
 export interface ElementInterface {
     id: string,
     layout: {
@@ -60,7 +64,7 @@ export interface ComponentInterface {
     title: string,
     icon?: string,
     group?: string,
-    properties: FieldConfigInterface[],
+    properties: ConfigField[],
     filterable?: boolean, // If component can be filtered, then it must have property 'filters'
     defaultPosition: {
         cols: number,
@@ -113,6 +117,11 @@ export class PageTypesProperties {
             propPath: '',
             fields: actionProperties
         })
+        this._types.set('rule', {
+            alias: 'rule',
+            propPath: '',
+            fields: ruleProperties
+        })
 
     }
     private _types: Map<FieldListOfType, PageListItemTypeInterface>
@@ -141,6 +150,25 @@ export const actionProperties:FieldConfigInterface[] = [
         type: 'handler'
     }
     ]
+
+export const ruleProperties:FieldConfigInterface[] = [
+    {
+        title: 'Title',
+        alias: 'title',
+        type: "string",
+        required: true
+    },
+    {
+        title: "Expression",
+        alias: "expression",
+        type: 'handler'
+    },
+    {
+        title: "Style",
+        alias: "style",
+        type: 'text'
+    }
+]
 
 export const pageProperties:FieldConfigInterface[] = [
     {

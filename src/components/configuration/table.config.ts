@@ -104,6 +104,14 @@ export class Config implements ComponentInterface {
             title: 'Visibility',
             alias: 'visible',
             type: 'handler'
+        },
+        {
+            title: 'Row highlight rules',
+            alias: 'rowHighlightRules',
+            type: 'list',
+            listOf: 'rule',
+            keyProp: 'title',
+            displayProp: 'title',
         }]
     defaultPosition = {
         rows: 1,

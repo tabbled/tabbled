@@ -32,7 +32,7 @@
                          :precision="fieldConfig.precision ? fieldConfig.precision : 0"
                          :model-value="value"
                          :readonly="!!readonly"
-                         style="width: 100%"
+                         style="width: 100%; text-align: left !important;"
                          type="type"/>
     </div>
 
@@ -114,6 +114,8 @@ function change(val) {
 
 </script>
 
-<style scoped>
-
+<style lang="scss">
+.el-input-number .el-input__inner {
+    text-align: left;
+}
 </style>

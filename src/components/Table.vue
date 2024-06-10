@@ -119,6 +119,7 @@
             :context="context_"
             @first-data-rendered="onFirstDataRendered"
             :getContextMenuItems="getContextMenuItems"
+            :getRowStyle="getRowStyle"
         />
     </div>
 </template>
@@ -131,7 +132,7 @@ import {
     ColumnApi,
     ModuleRegistry, IServerSideDatasource,
 } from "ag-grid-community"
-import {defineAsyncComponent, onMounted, onUnmounted, ref, watch} from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css";
 import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
@@ -161,34 +162,16 @@ import _ from "lodash";
 import {useStore} from "vuex";
 import {useApiClient} from "../services/api.service";
 
+import EnumCellEditor from "./table/EnumCellEditor.vue"
+import LinkCellEditor from "./table/LinkCellEditor.vue"
+import DatetimeCellEditor from "./table/DatetimeCellEditor.vue"
+import NumberCellEditor from "./table/NumberCellEditor.vue"
+import TreeCellEditor from "./table/TreeCellEditor.vue"
+import MultipleCellRenderer from "./table/MultipleCellRenderer.vue"
+import TotalsRenderer from "./table/TotalsRenderer.vue"
+import CustomCellRenderer from "./table/CustomCellRenderer.vue"
+import CustomFilterConstructor from "./CustomFilterConstructor.vue"
 
-const EnumCellEditor = defineAsyncComponent(() =>
-    import("./table/EnumCellEditor.vue")
-)
-const LinkCellEditor = defineAsyncComponent(() =>
-    import("./table/LinkCellEditor.vue")
-)
-const DatetimeCellEditor = defineAsyncComponent(() =>
-    import("./table/DatetimeCellEditor.vue")
-)
-const NumberCellEditor = defineAsyncComponent(() =>
-    import("./table/NumberCellEditor.vue")
-)
-const TreeCellEditor = defineAsyncComponent(() =>
-    import("./table/TreeCellEditor.vue")
-)
-const MultipleCellRenderer = defineAsyncComponent(() =>
-    import("./table/MultipleCellRenderer.vue")
-)
-const TotalsRenderer = defineAsyncComponent(() =>
-    import("./table/TotalsRenderer.vue")
-)
-const CustomCellRenderer = defineAsyncComponent(() =>
-    import("./table/CustomCellRenderer.vue")
-)
-const CustomFilterConstructor = defineAsyncComponent(() =>
-    import("./CustomFilterConstructor.vue")
-)
 
 LicenseManager.setLicenseKey("abc")
 numeral.locale('ru')
@@ -226,7 +209,8 @@ interface Props {
     customActions?: PageActionConfigInterface[],
     persistingColumnState?: boolean,
     datasourceInst?: DataSourceInterface,
-    canSelectAll?: boolean
+    canSelectAll?: boolean,
+    rowHighlightRules?: HighlightRule[]
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -243,6 +227,19 @@ const props = withDefaults(defineProps<Props>(), {
         return new Filters(null)
     }
 })
+
+class HighlightRule {
+    expression: string;
+    style: string
+}
+
+class compiledHighlightRule {
+    func: CompiledFunc;
+    style: string
+}
+
+let _highlightRules: compiledHighlightRule[] = []
+
 let actions = ref({
     onRowDoubleClick: null,
     onRowClick: null,
@@ -1060,6 +1057,16 @@ async function init() {
         columnDefs.value.push(colDef)
     }
 
+    _highlightRules = []
+    for(let i in props.rowHighlightRules) {
+        const rule = props.rowHighlightRules[i]
+        _highlightRules.push({
+            func: await compileAction(rule.expression),
+            style: JSON.parse(rule.style)
+        })
+    }
+
+
     _customActions.value = []
     for(let i in props.customActions) {
         const action = props.customActions[i]
@@ -1261,6 +1268,20 @@ function selectionChanged() {
     let selected = gridApi.getServerSideSelectionState().toggledNodes
     emit('update:currentId', selected.length ? selected[0] : null)
     emit('update:selected', selected)
+}
+
+function getRowStyle(params) {
+    if (!_highlightRules.length || !params.data)
+        return undefined
+
+    let style = {}
+    for(let i in _highlightRules) {
+
+        if (_highlightRules[i].func.exec(params.data)) {
+            style = Object.assign(style, _highlightRules[i].style)
+        }
+    }
+    return style
 }
 
 </script>

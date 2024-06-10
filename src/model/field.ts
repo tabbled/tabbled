@@ -7,7 +7,7 @@ let flakeId = new FlakeId()
 export type FieldComponentType = 'handler' | 'dataset' | 'datasource' | 'elements' | 'field' | 'role'
 export type FieldDataType = 'number' | 'string' | 'code' | 'password' | 'bool' | 'text' | 'list' | 'enum' | 'status' | 'image' | 'file' |'datetime' | 'date' | 'time' | 'link' | 'table'
 export type FieldType = FieldComponentType | FieldDataType
-export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action'
+export type FieldListOfType = 'dataset' | 'element' | 'column' | 'field' | 'action' | 'rule'
 
 export type NumericFormatType = 'none' | 'decimal' | 'currency'
 export type FormatType = NumericFormatType

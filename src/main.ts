@@ -16,32 +16,15 @@ import {useComponentService} from "./services/component.service";
 
 
 
+import FileField from "./components/FileField.vue"
+import TreeFilter from "./components/TreeFilter.vue"
+import StatusFilter from "./components/StatusFilter.vue"
+import ImageField from "./components/ImageField.vue"
+import DateTimeInput from "./components/DateTimeInput.vue"
+import Input from "./components/Input.vue"
+import CheckboxField from "./components/CheckboxField.vue"
+import LinkSelect from "./components/LinkSelect.vue"
 
-
-const FileField = defineAsyncComponent(() =>
-    import("./components/FileField.vue")
-)
-const TreeFilter = defineAsyncComponent(() =>
-    import("./components/TreeFilter.vue")
-)
-const StatusFilter = defineAsyncComponent(() =>
-    import("./components/StatusFilter.vue")
-)
-const ImageField = defineAsyncComponent(() =>
-    import("./components/ImageField.vue")
-)
-const DateTimeInput = defineAsyncComponent(() =>
-    import("./components/DateTimeInput.vue")
-)
-const Input = defineAsyncComponent(() =>
-    import("./components/Input.vue")
-)
-const CheckboxField = defineAsyncComponent(() =>
-    import( "./components/CheckboxField.vue")
-)
-const LinkSelect = defineAsyncComponent(() =>
-    import( "./components/LinkSelect.vue")
-)
 const RichTextEditor = defineAsyncComponent(() =>
     import('./components/RichTextEditor.vue')
 )

@@ -171,6 +171,7 @@ async function save() {
         }
         await updateRevision()
         isSaving = false
+        await setViewed()
 
         ElMessage.success(t('saved'))
     }catch (e) {
@@ -350,6 +351,7 @@ async function init() {
             isNew.value = false
 
             await updateRevision()
+            setViewed()
         } else {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
             isNew.value = true
@@ -506,6 +508,12 @@ function processElements(elements): ElementInterface[] {
 
 async function updateRevision() {
     editEntityRevisionId = await (editDataSource as DataSource).getCurrentRevisionId(editEntity.value.id)
+}
+
+async function setViewed() {
+    await socket.emit('dataSources/setViewed', {
+        itemId: editEntity.value.id
+    })
 }
 
 function selectedChanged(sl) {
