@@ -1178,7 +1178,7 @@ function isServerSideGroup(item) {
 }
 
 let onItemUpdated = async (params) => {
-    //console.log('onItemUpdated', params)
+    console.log('onItemUpdated', params)
 
     let items = await dataSource.getMany({
         fields: props.columns.map(i => i.field),
@@ -1186,7 +1186,8 @@ let onItemUpdated = async (params) => {
             key: "id",
             op: '==',
             compare: params.data.id
-        }]
+        }],
+        route: params.route
     })
 
     if (!items.data.length) {
