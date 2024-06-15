@@ -55,12 +55,18 @@ export class Filters {
         let filters = [...this.filtersById.values()]
 
         this.groupById.forEach(gr => {
-
-
             filters = filters.concat(gr)
         })
 
         this._filters = filters
+    }
+
+    restoreState(filters) {
+        this._filters = filters
+    }
+
+    backupState() {
+        return this._filters
     }
 }
 

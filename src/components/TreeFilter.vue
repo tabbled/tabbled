@@ -91,6 +91,18 @@ onMounted(async () => {
     await init()
 });
 
+async function restoreState() {
+    let state = localStorage.getItem(`${props.id}_state`)
+    if (state) {
+        selected.value = JSON.parse(state)
+        tree.value.setCheckedKeys(selected.value)
+    }
+}
+
+async function backupState() {
+    localStorage.setItem(`${props.id}_state`, JSON.stringify(selected.value))
+}
+
 async function init() {
     if (!props.fieldConfig) {
         return
@@ -106,6 +118,8 @@ async function init() {
     } else {
         console.warn(`Field "${props.fieldConfig.alias}" is not a link type`)
     }
+
+    await restoreState()
 }
 
 const load = async (node, resolve) => {
@@ -123,6 +137,7 @@ const load = async (node, resolve) => {
             res.data[i].isLeaf = !res.data[i].hasChildren
         }
         resolve(res.data)
+        restoreState()
     })
 }
 
@@ -140,6 +155,8 @@ function change(value: any) {
 
     emit('update:modelValue', value)
     emit('change', value)
+
+    backupState()
 
     if (!props.filters) {
         console.warn('No filters')

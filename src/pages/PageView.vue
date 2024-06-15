@@ -345,6 +345,15 @@ async function init() {
 
 
         filters = useFilters(editDataSource)
+        let state = localStorage.getItem(`${props.pageConfig.id}_filters_state`)
+        if (state) {
+            filters.value.restoreState(JSON.parse(state))
+        }
+        watch(() => filters.value.filters, () => {
+            localStorage.setItem(`${props.pageConfig.id}_filters_state`, JSON.stringify(filters.value.backupState()))
+        }, {
+            deep: true
+        })
 
         let id = <string>route.params.id
 

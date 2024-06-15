@@ -155,7 +155,7 @@
 
 import {FilterItemInterface, Filters, StandardQueryOperator} from "../model/filter";
 import ItemList from "./ItemList.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import FieldSelect from "./FieldSelect.vue";
 import {useI18n} from "vue-i18n";
 import {FieldConfigInterface, FieldType} from "../model/field";
@@ -214,6 +214,22 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['apply', 'close'])
 
+onMounted(async () => {
+    await restoreState()
+})
+
+async function restoreState() {
+    let state = localStorage.getItem(`${props.id}_filter_state`)
+    if (state) {
+        _filters.value = JSON.parse(state)
+        emit('apply', _filters.value.length)
+    }
+}
+
+async function backupState() {
+    localStorage.setItem(`${props.id}_filter_state`, JSON.stringify(_filters.value))
+}
+
 function apply() {
     let filters = []
 
@@ -226,8 +242,10 @@ function apply() {
         }
     })
 
+    backupState()
     props.filters.setGroup(props.id, filters)
     emit('apply', filters.length)
+
 }
 
 function clear() {

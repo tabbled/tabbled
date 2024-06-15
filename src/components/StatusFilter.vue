@@ -56,7 +56,6 @@ async function restoreState() {
     let state = localStorage.getItem(`${props.id}_state`)
     if (state) {
         value.value = JSON.parse(state)
-        updateFilter()
     }
 }
 
