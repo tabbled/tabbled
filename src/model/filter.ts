@@ -34,8 +34,6 @@ export class Filters {
         }
 
         this.updateFilters()
-
-
     }
 
     setGroup(id, filters: Array<FilterItemInterface>) {

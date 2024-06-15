@@ -2,7 +2,7 @@
 
     <div v-if="fieldConfig && multiple">
         <el-checkbox-group v-model="value" size="small" @change="changeMultiple">
-            <el-checkbox-button v-for="item in listValues" :key="item.key" :label="item.title">
+            <el-checkbox-button v-for="item in listValues" :value="item.key" :label="item.title">
                 {{ item.title }}
             </el-checkbox-button>
         </el-checkbox-group>
@@ -10,7 +10,7 @@
     <div v-else-if="fieldConfig">
         <div>
             <el-radio-group v-model="value" size="small" @change="changeSingle">
-                <el-radio-button v-for="item in listValues" :key="item.key" :label="item.title"/>
+                <el-radio-button v-for="item in listValues" :value="item.key" :label="item.title"/>
             </el-radio-group>
         </div>
     </div>
@@ -46,18 +46,23 @@ let listValues = ref([])
 
 onMounted(async () => {
     await init()
-    await getValue()
 })
 
-watch(() => props.modelValue,
-    async () => {
-        await getValue()
-    })
-
-watch(() => props.fieldConfig,
-    async () => {
+watch(() => props.fieldConfig,async () => {
         await init()
 })
+
+async function restoreState() {
+    let state = localStorage.getItem(`${props.id}_state`)
+    if (state) {
+        value.value = JSON.parse(state)
+        updateFilter()
+    }
+}
+
+async function backupState() {
+    localStorage.setItem(`${props.id}_state`, JSON.stringify(value.value))
+}
 
 async function init() {
     if (props.fieldConfig.type == 'link') {
@@ -81,44 +86,23 @@ async function init() {
         } else
             listValues.value = props.fieldConfig.values
     }
-    await getValue()
+    await restoreState()
 }
-
-function getValue() {
-
-}
-
-// Element plus can't use key and stores checked value by title
-function getKeyByTitle(title) {
-    for(let i in listValues.value) {
-        if (listValues.value[i].title === title) {
-            return listValues.value[i].key
-        }
-    }
-    return null
-}
-
 
 function changeMultiple() {
-    change(getMultipleValue())
-}
-
-function getMultipleValue() {
-    let items = []
-    for(let i in value.value) {
-        items.push(getKeyByTitle(value.value[i]))
-    }
-    return items
+    change(value.value)
 }
 
 function changeSingle(val) {
-    change(getKeyByTitle(val))
+    change(val)
 }
 
 
 function change(event: any) {
     emit('update:modelValue', event)
     emit('change', event)
+
+    backupState()
 
     if (!props.filters) {
         console.warn('No filters')
@@ -129,11 +113,14 @@ function change(event: any) {
         props.filters.setFilter(props.id, null)
         return
     }
+    updateFilter()
+}
 
+function updateFilter() {
     props.filters.setFilter(props.id, {
         key: props.fieldConfig.alias,
         op: props.multiple ? 'in' : '==',
-        compare: props.multiple ? getMultipleValue() : getKeyByTitle(value.value)
+        compare: value.value
     })
 }
 

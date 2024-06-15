@@ -282,7 +282,7 @@ let needToSelectRoute = ""
 let needToExpand = null
 
 watch(() => props.filters?.filters, () => {
-    gridApi.refreshServerSide({
+    gridApi?.refreshServerSide({
         purge: true
     })
 } )
