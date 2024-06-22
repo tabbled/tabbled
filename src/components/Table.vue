@@ -324,7 +324,7 @@ class GridDataSource implements IServerSideDatasource {
     getRows(params: IServerSideGetRowsParams): void {
 
         if (!dataSource) {
-            console.warn(`Datasource for Table2 doesn't set`)
+            console.warn(`Datasource for Table doesn't set`)
             console.log(props)
             params.fail()
             return;

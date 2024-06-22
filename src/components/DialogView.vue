@@ -74,6 +74,8 @@ let elements = ref<Array<ElementInterface>>([])
 let filters = ref<Filters>(null)
 let maxHeight = ref('')
 
+let dataSources = new Map<string, DataSourceInterface>()
+
 const emit = defineEmits(['update:visible', 'selected'])
 
 watch(() => props.visible, () => {
@@ -81,12 +83,17 @@ watch(() => props.visible, () => {
         init()
     } else {
         if (props.options.onClose instanceof Function) {
-            props.options.onClose({ options: props.options, selected: selected.value })
+            props.options.onClose({
+                options: props.options,
+                selected: selected.value,
+                dataSource: editDataSource
+            })
         }
     }
 })
 
 async function init() {
+    dataSources.clear()
     pageConfig.value = await dsService.pageDataSource.getByKey(props.options.page)
     if (!pageConfig.value) {
         console.error(`Page ${props.options.page} not found`)
@@ -105,10 +112,13 @@ async function init() {
 
     if (pageConfig.value.datasource) {
         editDataSource = await dsService.create(pageConfig.value.datasource)
+
         if (!editDataSource) {
             console.warn(`DataSource ${pageConfig.value.datasource} for editing page ${pageConfig.value.alias} not found`)
             return;
         }
+
+        dataSources.set(editDataSource.alias, editDataSource)
 
         filters = useFilters(editDataSource)
 
@@ -153,7 +163,14 @@ async function init() {
 
 
             if (prop.type === 'datasource') {
-                let ds = await dsService.create(element[prop.alias])
+                let ds
+                if (!dataSources.has(element[prop.alias])) {
+                    ds = await dsService.create(element[prop.alias])
+                    dataSources.set(element[prop.alias], ds)
+                } else {
+                    ds = dataSources.get(element[prop.alias])
+                }
+
                 if (!ds) {
                     console.warn(`DataSource ${prop.datasource} for field ${prop.alias} not found`)
                     continue
@@ -176,14 +193,15 @@ async function init() {
             el.props['filters'] = filters
         }
 
-        console.log(el.props)
-
         if (elProps.properties)
             elements.value.push(el)
     }
 
     if (props.options.onOpen instanceof Function) {
-        props.options.onOpen({ options: props.options })
+        props.options.onOpen({
+            options: props.options,
+            dataSource: editDataSource
+        })
     }
 }
 
