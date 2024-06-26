@@ -31,16 +31,21 @@
                         </template>
                     </el-dropdown>
 
-                    <el-button v-if="isEditPage" @click="cancel">{{$t('cancel')}}</el-button>
                     <el-button v-if="isEditPage"
+                               :disabled="!canUpdate"
+                               @click="cancel">
+                        {{$t('cancel')}}
+                    </el-button>
+                    <el-button v-if="isEditPage" :disabled="!canUpdate"
                                @click="save"
-                               type="primary"
-                    >{{$t('save')}}</el-button>
+                               type="primary">
+                        {{$t('save')}}
+                    </el-button>
                 </div>
             </template>
         </el-page-header>
 
-        <el-form v-if="pageConfig"
+        <el-form v-if="pageConfig" :disabled="!canUpdate"
                  ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
 
             <el-form-item v-for="(element, idx) in elements.filter(el => el.isVisible === true )"
@@ -56,6 +61,7 @@
                            @change="(value) => setValue(element, value)"
                            :context="scriptContext"
                            @update:selected="selectedChanged"
+                           :disabled="!canUpdate || element.props.disabled"
 
                 />
             </el-form-item>
@@ -110,6 +116,7 @@ let filters = ref<Filters>(null)
 let visibleElements = ref([])
 for(let i = 0; i < 12; i++) visibleElements.value.push([])
 let selected = ref<string[]>([])
+let canUpdate = ref(false)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -342,6 +349,11 @@ async function init() {
             console.warn(`DataSource ${props.pageConfig.datasource} for editing page ${props.pageConfig.alias} not found`)
             return;
         }
+
+
+        canUpdate.value = props.pageConfig.isEditPage
+            ? editDataSource.hasPermission('Edit', store.getters['auth/account'].permissions)
+            : true
 
 
         filters = useFilters(editDataSource)

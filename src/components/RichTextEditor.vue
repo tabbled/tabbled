@@ -145,6 +145,7 @@ async function getValue() {
 }
 
 function init() {
+    console.log(props)
     editor.value = new Editor({
         extensions: [
             StarterKit,
@@ -156,7 +157,8 @@ function init() {
         content: props.modelValue,
         onUpdate: () => {
             change(editor.value.getHTML())
-        }
+        },
+        editable: !props.disabled
     })
 }
 

@@ -8,6 +8,7 @@
                    :model-value="value"
                    :disabled="disabled || isDisabled"
                    remote
+                   readonly
                    :clearable="clearable"
                    remote-show-suffix
                    :remote-method="getData"
