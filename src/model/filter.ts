@@ -26,14 +26,15 @@ export class Filters {
 
     private _filters: Array<FilterItemInterface> = []
 
-    setFilter(id, filter: FilterItemInterface | null) {
+    setFilter(id, filter: FilterItemInterface | null, updateFilter: boolean = true) {
         if (!filter) {
             this.filtersById.delete(id)
         } else {
             this.filtersById.set(id, filter)
         }
 
-        this.updateFilters()
+        if (updateFilter)
+            this.updateFilters()
     }
 
     setGroup(id, filters: Array<FilterItemInterface>) {

@@ -92,15 +92,22 @@ onMounted(async () => {
 });
 
 async function restoreState() {
-    let state = localStorage.getItem(`${props.id}_state`)
+    let state = localStorage.getItem(`${props.id}_filters_state`)
     if (state) {
         selected.value = JSON.parse(state)
         tree.value.setCheckedKeys(selected.value)
+
+        props.filters.setFilter(props.id, {
+            key: props.fieldConfig.alias,
+            op: props.multiple ? 'in' : '==',
+            compare: selected.value
+        },
+            false)
     }
 }
 
 async function backupState() {
-    localStorage.setItem(`${props.id}_state`, JSON.stringify(selected.value))
+    localStorage.setItem(`${props.id}_filters_state`, JSON.stringify(selected.value ? selected.value : []))
 }
 
 async function init() {

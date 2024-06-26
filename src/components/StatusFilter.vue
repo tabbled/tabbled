@@ -56,6 +56,13 @@ async function restoreState() {
     let state = localStorage.getItem(`${props.id}_state`)
     if (state) {
         value.value = JSON.parse(state)
+
+        props.filters.setFilter(props.id, {
+                key: props.fieldConfig.alias,
+                op: props.multiple ? 'in' : '==',
+                compare: value.value
+            },
+            false)
     }
 }
 
