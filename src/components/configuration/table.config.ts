@@ -101,6 +101,11 @@ export class Config implements ComponentInterface {
             displayProp: 'alias',
         },
         {
+            title: "Filter data",
+            alias: "preFilter",
+            type: "handler"
+        },
+        {
             title: 'Visibility',
             alias: 'visible',
             type: 'handler'

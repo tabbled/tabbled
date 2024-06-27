@@ -20,6 +20,10 @@ export class Config implements ComponentInterface {
             title: 'Visibility',
             alias: 'visible',
             type: 'handler'
+        },{
+            title: "Values",
+            alias: "values",
+            type: "string"
         }]
     defaultPosition = {
         rows: 1,

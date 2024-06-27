@@ -137,7 +137,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-balham.css";
 import {EventHandlerConfigInterface, FieldConfigInterface, generateEntityWithDefault} from "../model/field";
 import {ColumnConfigInterface} from "../model/column";
-import {Filters} from "../model/filter";
+import {FilterItemInterface, Filters} from "../model/filter";
 import {PageActionConfigInterface} from "../model/page";
 import {useDataSourceService} from "../services/datasource.service";
 import {CustomDataSource, DataSourceInterface, GetDataManyOptions} from "../model/datasource";
@@ -210,7 +210,8 @@ interface Props {
     persistingColumnState?: boolean,
     datasourceInst?: DataSourceInterface,
     canSelectAll?: boolean,
-    rowHighlightRules?: HighlightRule[]
+    rowHighlightRules?: HighlightRule[],
+    preFilter?: FilterItemInterface[]
 }
 const props = withDefaults(defineProps<Props>(), {
     readonly: false,
@@ -271,6 +272,8 @@ let customFiltersCount = ref(0)
 let totalData = ref([])
 const store = useStore();
 const api = useApiClient()
+let preFilter:CompiledFunc = null
+
 let context_ = {
 }
 let permissions = {
@@ -348,6 +351,10 @@ class GridDataSource implements IServerSideDatasource {
 
         if (props.filters)
             options.filter.push(...props.filters.filters)
+
+        if (preFilter) {
+            options.filter.push(...preFilter.exec(context_))
+        }
 
         if (params.request.sortModel.length) {
             options.sort = {
@@ -568,8 +575,6 @@ async function addSibling() {
     }
 
     let selected = gridApi.getSelectedNodes()
-
-    console.log(dataSource)
 
     let parentId = null
     if (dataSource.isTree) {
@@ -1092,6 +1097,11 @@ async function init() {
             //console.error(`Compilation error in script for action "${action.title}"`)
             //console.error(e)
         }
+    }
+
+    preFilter = null
+    if (props.preFilter) {
+        preFilter = await compileAction(props.preFilter)
     }
 
     isIniting = false

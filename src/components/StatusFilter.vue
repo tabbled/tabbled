@@ -32,7 +32,8 @@ interface Props {
     field?: string,
     fieldConfig: FieldConfigInterface,
     multiple?: boolean,
-    filters?: Filters
+    filters?: Filters,
+    values?: any
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -92,6 +93,16 @@ async function init() {
         } else
             listValues.value = props.fieldConfig.values
     }
+    if (props.values) {
+        let arr = JSON.parse(props.values)
+        if (!Array.isArray(arr)) {
+            console.error(`Values are not an json array`)
+            return
+        }
+
+        listValues.value = listValues.value.filter(i => arr.includes(i.key))
+    }
+
     await restoreState()
 }
 
