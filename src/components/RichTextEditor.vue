@@ -1,7 +1,7 @@
 <template>
     <div v-if="editor" style="width: 100%; height: fit-content" >
 
-        <div class="editor-panel">
+        <div class="editor-panel" v-if="!readonly">
             <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleBold().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-bold" width="18" />
             </el-button>
@@ -145,7 +145,6 @@ async function getValue() {
 }
 
 function init() {
-    console.log(props)
     editor.value = new Editor({
         extensions: [
             StarterKit,
@@ -158,7 +157,7 @@ function init() {
         onUpdate: () => {
             change(editor.value.getHTML())
         },
-        editable: !props.disabled
+        editable: !props.disabled && !props.readonly
     })
 }
 
