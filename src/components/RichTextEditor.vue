@@ -76,7 +76,7 @@
                 </div>
             </el-popover>
         </div>
-        <editor-content :editor="editor"/>
+        <editor-content :class="{ editable: !readonly }" :editor="editor"/>
     </div>
 
 </template>
@@ -171,9 +171,14 @@ function change(val) {
 
 <style lang="scss">
 /* Basic editor styles */
+
+.editable .tiptap{
+    box-shadow: 0 0 0 1px var(--el-input-border-color,var(--el-border-color)) inset;
+}
+
 .tiptap {
 
-    box-shadow: 0 0 0 1px var(--el-input-border-color,var(--el-border-color)) inset;
+
     border-radius: var(--el-input-border-radius, var(--el-border-radius-base));
     background-color: var(--el-input-bg-color, var(--el-fill-color-blank));
     border: var(--el-input-border);
@@ -263,11 +268,11 @@ function change(val) {
     margin: 4px;
 }
 
-.tiptap:hover {
+.editable .tiptap:hover {
     box-shadow: 0 0 0 1px var(--el-border-color-hover) inset
 }
 
-.tiptap:focus {
+.editable .tiptap:focus {
     outline: none;
     //box-sizing: border-box;
     box-shadow: 0 0 0 1px var(--el-color-primary) inset
