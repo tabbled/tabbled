@@ -58,7 +58,7 @@
             />
         </el-select>
 
-        <el-button v-if="fieldConfig && fieldConfig.type === 'link' && fieldConfig.config.searchDialog"
+        <el-button v-if="fieldConfig && fieldConfig.type === 'link' && fieldConfig.config.searchDialog && !(disabled || isDisabled)"
                    text
                    @click="searchDialogVisible = true"
                    style="width: 32px; opacity:0.5; margin-left: 4px"

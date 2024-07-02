@@ -736,57 +736,56 @@ async function onFirstDataRendered(/*params*/) {
 function getContextMenuItems(/*params: GetContextMenuItemsParams*/) {
     let menu = []
 
-    if (hasPermission('Add') && (actions.value.onAdd || (!actions.value.onAdd && !isTree) || props.onClickAdd)) {
-        menu.push({
-            name: t('add'),
-            action: async () => {
-                await add()
-            },
-        })
-    } else {
-        menu.push(...[{
-            name: t('addSibling'),
-            action: async () => {
-                await addSibling()
-            },
-        },{
-            name: t('addChild'),
-            action: async () => {
-                await addChild()
-            },
-        }])
+    if (!props.readonly) {
+        if (hasPermission('Add') && (actions.value.onAdd || (!actions.value.onAdd && !isTree) || props.onClickAdd)) {
+            menu.push({
+                name: t('add'),
+                action: async () => {
+                    await add()
+                },
+            })
+        } else {
+
+            menu.push(...[{
+                name: t('addSibling'),
+                action: async () => {
+                    await addSibling()
+                },
+            },{
+                name: t('addChild'),
+                action: async () => {
+                    await addChild()
+                },
+            }])
+        }
+
+        if (hasPermission('Add')) {
+            menu.push({
+                name: t('duplicate'),
+                action: async () => {
+                    await duplicateSelected()
+                },
+            })
+        }
+
+        if (hasPermission('Edit') && actions.value.onEdit) {
+            menu.push({
+                name: t('edit'),
+                action: async () => {
+                    await edit()
+                },
+            })
+        }
+
+        if (hasPermission('Remove')) {
+            menu.push({
+                name: t('delete'),
+                action: async () => {
+                    await remove()
+                },
+            })
+        }
     }
-
-
-    if (hasPermission('Add')) {
-        menu.push({
-            name: t('duplicate'),
-            action: async () => {
-                await duplicateSelected()
-            },
-        })
-    }
-
-
-    if (hasPermission('Edit') && actions.value.onEdit) {
-        menu.push({
-            name: t('edit'),
-            action: async () => {
-                await edit()
-            },
-        })
-    }
-
-    if (hasPermission('Remove')) {
-        menu.push({
-            name: t('delete'),
-            action: async () => {
-                await remove()
-            },
-        })
-    }
-
-    //duplicateSelected
 
 
     menu.push({

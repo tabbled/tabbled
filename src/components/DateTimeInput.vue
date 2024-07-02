@@ -7,6 +7,7 @@
         @change="change"
         :disabled="isDisabled"
         :format="format"
+        :readonly="readonly"
 
     />
 </template>
@@ -26,7 +27,8 @@ interface Props {
     fieldConfig: FieldConfigInterface,
     context?:any,
     format?: string,
-    type?: string
+    type?: string,
+    readonly?:boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {

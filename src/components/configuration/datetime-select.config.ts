@@ -21,6 +21,11 @@ export class Config implements ComponentInterface {
             type: "string"
         },
         {
+            title: "Readonly",
+            alias: "readonly",
+            type: "bool"
+        },
+        {
             title: "Type",
             alias: "type",
             type: "enum",
