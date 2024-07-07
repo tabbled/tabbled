@@ -31,6 +31,9 @@ const RichTextEditor = defineAsyncComponent(() =>
 const Table = defineAsyncComponent(() =>
     import("./components/Table.vue")
 )
+const TableV2 = defineAsyncComponent(() =>
+    import("./components/tableV2/TableV2.vue")
+)
 const CodeEditor = defineAsyncComponent(() =>
     import("./components/CodeEditor.vue")
 )
@@ -64,6 +67,7 @@ app.component('StatusFilter', StatusFilter)
 app.component('TreeFilter', TreeFilter)
 app.component('FileField', FileField)
 app.component('RichTextEditor', RichTextEditor)
+app.component('TableV2', TableV2)
 
 let componentService = useComponentService()
 componentService.registerAllComponents()

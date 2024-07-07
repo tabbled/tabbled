@@ -19,7 +19,7 @@ export default {
             return
 
         if (totalFunc && totalFunc !== 'none') {
-            value = numeral(props.params.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
+            value.value = numeral(props.params.value).format('0,0.' + '0'.repeat(field.config.precision) + (field.config.format === 'currency' ? ' $' : ''))
         }
 
         return {

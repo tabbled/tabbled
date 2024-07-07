@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 
 export default defineConfig({
     plugins: [vue({
@@ -8,7 +9,8 @@ export default defineConfig({
                 isCustomElement: (tag) => tag.includes('tb-')
             }
         }
-    })
+    }),
+        vueJsx(),
     ],
     resolve: {
         alias: {

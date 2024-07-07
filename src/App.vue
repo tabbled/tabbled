@@ -33,7 +33,6 @@ import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "./services/socketio.service";
-import { defineAsyncComponent } from 'vue'
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -41,15 +40,9 @@ enum ConfigLoadState {
     Loaded
 }
 
-const DialogView = defineAsyncComponent(() =>
-    import("./components/DialogView.vue")
-)
-const FirstStartDialog = defineAsyncComponent(() =>
-    import("./pages/configuration/FirstStartDialog.vue")
-)
-const PageView = defineAsyncComponent(() =>
-    import("./pages/PageView.vue")
-)
+const DialogView = () => import("./components/DialogView.vue")
+const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
+const PageView = () => import("./pages/PageView.vue")
 
 const store = useStore();
 const route = useRoute();
