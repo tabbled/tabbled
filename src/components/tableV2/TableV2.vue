@@ -129,7 +129,7 @@ import {createColumnHelper, getCoreRowModel, useVueTable, FlexRender, RowSelecti
 import {onMounted, ref} from 'vue'
 import Checkbox from './Checkbox.vue'
 import {useDataSourceService} from "../../services/datasource.service";
-import {DataSourceInterface} from "../../model/datasource";
+import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
 import Table from "../Table.vue";
 import {EventHandlerConfigInterface} from "../../model/field";
 
@@ -271,10 +271,20 @@ const getData = async (reset = false) => {
     }
 
 
-    let opt = {
+    let opt:GetDataManyOptions = {
         take: pageSize,
         skip: page * pageSize
     }
+
+    console.log(sorting.value)
+
+    if (sorting.value && sorting.value.length) {
+        opt.sort = {
+            field: sorting.value[0].id,
+            ask: !sorting.value[0].desc
+        }
+    }
+
 
 //    console.log(reset, page, totalDataCount, opt)
 
@@ -289,16 +299,16 @@ const getData = async (reset = false) => {
             data.value = res.data
         } else {
             data.value.push(...res.data)
-
             res.data.forEach(item => {
-                table.getRowModel().rows.push(createRow(table, item.id, item, i++, 0))
+                let r = createRow(table, item.id, item, i++, 0)
+                table.getRowModel().rows.push(r)
+                table.getRowModel().flatRows.push(r)
+                table.getRowModel().rowsById[item.id] = r
             })
         }
 
         allDataLoaded.value = data.value.length >= res.count
         page++
-
-        console.log(table.getRowModel().rows)
     } catch (e) {
         console.error(e)
     } finally {
