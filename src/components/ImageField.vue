@@ -1,7 +1,7 @@
 <template>
     <el-upload  v-if="fieldConfig && !fieldConfig.isMultiple"
                 :show-file-list="false"
-                class="avatar-uploader"
+                class="avatar-uploader el-upload"
                :action="actionUrl"
                :on-success="uploaded"
                :on-error="handleError"
@@ -69,7 +69,11 @@ const props = defineProps<{
     field?: string,
     context?:any,
     height?: number,
-    width?: number
+    width?: number,
+    id?: string,
+    title?: string,
+    visible?: any,
+    disabled?: boolean
 }>()
 
 let imageUrl = ref(null)

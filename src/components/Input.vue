@@ -30,7 +30,7 @@
                          @input="change"
                          :controls="false"
                          :precision="fieldConfig.precision ? fieldConfig.precision : 0"
-                         :model-value="value"
+                         :model-value="Number(value)"
                          :readonly="!!readonly"
                          style="width: 100%; text-align: left !important;"
                          type="type"/>
@@ -54,7 +54,10 @@ const props = defineProps<{
     autosize?: boolean,
     disabled?: boolean,
     readonly?: boolean,
-    password?:boolean
+    password?:boolean,
+    title?: string,
+    customStyle?: string,
+    visible?: any
 }>()
 
 let value = ref<string | Array<string>>()
