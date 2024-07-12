@@ -8,6 +8,7 @@
         :disabled="isDisabled"
         :format="format"
         :readonly="readonly"
+        :firstDayOfWeek="1"
 
     />
 </template>

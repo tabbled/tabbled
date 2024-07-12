@@ -13,8 +13,11 @@ import ru from './locales/ru.json'
 import en from './locales/en.json'
 import { createI18n } from 'vue-i18n'
 import {useComponentService} from "./services/component.service";
+import ruEl from 'element-plus/es/locale/lang/ru'
 
-
+import dayjs from 'dayjs'
+// set first day of week to Monday, that the El datatime picker doesn't support first day of week setting
+dayjs.Ls.en.weekStart = 1
 
 import FileField from "./components/FileField.vue"
 import TreeFilter from "./components/TreeFilter.vue"
@@ -73,7 +76,9 @@ const routerInst = router(store)
 app.use(i18n)
 app.use(routerInst);
 app.use(store)
-app.use(ElementPlus)
+app.use(ElementPlus, {
+    locale: ruEl
+})
 
 // Sentry.init({
 //     app,
