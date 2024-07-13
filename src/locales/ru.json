@@ -173,5 +173,6 @@
     "newPasswordRepeat": "Пароль (подтверждение)",
     "currentPassword": "Текущий пароль",
     "newPasswordNotEqual": "Пароли не совпадают",
-    "uploaded": "Загружен"
+    "uploaded": "Загружен",
+    "leaveWithoutSavingWarn": "Данные изменены, хотите выйти без сохранения?"
 }

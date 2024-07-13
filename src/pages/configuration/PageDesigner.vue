@@ -205,7 +205,7 @@ import {
     PositionElementInterface,
     ScreenSize
 } from "../../model/page";
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {useDataSourceService} from "../../services/datasource.service";
 import {usePageHeader} from "../../services/page.service";
 import _ from 'lodash'
@@ -216,7 +216,9 @@ import PageSettingsPanel from '../../components/PageSettingsPanel.vue'
 import { FlakeId } from '../../flake-id'
 import {useSettings} from "../../services/settings.service";
 import {generateEntityWithDefault} from "../../model/field";
+import {useI18n} from "vue-i18n";
 let flakeId = new FlakeId()
+const { t } = useI18n();
 
 interface ComponentDropInterface extends ComponentInterface {
     layerX: number,
@@ -367,10 +369,13 @@ function getElementProperties(element: ElementInterface | any) {
 }
 
 async function init() {
+    isChanged.value = false
     if (!route.params.id) {
         console.error("Id not provided in url params")
         return;
     }
+
+
 
     if (route.params.id === 'new') {
         pageConfig.value = {
@@ -435,6 +440,8 @@ async function save() {
         } else {
             await ds.updateById(pageConfig.value.id, pageConfig.value)
         }
+
+        isChanged.value = false
 
         ElMessage.success('Saved successfully')
     } catch (e) {
@@ -613,8 +620,6 @@ async function dropNewWidget(e:DragEvent) {
     let startCol = Math.round((relatedX - item.layerX)  / colWidth)
     let startRow = Math.round((relatedY)  / 76)
 
-    console.log(item, comp)
-
 
     startCol = startCol >= 1 ? startCol : 1
     let endCol = startCol + comp.defaultPosition.cols;
@@ -652,6 +657,14 @@ async function dropNewWidget(e:DragEvent) {
 
     isChanged.value = true;
 }
+
+onBeforeRouteLeave(() => {
+    if (isChanged.value) {
+        const answer = window.confirm(t('leaveWithoutSavingWarn'))
+        if (!answer) return false
+    }
+    return true
+})
 
 </script>
 

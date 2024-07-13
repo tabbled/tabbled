@@ -153,7 +153,7 @@
 <script setup lang="ts">
 
 import {ElMessage} from "element-plus";
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {computed, ComputedRef, onMounted, ref} from "vue";
 import CodeEditor from "../../components/CodeEditor.vue";
 import Input from "../../components/Input.vue";
@@ -179,6 +179,7 @@ let dsService = useDataSourceService()
 let isNew = ref(false)
 let activeTab = ref('template')
 let pages = ref([])
+let isChanged = ref(false)
 
 const { t } = useI18n();
 
@@ -218,6 +219,7 @@ async function load() {
         isNew.value = false
     }
 
+    isChanged.value = false
 
     if(!reportEntity.value.permissions)
         reportEntity.value.permissions = {
@@ -249,6 +251,7 @@ async function save() {
             await datasource.updateById(reportEntity.value.id, reportEntity.value)
         }
 
+        isChanged.value = false
         ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
@@ -268,6 +271,7 @@ function setValue(alias, val) {
         return undefined;
 
     reportEntity.value[alias] = val
+    isChanged.value = true
 }
 
 async function cancel() {
@@ -373,6 +377,13 @@ function loadFile() : Promise<any> {
     })
 }
 
+onBeforeRouteLeave(() => {
+    if (isChanged.value) {
+        const answer = window.confirm(t('leaveWithoutSavingWarn'))
+        if (!answer) return false
+    }
+    return true
+})
 
 </script>
 

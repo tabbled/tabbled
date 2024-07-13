@@ -74,7 +74,7 @@
 import _ from 'lodash'
 import {onMounted, watch, ref} from "vue";
 import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterface} from "../model/page";
-import {useRouter, useRoute} from 'vue-router';
+import {useRouter, useRoute, onBeforeRouteLeave} from 'vue-router';
 import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
 import {ElMessage} from "element-plus";
@@ -117,6 +117,8 @@ let visibleElements = ref([])
 for(let i = 0; i < 12; i++) visibleElements.value.push([])
 let selected = ref<string[]>([])
 let canUpdate = ref(false)
+let isChanged = ref(false)
+let isLoading = ref(false)
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -179,13 +181,14 @@ async function save() {
             await editDataSource.updateById(editEntity.value.id, editEntity.value)
         }
         await updateRevision()
-        isSaving = false
+        isChanged.value = false
         await setViewed()
 
         ElMessage.success(t('saved'))
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
+    } finally {
         isSaving = false
     }
 }
@@ -239,12 +242,6 @@ function getValue(el: ElementInterface | any) {
     return undefined
 }
 
-function getVisible(el) {
-    console.log('getVisible', el)
-    return true
-}
-
-
 async function processVisibleAllElements() {
 
     for(let i in elements.value) {
@@ -266,6 +263,7 @@ async function processVisible(element: ElementInterface | any) {
 
 async function setValue(el:ElementInterface | any, value: any) {
     //console.log(el, value)
+
     if (isEditPage.value) {
         if (!editEntity.value)
             return false
@@ -282,6 +280,7 @@ async function setValue(el:ElementInterface | any, value: any) {
 }
 
 async function setEntityValue(alias, value) {
+    isChanged.value = true
     editEntity.value[alias] = value
 
     let fSetValue = await editDataSource.getFieldByAlias(alias).setValueFunc()
@@ -299,6 +298,7 @@ function getField(el:ElementInterface | any) {
 
 
 async function cancel() {
+    isChanged.value = false
     router.back();
 }
 
@@ -480,6 +480,9 @@ async function init() {
     }
 
     await processVisibleAllElements()
+
+    isLoading.value = false
+    isChanged.value = false
 }
 
 function processElements(elements): ElementInterface[] {
@@ -615,6 +618,15 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
     }
     return style;
 }
+
+onBeforeRouteLeave(() => {
+    if (isChanged.value) {
+        const answer = window.confirm(t('leaveWithoutSavingWarn'))
+        if (!answer) return false
+    }
+    return true
+})
+
 
 </script>
 

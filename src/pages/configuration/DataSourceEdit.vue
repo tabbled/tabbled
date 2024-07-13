@@ -234,7 +234,7 @@
                 <el-form label-position="top" label-width="30">
                     <el-form-item :label="t('canAdd')">
                         <div style="display: flex; flex-direction: row">
-                            <el-select v-model="dataSourceEntity.permissions.canAdd" style="padding-right: 8px; width: 250px">
+                            <el-select @change="isChanged = true" v-model="dataSourceEntity.permissions.canAdd" style="padding-right: 8px; width: 250px">
                                 <el-option
                                     v-for="item in getAccessTypes(t)"
                                     :key="item.alias"
@@ -242,13 +242,13 @@
                                     :value="item.alias"
                                 />
                             </el-select>
-                            <UserRoleSelect style="width: 100%" v-if="dataSourceEntity.permissions.canAdd === 'roles'" v-model="dataSourceEntity.permissions.canAddRoles"/>
+                            <UserRoleSelect @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canAdd === 'roles'" v-model="dataSourceEntity.permissions.canAddRoles"/>
                         </div>
                     </el-form-item>
 
                     <el-form-item :label="t('canEdit')">
                         <div style="display: flex; flex-direction: row">
-                            <el-select v-model="dataSourceEntity.permissions.canEdit" style="padding-right: 8px; width: 250px">
+                            <el-select @change="isChanged = true" v-model="dataSourceEntity.permissions.canEdit" style="padding-right: 8px; width: 250px">
                                 <el-option
                                     v-for="item in getAccessTypes(t)"
                                     :key="item.alias"
@@ -256,13 +256,13 @@
                                     :value="item.alias"
                                 />
                             </el-select>
-                            <UserRoleSelect style="width: 100%" v-if="dataSourceEntity.permissions.canEdit === 'roles'" v-model="dataSourceEntity.permissions.canEditRoles"/>
+                            <UserRoleSelect @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canEdit === 'roles'" v-model="dataSourceEntity.permissions.canEditRoles"/>
                         </div>
                     </el-form-item>
 
                     <el-form-item :label="t('canRemove')">
                         <div style="display: flex; flex-direction: row">
-                            <el-select v-model="dataSourceEntity.permissions.canRemove" style="padding-right: 8px; width: 250px">
+                            <el-select @change="isChanged = true" v-model="dataSourceEntity.permissions.canRemove" style="padding-right: 8px; width: 250px">
                                 <el-option
                                     v-for="item in getAccessTypes(t)"
                                     :key="item.alias"
@@ -270,7 +270,7 @@
                                     :value="item.alias"
                                 />
                             </el-select>
-                            <UserRoleSelect style="width: 100%" v-if="dataSourceEntity.permissions.canRemove === 'roles'" v-model="dataSourceEntity.permissions.canRemoveRoles"/>
+                            <UserRoleSelect @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canRemove === 'roles'" v-model="dataSourceEntity.permissions.canRemoveRoles"/>
                         </div>
                     </el-form-item>
                 </el-form>
@@ -329,7 +329,7 @@
 <script setup lang="ts">
 
 import {ElMessage, ElMessageBox} from "element-plus";
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import Input from "../../components/Input.vue";
 import ItemList from "../../components/ItemList.vue";
@@ -368,6 +368,7 @@ let dsService = useDataSourceService()
 let isNew = ref(false)
 let testDataSource: DataSourceInterface = null
 const settings = useSettings()
+let isChanged = ref(false)
 
 
 let context = ref<any>(getContext())
@@ -402,8 +403,6 @@ async function load() {
     if (!route.params.id || route.params.id === 'new') {
         dataSourceEntity.value = await generateEntityWithDefault(datasource.fields)
 
-        console.log(dataSourceEntity.value)
-
         isNew.value = true
     } else {
         dataSourceEntity.value = await datasource.getById(<string>route.params.id)
@@ -417,6 +416,8 @@ async function load() {
             canEdit: 'all',
             canRemove: 'all'
         }
+
+    isChanged.value = false
 }
 
 async  function initTestDataSource() {
@@ -485,6 +486,7 @@ function setValue(alias, val) {
         return undefined;
 
     dataSourceEntity.value[alias] = val
+    isChanged.value = true
 }
 
 async function save() {
@@ -497,6 +499,7 @@ async function save() {
             await datasource.updateById(dataSourceEntity.value.id, dataSourceEntity.value)
         }
         ElMessage.success('Saved successfully')
+        isChanged.value = false
     }catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
@@ -551,13 +554,12 @@ async function tryBuildDataSource() {
 function saveField() {
     fieldEditDialogVisible.value = false;
 
-    console.log(currentField.value)
-
     if (currentIndex == -1) {
         dataSourceEntity.value.fields.push(currentField.value)
     } else {
         dataSourceEntity.value.fields[currentIndex] = currentField.value
     }
+    isChanged.value = true
 }
 
 function insertField() {
@@ -570,6 +572,7 @@ function insertField() {
     }
     currentIndex = -1;
     fieldEditDialogVisible.value = true
+    isChanged.value = true
 }
 
 function editField(row) {
@@ -590,6 +593,7 @@ function removeField(row) {
     )
         .then(() => {
             dataSourceEntity.value.fields.splice(row, 1)
+            isChanged.value = true
         })
 }
 
@@ -601,6 +605,7 @@ function saveEventHandler() {
     } else {
         dataSourceEntity.value.eventHandlers[currentEventHandlerIndex] = currentEventHandler.value
     }
+    isChanged.value = true
 }
 
 function getEventHandlerTitle(item: EventHandlerInterface) {
@@ -628,6 +633,7 @@ function insertEventHandler() {
         dataSourceEntity.value.eventHandlers = []
     }
     dataSourceEntity.value.eventHandlers.push()
+    isChanged.value = true
 }
 
 function editEventHandler(row) {
@@ -648,8 +654,17 @@ function removeEventHandler(row) {
     )
         .then(() => {
             dataSourceEntity.value.eventHandlers.splice(row, 1)
+            isChanged.value = true
         })
 }
+
+onBeforeRouteLeave(() => {
+    if (isChanged.value) {
+        const answer = window.confirm(t('leaveWithoutSavingWarn'))
+        if (!answer) return false
+    }
+    return true
+})
 
 </script>
 

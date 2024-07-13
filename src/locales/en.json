@@ -174,5 +174,6 @@
     "newPasswordRepeat": "New password repeat",
     "currentPassword": "Current password",
     "newPasswordNotEqual": "New passwords is not equal",
-    "uploaded": "Uploaded"
+    "uploaded": "Uploaded",
+    "leaveWithoutSavingWarn": "Do you really want to leave? you have unsaved changes!"
 }

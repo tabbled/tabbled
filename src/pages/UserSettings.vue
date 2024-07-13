@@ -84,11 +84,7 @@ onMounted(async () => {
 
 
 async function load() {
-    let user =  await server.emit("users/me", {})
-
-    userEntity.value = user
-
-    console.log(user)
+    userEntity.value = await server.emit("users/me", {})
 }
 
 async function save() {

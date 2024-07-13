@@ -74,7 +74,7 @@
 <script setup lang="ts">
 
 import {ElMessage} from "element-plus";
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {computed, ComputedRef, onMounted, ref} from "vue";
 import CodeEditor from "../../components/CodeEditor.vue";
 import Input from "../../components/Input.vue";
@@ -95,6 +95,7 @@ let dsService = useDataSourceService()
 let isNew = ref(false)
 let updateKey = ref(0)
 let activeTab = 'script'
+let isChanged = ref(false)
 
 const socket = useSocketClient()
 const settings = useSettings()
@@ -138,6 +139,7 @@ async function load() {
 
     roomId = `console.${flakeId.generateId().toString()}`
     socket.socket.on(roomId, consoleRoom)
+    isChanged.value = false
 }
 
 function consoleRoom(data) {
@@ -156,6 +158,8 @@ async function save() {
         } else {
             await datasource.updateById(functionEntity.value.id, functionEntity.value)
         }
+
+        isChanged.value = false
 
         ElMessage.success(t('saved'))
     }catch (e) {
@@ -176,6 +180,8 @@ function setValue(alias, val) {
         return undefined;
 
     functionEntity.value[alias] = val
+
+    isChanged.value = true
 }
 
 async function cancel() {
@@ -210,6 +216,14 @@ async function run() {
         console.error(e)
     }
 }
+
+onBeforeRouteLeave(() => {
+    if (isChanged.value) {
+        const answer = window.confirm(t('leaveWithoutSavingWarn'))
+        if (!answer) return false
+    }
+    return true
+})
 
 </script>
 

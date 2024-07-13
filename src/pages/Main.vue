@@ -209,7 +209,6 @@ const currentPageTitle: ComputedRef<string> = computed((): string =>  {
 })
 
 onMounted(() => {
-    console.log('Main mounted')
     favicon.value = window['env']['appFavicon'] ? window['env']['appFavicon'] : "/favicon.png"
     title.value = window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled"
     mainViewHeight.value = mainContainer.value.$el.clientHeight
