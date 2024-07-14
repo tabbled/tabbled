@@ -378,6 +378,7 @@ function setComponentAvailableHeight() {
 }
 
 async function init() {
+    revisions.value = []
     currentRevision.value = null
     if (!props.pageConfig) {
         router.back()
