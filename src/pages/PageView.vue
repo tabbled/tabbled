@@ -2,7 +2,37 @@
     <div class="page-view" ref="page">
         <el-page-header ref="mainHeader" style="padding: 16px" @back="$router.back()">
             <template #content>
-                <span class="text-large font-600 mr-3"> {{route.meta.title}} </span>
+                <div style="align-items: center; display: flex">
+                    <div > {{route.meta.title}} </div>
+                    <el-tooltip
+                        :content="$t('revisions')"
+                        placement="right"
+                        effect="light"
+                        trigger="hover"
+                        :hide-after="0"
+                        :show-after="500"
+                        :virtual-ref="revisionBtn"
+                    />
+                    <el-dropdown ref="revisionBtn" v-if="isEditPage && editEntityRevisionId !== -1" max-height="300" trigger="click"
+                                 style="margin-left: 12px;"
+                    >
+                        <el-button :type="currentRevision && currentRevision.id !== editEntityRevisionId ? 'danger' : 'info'"
+                                   link @click="getRevisions">
+                            <Icon width="16" style="padding-left: 4px" icon="material-symbols:history"/>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item v-for="rev in revisions" @click="setRevision(rev)">
+                                    <div style="width: 30px; align-items: center; display: flex">
+                                        <Icon v-if="currentRevision.id === rev.id" width="16" style="padding-left: 4px" icon="material-symbols:check"/>
+                                    </div>
+                                    ({{rev.version}}) {{rev.createdAt}} - {{rev.createdBy}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </div>
+
             </template>
 
             <template #extra>
@@ -43,8 +73,19 @@
                     </el-button>
                 </div>
             </template>
-        </el-page-header>
 
+        </el-page-header>
+        <el-alert v-if="isEditPage && currentRevision && currentRevision.id !== editEntityRevisionId"
+                  type="warning"
+                  :closable="false"
+                  style="border-radius: 0;"
+                  show-icon
+        >
+                ({{currentRevision.version}}) {{currentRevision.createdAt}} - {{currentRevision.createdBy}}
+        </el-alert>
+        <div  style="font-size: 0.8em">
+
+        </div>
         <el-form v-if="pageConfig" :disabled="!canUpdate"
                  ref="grid"  class="grid-wrap" :model="editEntity" label-position="top">
 
@@ -77,7 +118,7 @@ import {ScreenSize, PageConfigInterface, PositionElementInterface, ElementInterf
 import {useRouter, useRoute, onBeforeRouteLeave} from 'vue-router';
 import {usePageScriptHelper, usePageHeader} from "../services/page.service";
 import {CompiledFunc, compileScript} from "../services/compiler";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {useComponentService} from "../services/component.service";
 import {CustomDataSource, DataSource, DataSourceInterface, EntityInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
@@ -88,6 +129,8 @@ import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "../services/socketio.service";
 import {hasPermission} from "../model/permissions";
 import store from "../store";
+import {useApiClient} from "../services/api.service";
+import dayjs from "dayjs";
 const { t } = useI18n();
 
 let router = useRouter();
@@ -105,6 +148,9 @@ let dsService = useDataSourceService()
 let settings = useSettings()
 let reportMenu = ref([])
 const socket = useSocketClient()
+let revisions = ref([])
+let currentRevision = ref(null)
+let revisionBtn = ref(null)
 
 
 let editEntity = ref<EntityInterface>(null)
@@ -119,6 +165,7 @@ let selected = ref<string[]>([])
 let canUpdate = ref(false)
 let isChanged = ref(false)
 let isLoading = ref(false)
+let api = useApiClient()
 
 const props = defineProps<{
     pageConfig: PageConfigInterface,
@@ -170,26 +217,48 @@ function setAppTitle() {
 }
 
 async function save() {
-    try {
-        isSaving = true
-        if (isNew.value) {
-            let item = await editDataSource.insert(editEntity.value.id, editEntity.value)
+    if (currentRevision.value.id !== editEntityRevisionId) {
+        ElMessageBox.confirm(
+            t('confirmSaveRevision'),
+            t('saveRevision'),
+            {
+                confirmButtonText: t('save'),
+                cancelButtonText: t('cancel'),
+                type: 'warning',
+            }
+        )
+            .then(async () => {
+                await saveData()
+            })
+    } else {
+        await saveData()
+    }
 
-            await router.replace({ params: { id: item.id }})
-            await init()
-        } else {
-            await editDataSource.updateById(editEntity.value.id, editEntity.value)
+    async function saveData() {
+        try {
+            isSaving = true
+            if (isNew.value) {
+                let item = await editDataSource.insert(editEntity.value.id, editEntity.value)
+
+                await router.replace({ params: { id: item.id }})
+                await init()
+            } else {
+                await editDataSource.updateById(editEntity.value.id, editEntity.value)
+            }
+            await updateRevision()
+            currentRevision.value = {
+                id: editEntityRevisionId
+            }
+            isChanged.value = false
+            await setViewed()
+
+            ElMessage.success(t('saved'))
+        }catch (e) {
+            ElMessage.error(e.toString())
+            console.error(e)
+        } finally {
+            isSaving = false
         }
-        await updateRevision()
-        isChanged.value = false
-        await setViewed()
-
-        ElMessage.success(t('saved'))
-    }catch (e) {
-        ElMessage.error(e.toString())
-        console.error(e)
-    } finally {
-        isSaving = false
     }
 }
 
@@ -262,8 +331,6 @@ async function processVisible(element: ElementInterface | any) {
 }
 
 async function setValue(el:ElementInterface | any, value: any) {
-    //console.log(el, value)
-
     if (isEditPage.value) {
         if (!editEntity.value)
             return false
@@ -298,7 +365,6 @@ function getField(el:ElementInterface | any) {
 
 
 async function cancel() {
-    isChanged.value = false
     router.back();
 }
 
@@ -312,6 +378,7 @@ function setComponentAvailableHeight() {
 }
 
 async function init() {
+    currentRevision.value = null
     if (!props.pageConfig) {
         router.back()
         console.error(`Page has no config`)
@@ -374,6 +441,9 @@ async function init() {
             isNew.value = false
 
             await updateRevision()
+            currentRevision.value = {
+                id: editEntityRevisionId
+            }
             setViewed()
         } else {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
@@ -617,6 +687,51 @@ function getGridElementStyle(layout: {[key in ScreenSize]: PositionElementInterf
         style.gridRow = r;
     }
     return style;
+}
+
+const getRevisions = async () => {
+    const res = await api.get(`/v2/datasource/${editDataSource.alias}/data/${editEntity.value.id}/revision`)
+
+    revisions.value = res.data.items.map(i => {
+        return {
+            id: i.id,
+            version: `v${i.version}`,
+            createdAt: dayjs(i.createdAt).format('DD.MM.YYYY HH:mm:ss'),
+            createdBy: i.createdBy.id ? `${i.createdBy.title} (${i.createdBy.username})` : t('system')
+        }
+    })
+}
+
+const setRevision = async (rev) => {
+
+    if (isChanged.value) {
+        ElMessageBox.confirm(
+            t('confirmOpenRevision'),
+            t('openRevision'),
+            {
+                confirmButtonText: t('open'),
+                cancelButtonText: t('cancel'),
+                type: 'warning',
+            }
+        )
+            .then(async () => {
+                await setRev()
+            })
+    } else
+        await setRev()
+
+
+    async function setRev() {
+        try {
+            const res = await api.get(`/v2/datasource/${editDataSource.alias}/data/${editEntity.value.id}/revision/${rev.id}`)
+            //console.log()
+            editEntity.value = res.data.data
+            currentRevision.value = rev
+        } catch (e) {
+            ElMessage.error(e.toString())
+            console.error(e)
+        }
+    }
 }
 
 onBeforeRouteLeave(() => {

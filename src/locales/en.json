@@ -175,5 +175,12 @@
     "currentPassword": "Current password",
     "newPasswordNotEqual": "New passwords is not equal",
     "uploaded": "Uploaded",
-    "leaveWithoutSavingWarn": "Do you really want to leave? you have unsaved changes!"
+    "leaveWithoutSavingWarn": "Do you really want to leave? you have unsaved changes!",
+    "system": "System",
+    "saveRevision": "Save from revision",
+    "confirmSaveRevision": "Do you confirm saving data from the revision?",
+    "open": "Open",
+    "openRevision": "Open from revision",
+    "confirmOpenRevision": "Data is changed! Do you confirm opening data from the revision?",
+    "revisions": "Changes history"
 }

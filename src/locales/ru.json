@@ -174,5 +174,12 @@
     "currentPassword": "Текущий пароль",
     "newPasswordNotEqual": "Пароли не совпадают",
     "uploaded": "Загружен",
-    "leaveWithoutSavingWarn": "Данные изменены, хотите выйти без сохранения?"
+    "leaveWithoutSavingWarn": "Данные изменены, хотите выйти без сохранения?",
+    "system": "Система",
+    "saveRevision": "Сохранение из истории",
+    "confirmSaveRevision": "Вы уверены что хотите сохранить данные из истории?",
+    "open": "Открыть",
+    "openRevision": "Открыть из истории",
+    "confirmOpenRevision": "Данные изменены! Открыть запись из истории?",
+    "revisions": "История изменений"
 }
