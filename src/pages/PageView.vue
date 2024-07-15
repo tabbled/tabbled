@@ -728,6 +728,24 @@ const setRevision = async (rev) => {
             //console.log()
             editEntity.value = res.data.data
             currentRevision.value = rev
+
+            for (let i in editDataSource.fields) {
+                let f = editDataSource.fields[i]
+                if (f.type === 'table') {
+                    let ds = await dsService.getByAlias(f.datasource)
+                    if (!ds) {
+                        console.warn(`DataSource ${f.datasource} for field ${f.alias} not found`)
+                        continue
+                    }
+
+                    if (ds instanceof CustomDataSource)
+                        ds.setContext(scriptContext.value)
+
+                    await ds.setData(editEntity.value[f.alias])
+                }
+            }
+            isChanged.value = false
+
         } catch (e) {
             ElMessage.error(e.toString())
             console.error(e)
