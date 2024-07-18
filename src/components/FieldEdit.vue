@@ -80,6 +80,16 @@
                     <el-checkbox v-model="modelValue.autoincrement"/>
                 </el-form-item>
 
+                <el-form-item v-if="modelValue.type !== 'table'" :label="t('fieldConfig.filterable')">
+                    <el-checkbox v-model="modelValue.filterable"/>
+                </el-form-item>
+
+                <el-form-item v-if="modelValue.type !== 'table'" :label="t('fieldConfig.sortable')">
+                    <el-checkbox v-model="modelValue.sortable"/>
+                </el-form-item>
+
+
+
                 <el-form-item v-if="modelValue.type === 'enum'" :label="t('fieldConfig.values')">
                     <ItemList key-prop="alias"
                               title-prop="title"
@@ -150,6 +160,7 @@ import {useI18n} from "vue-i18n";
 import {onMounted, ref} from "vue";
 import {useDataSourceService} from "../services/datasource.service";
 import ItemList from "../components/ItemList.vue";
+import CodeEditor from "./CodeEditor.vue";
 
 const { t } = useI18n();
 

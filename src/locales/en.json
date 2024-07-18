@@ -102,7 +102,9 @@
         "setValue": "Set value",
         "getReadonly": "Readonly",
         "searchable": "Searchable",
-        "searchDialog": "Search dialog"
+        "searchDialog": "Search dialog",
+        "filterable": "Filterable",
+        "sortable": "Sortable"
     },
     "menuConfig": {
         "title": "Title",

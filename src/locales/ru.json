@@ -91,9 +91,11 @@
         "getValue": "getValue",
         "setValue": "setValue",
         "getReadonly": "getReadonly",
-        "searchable": "Текстовый поиск по полю",
+        "searchable": "Поиск",
         "isTree": "Древовидный",
-        "searchDialog": "Диалог поиска"
+        "searchDialog": "Диалог поиска",
+        "filterable": "Фильтруемый",
+        "sortable": "Сортируемый"
     },
     "fieldTypes": {
         "number": "Число",

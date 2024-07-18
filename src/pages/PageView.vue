@@ -217,7 +217,7 @@ function setAppTitle() {
 }
 
 async function save() {
-    if (currentRevision.value.id !== editEntityRevisionId) {
+    if (!isNew.value && currentRevision.value.id !== editEntityRevisionId) {
         ElMessageBox.confirm(
             t('confirmSaveRevision'),
             t('saveRevision'),
