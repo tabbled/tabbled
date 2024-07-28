@@ -26,6 +26,7 @@
                             <div class="columnHeaderTitle">
                                 <Checkbox v-if="header.index === 0"
                                           id="column-header-checkbox"
+                                          class="select-checkbox"
                                           :indeterminate="table.getIsSomeRowsSelected()"
                                           :checked="table.getIsAllRowsSelected()"
                                           @change="table.getToggleAllRowsSelectedHandler()($event)"
@@ -75,6 +76,7 @@
                         <div class="cell">
                             <Checkbox v-if="cell.column.getIndex() === 0"
                                       id="row-checkbox"
+                                      class="select-checkbox"
                                       :indeterminate="false"
                                       style="z-index: 100"
                                       :checked="row.getIsSelected()"
@@ -464,8 +466,12 @@ thead th .cell:hover {
 
 
 .cell {
+    display: flex;
+    flex-direction: row;
     height: 32px;
     width: inherit;
+    min-width: 0;
+    align-items: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -528,6 +534,10 @@ thead th .cell:hover {
     height: 100%;
     align-items: center;
     display: flex;
+}
+
+.select-checkbox {
+    margin-right: 10px;
 }
 
 
