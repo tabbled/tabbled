@@ -1,6 +1,7 @@
 <template>
     <div class="table-wrapper">
         <div class="table-header" ref="tableHeader">
+            <el-progress v-if="isLoading" class="load-progressbar" :percentage="100"  :indeterminate="true" :show-text="false"/>
             <table :style="{ width: `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
                 <thead>
                 <tr
@@ -73,7 +74,7 @@
                         :key="cell.id"
                         :style="{ width: `${cell.column.getSize()}px` }"
                     >
-                        <div class="cell">
+                        <div :class="{cell: true, 'cell-selected': selectedCellId === cell.id  } " @click="onCellClick(cell)">
                             <Checkbox v-if="cell.column.getIndex() === 0"
                                       id="row-checkbox"
                                       class="select-checkbox"
@@ -91,9 +92,7 @@
 
                     </td>
                 </tr>
-                <div class="loading" v-if="isLoading">
-                    Loading...
-                </div>
+
             </tbody>
         </table>
         </div>
@@ -128,12 +127,14 @@
 <script setup lang="tsx" >
 
 import {createColumnHelper, getCoreRowModel, useVueTable, FlexRender, RowSelectionState, createRow} from '@tanstack/vue-table'
-import {onMounted, ref} from 'vue'
+import {markRaw, onMounted, ref, shallowRef} from 'vue'
 import Checkbox from './Checkbox.vue'
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
 import Table from "../Table.vue";
 import {EventHandlerConfigInterface} from "../../model/field";
+import {useSettingsPanel} from "../../services/settings-panel.service";
+import TableSettingsWidget from "./TableSettingsWidget.vue";
 
 interface Props {
     id: string
@@ -153,12 +154,10 @@ let tableHeader = ref(null)
 let tableFooter = ref(null)
 const columnHelper = createColumnHelper()
 let height = 400 + 'px'
+let selectedCellId = ref(null)
 
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
-
-
-
 
 
 let data = ref([])
@@ -207,6 +206,9 @@ let page = 1
 let pageSize = 30
 let isLoading = ref(false)
 let allDataLoaded = ref(false)
+
+let settingsPanel = useSettingsPanel()
+let tableSettingsWidget = ref(null)
 
 let headerHeight = '40px'
 
@@ -324,6 +326,12 @@ const init = async () => {
    await getData(true)
 }
 
+const onCellClick = (cell) => {
+    selectedCellId.value = cell.id
+
+    settingsPanel.openWidget(markRaw(TableSettingsWidget))
+}
+
 const onBodyScroll = async (e) => {
     tableHeader.value.scrollLeft = e.target?.scrollLeft
     tableFooter.value.scrollLeft = e.target?.scrollLeft
@@ -394,18 +402,18 @@ const onDragEnter = (e) => {
 }
 
 .table-body {
+
     width: inherit;
     overflow: auto;
     height: 100%;
 }
-
-
 
 table {
     border-collapse: collapse;
 }
 
 .table-header {
+    position: relative;
     overflow: hidden;
     height: v-bind(headerHeight);
     width: inherit;
@@ -458,6 +466,8 @@ tfoot th .cell {
     border-bottom: none;
 }
 
+
+
 thead th .cell:hover {
     background: var(--el-border-color-extra-light);
     transition: background-color .12s ease;
@@ -466,7 +476,7 @@ thead th .cell:hover {
 
 
 .cell {
-    display: flex;
+    display: block;
     flex-direction: row;
     height: 32px;
     width: inherit;
@@ -476,8 +486,11 @@ thead th .cell:hover {
     text-overflow: ellipsis;
     white-space: nowrap;
     border-bottom: 1px solid var(--el-border-color-light);
+    border-top: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-left: 1px solid transparent;
     text-align: left;
-    padding: 0 8px 0 8px ;
+    padding: 0 8px 0 8px;
 }
 
 :global(th .resizer:hover) .cell {
@@ -540,10 +553,25 @@ thead th .cell:hover {
     margin-right: 10px;
 }
 
-
+.table-body td .cell-selected {
+    border: 1px solid var(--el-color-primary);
+    transition: border .14s ease;
+}
 
 .loading {
     padding: 10px;
+}
+
+.load-progressbar {
+    z-index: 10;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    .el-progress-bar__outer {
+        height: 2px !important;
+        border-radius: 0 !important;
+    }
 }
 
 

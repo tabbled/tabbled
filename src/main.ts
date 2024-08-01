@@ -13,9 +13,6 @@ import ru from './locales/ru.json'
 import en from './locales/en.json'
 import { createI18n } from 'vue-i18n'
 import {useComponentService} from "./services/component.service";
-
-
-
 import FileField from "./components/FileField.vue"
 import TreeFilter from "./components/TreeFilter.vue"
 import StatusFilter from "./components/StatusFilter.vue"
@@ -71,6 +68,7 @@ app.component('TableV2', TableV2)
 
 let componentService = useComponentService()
 componentService.registerAllComponents()
+
 
 const routerInst = router(store)
 

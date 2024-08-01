@@ -1,4 +1,7 @@
 <template>
+    <div style="display: flex; flex-direction: column; width: 100%">
+
+
     <el-page-header style="padding: 16px;" @back="$router.back()" >
         <template #content>
             <span> {{$t('configuration')}} </span>
@@ -15,7 +18,7 @@
         </template>
     </el-page-header>
 
-    <el-tabs ref="tabsEl" tab-position="top" style="height: calc(100% - 128px); padding-left: 16px; padding-right: 16px" v-model="activeTab" @tab-change="tabChange">
+    <el-tabs ref="tabsEl" tab-position="top" style="height: calc(100% - 150px); padding-left: 16px; padding-right: 16px" v-model="activeTab" @tab-change="tabChange">
 
         <el-tab-pane :label="$t('pages')"  name="pages" style="height: inherit">
             <Table :columns="pagesColumns"
@@ -101,6 +104,8 @@
         </el-tab-pane>
 
     </el-tabs>
+
+    </div>
 
     <ImportDialog v-model:visible="importDialogVisible"></ImportDialog>
     <ExportDialog v-model:visible="exportDialogVisible"/>

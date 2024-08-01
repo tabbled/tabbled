@@ -1,17 +1,30 @@
 <template>
-    <div v-if="route.meta.isSingle" style="width: 100vw" >
-        <router-view />
+    <div style="display: flex; flex-direction: row">
+
+
+        <div v-if="route.meta.isSingle" style="width: 100vw" >
+            <router-view />
+        </div>
+        <div v-else-if="configLoadState !== ConfigLoadState.Loaded" style="width: 30vw; margin: auto">
+            <el-progress
+                status="success"
+                :indeterminate="true"
+                :duration="1"
+                :percentage="100"
+            />
+            <div>{{$t('loading')}}</div>
+        </div>
+        <div v-else class="app-container">
+            <SidebarMenu :screen-size="screenSize"/>
+            <router-view :screenSize="screenSize" v-slot="{Component}" style="width: 100%">
+                <component ref="rView" :is="Component" />
+            </router-view>
+            <SettingsPanelV2 :style="{'display': displaySettingsPanel}"
+                             @activeWidgetChange="settingsPanelVisible = true"
+                             ref="settingsPanel"></SettingsPanelV2>
+        </div>
+
     </div>
-    <div v-else-if="configLoadState !== ConfigLoadState.Loaded" style="width: 30vw; margin: auto">
-        <el-progress
-            status="success"
-            :indeterminate="true"
-            :duration="1"
-            :percentage="100"
-        />
-        <div>{{$t('loading')}}</div>
-    </div>
-    <Main v-else  :screen-size="screenSize" />
 
     <DialogView ref="dialogRef"
                  v-model:visible="dialogVisible"
@@ -23,16 +36,17 @@
 
 <script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
-import Main from "./pages/Main.vue"
-import {onMounted, onUnmounted, ref} from "vue";
+import {computed, ComputedRef, onMounted, onUnmounted, ref, watch} from "vue";
 import {useStore} from "vuex";
-import {DataSourceType} from "./model/datasource";
 import {OpenDialogOptions, PageConfigInterface, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "./services/socketio.service";
+import SettingsPanelV2 from "./components/SettingsPanelV2.vue";
+import {useSettingsPanel} from "./services/settings-panel.service";
+import SidebarMenu from "./components/SidebarMenu.vue";
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -65,23 +79,22 @@ let permissions = {
     roles: []
 }
 
+
+let settingsPanel = ref(null)
+let settingsPanelService = useSettingsPanel()
+settingsPanelService.setPanelElement(settingsPanel)
+let settingsPanelVisible = ref(false)
+
+const displaySettingsPanel: ComputedRef<string> = computed((): string =>  {
+    return settingsPanelVisible.value ? '' : 'none'
+})
+
 const { t, locale } = useI18n();
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
-store.subscribe(async (payload) => {
-    if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
-        await loadConfig()
-    }
-
-    if (payload.type === 'auth/loggedOut') {
-        configLoadState.value = ConfigLoadState.NotLoaded
-        await dsService.clear(DataSourceType.config)
-        await dsService.clear(DataSourceType.data)
-    }
-})
-
 onMounted(async () => {
+    console.log('App onMounted')
     await settings.refresh();
     favicon.value = window['env']['appFavicon'] ? window['env']['appFavicon'] : '/favicon.png'
 
@@ -109,6 +122,11 @@ onMounted(async () => {
 
     permissions = store.getters['auth/account'].permissions
 })
+
+watch(() => route.path,
+    async () => {
+        settingsPanelVisible.value = false
+    })
 
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
@@ -180,6 +198,18 @@ socketClient.socket.on("login_needed", () => {
     logout();
 })
 
+// store.subscribe(async (payload) => {
+//     console.log(payload)
+//     if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
+//         await loadConfig()
+//     }
+//
+//     if (payload.type === 'auth/loggedOut') {
+//         configLoadState.value = ConfigLoadState.NotLoaded
+//         await dsService.clear(DataSourceType.config)
+//         await dsService.clear(DataSourceType.data)
+//     }
+
 function canPageAccess(page) {
     if (!permissions) {
         console.warn('No permissions for user')
@@ -243,20 +273,10 @@ async function isFirstStart() {
 
 
 <style lang="scss">
-html,
-body {
-    font-family: "Noto Sans", Inter, Roboto, sans-serif;
-    min-height: 100vh;
-
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-#app {
-    text-align: start !important;
-    padding: 0 !important;
-    margin: 0 !important;
+.app-container {
     width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
 }
-
 </style>
