@@ -136,7 +136,7 @@ import {ScreenSize} from "../model/page";
 
 let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 let isAdmin = ref(false)
-let mainSideBarWidth = ref('300px')
+let mainSideBarWidth = ref('250px')
 let sidebarMenu = ref<Array<MenuConfigInterface>>(null)
 const store = useStore();
 let socketClient = useSocketClient()
@@ -164,7 +164,7 @@ onMounted(() => {
 
     loadMenu();
 
-    mainSideBarWidth.value = `${!isSideBarCollapsed.value ? 300 : 60}px`
+    mainSideBarWidth.value = `${!isSideBarCollapsed.value ? 250 : 60}px`
     isAdmin.value = store.getters['auth/account'] && store.getters['auth/account'].permissions.admin
 
     permissions = store.getters['auth/account'].permissions
@@ -231,6 +231,7 @@ function openInNewWindow(to: string) {
     flex-direction: column;
     border-right: 1px solid var(--el-border-color);
     width: v-bind(mainSideBarWidth);
+    min-width: v-bind(mainSideBarWidth);
     height: 100%;
 
 

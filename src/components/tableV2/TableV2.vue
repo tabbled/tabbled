@@ -1,8 +1,9 @@
 <template>
     <div class="table-wrapper">
+        <div>Title = {{title}}</div>
         <div class="table-header" ref="tableHeader">
             <el-progress v-if="isLoading" class="load-progressbar" :percentage="100"  :indeterminate="true" :show-text="false"/>
-            <table :style="{ width: `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
+            <table :style="{ width: `${table.getTotalSize()+10}px`, 'max-width': `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
                 <thead>
                 <tr
                     v-for="headerGroup in table.getHeaderGroups()"
@@ -62,7 +63,7 @@
              :infinite-scroll-distance="60"
              @scroll="onBodyScroll"
         >
-            <table :style="{ width: `${table.getTotalSize()}px`}">
+            <table :style="{ width: `${table.getTotalSize()}px`, 'max-width': `${table.getTotalSize()+10}px`}">
                 <tbody>
                 <tr  v-for="row in table.getRowModel().rows"
                      :key="row.id "
@@ -97,7 +98,7 @@
         </table>
         </div>
         <div class="table-footer" ref="tableFooter">
-            <table :style="{ width: `${table.getTotalSize()}px`, 'margin-right': '32px'}">
+            <table :style="{ width: `${table.getTotalSize()}px`, 'max-width': `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
                 <tfoot>
                 <tr
                     v-for="footerGroup in table.getFooterGroups()"
@@ -124,30 +125,38 @@
     </div>
 </template>
 
-<script setup lang="tsx" >
+<script setup lang="tsx">
 
-import {createColumnHelper, getCoreRowModel, useVueTable, FlexRender, RowSelectionState, createRow} from '@tanstack/vue-table'
-import {markRaw, onMounted, ref, shallowRef} from 'vue'
+import {
+    createColumnHelper,
+    createRow,
+    FlexRender,
+    getCoreRowModel,
+    RowSelectionState,
+    useVueTable
+} from '@tanstack/vue-table'
+import {onMounted, ref, watch} from 'vue'
 import Checkbox from './Checkbox.vue'
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
 import Table from "../Table.vue";
-import {EventHandlerConfigInterface} from "../../model/field";
-import {useSettingsPanel} from "../../services/settings-panel.service";
-import TableSettingsWidget from "./TableSettingsWidget.vue";
+import {useRightSidebar} from "../../services/right-sidebar.service";
+import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
+import IconArrowUp from "../icons/sort-arrow-up-icon.vue";
+import {DatasourceType, PropertiesHelper} from "./config"
 
-interface Props {
+export interface Props {
     id: string
-    onRowClick?: EventHandlerConfigInterface
-    onRowDoubleClick?: EventHandlerConfigInterface
+    datasourceType: DatasourceType
+    datasourceAlias?: string
+    title?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-
+    title: "",
+    datasourceType: DatasourceType.datasource
 })
 
-const IconArrowDown = <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 18l-6-6l1.4-1.4l3.6 3.6V5h2v9.2l3.6-3.6L18 12z"/></svg>
-const IconArrowUp = <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M11 18V8.8l-3.6 3.6L6 11l6-6l6 6l-1.4 1.4L13 8.8V18z"/></svg>
 
 let tableContainer = ref(null)
 let tableHeader = ref(null)
@@ -207,8 +216,13 @@ let pageSize = 30
 let isLoading = ref(false)
 let allDataLoaded = ref(false)
 
-let settingsPanel = useSettingsPanel()
-let tableSettingsWidget = ref(null)
+let rightSidebarPanel = useRightSidebar()
+let propertiesHelper = ref<PropertiesHelper>(new PropertiesHelper(props))
+propertiesHelper.value.onPropertyChange = (prop, value) => {
+
+    console.log('propertiesHelper.value.onPropertyChange', prop, value)
+    emit('update:property', prop, value)
+}
 
 let headerHeight = '40px'
 
@@ -262,6 +276,15 @@ const { rows } = table.getRowModel()
 onMounted(async () => {
     await init()
 })
+
+watch(() => props,
+    async () => {
+        console.log('TableV2 props changed', props)
+    })
+
+const emit = defineEmits<{
+    (e: 'update:property', prop: string, value: any): string
+}>()
 
 const getData = async (reset = false) => {
     if (isLoading.value || !dataSource)
@@ -323,13 +346,14 @@ const getData = async (reset = false) => {
 const init = async () => {
     dataSource = await dsService.getByAlias('products')
 
+    console.log('tablev2 init', props)
+
    await getData(true)
 }
 
 const onCellClick = (cell) => {
     selectedCellId.value = cell.id
-
-    settingsPanel.openWidget(markRaw(TableSettingsWidget))
+    rightSidebarPanel.openSettingsOf(propertiesHelper.value)
 }
 
 const onBodyScroll = async (e) => {
@@ -394,7 +418,6 @@ const onDragEnter = (e) => {
 
 .table-wrapper {
     height: v-bind(height);
-    width: 100%;
     border: 1px solid var(--el-border-color);
     border-radius: 3px;
     display: flex;
@@ -491,6 +514,7 @@ thead th .cell:hover {
     border-left: 1px solid transparent;
     text-align: left;
     padding: 0 8px 0 8px;
+    align-content: center;
 }
 
 :global(th .resizer:hover) .cell {

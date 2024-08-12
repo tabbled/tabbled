@@ -95,7 +95,8 @@ export interface PageConfigInterface {
     isEditPage: boolean
     datasource?: string,
     access: AccessType,
-    accessRoles: string[]
+    accessRoles: string[],
+    type: 'edit' | 'list' | 'dashboard' | 'select'
 }
 
 interface PageListItemTypeInterface {

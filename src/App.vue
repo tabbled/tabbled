@@ -16,12 +16,13 @@
         </div>
         <div v-else class="app-container">
             <SidebarMenu :screen-size="screenSize"/>
-            <router-view :screenSize="screenSize" v-slot="{Component}" style="width: 100%">
+            <router-view :screenSize="screenSize" v-slot="{Component}" :style="{ width: viewerWidth, 'max-width': viewerWidth}">
                 <component ref="rView" :is="Component" />
             </router-view>
-            <SettingsPanelV2 :style="{'display': displaySettingsPanel}"
-                             @activeWidgetChange="settingsPanelVisible = true"
-                             ref="settingsPanel"></SettingsPanelV2>
+            <RightSidebar v-model:visible="rightSidebarVisible"
+                          v-model:pinned="rightSidebarPinned"
+                          :width="rightSidebarWidth"
+                          ref="rightSidebar"/>
         </div>
 
     </div>
@@ -44,9 +45,20 @@ import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "./services/socketio.service";
-import SettingsPanelV2 from "./components/SettingsPanelV2.vue";
-import {useSettingsPanel} from "./services/settings-panel.service";
+import RightSidebar from "./components/RightSidebar.vue";
+import {useRightSidebar} from "./services/right-sidebar.service";
 import SidebarMenu from "./components/SidebarMenu.vue";
+import { useWindowSize } from '@vueuse/core'
+
+const DialogView = () => import("./components/DialogView.vue")
+const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
+const PageView = () => import("./pages/PageView.vue")
+const ListPageView = () => import("./pages/ListPageView.vue")
+
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
+const favicon = useFavicon()
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -54,17 +66,10 @@ enum ConfigLoadState {
     Loaded
 }
 
-const DialogView = () => import("./components/DialogView.vue")
-const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
-const PageView = () => import("./pages/PageView.vue")
-
-const store = useStore();
-const route = useRoute();
-const router = useRouter();
-const favicon = useFavicon()
-
 let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
+const { width } = useWindowSize()
+
 
 let socketClient = useSocketClient()
 const dsService = useDataSourceService();
@@ -80,21 +85,23 @@ let permissions = {
 }
 
 
-let settingsPanel = ref(null)
-let settingsPanelService = useSettingsPanel()
-settingsPanelService.setPanelElement(settingsPanel)
-let settingsPanelVisible = ref(false)
-
-const displaySettingsPanel: ComputedRef<string> = computed((): string =>  {
-    return settingsPanelVisible.value ? '' : 'none'
-})
+let rightSidebar = ref(null)
+let rightSidebarService = useRightSidebar()
+rightSidebarService.setPanelElement(rightSidebar)
+let rightSidebarVisible = ref(false)
+let rightSidebarPinned = ref(false)
+let rightSidebarWidth = ref(300)
 
 const { t, locale } = useI18n();
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
+const viewerWidth: ComputedRef<string> = computed((): string =>  {
+    let w = ( width.value - (252 + (rightSidebarVisible.value && rightSidebarPinned.value ? rightSidebarWidth.value : 0)))
+    return w + 'px'
+})
+
 onMounted(async () => {
-    console.log('App onMounted')
     await settings.refresh();
     favicon.value = window['env']['appFavicon'] ? window['env']['appFavicon'] : '/favicon.png'
 
@@ -106,8 +113,6 @@ onMounted(async () => {
     window.addEventListener('resize', handleResize);
     handleResize();
     configLoadState.value = ConfigLoadState.NotLoaded
-
-
 
     if (store.getters["auth/isAuthenticated"]) {
         try {
@@ -125,7 +130,7 @@ onMounted(async () => {
 
 watch(() => route.path,
     async () => {
-        settingsPanelVisible.value = false
+        rightSidebarService.close()
     })
 
 onUnmounted(() => {
@@ -243,14 +248,17 @@ function addRoute(path: string, page: PageConfigInterface) {
     if (!canPageAccess(page))
         return
 
+    let component = page.type === 'list' ? ListPageView : PageView
+
     router.addRoute({
         path: path,
         name: page.alias,
-        component: PageView,
+        component: component,
         props: {
             pageConfig: page,
             screenSize: screenSize.value,
-            openDialog: openDialog
+            openDialog: openDialog,
+            properties: page
         },
         meta: {
             isSingle: false,
@@ -278,5 +286,9 @@ async function isFirstStart() {
     height: 100vh;
     display: flex;
     flex-direction: row;
+}
+
+.viewer {
+    width: v-bind(viewerWidth)
 }
 </style>
