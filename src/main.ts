@@ -5,6 +5,7 @@ import { defineAsyncComponent } from 'vue'
 import App from './App.vue'
 import router from "./router";
 import store from './store'
+import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import './style.css'
@@ -13,12 +14,6 @@ import ru from './locales/ru.json'
 import en from './locales/en.json'
 import { createI18n } from 'vue-i18n'
 import {useComponentService} from "./services/component.service";
-import ruEl from 'element-plus/es/locale/lang/ru'
-
-import dayjs from 'dayjs'
-// set first day of week to Monday, that the El datatime picker doesn't support first day of week setting
-dayjs.Ls.en.weekStart = 1
-
 import FileField from "./components/FileField.vue"
 import TreeFilter from "./components/TreeFilter.vue"
 import StatusFilter from "./components/StatusFilter.vue"
@@ -33,6 +28,9 @@ const RichTextEditor = defineAsyncComponent(() =>
 )
 const Table = defineAsyncComponent(() =>
     import("./components/Table.vue")
+)
+const TableV2 = defineAsyncComponent(() =>
+    import("./components/tableV2/TableV2.vue")
 )
 const CodeEditor = defineAsyncComponent(() =>
     import("./components/CodeEditor.vue")
@@ -67,18 +65,21 @@ app.component('StatusFilter', StatusFilter)
 app.component('TreeFilter', TreeFilter)
 app.component('FileField', FileField)
 app.component('RichTextEditor', RichTextEditor)
+app.component('TableV2', TableV2)
 
 let componentService = useComponentService()
 componentService.registerAllComponents()
+
+const pinia = createPinia()
+
 
 const routerInst = router(store)
 
 app.use(i18n)
 app.use(routerInst);
+app.use(pinia)
 app.use(store)
-app.use(ElementPlus, {
-    locale: ruEl
-})
+app.use(ElementPlus)
 
 // Sentry.init({
 //     app,

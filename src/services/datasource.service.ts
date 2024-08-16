@@ -126,6 +126,7 @@ export class DataSourceService {
 
 
     async registerAll() {
+
         let items = (await this.dsDataSource.getMany()).data
 
         items.forEach(ds => {

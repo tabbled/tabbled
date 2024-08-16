@@ -1,6 +1,6 @@
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  font-family: Roboto, Inter, sans-serif;
+  font-size: 14px;
   line-height: 24px;
   font-weight: 400;
 
@@ -35,6 +35,18 @@ h1 {
   line-height: 1.1;
 }
 
+h3 {
+    font-size: 1.5em;
+    line-height: 1;
+    margin: 0.8em 0;
+}
+
+h4 {
+    font-size: 1.2em;
+    line-height: 1;
+    margin: 0.4em 0;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -46,23 +58,9 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.card {
-  padding: 2em;
-}
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
 }
 
 @media (prefers-color-scheme: light) {

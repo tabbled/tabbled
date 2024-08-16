@@ -48,7 +48,7 @@ export interface FieldConfigInterface {
     alias: string,                      // Using in calculations
     type: FieldType,
     tooltip?: string,
-    required?: boolean,
+    required?: boolean | Function,
     hidden?:boolean,
     listOf?: FieldListOfType
     keyProp?: string,
@@ -75,7 +75,7 @@ export interface FieldInterface {
     title: string,                      // Using in table and editor titles
     alias: string,                      // Using in calculations
     type: FieldType,
-    required?: boolean,
+    required?: boolean | Function,
     hidden?: boolean,
     listOf?: FieldListOfType
     keyProp?: string,
@@ -135,7 +135,7 @@ export class Field implements FieldInterface {
     isMultiple?: boolean;
     isTree?:boolean;
     link?: string;
-    required: boolean;
+    required: boolean | Function;
     title: string;
     datasource?: string;
     values: EnumValuesInterface[] | (() => Promise<EnumValuesInterface[]>)

@@ -1,17 +1,29 @@
 <template>
-    <div v-if="route.meta.isSingle" style="width: 100vw" >
-        <router-view />
+    <div style="display: flex; flex-direction: row">
+
+
+        <div v-if="route.meta.isSingle" style="width: 100vw" >
+            <router-view />
+        </div>
+        <div v-else-if="configLoadState !== ConfigLoadState.Loaded" style="width: 30vw; margin: auto">
+            <el-progress
+                status="success"
+                :indeterminate="true"
+                :duration="1"
+                :percentage="100"
+            />
+            <div>{{$t('loading')}}</div>
+        </div>
+        <div v-else class="app-container">
+            <SidebarMenu :screen-size="screenSize"/>
+            <router-view :screenSize="screenSize" v-slot="{Component}" :style="{ width: viewerWidth, 'max-width': viewerWidth}">
+                <component ref="rView" :is="Component" />
+            </router-view>
+            <RightSidebar :width="rightSidebarWidth"
+                          ref="rightSidebar"/>
+        </div>
+
     </div>
-    <div v-else-if="configLoadState !== ConfigLoadState.Loaded" style="width: 30vw; margin: auto">
-        <el-progress
-            status="success"
-            :indeterminate="true"
-            :duration="1"
-            :percentage="100"
-        />
-        <div>{{$t('loading')}}</div>
-    </div>
-    <Main v-else  :screen-size="screenSize" />
 
     <DialogView ref="dialogRef"
                  v-model:visible="dialogVisible"
@@ -23,17 +35,28 @@
 
 <script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
-import Main from "./pages/Main.vue"
-import {onMounted, onUnmounted, ref} from "vue";
+import {computed, ComputedRef, onMounted, onUnmounted, ref, watch} from "vue";
 import {useStore} from "vuex";
-import {DataSourceType} from "./model/datasource";
 import {OpenDialogOptions, PageConfigInterface, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "./services/socketio.service";
-import { defineAsyncComponent } from 'vue'
+import RightSidebar from "./components/RightSidebar.vue";
+import SidebarMenu from "./components/SidebarMenu.vue";
+import { useWindowSize } from '@vueuse/core'
+import {usePage} from "./store/pageStore";
+
+const DialogView = () => import("./components/DialogView.vue")
+const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
+const PageView = () => import("./pages/PageView.vue")
+const ListPageView = () => import("./pages/ListPageView.vue")
+
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
+const favicon = useFavicon()
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -41,23 +64,10 @@ enum ConfigLoadState {
     Loaded
 }
 
-const DialogView = defineAsyncComponent(() =>
-    import("./components/DialogView.vue")
-)
-const FirstStartDialog = defineAsyncComponent(() =>
-    import("./pages/configuration/FirstStartDialog.vue")
-)
-const PageView = defineAsyncComponent(() =>
-    import("./pages/PageView.vue")
-)
-
-const store = useStore();
-const route = useRoute();
-const router = useRouter();
-const favicon = useFavicon()
-
 let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
+const { width } = useWindowSize()
+
 
 let socketClient = useSocketClient()
 const dsService = useDataSourceService();
@@ -72,20 +82,20 @@ let permissions = {
     roles: []
 }
 
+
+let rightSidebar = ref(null)
+let rightSidebarService = usePage()
+let rightSidebarVisible = ref(false)
+let rightSidebarPinned = ref(false)
+let rightSidebarWidth = ref(300)
+
 const { t, locale } = useI18n();
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
-store.subscribe(async (payload) => {
-    if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
-        await loadConfig()
-    }
-
-    if (payload.type === 'auth/loggedOut') {
-        configLoadState.value = ConfigLoadState.NotLoaded
-        await dsService.clear(DataSourceType.config)
-        await dsService.clear(DataSourceType.data)
-    }
+const viewerWidth: ComputedRef<string> = computed((): string =>  {
+    let w = ( width.value - (252 + (rightSidebarVisible.value && rightSidebarPinned.value ? rightSidebarWidth.value : 0)))
+    return w + 'px'
 })
 
 onMounted(async () => {
@@ -101,8 +111,6 @@ onMounted(async () => {
     handleResize();
     configLoadState.value = ConfigLoadState.NotLoaded
 
-
-
     if (store.getters["auth/isAuthenticated"]) {
         try {
             await store.dispatch('auth/loadUserSettings')
@@ -116,6 +124,11 @@ onMounted(async () => {
 
     permissions = store.getters['auth/account'].permissions
 })
+
+watch(() => route.path,
+    async () => {
+        rightSidebarService.closeSetting()
+    })
 
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
@@ -187,6 +200,18 @@ socketClient.socket.on("login_needed", () => {
     logout();
 })
 
+// store.subscribe(async (payload) => {
+//     console.log(payload)
+//     if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
+//         await loadConfig()
+//     }
+//
+//     if (payload.type === 'auth/loggedOut') {
+//         configLoadState.value = ConfigLoadState.NotLoaded
+//         await dsService.clear(DataSourceType.config)
+//         await dsService.clear(DataSourceType.data)
+//     }
+
 function canPageAccess(page) {
     if (!permissions) {
         console.warn('No permissions for user')
@@ -199,11 +224,22 @@ function canPageAccess(page) {
     if (!permissions.roles)
         return false
 
-    switch (page.access) {
+    let pagePermissions: { access: string; accessRoles: string[] }
+
+    if (page.permissions) {
+        pagePermissions = page.permissions
+    } else {
+        pagePermissions = {
+            access: page.access,
+            accessRoles: page.accessRoles
+        }
+    }
+
+    switch (pagePermissions.access) {
         case 'all': return true;
         case 'nobody': return false;
         case 'roles':
-            return page.accessRoles.some(r=> permissions.roles.includes(r))
+            return pagePermissions.accessRoles.some(r=> permissions.roles.includes(r))
         default: return false
     }
 }
@@ -220,14 +256,18 @@ function addRoute(path: string, page: PageConfigInterface) {
     if (!canPageAccess(page))
         return
 
+    let component = page.type === 'list' ? ListPageView : PageView
+
     router.addRoute({
         path: path,
         name: page.alias,
-        component: PageView,
+        component: component,
         props: {
             pageConfig: page,
             screenSize: screenSize.value,
-            openDialog: openDialog
+            openDialog: openDialog,
+            //for page v2
+            alias: page.alias
         },
         meta: {
             isSingle: false,
@@ -250,20 +290,14 @@ async function isFirstStart() {
 
 
 <style lang="scss">
-html,
-body {
-    font-family: "Noto Sans", Inter, Roboto, sans-serif;
-    min-height: 100vh;
-
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-#app {
-    text-align: start !important;
-    padding: 0 !important;
-    margin: 0 !important;
+.app-container {
     width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
 }
 
+.viewer {
+    width: v-bind(viewerWidth)
+}
 </style>

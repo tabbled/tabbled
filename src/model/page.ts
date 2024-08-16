@@ -43,6 +43,9 @@ export interface ConfigField extends FieldConfigInterface{
     isVisible?: (s: object) => boolean
 }
 
+/*
+deprecated
+ */
 export interface ElementInterface {
     id: string,
     layout: {
@@ -57,6 +60,15 @@ export interface ElementInterface {
     elements?: ElementInterface[]
     isVisible?: boolean
     visibleFunc?:  CompiledFunc
+}
+
+export interface ElementInterfaceV2 {
+    id: string,
+    componentName: string,
+    properties: any,
+    elements?: ElementInterfaceV2[],
+    colSpan: number
+    visible?: (ctx: any) => boolean
 }
 
 export interface ComponentInterface {
@@ -95,7 +107,22 @@ export interface PageConfigInterface {
     isEditPage: boolean
     datasource?: string,
     access: AccessType,
-    accessRoles: string[]
+    accessRoles: string[],
+    type?: 'edit' | 'list' | 'dashboard' | 'select'
+}
+
+export interface PageConfigInterfaceV2 {
+    id: string,
+    alias: string,
+    path: string,
+    title: string,
+    elements: ElementInterfaceV2[]
+    headerActions: PageActionConfigInterface[],
+    permissions: {
+        access: AccessType,
+        accessRoles: string[],
+    }
+    type: 'edit' | 'list' | 'dashboard' | 'select'
 }
 
 interface PageListItemTypeInterface {
