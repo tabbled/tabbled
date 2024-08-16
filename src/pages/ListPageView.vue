@@ -1,38 +1,43 @@
 <template>
-    <div v-if="properties" class="list-page-view" >
+    <div v-if="pageStore.properties" class="list-page-view" >
         <el-page-header ref="mainHeader" class="list-page-view-header" @back="$router.back()">
             <template #content>
-                <span class="text-large font-600 mr-3"> {{route.meta.title}} </span>
+                <span> {{pageStore.properties.title}} </span>
+            </template>
+            <template #extra>
+                <div class="page-actions">
+                    <el-button text circle :icon="SettingsIcon"/>
+                </div>
             </template>
         </el-page-header>
-        <TableV2 v-if="tableProps" style=" margin: 16px"
-                 v-bind="tableProps"
-                 :id="tableProps.id"
-                 @update:property="(prop, value) => onComponentPropertyChange(tableProps.id, prop, value)"/>
+        <Grid class="page-grid" path="" :elements="pageStore.properties.elements"/>
+
     </div>
 
 </template>
 
 <script setup lang="ts">
-import TableV2 from "../components/tableV2/TableV2.vue";
 import {useRoute, useRouter} from "vue-router";
-import {PageConfigInterface} from "../model/page";
+import {PageConfigInterfaceV2} from "../model/page";
 import {onMounted, ref, watch} from "vue";
+import Grid from "../components/Grid.vue";
+import {usePage} from "../store/pageStore";
+import SettingsIcon from "../components/icons/settings-icon.vue";
+
 
 let router = useRouter();
 let route = useRoute();
+let pageStore = usePage()
+
+
 
 const props = defineProps<{
-    properties: PageConfigInterface,
+    alias: string
 }>()
 
-//let elements: Map<string, any> = new Map()
+let pageProps = ref<PageConfigInterfaceV2>(null)
 
-let pageProps = ref<PageConfigInterface>(null)
-
-let tableProps = ref(null)
-
-watch(() => props.properties,
+watch(() => props.alias,
     async () => {
         await init()
     })
@@ -41,37 +46,42 @@ onMounted(async () => {
     await init()
 })
 
-const init = () => {
+const init = async () => {
     console.log("Init list view")
-    pageProps.value = props.properties
+    await pageStore.loadByAlias(props.alias)
 
-    console.log(pageProps.value)
 
-    tableProps.value = pageProps.value.elements.find(i => i.name === 'TableV2')
-    //elements.set(tableProps.value.id, t)
-
-    if(!tableProps.value) {
-        console.error('Has no TableV2 props in elements')
-    }
+    console.log(pageStore.properties)
 }
 
-const onComponentPropertyChange = (componentId: string, prop: string, value: any) => {
-    console.log('onComponentPropertyChange', componentId, prop, value)
-    let comp = pageProps.value.elements.find(i => i.id === componentId)
-
-    if (!comp) {
-        console.error('onComponentPropertyChange', `Component by id ${componentId} not found`)
-        return
-    }
-    //pageProps.value[prop] = value
-    comp[prop] = value
-
-    console.log(comp)
-}
+// const onComponentPropertyChange = (componentId: string, prop: string, value: any) => {
+//     console.log('onComponentPropertyChange', componentId, prop, value)
+//     let comp = pageProps.value.elements.find(i => i.id === componentId)
+//
+//     if (!comp) {
+//         console.error('onComponentPropertyChange', `Component by id ${componentId} not found`)
+//         return
+//     }
+//     //pageProps.value[prop] = value
+//     comp[prop] = value
+//
+//     console.log(comp)
+// }
 
 </script>
 
 <style lang="scss">
+
+.page-grid {
+    overflow: auto;
+    height: -webkit-fill-available;
+}
+
+.page-header-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 
 .list-page-view {
     display: flex;

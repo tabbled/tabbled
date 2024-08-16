@@ -1,13 +1,13 @@
 <template>
-    <el-form v-if="helper" class="settings-panel-form" label-position="top" :model="helper.props" size="small" >
+    <el-form v-if="pageStore.propertiesHelper" class="settings-panel-form" label-position="top" :model="pageStore.propertiesHelper.props" size="small" >
         <div class="form-item-group">
             <div class="form-item-group-title">
                 General
             </div>
-            <el-form-item  v-for="(prop)  in helper.getAliases()"
+            <el-form-item  v-for="(prop)  in pageStore.propertiesHelper.getAliases()"
                            class="settings-panel-form-item"
-                           :label="helper.propertiesDef()[prop].title">
-                <el-input :model-value="helper.props[prop]" @input="e => onChange(prop, e)"/>
+                           :label="pageStore.propertiesHelper.propertiesDef()[prop].title">
+                <el-input size="small" :model-value="pageStore.propertiesHelper.props[prop]" @input="e => onChange(prop, e)"/>
 
     <!--            <div>{{prop}} - {{ helper.props }}</div>-->
             </el-form-item>
@@ -17,28 +17,45 @@
 
 <script setup lang="ts">
 
-import { onMounted, watch } from "vue";
-import { ComponentPropertiesHelper } from "../model/component";
+import { onMounted } from "vue";
+import {usePage} from "../store/pageStore";
 
 const emit = defineEmits<{
     (e: 'update:property', prop: string, value: any): string
 }>()
 
-const props = defineProps<{
-    helper: ComponentPropertiesHelper
-}>()
+let pageStore = usePage()
+
+// const props = defineProps<{
+//     helper: ComponentPropertiesHelper
+// }>()
+
+pageStore.$onAction(
+    ({
+         name, // name of the action
+         store, // store instance, same as `someStore`
+         args, // array of parameters passed to the action
+         after, // hook after the action returns or resolves
+         onError, // hook if the action throws or rejects
+     }) => {
+
+
+        after((result) => {
+            if (name === 'openSettings')
+                init()
+            console.log('after', name)
+            console.log()
+        })
+    })
 
 let init = () => {
-    console.log('init', props.helper)
+    console.log('init', pageStore.propertiesHelper)
 }
 
 let onChange = (prop, value) => {
-    console.log(prop, value)
-    emit('update:property', prop, value)
-    props.helper.setPropertyValue(prop, value)
+    pageStore.setProperty(prop, value)
 }
 
-watch(() => props, () => init(), {deep: true})
 onMounted(() => init())
 
 

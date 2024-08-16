@@ -54,7 +54,10 @@ const props = defineProps<{
     autosize?: boolean,
     disabled?: boolean,
     readonly?: boolean,
-    password?:boolean
+    password?:boolean,
+    title?: string,
+    customStyle?:any
+    visible?:boolean
 }>()
 
 let value = ref<string | Array<string>>()

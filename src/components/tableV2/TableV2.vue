@@ -1,6 +1,18 @@
 <template>
-    <div class="table-wrapper">
-        <div>Title = {{title}}</div>
+    <div class="table-wrapper" :style="{height: height + 'px'}">
+        <div class="table-title">
+            <div class="table-actions">
+                <h4 v-if="title" class="table-title-caption">{{title}}</h4>
+                <el-button type="primary" size="small" @click="openSettings">Add</el-button>
+            </div>
+            <div class="table-actions-ext">
+                <el-input clearable :placeholder="$t('search')" :prefix-icon="SearchIcon" style="height: 24px; width: 150px" size="small" v-model="searchText"></el-input>
+                <el-button round circle text :icon="SettingsIcon" class="table-settings-button" @click="openSettings"/>
+            </div>
+
+        </div>
+
+
         <div class="table-header" ref="tableHeader">
             <el-progress v-if="isLoading" class="load-progressbar" :percentage="100"  :indeterminate="true" :show-text="false"/>
             <table :style="{ width: `${table.getTotalSize()+10}px`, 'max-width': `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
@@ -140,21 +152,27 @@ import Checkbox from './Checkbox.vue'
 import {useDataSourceService} from "../../services/datasource.service";
 import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
 import Table from "../Table.vue";
-import {useRightSidebar} from "../../services/right-sidebar.service";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
 import IconArrowUp from "../icons/sort-arrow-up-icon.vue";
+import SettingsIcon from "../icons/settings-icon.vue";
+import SearchIcon from "../icons/search-icon.vue"
 import {DatasourceType, PropertiesHelper} from "./config"
+import {usePage} from "../../store/pageStore";
+import {computed, ComputedRef} from "vue/dist/vue";
 
 export interface Props {
     id: string
     datasourceType: DatasourceType
     datasourceAlias?: string
-    title?: string
+    title?: string,
+    path: string
+    height: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
     title: "",
-    datasourceType: DatasourceType.datasource
+    datasourceType: DatasourceType.datasource,
+    height: 400
 })
 
 
@@ -162,12 +180,11 @@ let tableContainer = ref(null)
 let tableHeader = ref(null)
 let tableFooter = ref(null)
 const columnHelper = createColumnHelper()
-let height = 400 + 'px'
 let selectedCellId = ref(null)
+let searchText = ref("")
 
 let dsService = useDataSourceService()
 let dataSource:DataSourceInterface = null
-
 
 let data = ref([])
 const columns =[
@@ -216,15 +233,11 @@ let pageSize = 30
 let isLoading = ref(false)
 let allDataLoaded = ref(false)
 
-let rightSidebarPanel = useRightSidebar()
-let propertiesHelper = ref<PropertiesHelper>(new PropertiesHelper(props))
-propertiesHelper.value.onPropertyChange = (prop, value) => {
+let pageSettings = usePage()
+let propertiesHelper = ref<PropertiesHelper>(new PropertiesHelper())
+let headerHeight = '34px'
 
-    console.log('propertiesHelper.value.onPropertyChange', prop, value)
-    emit('update:property', prop, value)
-}
 
-let headerHeight = '40px'
 
 
 const table = useVueTable({
@@ -353,7 +366,6 @@ const init = async () => {
 
 const onCellClick = (cell) => {
     selectedCellId.value = cell.id
-    rightSidebarPanel.openSettingsOf(propertiesHelper.value)
 }
 
 const onBodyScroll = async (e) => {
@@ -412,16 +424,106 @@ const onDragEnter = (e) => {
     e.preventDefault()
 }
 
+const openSettings = async () => {
+    pageSettings.openSettings(props.path + '.properties', propertiesHelper.value)
+
+
+    // //let j = new jexl.Jexl()
+    // jexl.addFunction('d.dddd', (param) => {
+    //     return param
+    // })
+    //
+    // let ctx = {
+    //     DATA:{
+    //         test: (p) => {
+    //             return p
+    //         },
+    //         c: 100
+    //     }
+    //
+    // }
+    //
+    //
+    // let dateStart = new Date()
+    // console.log(dateStart.toISOString())
+    // timeSpent.value = dateStart.toISOString() + ' '
+    // let i = 0
+    // while(i < 1) {
+    //     let res = await indirectEval('DATA.test(222)', ctx)
+    //     //console.log(res)
+    //     i++
+    // }
+    //
+    // let dateEnd = new Date()
+    //
+    // timeSpent.value += dateEnd.toISOString()
+    // timeSpent.value += 'spent' + (dateEnd.valueOf() - dateStart.valueOf())
+
+
+}
+
+// async function indirectEval(script: string, ctx: any) {
+//     let keys = Object.keys(ctx)
+//     let f = new Function(...keys, `"use strict"; return (${script});`)
+//
+//     let args = []
+//
+//     keys.forEach(i => {
+//         //console.log(ctx[i])
+//         args.push(ctx[i])
+//         //f.bind() = ctx[i]
+//     })
+//
+//     //return null
+//     //f = f.bind({})
+//
+//    // let f = new Function(null, `console.log(this); return (${script});`)
+//
+//
+//     return f(...args, script)
+// }
+
 </script>
 
 <style lang="scss">
 
 .table-wrapper {
-    height: v-bind(height);
     border: 1px solid var(--el-border-color);
     border-radius: 3px;
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow: auto;
+}
+
+.table-title-caption {
+    margin-right: 14px;
+    cursor: default;
+}
+
+.table-title {
+    display: flex;
+    flex-direction: row;
+    padding: 8px 0;
+    justify-content: space-between;
+}
+
+.table-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 14px;
+}
+
+.table-actions-ext {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.table-settings-button {
+    z-index: 10;
+    margin: 0 4px;
 }
 
 .table-body {
@@ -439,6 +541,7 @@ table {
     position: relative;
     overflow: hidden;
     height: v-bind(headerHeight);
+    min-height: v-bind(headerHeight);
     width: inherit;
     border-bottom: 1px solid var(--el-border-color);
 }
@@ -447,7 +550,12 @@ table {
     overflow: hidden;
     width: inherit;
     height: v-bind(headerHeight);
+    min-height: v-bind(headerHeight);
     border-top: 1px solid var(--el-border-color);
+}
+
+thead {
+    height: v-bind(headerHeight);
 }
 
 .table-row {

@@ -107,6 +107,7 @@ interface Props {
     screenSize?: ScreenSize,
     disabled?: boolean,
     clearable?: boolean
+    visible?: boolean
 }
 
 

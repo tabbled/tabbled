@@ -42,6 +42,12 @@ export class PropertiesHelper extends ComponentPropertiesHelper {
                         title: ""
                     }]
                 }
+            },
+            height: {
+                title: "Height",
+                editor: "input",
+                group: "general",
+                tooltip: "This is **markdown** hint for this property",
             }
         }
 

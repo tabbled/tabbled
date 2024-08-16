@@ -5,6 +5,7 @@ import { defineAsyncComponent } from 'vue'
 import App from './App.vue'
 import router from "./router";
 import store from './store'
+import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import './style.css'
@@ -69,11 +70,14 @@ app.component('TableV2', TableV2)
 let componentService = useComponentService()
 componentService.registerAllComponents()
 
+const pinia = createPinia()
+
 
 const routerInst = router(store)
 
 app.use(i18n)
 app.use(routerInst);
+app.use(pinia)
 app.use(store)
 app.use(ElementPlus)
 

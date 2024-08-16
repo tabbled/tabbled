@@ -20,7 +20,11 @@ export class PropertiesDef {
 }
 
 export class ComponentPropertiesHelper {
-    constructor(props: any) {
+    constructor(props?: any) {
+        this.props = props
+    }
+
+    setProperties(props: any) {
         this.props = props
     }
 

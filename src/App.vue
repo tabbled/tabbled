@@ -19,9 +19,7 @@
             <router-view :screenSize="screenSize" v-slot="{Component}" :style="{ width: viewerWidth, 'max-width': viewerWidth}">
                 <component ref="rView" :is="Component" />
             </router-view>
-            <RightSidebar v-model:visible="rightSidebarVisible"
-                          v-model:pinned="rightSidebarPinned"
-                          :width="rightSidebarWidth"
+            <RightSidebar :width="rightSidebarWidth"
                           ref="rightSidebar"/>
         </div>
 
@@ -46,9 +44,9 @@ import {useSettings} from "./services/settings.service";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "./services/socketio.service";
 import RightSidebar from "./components/RightSidebar.vue";
-import {useRightSidebar} from "./services/right-sidebar.service";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import { useWindowSize } from '@vueuse/core'
+import {usePage} from "./store/pageStore";
 
 const DialogView = () => import("./components/DialogView.vue")
 const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
@@ -86,8 +84,7 @@ let permissions = {
 
 
 let rightSidebar = ref(null)
-let rightSidebarService = useRightSidebar()
-rightSidebarService.setPanelElement(rightSidebar)
+let rightSidebarService = usePage()
 let rightSidebarVisible = ref(false)
 let rightSidebarPinned = ref(false)
 let rightSidebarWidth = ref(300)
@@ -130,7 +127,7 @@ onMounted(async () => {
 
 watch(() => route.path,
     async () => {
-        rightSidebarService.close()
+        rightSidebarService.closeSetting()
     })
 
 onUnmounted(() => {
@@ -227,11 +224,22 @@ function canPageAccess(page) {
     if (!permissions.roles)
         return false
 
-    switch (page.access) {
+    let pagePermissions: { access: string; accessRoles: string[] }
+
+    if (page.permissions) {
+        pagePermissions = page.permissions
+    } else {
+        pagePermissions = {
+            access: page.access,
+            accessRoles: page.accessRoles
+        }
+    }
+
+    switch (pagePermissions.access) {
         case 'all': return true;
         case 'nobody': return false;
         case 'roles':
-            return page.accessRoles.some(r=> permissions.roles.includes(r))
+            return pagePermissions.accessRoles.some(r=> permissions.roles.includes(r))
         default: return false
     }
 }
@@ -258,7 +266,8 @@ function addRoute(path: string, page: PageConfigInterface) {
             pageConfig: page,
             screenSize: screenSize.value,
             openDialog: openDialog,
-            properties: page
+            //for page v2
+            alias: page.alias
         },
         meta: {
             isSingle: false,

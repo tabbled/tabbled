@@ -1,5 +1,5 @@
 <template>
-    <div :class="{'settings-panel': true,  'unpinned': !isPinned, 'pinned': isPinned, 'sidebar-hidden': !visible}">
+    <div :class="{'settings-panel': true,  'unpinned': !isPinned, 'pinned': isPinned, 'sidebar-hidden': !page.propertiesPanelVisible}">
         <div class="sidebar-header" >
             <span>{{title}}</span>
             <div>
@@ -16,10 +16,7 @@
         </div>
 
 
-        <component v-if="activeWidgetType === WidgetType.Custom" ref="widgetView" :is="activeWidget" />
-        <SettingsPanel v-if="activeWidgetType === WidgetType.Settings"
-                       :helper="componentHelper"
-        />
+        <SettingsPanel/>
     </div>
 </template>
 
@@ -32,26 +29,19 @@ import PinIcon from "./icons/pin-icon.vue";
 import CloseIcon from "./icons/close-icon.vue";
 import SettingsPanel from "./SettingsPanel.vue"
 import {ComponentPropertiesHelper} from "../model/component";
+import {usePage} from "../store/pageStore";
 
-let activeWidget = ref(null)
 let isPinned = ref(true)
-let componentHelper: ComponentPropertiesHelper
 
 
-enum WidgetType {
-    Custom = 1,
-    Settings
-}
-
-let activeWidgetType = ref<WidgetType>(null)
 let title = ref('Settings')
 
+let page = usePage()
 
-const emit = defineEmits(['close', 'activeWidgetChange', 'update:visible', 'update:pinned'])
+
+const emit = defineEmits([])
 
 const props = defineProps<{
-    visible: boolean,
-    pinned: boolean,
     width: number
 }>()
 
@@ -62,38 +52,16 @@ const minWidth: ComputedRef<string> = computed((): string =>  {
 onMounted(async () => {
     let state = localStorage.getItem(`right-sidebar-pinned`)
     isPinned.value = state === 'true'
-    emit('update:pinned', isPinned.value)
 })
-
-let setActiveWidget = (el) => {
-    activeWidget.value = el
-    activeWidgetType.value = WidgetType.Custom
-    emit('activeWidgetChange')
-}
-
-let openSettingsOf = (helper: ComponentPropertiesHelper) => {
-    console.log('openSettingsOf', helper.getAliases())
-    activeWidgetType.value = WidgetType.Settings
-    // settings.value = params
-     title.value = 'Setting of ---'
-    componentHelper = helper
-
-    emit('update:visible', true)
-
-}
 
 let togglePin = () => {
     isPinned.value = !isPinned.value
-    emit('update:pinned', isPinned.value)
     localStorage.setItem('right-sidebar-pinned', String(isPinned.value))
 }
 
 let close = () => {
-    emit('update:visible', false)
+    page.closeSetting()
 }
-
-
-defineExpose({setActiveWidget, openSettingsOf, close})
 
 </script>
 
