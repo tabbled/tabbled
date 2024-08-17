@@ -52,9 +52,9 @@
         >
             <el-option
                 v-for="item in fieldConfig.values"
-                :key="item.key"
-                :label="item.title"
-                :value="item.key"
+                :key="item['key']"
+                :label="item['title']"
+                :value="item['key']"
             />
         </el-select>
 
