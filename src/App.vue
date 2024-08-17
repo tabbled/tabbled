@@ -20,6 +20,7 @@
                 <component ref="rView" :is="Component" />
             </router-view>
             <RightSidebar :width="rightSidebarWidth"
+                          v-if="page.propertiesPanelVisible"
                           ref="rightSidebar"/>
         </div>
 
@@ -57,6 +58,7 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const favicon = useFavicon()
+const page = usePage()
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -90,6 +92,7 @@ let rightSidebarPinned = ref(false)
 let rightSidebarWidth = ref(300)
 
 const { t, locale } = useI18n();
+
 
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 

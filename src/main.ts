@@ -46,7 +46,8 @@ const i18n = createI18n({
     globalInjection: true,
     mode: 'composition',
     legacy: false,
-    globals: true
+    globals: true,
+    warnHtmlMessage: false
 })
 
 const app = createApp({

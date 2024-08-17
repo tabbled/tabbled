@@ -15,8 +15,10 @@
             </div>
         </div>
 
+        <div style=" overflow:auto;">
+            <SettingsPanel />
+        </div>
 
-        <SettingsPanel/>
     </div>
 </template>
 
@@ -28,7 +30,6 @@ import UnpinIcon from "./icons/unpin-icon.vue";
 import PinIcon from "./icons/pin-icon.vue";
 import CloseIcon from "./icons/close-icon.vue";
 import SettingsPanel from "./SettingsPanel.vue"
-import {ComponentPropertiesHelper} from "../model/component";
 import {usePage} from "../store/pageStore";
 
 let isPinned = ref(true)

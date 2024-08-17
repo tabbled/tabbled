@@ -126,6 +126,7 @@ import { useSocketClient } from "../../services/socketio.service";
 import MenuEdit from "./MenuEdit.vue";
 import ExportDialog from "./ExportDialog.vue";
 import ImportDialog from "./ImportDialog.vue";
+import {usePage} from "../../store/pageStore";
 
 const { t } = useI18n();
 const server = useSocketClient()
@@ -144,6 +145,7 @@ let menuEntity = ref([])
 
 let tabsEl = ref(null)
 const { height } = useElementSize(tabsEl)
+const page = usePage()
 
 const props = defineProps<{
     screenSize: ScreenSize

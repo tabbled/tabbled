@@ -255,6 +255,9 @@ function openInNewWindow(to: string) {
     margin: 0;
     padding: 16px;
     border-bottom: 1px solid var(--el-border-color);
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
 }
 
 .el-sub-menu__title {
@@ -270,13 +273,6 @@ function openInNewWindow(to: string) {
 .el-menu-item {
     height: 40px !important;
     line-height: 40px !important;
-}
-
-.menu-header {
-    justify-content: space-between;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
 }
 
 .open-new {

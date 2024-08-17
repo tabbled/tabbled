@@ -1,24 +1,70 @@
 <template>
     <el-form v-if="pageStore.propertiesHelper" class="settings-panel-form" label-position="top" :model="pageStore.propertiesHelper.props" size="small" >
-        <div class="form-item-group">
-            <div class="form-item-group-title">
-                General
-            </div>
-            <el-form-item  v-for="(prop)  in pageStore.propertiesHelper.getAliases()"
-                           class="settings-panel-form-item"
-                           :label="pageStore.propertiesHelper.propertiesDef()[prop].title">
-                <el-input size="small" :model-value="pageStore.propertiesHelper.props[prop]" @input="e => onChange(prop, e)"/>
 
-    <!--            <div>{{prop}} - {{ helper.props }}</div>-->
-            </el-form-item>
-        </div>
+            <el-collapse v-model="activeGroups" style="border-top: unset">
+                <el-collapse-item v-for="group in groupedProps" :title="group.title" :name="group.key">
+                    <template #title>
+                        <div class="group-title">{{t(group.title)}}</div>
+                    </template>
+
+                    <el-form-item  v-for="(prop, idx)  in group.props"
+                                   class="settings-panel-form-item"
+                                   :tabindex="idx"
+                                   :show-message="false"
+                                   >
+                        <template #label>
+                            <PropertyTitle :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
+                        </template>
+
+
+                        <el-input v-if="prop.editor === 'input' && prop.format === 'string'"
+                                  clearable
+                                  size="small"
+                                  :model-value="getValue(prop.path)"
+
+                                  @input="e => onChange(prop.path, e)"/>
+
+                        <el-input-number v-if="prop.editor === 'input' && prop.format === 'number'"
+                                         clearable
+                                         size="small"
+                                         :controls="false"
+                                         :model-value="getValue(prop.path)"
+                                         @input="e => onChange(prop.path, e)"/>
+
+                        <Select v-if="prop.editor === 'select'"
+                                :items="prop.items"
+                                :model-value="getValue(prop.path)"
+                                @change="e => onChange(prop.path, e)"
+
+                        />
+
+                    </el-form-item>
+
+                </el-collapse-item>
+            </el-collapse>
+
+
+
+
     </el-form>
 </template>
 
 <script setup lang="ts">
 
-import { onMounted } from "vue";
+import {ref, onMounted, onBeforeMount} from "vue";
 import {usePage} from "../store/pageStore";
+import Select from "./controls/Select.vue";
+import _ from "lodash"
+import {PropertyDef} from "../model/component";
+import PropertyTitle from "./controls/PropertyTitle.vue";
+import {useI18n} from "vue-i18n"
+const {t, setLocaleMessage, availableLocales} = useI18n({
+   useScope: "local"
+})
+
+
+
+let activeGroups = ref<string[]>([])
 
 const emit = defineEmits<{
     (e: 'update:property', prop: string, value: any): string
@@ -26,17 +72,18 @@ const emit = defineEmits<{
 
 let pageStore = usePage()
 
-// const props = defineProps<{
-//     helper: ComponentPropertiesHelper
-// }>()
+class GroupedProperties {
+    key: string
+    title: string
+    props: PropertyDef[]
+}
+let groupedProps = ref<GroupedProperties[]>([])
+
 
 pageStore.$onAction(
     ({
-         name, // name of the action
-         store, // store instance, same as `someStore`
-         args, // array of parameters passed to the action
-         after, // hook after the action returns or resolves
-         onError, // hook if the action throws or rejects
+         name,
+         after
      }) => {
 
 
@@ -48,15 +95,40 @@ pageStore.$onAction(
         })
     })
 
-let init = () => {
-    console.log('init', pageStore.propertiesHelper)
+const init = async () => {
+    availableLocales.forEach(locale => {
+        setLocaleMessage(locale as string, pageStore.propertiesHelper.locales[locale as string])
+    })
+
+    populateProps()
+    activeGroups.value = pageStore.propertiesHelper.groups.map(g => g.key)
 }
 
-let onChange = (prop, value) => {
-    pageStore.setProperty(prop, value)
+const populateProps = () => {
+    groupedProps.value = pageStore.propertiesHelper.groups.map(g => {
+        return {
+            key: g.key,
+            title: g.title,
+            props: pageStore.propertiesHelper.propertiesDef().filter(p => p.group === g.key && (_.has(p, 'visible') ? p.visible() : true))
+        }
+    })
 }
+
+let onChange = (path: string, value: any) => {
+    pageStore.setProperty(path, value)
+    populateProps()
+}
+
+const getValue = (path: string) => {
+    return _.has(pageStore.propertiesHelper.props, path) ? _.get(pageStore.propertiesHelper.props, path) : null
+}
+
 
 onMounted(() => init())
+
+onBeforeMount(() => {
+
+})
 
 
 </script>
@@ -64,12 +136,28 @@ onMounted(() => init())
 <style lang="scss">
 
 .settings-panel-form {
-    margin-bottom: 8px;
-    margin-top: 8px;
+    margin: 0;
+}
+
+.settings-panel-form-item {
+    margin: 0 16px;
 }
 
 .form-item-group {
     padding: 0 16px;
+}
+
+.el-form-item--small {
+    margin-bottom: 10px !important;
+}
+
+.group-title {
+    margin: 0 16px;
+}
+
+.el-collapse-item__header {
+    height: 32px !important;
+    overflow: hidden;
 }
 
 </style>

@@ -36,6 +36,7 @@ export const usePage = defineStore('page', {
 
 
         openSettings(path, helper) {
+            console.log('openSettings')
             this.propertiesHelper = helper
             this.propertiesPath = path
             this.propertiesHelper.setProperties(_.get(this.properties, this.propertiesPath))
@@ -47,8 +48,8 @@ export const usePage = defineStore('page', {
             this.propertiesHelper = null
         },
 
-        setProperty(prop, value) {
-            _.set(this.properties, `${this.propertiesPath ? this.propertiesPath + "."  : ""}${prop}`, value)
+        setProperty(path: string, value: any) {
+            _.set(this.properties, `${this.propertiesPath ? this.propertiesPath + "."  : ""}${path}`, value)
         }
 
     }

@@ -768,6 +768,7 @@ onBeforeRouteLeave(() => {
 
 .page-view {
     height: inherit;
+    overflow: auto;
 }
 
 .grid-wrap {

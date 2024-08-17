@@ -1,6 +1,7 @@
 import {ComponentInterface} from "../../model/page";
 import {FieldConfigInterface} from "../../model/field";
-import {ComponentPropertiesHelper, PropertiesDef} from "../../model/component";
+import {ComponentPropertiesHelper, PropertyDef, PropertyGroup} from "../../model/component";
+import locales from "./locales"
 
 export enum DatasourceType {
     datasource = "datasource",
@@ -8,49 +9,69 @@ export enum DatasourceType {
 }
 
 export class PropertiesHelper extends ComponentPropertiesHelper {
-    propertiesDef = () : PropertiesDef => {
-        return {
-            title: {
-                title: "Title",
+    groups: PropertyGroup[] = [
+        {
+           key: "data",
+           title: "group.data"
+        },
+        {
+            key: "appearance",
+            title: "group.appearance"
+        }
+    ]
+
+    locales = locales
+
+    propertiesDef = () : PropertyDef[] => {
+        return [
+            {
+                title: "prop.title",
                 editor: "input",
-                group: "general",
+                group: "appearance",
+                format: "string",
+                path: "title",
+                visible: () => true
             },
-            datasourceType: {
-                title: "Type of datasource",
+            {
+                title: "prop.typeOfDatasource",
                 editor: "select",
-                group: "general",
+                path: "datasourceType",
+                group: "data",
+                tooltip: "tooltip.datasourceType",
                 items: async () => [{
                     key: "datasource",
                     title: "Data source"
                 },{
-                    key: "function",
-                    title: "Function"
+                    key: "script",
+                    title: "Script"
                 },{
-                    key: "static",
-                    title: "Static"
+                    key: "value",
+                    title: "Value"
                 }],
             },
-            datasourceAlias: {
-                title: "Data source",
-                visible: () => { return this.props.datasourceType === 'datasource' },
+            {
+                title: "prop.datasource",
+                path: "datasource",
+                visible: () => this.props.datasourceType === 'datasource',
                 editor: "select",
-                group: "general",
-                tooltip: "This is **markdown** hint for this property",
+                group: "data",
+                tooltip: "tooltip.datasource",
                 items: async () => {
+
                     return [{
-                        key: "",
-                        title: ""
+                        key: "ds",
+                        title: "ds"
                     }]
                 }
             },
-            height: {
-                title: "Height",
+            {
+                title: "prop.height",
+                path: "height",
                 editor: "input",
-                group: "general",
-                tooltip: "This is **markdown** hint for this property",
+                format: "number",
+                group: "appearance",
             }
-        }
-
+        ]
     }
 }
 

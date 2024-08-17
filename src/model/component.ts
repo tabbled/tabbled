@@ -8,15 +8,18 @@ export class SelectItem {
 
 export class PropertyDef {
     title: string
+    path: string
     editor: EditorComponent
+    format?: 'string' | 'number'
     visible?: () => boolean
     tooltip?: string
     group: ComponentPropGroups
     items?: () => Promise<SelectItem[]>
 }
 
-export class PropertiesDef {
-    [name: string]: PropertyDef
+export class PropertyGroup {
+    key: string
+    title: string
 }
 
 export class ComponentPropertiesHelper {
@@ -29,18 +32,14 @@ export class ComponentPropertiesHelper {
     }
 
     props: any
-    propertiesDef: () => PropertiesDef
+    propertiesDef: () => PropertyDef[]
+    groups: PropertyGroup[]
 
     getAliases = () : string[] =>  {
         return Object.keys(this.propertiesDef())
     }
 
-    onPropertyChange: (prop: string, value: any) => void
-
-    setPropertyValue = (prop: string, value: any) => {
-        console.log(prop, value)
-        if (this.onPropertyChange) {
-            this.onPropertyChange(prop, value)
-        }
+    locales: {
+        [k in string]: any
     }
 }

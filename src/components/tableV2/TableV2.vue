@@ -7,7 +7,7 @@
             </div>
             <div class="table-actions-ext">
                 <el-input clearable :placeholder="$t('search')" :prefix-icon="SearchIcon" style="height: 24px; width: 150px" size="small" v-model="searchText"></el-input>
-                <el-button round circle text :icon="SettingsIcon" class="table-settings-button" @click="openSettings"/>
+                <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="openSettings"/>
             </div>
 
         </div>
@@ -158,7 +158,6 @@ import SettingsIcon from "../icons/settings-icon.vue";
 import SearchIcon from "../icons/search-icon.vue"
 import {DatasourceType, PropertiesHelper} from "./config"
 import {usePage} from "../../store/pageStore";
-import {computed, ComputedRef} from "vue/dist/vue";
 
 export interface Props {
     id: string

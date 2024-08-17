@@ -3,10 +3,11 @@
         <el-page-header ref="mainHeader" class="list-page-view-header" @back="$router.back()">
             <template #content>
                 <span> {{pageStore.properties.title}} </span>
+                <el-button type="info" text circle :icon="SettingsIcon"/>
             </template>
             <template #extra>
                 <div class="page-actions">
-                    <el-button text circle :icon="SettingsIcon"/>
+
                 </div>
             </template>
         </el-page-header>
