@@ -52,7 +52,7 @@ import {usePage} from "./store/pageStore";
 const DialogView = () => import("./components/DialogView.vue")
 const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
 const PageView = () => import("./pages/PageView.vue")
-const ListPageView = () => import("./pages/ListPageView.vue")
+const ListPageView = () => import("./pages/PageViewV2.vue")
 
 const store = useStore();
 const route = useRoute();

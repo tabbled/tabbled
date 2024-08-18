@@ -1,3 +1,6 @@
+/* This is the old version if component registry, see new on ./store/componentStore
+*  */
+
 import {ref, unref, UnwrapRef} from "vue";
 import {ComponentInterface} from "../model/page";
 
@@ -12,7 +15,6 @@ import {Config as StatusFilterProps} from '../components/configuration/status.fi
 import {Config as TreeFilterProps} from '../components/configuration/tree.filter.config'
 import {Config as FileFieldProps} from '../components/configuration/file-field.config'
 import {Config as RichTextEditorProps} from '../components/configuration/rich-text-editor.config'
-import {Config as TableV2Props} from '../components/tableV2/config'
 
 export interface ComponentTitle {
     name: string,
@@ -59,7 +61,6 @@ export class ComponentService {
         this.registerComponent(new StatusFilterProps)
         this.registerComponent(new TreeFilterProps)
         this.registerComponent(new RichTextEditorProps)
-        this.registerComponent(new TableV2Props)
     }
 }
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="grid-wrapper">
+    <div v-if="elements && elements.length" class="grid-wrapper">
         <div v-for="(element, idx) in elements" class="grid-element-wrapper" :style="{'grid-column': `span ${element.colSpan}`}">
             <component :id="element.id"
                        :is="element.componentName"
@@ -26,7 +26,6 @@ const props = defineProps<{
 }>()
 
 onMounted(() => {
-    console.log(props.elements)
 })
 
 const getElementPath = (idx) => {

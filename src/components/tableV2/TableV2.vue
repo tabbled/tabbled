@@ -156,23 +156,30 @@ import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
 import IconArrowUp from "../icons/sort-arrow-up-icon.vue";
 import SettingsIcon from "../icons/settings-icon.vue";
 import SearchIcon from "../icons/search-icon.vue"
-import {DatasourceType, PropertiesHelper} from "./config"
 import {usePage} from "../../store/pageStore";
 
 export interface Props {
     id: string
-    datasourceType: DatasourceType
+    datasourceType: 'datasource' | 'data' | 'script'
     datasourceAlias?: string
-    title?: string,
+    title?: string
     path: string
     height: number
+    inlineEdit: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     title: "",
-    datasourceType: DatasourceType.datasource,
-    height: 400
+    datasourceType: 'datasource',
+    height: 400,
+    inlineEdit: false
 })
+
+const refresh = () => {
+    console.log('refresh')
+}
+
+defineExpose({ refresh })
 
 
 let tableContainer = ref(null)
@@ -232,8 +239,7 @@ let pageSize = 30
 let isLoading = ref(false)
 let allDataLoaded = ref(false)
 
-let pageSettings = usePage()
-let propertiesHelper = ref<PropertiesHelper>(new PropertiesHelper())
+let pageStore = usePage()
 let headerHeight = '34px'
 
 
@@ -314,8 +320,6 @@ const getData = async (reset = false) => {
         take: pageSize,
         skip: page * pageSize
     }
-
-    console.log(sorting.value)
 
     if (sorting.value && sorting.value.length) {
         opt.sort = {
@@ -424,7 +428,13 @@ const onDragEnter = (e) => {
 }
 
 const openSettings = async () => {
-    pageSettings.openSettings(props.path + '.properties', propertiesHelper.value)
+    try {
+        pageStore.openSettings(props.path + '.properties', 'TableV2')
+    } catch (e) {
+        console.error(e)
+    }
+
+
 
 
     // //let j = new jexl.Jexl()

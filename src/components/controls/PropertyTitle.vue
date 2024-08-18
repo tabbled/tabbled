@@ -9,7 +9,7 @@
         <template #reference>
             <span  :style="{'text-decoration': 'underline dotted'}">{{title}}</span>
         </template>
-        <div v-html="tooltip">
+        <div class="tooltip-content" v-html="tooltip">
 
         </div>
     </el-popover>
@@ -25,6 +25,12 @@ const props = defineProps<{
 </script>
 
 <style lang="scss">
+
+.tooltip-content {
+    font-size: 12px;
+    font-weight: 400;
+}
+
 code {
     background-color: #f1f1f1;
     border-radius: 5px;

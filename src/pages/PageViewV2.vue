@@ -1,9 +1,9 @@
 <template>
-    <div v-if="pageStore.properties" class="list-page-view" >
+    <div v-if="pageStore.loaded && pageStore.properties" class="list-page-view" >
         <el-page-header ref="mainHeader" class="list-page-view-header" @back="$router.back()">
             <template #content>
                 <span> {{pageStore.properties.title}} </span>
-                <el-button type="info" text circle :icon="SettingsIcon"/>
+                <el-button type="info" text circle :icon="SettingsIcon" @click="openSettings"/>
             </template>
             <template #extra>
                 <div class="page-actions">
@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
 import {PageConfigInterfaceV2} from "../model/page";
-import {onMounted, ref, watch} from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import Grid from "../components/Grid.vue";
 import {usePage} from "../store/pageStore";
 import SettingsIcon from "../components/icons/settings-icon.vue";
@@ -45,14 +45,26 @@ watch(() => props.alias,
 
 onMounted(async () => {
     await init()
+    //
+})
+
+onUnmounted(() => {
+    pageStore.loaded = false
+    pageStore.properties = null
 })
 
 const init = async () => {
     console.log("Init list view")
     await pageStore.loadByAlias(props.alias)
+    console.log("loaded", pageStore.$state)
+}
 
-
-    console.log(pageStore.properties)
+const openSettings = async () => {
+    try {
+        pageStore.openSettings('', 'Page')
+    } catch (e) {
+        console.error(e)
+    }
 }
 
 // const onComponentPropertyChange = (componentId: string, prop: string, value: any) => {

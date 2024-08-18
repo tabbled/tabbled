@@ -1,6 +1,4 @@
-
-export type ComponentPropGroups = 'general' | string
-export type EditorComponent = 'select' | 'input' | 'text' | 'code'
+export type EditorComponent = 'select' | 'input' | 'input-number' | 'text' | 'code' | 'checkbox' | 'list'
 export class SelectItem {
     key: string
     title: string
@@ -13,8 +11,9 @@ export class PropertyDef {
     format?: 'string' | 'number'
     visible?: () => boolean
     tooltip?: string
-    group: ComponentPropGroups
+    group: string
     items?: () => Promise<SelectItem[]>
+    default: () => any
 }
 
 export class PropertyGroup {
@@ -42,4 +41,11 @@ export class ComponentPropertiesHelper {
     locales: {
         [k in string]: any
     }
+}
+
+export class Component {
+    title: string
+    name: string
+    icon: string
+    group: string
 }

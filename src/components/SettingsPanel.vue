@@ -13,7 +13,7 @@
                                    :show-message="false"
                                    >
                         <template #label>
-                            <PropertyTitle :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
+                            <PropertyTitle v-if="prop.editor !== 'checkbox'" :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
                         </template>
 
 
@@ -37,6 +37,11 @@
                                 @change="e => onChange(prop.path, e)"
 
                         />
+
+                        <el-checkbox v-else-if="prop.editor === 'checkbox'"
+                                     :label="t(prop.title)"
+                                     :model-value="getValue(prop.path)"
+                                     @change="e => onChange(prop.path, e)"/>
 
                     </el-form-item>
 
@@ -87,7 +92,7 @@ pageStore.$onAction(
      }) => {
 
 
-        after((result) => {
+        after(() => {
             if (name === 'openSettings')
                 init()
             console.log('after', name)
@@ -96,9 +101,12 @@ pageStore.$onAction(
     })
 
 const init = async () => {
-    availableLocales.forEach(locale => {
-        setLocaleMessage(locale as string, pageStore.propertiesHelper.locales[locale as string])
-    })
+    if (pageStore.propertiesHelper.locales) {
+        availableLocales.forEach(locale => {
+            setLocaleMessage(locale as string, pageStore.propertiesHelper.locales[locale as string])
+        })
+    }
+
 
     populateProps()
     activeGroups.value = pageStore.propertiesHelper.groups.map(g => g.key)
@@ -115,6 +123,7 @@ const populateProps = () => {
 }
 
 let onChange = (path: string, value: any) => {
+    console.log('onChange', path)
     pageStore.setProperty(path, value)
     populateProps()
 }
@@ -156,8 +165,13 @@ onBeforeMount(() => {
 }
 
 .el-collapse-item__header {
-    height: 32px !important;
+    height: 38px !important;
     overflow: hidden;
 }
+
+.el-collapse-item__content {
+    padding-bottom: 8px !important;
+}
+
 
 </style>
