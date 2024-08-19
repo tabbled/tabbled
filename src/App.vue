@@ -48,9 +48,9 @@ import RightSidebar from "./components/RightSidebar.vue";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import { useWindowSize } from '@vueuse/core'
 import {usePage} from "./store/pageStore";
+import DialogView from "./components/DialogView.vue"
+import FirstStartDialog from "./pages/configuration/FirstStartDialog.vue"
 
-const DialogView = () => import("./components/DialogView.vue")
-const FirstStartDialog = () => import("./pages/configuration/FirstStartDialog.vue")
 const PageView = () => import("./pages/PageView.vue")
 const ListPageView = () => import("./pages/PageViewV2.vue")
 
@@ -139,6 +139,7 @@ onUnmounted(() => {
 })
 
 function openDialog(options : OpenDialogOptions) {
+    console.log(dialogRef)
     dialogOptions.value = options
     dialogVisible.value = true
 
