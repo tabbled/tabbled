@@ -1,47 +1,47 @@
 <template>
-    <div v-if="pageStore.loaded && pageStore.properties" class="list-page-view" >
-        <el-page-header ref="mainHeader" class="list-page-view-header" @back="$router.back()">
-            <template #content>
-                <span> {{pageStore.properties.title}} </span>
-                <el-button type="info" text circle :icon="SettingsIcon" @click="openSettings"/>
-            </template>
-            <template #extra>
-                <div class="page-actions">
 
-                </div>
-            </template>
-        </el-page-header>
-        <Grid class="page-grid" path="" :elements="pageStore.properties.elements"/>
-
-    </div>
+    <Page v-if="pageStore.loaded && pageStore.properties"
+          :title="pageStore.properties.title"
+          :elements="pageStore.properties.elements"
+          @settings-request="openSettings"
+    />
 
 </template>
 
 <script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
-import {PageConfigInterfaceV2} from "../model/page";
-import {onMounted, onUnmounted, ref, watch} from "vue";
-import Grid from "../components/Grid.vue";
+import {onMounted, onUnmounted, watch, ref} from "vue";
 import {usePage} from "../store/pageStore";
-import SettingsIcon from "../components/icons/settings-icon.vue";
+
+import Page from "../components/page/Page.vue";
+import {DataSetInterface} from "../components/dataset";
 
 
 let router = useRouter();
 let route = useRoute();
 let pageStore = usePage()
 
+let datasets = ref<DataSetInterface[]>([])
+
+let stopWatchDatasets
 
 
 const props = defineProps<{
-    alias: string
+    alias: string,
 }>()
 
-let pageProps = ref<PageConfigInterfaceV2>(null)
 
 watch(() => props.alias,
     async () => {
         await init()
     })
+
+// watch(() => pageStore.properties.datasets,
+//     async () => {
+//         console.log('<<<')
+//     })
+
+
 
 onMounted(async () => {
     await init()
@@ -57,6 +57,9 @@ const init = async () => {
     console.log("Init list view")
     await pageStore.loadByAlias(props.alias)
     console.log("loaded", pageStore.$state)
+    //datasets.value = pageStore.properties.datasets
+    //console.log(pageStore.properties.datasets)
+
 }
 
 const openSettings = async () => {
@@ -85,24 +88,6 @@ const openSettings = async () => {
 
 <style lang="scss">
 
-.page-grid {
-    overflow: auto;
-    height: -webkit-fill-available;
-}
 
-.page-header-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.list-page-view {
-    display: flex;
-    flex-direction: column;
-}
-
-.list-page-view-header {
-    padding: 16px;
-}
 
 </style>

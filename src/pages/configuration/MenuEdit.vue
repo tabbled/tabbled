@@ -59,6 +59,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['update:menuEntity'])
 
 async function insert(parentId) {
+    console.log(parentId)
     let _items =  _.cloneDeep(props.menuEntity)
     let _id = flakeId.generateId().toString()
     let child = {

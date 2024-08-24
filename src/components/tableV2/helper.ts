@@ -30,36 +30,19 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 default: () => ''
             },
             {
-                title: "prop.typeOfDatasource",
-                editor: "select",
-                path: "datasourceType",
-                group: "data",
-                tooltip: "tooltip.datasourceType",
-                items: async () => [{
-                    key: "datasource",
-                    title: "Data source"
-                },{
-                    key: "script",
-                    title: "Script"
-                },{
-                    key: "value",
-                    title: "Value"
-                }],
-                default: () => 'datasource'
-            },
-            {
-                title: "prop.datasource",
-                path: "datasource",
-                visible: () => this.props.datasourceType === 'datasource',
+                title: "prop.dataset",
+                path: "dataset",
+                visible: () => true,
                 editor: "select",
                 group: "data",
-                tooltip: "tooltip.datasource",
+                tooltip: "tooltip.dataset",
                 items: async () => {
-
-                    return [{
-                        key: "ds",
-                        title: "ds"
-                    }]
+                    return this.pageProps.datasets.map((d) => {
+                        return {
+                            key: d.alias,
+                            title: d.alias
+                        }
+                    })
                 },
                 default: () => null
             },

@@ -5,6 +5,8 @@ import {ComponentPropertiesHelper} from "../model/component";
 import _ from "lodash"
 import {useComponents} from "./componentStore";
 import {ElMessage} from "element-plus";
+import {watch} from "vue";
+import {DataSet} from "../components/dataset";
 
 const api = useApiClient()
 let components = null
@@ -16,7 +18,10 @@ interface State {
     loaded: boolean
     propertiesPanelVisible: boolean,
     propertiesHelper: ComponentPropertiesHelper
-    propertiesPath: string
+    propertiesPath: string,
+    datasets: {
+        [key in string]: DataSet
+    }
 }
 
 export const usePage = defineStore('page', {
@@ -28,7 +33,8 @@ export const usePage = defineStore('page', {
             propertiesHelper: null,
             propertiesPath: "",
             isLoading: false,
-            loaded: false
+            loaded: false,
+            datasets: {}
         }
     },
 
@@ -65,6 +71,8 @@ export const usePage = defineStore('page', {
             //console.log(props)
             this.properties = props
 
+            this.updateDataSets()
+
             this.loaded = true
 
         },
@@ -86,8 +94,15 @@ export const usePage = defineStore('page', {
 
             this.propertiesHelper.setProperties(path
                 ? _.get(this.properties, this.propertiesPath)
-                : this.properties)
+                : this.properties,
+                this.properties)
             this.propertiesPanelVisible = true
+
+            watch(() => this.properties.datasets,
+                async () => {
+                    this.updateDataSets()
+                })
+
         },
 
         closeSetting() {
@@ -97,6 +112,22 @@ export const usePage = defineStore('page', {
 
         setProperty(path: string, value: any) {
             _.set(this.properties, `${this.propertiesPath ? this.propertiesPath + "."  : ""}${path}`, value)
+        },
+
+        updateDataSets() {
+            for(const i in this.properties.datasets) {
+                let ds:DataSet
+                if (_.has(this.datasets, this.properties.datasets[i].alias)) {
+                    ds = this.properties.datasets[i]
+                } else {
+                    ds = new DataSet()
+                    this.datasets[this.properties.datasets[i].alias] = ds
+                }
+                ds.props = this.properties.datasets[i]
+            }
+
+            console.log("<<<!")
+            console.log(this.datasets)
         }
 
     }

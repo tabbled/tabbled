@@ -1,20 +1,20 @@
 <template>
-    <div class="table-wrapper" :style="{height: height + 'px'}">
+    <div v-if="dataset" class="table-wrapper">
         <div class="table-title">
             <div class="table-actions">
                 <h4 v-if="title" class="table-title-caption">{{title}}</h4>
-                <el-button type="primary" size="small" @click="openSettings">Add</el-button>
+                <el-button type="primary" size="small">Add</el-button>
             </div>
             <div class="table-actions-ext">
                 <el-input clearable :placeholder="$t('search')" :prefix-icon="SearchIcon" style="height: 24px; width: 150px" size="small" v-model="searchText"></el-input>
-                <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="openSettings"/>
+                <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settingsRequest')"/>
             </div>
 
         </div>
 
 
         <div class="table-header" ref="tableHeader">
-            <el-progress v-if="isLoading" class="load-progressbar" :percentage="100"  :indeterminate="true" :show-text="false"/>
+            <el-progress v-if="dataset && dataset.isLoading" class="load-progressbar" :percentage="100"  :indeterminate="true" :show-text="false"/>
             <table :style="{ width: `${table.getTotalSize()+10}px`, 'max-width': `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
                 <thead>
                 <tr
@@ -71,10 +71,11 @@
         </div>
         <div class="table-body" ref="tableContainer"
              v-infinite-scroll="getData"
-             :infinite-scroll-disabled="isLoading || allDataLoaded"
+             :infinite-scroll-disabled="!props.dataset || props.dataset.isLoading || props.dataset.allDataLoaded"
              :infinite-scroll-distance="60"
              @scroll="onBodyScroll"
         >
+
             <table :style="{ width: `${table.getTotalSize()}px`, 'max-width': `${table.getTotalSize()+10}px`}">
                 <tbody>
                 <tr  v-for="row in table.getRowModel().rows"
@@ -97,10 +98,15 @@
                                       :disabled="!row.getCanSelect()"
                                       @change="row.getToggleSelectedHandler()($event)"
                             />
-                            <FlexRender
-                                :render="cell.column.columnDef.cell"
-                                :props="cell.getContext()"
-                            />
+
+                            <div>
+                                {{cell.getValue()}}
+                            </div>
+
+<!--                            <FlexRender v-if="cell"-->
+<!--                                :render="cell?.column?.columnDef?.cell"-->
+<!--                                :props="cell?.getContext()"-->
+<!--                            />-->
                         </div>
 
                     </td>
@@ -147,23 +153,20 @@ import {
     RowSelectionState,
     useVueTable
 } from '@tanstack/vue-table'
-import {onMounted, ref, watch} from 'vue'
+import {onMounted, onUnmounted, ref, watch, PropType} from 'vue'
 import Checkbox from './Checkbox.vue'
-import {useDataSourceService} from "../../services/datasource.service";
-import {DataSourceInterface, GetDataManyOptions} from "../../model/datasource";
 import Table from "../Table.vue";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
 import IconArrowUp from "../icons/sort-arrow-up-icon.vue";
 import SettingsIcon from "../icons/settings-icon.vue";
 import SearchIcon from "../icons/search-icon.vue"
-import {usePage} from "../../store/pageStore";
+import {DataSetInterface} from "../dataset";
+import {ElMessage} from "element-plus";
 
 export interface Props {
     id: string
-    datasourceType: 'datasource' | 'data' | 'script'
-    datasourceAlias?: string
+    dataset: DataSetInterface
     title?: string
-    path: string
     height: number
     inlineEdit: boolean
 }
@@ -176,10 +179,17 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const refresh = () => {
-    console.log('refresh')
+    if (props.dataset) {
+        props.dataset.loadNext(true)
+    }
 }
 
 defineExpose({ refresh })
+
+const emit = defineEmits<{
+    (e: 'settingsRequest'): void,
+    (e: 'update:property', prop: string, value: any): string
+}>()
 
 
 let tableContainer = ref(null)
@@ -189,10 +199,6 @@ const columnHelper = createColumnHelper()
 let selectedCellId = ref(null)
 let searchText = ref("")
 
-let dsService = useDataSourceService()
-let dataSource:DataSourceInterface = null
-
-let data = ref([])
 const columns =[
     columnHelper.accessor('type', {
         header: "Тип",
@@ -211,7 +217,7 @@ const columns =[
         size: 150,
         minSize: 20,
         enableResizing: true,
-    }),//<div><strong>{row.original.firstName}</strong> {row.original.lastName}</div>
+    }),
     columnHelper.accessor('name', {
         header: "Название",
         cell: info => info.getValue(),
@@ -233,21 +239,16 @@ let dragColumnId = ref(null)
 let beforeDragColumnWidths = []
 const rowSelection = ref<RowSelectionState>({})
 const sorting = ref()
-let totalDataCount = 0
 let page = 1
 let pageSize = 30
-let isLoading = ref(false)
-let allDataLoaded = ref(false)
 
-let pageStore = usePage()
+
 let headerHeight = '34px'
+let items = []
 
-
-
-
-const table = useVueTable({
+let table = useVueTable({
     get data() {
-        return data.value
+        return props.dataset ? props.dataset.items : items
     },
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
@@ -271,10 +272,22 @@ const table = useVueTable({
         columnOrder.value = (order as string[])
     },
     onSortingChange: (updaterOrValue) => {
+        console.log('onSortingChange', props.dataset)
+        if (!props.dataset)
+            return
+
         sorting.value =
             typeof updaterOrValue === 'function'
                 ? updaterOrValue(sorting.value)
                 : updaterOrValue
+
+        console.log(sorting.value)
+
+        let sort = []
+        sorting.value.forEach(i => {
+            sort.push(`${i.id}:${i.desc ? 'desc' : 'asc'}`)
+        })
+        props.dataset.sort = sort
         getData(true)
     },
     enableRowSelection: true,
@@ -300,71 +313,69 @@ watch(() => props,
         console.log('TableV2 props changed', props)
     })
 
-const emit = defineEmits<{
-    (e: 'update:property', prop: string, value: any): string
-}>()
+watch(() => props.dataset,
+    async () => {
+        await init()
+        console.log('TableV2 props.dataset', props.dataset)
+        //await props.dataset.loadNext(true)
+        //console.log(props.dataset.items)
+
+    })
 
 const getData = async (reset = false) => {
-    if (isLoading.value || !dataSource)
+    console.log('TableV2.getData', props.dataset)
+    if (!props.dataset)
         return
 
-    isLoading.value = true
-    if (reset) {
-        page = 0
-        totalDataCount = 0
-        data.value = []
-    }
-
-
-    let opt:GetDataManyOptions = {
-        take: pageSize,
-        skip: page * pageSize
-    }
-
-    if (sorting.value && sorting.value.length) {
-        opt.sort = {
-            field: sorting.value[0].id,
-            ask: !sorting.value[0].desc
-        }
-    }
-
-
-//    console.log(reset, page, totalDataCount, opt)
-
     try {
-        let res = await dataSource.getMany(opt)
-        let i = data.value.length
-        totalDataCount = res.count
-
-
-
-        if (reset) {
-            data.value = res.data
-        } else {
-            data.value.push(...res.data)
-            res.data.forEach(item => {
-                let r = createRow(table, item.id, item, i++, 0)
-                table.getRowModel().rows.push(r)
-                table.getRowModel().flatRows.push(r)
-                table.getRowModel().rowsById[item.id] = r
-            })
-        }
-
-        allDataLoaded.value = data.value.length >= res.count
-        page++
+        await props.dataset.loadNext(reset)
     } catch (e) {
-        console.error(e)
-    } finally {
-        isLoading.value = false
+        ElMessage.error(`Error while loading data in table: ${e.toString()}`)
     }
+
 }
 
 const init = async () => {
-    dataSource = await dsService.getByAlias('products')
-
     console.log('tablev2 init', props)
 
-   await getData(true)
+    if (props.dataset) {
+        unsubscribeDatasetEvents()
+        subscribeDatasetEvents()
+        await getData(true)
+    }
+}
+
+const subscribeDatasetEvents = () => {
+
+    // let reset = onDatasetReset.bind({ dataset: props.dataset})
+    // let insert = onDatasetInsert.bind({ dataset: props.dataset})
+
+    props.dataset.addListener('reset-data', onDatasetReset)
+    props.dataset.addListener('insert', onDatasetInsert)
+}
+
+const unsubscribeDatasetEvents = () => {
+    props.dataset.removeListener('reset', onDatasetReset)
+    props.dataset.removeListener('insert', onDatasetInsert)
+}
+
+const onDatasetReset = () => {
+    console.log('onDatasetReset')
+    table.getRowModel().rows = []
+    table.getRowModel().rowsById = {}
+    table.getRowModel().flatRows = []
+}
+
+const onDatasetInsert = (ops) => {
+    console.log("onDatasetInsert", ops)
+
+    let i = props.dataset.totalCount
+    ops.items.forEach(item => {
+        let r = createRow(table, item.id, item, i++, 0)
+        table.getRowModel().rows.push(r)
+        table.getRowModel().flatRows.push(r)
+        table.getRowModel().rowsById[item.id] = r
+    })
 }
 
 const onCellClick = (cell) => {
@@ -427,70 +438,9 @@ const onDragEnter = (e) => {
     e.preventDefault()
 }
 
-const openSettings = async () => {
-    try {
-        pageStore.openSettings(props.path + '.properties', 'TableV2')
-    } catch (e) {
-        console.error(e)
-    }
-
-
-
-
-    // //let j = new jexl.Jexl()
-    // jexl.addFunction('d.dddd', (param) => {
-    //     return param
-    // })
-    //
-    // let ctx = {
-    //     DATA:{
-    //         test: (p) => {
-    //             return p
-    //         },
-    //         c: 100
-    //     }
-    //
-    // }
-    //
-    //
-    // let dateStart = new Date()
-    // console.log(dateStart.toISOString())
-    // timeSpent.value = dateStart.toISOString() + ' '
-    // let i = 0
-    // while(i < 1) {
-    //     let res = await indirectEval('DATA.test(222)', ctx)
-    //     //console.log(res)
-    //     i++
-    // }
-    //
-    // let dateEnd = new Date()
-    //
-    // timeSpent.value += dateEnd.toISOString()
-    // timeSpent.value += 'spent' + (dateEnd.valueOf() - dateStart.valueOf())
-
-
-}
-
-// async function indirectEval(script: string, ctx: any) {
-//     let keys = Object.keys(ctx)
-//     let f = new Function(...keys, `"use strict"; return (${script});`)
-//
-//     let args = []
-//
-//     keys.forEach(i => {
-//         //console.log(ctx[i])
-//         args.push(ctx[i])
-//         //f.bind() = ctx[i]
-//     })
-//
-//     //return null
-//     //f = f.bind({})
-//
-//    // let f = new Function(null, `console.log(this); return (${script});`)
-//
-//
-//     return f(...args, script)
-// }
+onUnmounted(() => {
+    unsubscribeDatasetEvents()
+})
 
 </script>
 

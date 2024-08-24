@@ -6,7 +6,7 @@ export default {
             interaction: "Interaction"
         },
         prop: {
-            dataSets: "Data sets",
+            datasets: "Data sets",
             alias: "Alias",
             title: "Title"
         },
@@ -21,7 +21,7 @@ export default {
             interaction: "Взаимодействие"
         },
         prop: {
-            dataSets: "Наборы данных",
+            datasets: "Наборы данных",
             alias: "Алиас",
             title: "Заголовок"
         },

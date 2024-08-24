@@ -37,10 +37,10 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 path: "alias",
                 default: () => ''
             },{
-                title: "prop.dataSets",
-                editor: "list",
+                title: "prop.datasets",
+                editor: "dataset-list",
                 group: "data",
-                path: "alias",
+                path: "datasets",
                 default: () => []
             }]
     }

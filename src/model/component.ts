@@ -1,4 +1,15 @@
-export type EditorComponent = 'select' | 'input' | 'input-number' | 'text' | 'code' | 'checkbox' | 'list'
+import {PageConfigInterfaceV2} from "./page";
+
+export type EditorComponent =
+    'select' |
+    'input' |
+    'input-number' |
+    'text' |
+    'code' |
+    'checkbox' |
+    'list' |
+    'dataset-list' |
+    'event-handler-list'
 export class SelectItem {
     key: string
     title: string
@@ -26,11 +37,13 @@ export class ComponentPropertiesHelper {
         this.props = props
     }
 
-    setProperties(props: any) {
+    setProperties(props: any, pageProps: PageConfigInterfaceV2) {
         this.props = props
+        this.pageProps = pageProps
     }
 
     props: any
+    pageProps: PageConfigInterfaceV2
     propertiesDef: () => PropertyDef[]
     groups: PropertyGroup[]
 

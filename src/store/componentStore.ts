@@ -31,10 +31,10 @@ export const useComponents = defineStore('components', {
         },
         async registerOne(name, path, app) {
             const comp = defineAsyncComponent(() =>
-                import(`${path}/${name}.vue`)
+                import(`${path}/${name}.element.vue`)
             )
             app.component(name, comp)
-
+//component: defineAsyncComponent(() => import('component'))
             this.helpers.set(name, new ((await import(`${path}/helper`)).default))
             this.components.push(new ((await import(`${path}/config`)).default))
         }

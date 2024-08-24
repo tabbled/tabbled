@@ -2,6 +2,7 @@ import {EventHandlerConfigInterface, FieldConfigInterface, FieldListOfType} from
 import {columnProperties} from "./column";
 import {CompiledFunc} from "../services/compiler";
 import {AccessType} from "./permissions";
+import {DataSetParamsInterface} from "../components/dataset";
 
 export type  PageActionType = "default" | "primary" | "success" | "warning" | "info" | "danger"
 
@@ -123,6 +124,7 @@ export interface PageConfigInterfaceV2 {
         accessRoles: string[],
     }
     type: 'edit' | 'list' | 'dashboard' | 'select'
+    datasets: DataSetParamsInterface[]
 }
 
 interface PageListItemTypeInterface {

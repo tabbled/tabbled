@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <div style=" overflow:auto;">
+        <div style=" overflow:auto; height: 100%">
             <SettingsPanel />
         </div>
 
@@ -69,11 +69,13 @@ let close = () => {
 <style lang="scss">
 
 .settings-panel {
-    display: block;
     z-index: 100;
     min-width: v-bind(minWidth);
     background: var(--el-fill-color-blank);
     box-shadow: var(--el-box-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-header {

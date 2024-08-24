@@ -56,7 +56,7 @@ let selected = ref<string[]>([])
 const props = defineProps<{
     screenSize: ScreenSize,
     visible: boolean,
-    options: OpenDialogOptions
+    options?: OpenDialogOptions
 }>()
 
 const scriptContext = ref({

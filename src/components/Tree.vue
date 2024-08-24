@@ -1,6 +1,6 @@
 <template>
     <el-card shadow="never" body-style="padding: 0" style="width: 100%">
-    <el-tree :data="_data"
+    <el-tree :data="data"
              :node-key="keyProp"
              :props="treeProps"
              default-expand-all
@@ -54,10 +54,9 @@
 <script setup lang="ts">
 
 import {Icon} from "@iconify/vue";
-import {onMounted, ref, watch} from "vue";
 
 function change() {
-    emit('change', _data.value)
+    emit('change', props.data)
 }
 
 interface Props {
@@ -69,18 +68,6 @@ interface Props {
     insertable?: boolean,
     childrenProp?: string
 }
-
-let _data = ref([])
-
-watch(() => props.data,
-    async () => {
-    _data.value = props.data
-    })
-
-onMounted(async () => {
-    _data.value = props.data
-});
-
 
 const props = withDefaults(defineProps<Props>(), {
     sortable: true,
