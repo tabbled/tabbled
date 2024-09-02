@@ -184,5 +184,6 @@
     "open": "Open",
     "openRevision": "Open from revision",
     "confirmOpenRevision": "Data is changed! Do you confirm opening data from the revision?",
-    "revisions": "Changes history"
+    "revisions": "Changes history",
+    "confirmSaveOnServerDataChanged": "Data is changed on server! Do you confirm save current data?"
 }

@@ -155,6 +155,7 @@ let revisionBtn = ref(null)
 
 let editEntity = ref<EntityInterface>(null)
 let editEntityRevisionId = -1
+let serverRevision = null
 let isSaving = false
 let editDataSource: DataSourceInterface = null
 let isNew = ref(false)
@@ -230,6 +231,19 @@ async function save() {
             .then(async () => {
                 await saveData()
             })
+    } else if (!isNew.value && serverRevision !== editEntityRevisionId) {
+        ElMessageBox.confirm(
+            t('confirmSaveOnServerDataChanged'),
+            t('save'),
+            {
+                confirmButtonText: t('save'),
+                cancelButtonText: t('cancel'),
+                type: 'warning',
+            }
+        )
+            .then(async () => {
+                await saveData()
+            })
     } else {
         await saveData()
     }
@@ -250,6 +264,7 @@ async function save() {
                 id: editEntityRevisionId
             }
             isChanged.value = false
+            serverRevision = editEntityRevisionId
             await setViewed()
 
             ElMessage.success(t('saved'))
@@ -445,11 +460,13 @@ async function init() {
             currentRevision.value = {
                 id: editEntityRevisionId
             }
+            serverRevision = editEntityRevisionId
             setViewed()
         } else {
             editEntity.value = await generateEntityWithDefault(editDataSource.fields)
             isNew.value = true
             editEntityRevisionId = -1
+            serverRevision = null
         }
 
         scriptContext.value.item = editEntity.value
@@ -627,12 +644,14 @@ async function onUpdates(msg: any) {
 
     if (msg.entity.id === editEntity.value.id
         && editEntityRevisionId !== msg.entity.rev) {
+        serverRevision = msg.entity.rev
         ElMessage.warning({
             message: t('entityUpdated'),
             duration: 0,
             showClose: true,
             grouping: true
         })
+
     }
 }
 
