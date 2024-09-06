@@ -185,5 +185,7 @@
     "openRevision": "Open from revision",
     "confirmOpenRevision": "Data is changed! Do you confirm opening data from the revision?",
     "revisions": "Changes history",
-    "confirmSaveOnServerDataChanged": "Data is changed on server! Do you confirm save current data?"
+    "confirmSaveOnServerDataChanged": "Data is changed on server! Do you confirm save current data?",
+    "copiedToClipboard": "Copied to clipboard",
+    "clipboardNotSupported":  "Clipboard is not supported"
 }

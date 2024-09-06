@@ -72,6 +72,21 @@
                 :options="{modal: true, page: fieldConfig && fieldConfig.config.searchDialog, selecting: true}"
                 @selected="selectFromDialog"
     />
+
+    <el-popover
+        :virtual-ref="select"
+        trigger="hover"
+        virtual-triggering
+        placement="top-end"
+        :width="50"
+        :show-after="300"
+        :popper-style="{'max-width': '50px'}"
+    >
+
+        <el-button title="Copy" class="editor-panel-button" size="small" text @click="copyTextToClipboard">
+            <Icon  class="editor-panel-button-icon" icon="material-symbols:content-copy-outline" width="18" />
+        </el-button>
+    </el-popover>
 </template>
 
 <script setup lang="ts">
@@ -81,6 +96,13 @@ import {DataSourceInterface, GetDataManyOptions} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
 import DialogView from "./DialogView.vue";
 import {ScreenSize} from "../model/page";
+import { useClipboard } from '@vueuse/core'
+import {ElMessage} from "element-plus";
+import {useI18n} from "vue-i18n";
+const { t } = useI18n();
+
+const clip = ref('')
+const { text, copy, copied, isSupported } = useClipboard({})
 
 let isLoading = ref(false)
 let data = ref<Array<any>>([])
@@ -275,6 +297,33 @@ const getCacheData = async () => {
 
     data.value = (await dataSource.getMany(opt)).data
     return data.value
+}
+
+const copyTextToClipboard = () => {
+    if (!isSupported) {
+        ElMessage.error('Clipboard is not supported')
+        return
+    }
+
+    if (!value.value)
+        return
+
+    let items = []
+    if (props.fieldConfig.isMultiple) {
+        value.value.forEach(i => {
+            let t = data.value.find(j => j.id === i)
+            if (t) {
+                items.push(t[props.displayProp ? props.displayProp : 'name'])
+            }
+        })
+    } else {
+        let t = data.value.find(j => j.id === value.value)
+        if (t) {
+            items.push(t[props.displayProp ? props.displayProp : 'name'])
+        }
+    }
+    copy(items.join(', '))
+    ElMessage.info(t('copiedToClipboard'))
 }
 
 

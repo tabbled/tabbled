@@ -131,7 +131,7 @@
         </div>
 
 
-        <el-tabs v-model="activeTab" class="demo-tabs">
+        <el-tabs v-model="activeTab" class="demo-tabs" style="; max-height: unset">
             <el-tab-pane :label="$t('fields')" name="fields">
 
                 <el-form-item >

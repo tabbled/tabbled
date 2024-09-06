@@ -18,7 +18,11 @@
         </template>
     </el-page-header>
 
-    <el-tabs ref="tabsEl" tab-position="top" style="height: calc(100% - 150px); padding-left: 16px; padding-right: 16px" v-model="activeTab" @tab-change="tabChange">
+    <el-tabs ref="tabsEl"
+             tab-position="top"
+             style="height: calc(100% - 150px); padding-left: 16px; padding-right: 16px"
+             v-model="activeTab"
+             @tab-change="tabChange">
 
         <el-tab-pane :label="$t('pages')"  name="pages" style="height: inherit">
             <Table :columns="pagesColumns"

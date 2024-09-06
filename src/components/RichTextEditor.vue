@@ -2,23 +2,23 @@
     <div v-if="editor" style="width: 100%; height: fit-content" >
 
         <div class="editor-panel" v-if="!readonly">
-            <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleBold().run()">
+            <el-button title="Bold" class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleBold().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-bold" width="18" />
             </el-button>
-            <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleItalic().run()">
+            <el-button title="Italic" class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleItalic().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-italic" width="18"/>
             </el-button>
-            <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleStrike().run()">
+            <el-button title="Strike" class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleStrike().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:strikethrough-s" width="18"/>
             </el-button>
-            <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleUnderline().run()">
+            <el-button title="Underline" class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleUnderline().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-underlined" width="18"/>
             </el-button>
 
-            <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleBulletList().run()">
+            <el-button title="Bullet list" class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleBulletList().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-list-bulleted" width="18"/>
             </el-button>
-            <el-button class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleOrderedList().run()">
+            <el-button title="Ordered list" class="editor-panel-button" size="small" text @click="editor.chain().focus().toggleOrderedList().run()">
                 <Icon  class="editor-panel-button-icon" icon="material-symbols:format-list-numbered" width="18"/>
             </el-button>
 
@@ -28,7 +28,7 @@
                 trigger="click"
             >
                 <template #reference>
-                    <el-button class="editor-panel-button" size="small" text>
+                    <el-button title="Highlight" class="editor-panel-button" size="small" text>
                         <Icon  class="editor-panel-button-icon" icon="material-symbols:format-ink-highlighter-outline-rounded" width="18"/>
                     </el-button>
                 </template>
@@ -47,7 +47,7 @@
                 trigger="click"
             >
                 <template #reference>
-                    <el-button class="editor-panel-button" size="small" text>
+                    <el-button title="Color" class="editor-panel-button" size="small" text>
                         <Icon  class="editor-panel-button-icon" icon="material-symbols:format-color-text" width="18"/>
                     </el-button>
                 </template>
@@ -64,7 +64,7 @@
                 trigger="click"
             >
                 <template #reference>
-                    <el-button class="editor-panel-button" size="small" text>
+                    <el-button title="Format" class="editor-panel-button" size="small" text>
                         <Icon  class="editor-panel-button-icon" icon="material-symbols:format-h1" width="18"/>
                     </el-button>
                 </template>
