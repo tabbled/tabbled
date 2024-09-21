@@ -146,7 +146,8 @@
         "in": "входит",
         "!in": "не входит",
         "any": "любое",
-        "empty": "пусто"
+        "empty": "пусто",
+        "notEmpty": "не пусто"
     },
     "pageDesigner": {
         "pageSettings": "Настройки",

@@ -147,7 +147,8 @@
         "in": "in",
         "!in": "not in",
         "any": "any value",
-        "empty": "is empty"
+        "empty": "is empty",
+        "notEmpty": "Is not empty"
     },
     "pageDesigner": {
         "pageSettings": "Page settings",

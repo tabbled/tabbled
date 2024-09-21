@@ -1,7 +1,7 @@
 import {ref} from "vue";
 import {DataSourceInterface} from "./datasource";
 
-export declare type StandardQueryOperator = '<' | '<=' | '==' | '!=' | '>' | '>=' | 'exists' | '!exists' | 'between' | '!between' | 'like' | '!like' | 'matches' | '!matches' | 'in' | '!in' | 'has' | '!has' | 'contains' | '!contains' | 'any' | 'empty';
+export declare type StandardQueryOperator = '<' | '<=' | '==' | '!=' | '>' | '>=' | 'exists' | '!exists' | 'between' | '!between' | 'like' | '!like' | 'matches' | '!matches' | 'in' | '!in' | 'has' | '!has' | 'contains' | '!contains' | 'any' | 'empty' | '!empty';
 
 export interface FilterItemInterface {
     key: string,

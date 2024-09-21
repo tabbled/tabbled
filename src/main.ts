@@ -9,6 +9,7 @@ import router from "./router";
 import store from './store'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import epRu from 'element-plus/es/locale/lang/ru'
 import 'element-plus/dist/index.css'
 import './style.css'
 import { Icon } from "@iconify/vue"
@@ -24,6 +25,16 @@ import DateTimeInput from "./components/DateTimeInput.vue"
 import Input from "./components/Input.vue"
 import CheckboxField from "./components/CheckboxField.vue"
 import LinkSelect from "./components/LinkSelect.vue"
+import 'dayjs/locale/ru.js'
+import dayjs from "dayjs";
+
+dayjs.locale('ru')
+import utc from "dayjs/plugin/utc";
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault("Europe/Moscow")
 
 const RichTextEditor = defineAsyncComponent(() =>
     import('./components/RichTextEditor.vue')
@@ -79,7 +90,9 @@ app.use(i18n)
 app.use(routerInst);
 app.use(pinia)
 app.use(store)
-app.use(ElementPlus)
+app.use(ElementPlus, {
+    locale: epRu,
+})
 
 const componentsStore = useComponents()
 componentsStore.registerAll(app)

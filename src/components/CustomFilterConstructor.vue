@@ -59,6 +59,7 @@
                     <div style="display: flex; flex-direction: row; width: 100%"  v-if="item['field'].type === 'date' || item['field'].type === 'datetime' || getField(item['key'])?.type === 'time'">
 
                         <el-date-picker v-model="item['compare']"
+                                        @change="v => setDatetime(item, 'compare', v)"
                                         :type="item['field'].type"
                                         :format="format(item['field'].type)"
                                         style="width: 50%"
@@ -68,6 +69,7 @@
 
                         <el-date-picker v-if="item['op'] === 'between'"
                                         v-model="item['compare_2']"
+                                        @change="v => setDatetime(item, 'compare_2', v)"
                                         :type="item['field'].type"
                                         :format="format(item['field'].type)"
                                         style="width: 50%"
@@ -161,7 +163,9 @@ import {useI18n} from "vue-i18n";
 import {FieldConfigInterface, FieldType} from "../model/field";
 import {DataSourceInterface} from "../model/datasource";
 import {useDataSourceService} from "../services/datasource.service";
+import dayjs from "dayjs";
 const { t } = useI18n();
+
 
 interface Props {
     id?: string
@@ -205,7 +209,9 @@ let operators: Operator[] = [
     { key: 'contains',  title: t("filters.contains"), types: ['string', 'text'] },
     { key: '!contains', title: t("filters.!contains"), types: ['string', 'text'] },
     { key: 'any', title: t("filters.any"), types: ['number', 'string', 'text', 'link', 'list', 'date', 'time', 'datetime', 'bool', 'image', 'table', 'enum'] },
-    { key: 'empty', title: t("filters.empty"), types: ['number', 'string', 'text', 'link', 'list', 'date', 'time', 'datetime', 'bool', 'image', 'table', 'enum']}
+    { key: 'empty', title: t("filters.empty"), types: ['number', 'string', 'text', 'link', 'list', 'date', 'time', 'datetime', 'bool', 'image', 'table', 'enum']},
+    { key: '!empty', title: t("filters.notEmpty"), types: ['number', 'string', 'text', 'link', 'list', 'date', 'time', 'datetime', 'bool', 'image', 'table', 'enum']}
+
 ]
 
 const props = withDefaults(defineProps<Props>(), {
@@ -242,10 +248,17 @@ function apply() {
         }
     })
 
+    console.log(filters)
+
     backupState()
     props.filters.setGroup(props.id, filters)
     emit('apply', filters.length)
 
+}
+
+function setDatetime(item, compare, value) {
+    console.log(item, compare, value)
+    item[compare] = dayjs(value).format()
 }
 
 function clear() {

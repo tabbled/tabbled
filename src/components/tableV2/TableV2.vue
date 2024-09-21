@@ -3,7 +3,7 @@
         <div class="table-title">
             <div class="table-actions">
                 <h4 v-if="title" class="table-title-caption">{{title}}</h4>
-                <el-button type="primary" size="small">Add</el-button>
+                <el-button type="primary" size="small" @click="addColumn">Add</el-button>
             </div>
             <div class="table-actions-ext">
                 <el-input clearable :placeholder="$t('search')" :prefix-icon="SearchIcon" style="height: 24px; width: 150px" size="small" v-model="searchText"></el-input>
@@ -24,6 +24,7 @@
                     <th
                         v-for="header in headerGroup.headers"
                         :key="header.id"
+                        :ref="`col_${header.id}`"
                         :colSpan="header.colSpan"
                         :style="{ width: `${header.getSize()}px` }"
                         :draggable="!header.column.getIsResizing()"
@@ -34,6 +35,7 @@
                         @dragover.prevent
                         @dragenter.prevent
                         @click="onHeaderClick($event, header)"
+                        @contextmenu.prevent="openHeaderMenu($event, header)"
                     >
                         <div class="cell">
 
@@ -62,7 +64,6 @@
                                  @mousedown="(e) => { (header.getResizeHandler())(e) } "
                             />
                         </div>
-
                     </th>
 
                 </tr>
@@ -99,7 +100,7 @@
                                       @change="row.getToggleSelectedHandler()($event)"
                             />
 
-                            <div>
+                            <div style="width: inherit; overflow: hidden; text-overflow: ellipsis;">
                                 {{cell.getValue()}}
                             </div>
 
@@ -140,12 +141,21 @@
                 </tfoot>
             </table>
         </div>
+        <ContextMenu :actions="contextMenuActions"
+                     ref="contextMenu"
+                     :x="contextMenuX"
+                     v-model:visible="showContextMenu"
+                     :y="contextMenuY"/>
     </div>
+
+
+
 </template>
 
-<script setup lang="tsx">
+<script setup lang="ts">
 
 import {
+    ColumnDef,
     createColumnHelper,
     createRow,
     FlexRender,
@@ -153,7 +163,7 @@ import {
     RowSelectionState,
     useVueTable
 } from '@tanstack/vue-table'
-import {onMounted, onUnmounted, ref, watch, PropType} from 'vue'
+import {onMounted, onUnmounted, ref, watch, computed} from 'vue'
 import Checkbox from './Checkbox.vue'
 import Table from "../Table.vue";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
@@ -162,20 +172,32 @@ import SettingsIcon from "../icons/settings-icon.vue";
 import SearchIcon from "../icons/search-icon.vue"
 import {DataSetInterface} from "../dataset";
 import {ElMessage} from "element-plus";
+import ContextMenu from "./ContextMenu.vue";
+import {ContextMenuAction} from "./context-menu-action";
+import {useI18n} from "vue-i18n"
+import {Column} from "../column"
+import Locales from "./locales"
 
-export interface Props {
+const {t, setLocaleMessage, availableLocales} = useI18n({
+    useScope: "local"
+})
+
+
+interface Props {
     id: string
     dataset: DataSetInterface
     title?: string
     height: number
     inlineEdit: boolean
+    columns: Column[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
     title: "",
     datasourceType: 'datasource',
     height: 400,
-    inlineEdit: false
+    inlineEdit: false,
+    columns: () => []
 })
 
 const refresh = () => {
@@ -198,43 +220,14 @@ let tableFooter = ref(null)
 const columnHelper = createColumnHelper()
 let selectedCellId = ref(null)
 let searchText = ref("")
+let contextMenu = ref(null)
+let showContextMenu = ref(false)
+let contextMenuX = ref(0)
+let contextMenuY = ref(0)
 
-const columns =[
-    columnHelper.accessor('type', {
-        header: "Тип",
-        cell: info => info.getValue(),
-        footer: props => props.column.id,
-        size: 80,
-        minSize: 20,
-    }),
-    columnHelper.accessor('group', {
-        id: 'group',
-        header: "Группа",
-        cell: ({ cell, row }) => {
-            return <strong>{row.original['group']}</strong>
-        },
-        footer: props => props.column.id,
-        size: 150,
-        minSize: 20,
-        enableResizing: true,
-    }),
-    columnHelper.accessor('name', {
-        header: "Название",
-        cell: info => info.getValue(),
-        footer: props => props.column.id,
-        size: 120,
-        minSize: 20,
-    }),
-    columnHelper.accessor('price', {
-        header: "Цена",
-        cell: info => info.getValue(),
-        footer: props => props.column.id,
-        size: 120,
-        minSize: 20,
-    })
-]
-
-let columnOrder = ref(['type', 'group', 'name', 'price'])
+const contextMenuActions = ref<ContextMenuAction[]>([]);
+let columns = ref<ColumnDef<any, any>[]>([])
+let columnOrder = ref([])
 let dragColumnId = ref(null)
 let beforeDragColumnWidths = []
 const rowSelection = ref<RowSelectionState>({})
@@ -246,11 +239,15 @@ let pageSize = 30
 let headerHeight = '34px'
 let items = []
 
+
+
 let table = useVueTable({
     get data() {
         return props.dataset ? props.dataset.items : items
     },
-    columns: columns,
+    get columns() {
+        return columns.value
+    } ,
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode: 'onChange',
     //manualSorting: true,
@@ -308,10 +305,11 @@ onMounted(async () => {
     await init()
 })
 
-watch(() => props,
+watch(() => props.columns,
     async () => {
         console.log('TableV2 props changed', props)
-    })
+        initColumns()
+    }, {deep: true})
 
 watch(() => props.dataset,
     async () => {
@@ -338,11 +336,36 @@ const getData = async (reset = false) => {
 const init = async () => {
     console.log('tablev2 init', props)
 
+    availableLocales.forEach(locale => {
+        setLocaleMessage(locale as string, Locales[locale as string])
+    })
+
+    initColumns()
+
     if (props.dataset) {
         unsubscribeDatasetEvents()
         subscribeDatasetEvents()
         await getData(true)
     }
+}
+
+const initColumns = () => {
+    let cols = []
+    for(let i in props.columns) {
+        let col = props.columns[i]
+        cols.push(columnHelper.accessor(col.field, {
+            header: col.title,
+            cell: info => info.getValue(),
+            footer: props => "",
+            size: col.minWidth && col.minWidth > 0 ? col.width : 150,
+            minSize: col.minWidth && col.minWidth > 0 ? col.minWidth : 150,
+            enableSorting: col.sortable
+        }))
+    }
+
+    columns.value = cols
+
+    console.log(columns.value)
 }
 
 const subscribeDatasetEvents = () => {
@@ -430,12 +453,61 @@ const onHeaderClick = (e, header) => {
     }
 }
 
+const openHeaderMenu = (e, header) => {
+    console.log(e)
+    e.preventDefault();
+
+    contextMenuActions.value = []
+
+    contextMenuActions.value.push({
+        title: t("column.insertRight"),
+        action: "insertRight"
+    },{
+        title: t("column.insertLeft"),
+        action: "insertLeft"
+    },{
+        action: "divider"
+    },{
+        title: t("column.settings"),
+        action: "settings"
+    },{
+        action: "divider"
+    },{
+        title: t("column.delete"),
+        action: "delete"
+    })
+
+    contextMenuX.value = e.clientX;
+    contextMenuY.value = e.clientY;
+    showContextMenu.value = true;
+
+}
+
 const onDragEnd = () => {
     dragColumnId.value = null
 }
 
 const onDragEnter = (e) => {
     e.preventDefault()
+}
+
+const addColumn = () => {
+
+    columns.value = [columnHelper.accessor('group', {
+        id: 'group',
+        header: "Группа",
+        cell: ({ cell, row }) => {
+            return ""
+        },
+        footer: props => props.column.id,
+        size: 150,
+        minSize: 20,
+        enableResizing: true,
+    })]
+
+
+
+    console.log('added column', table.getAllColumns())
 }
 
 onUnmounted(() => {
@@ -566,7 +638,7 @@ thead th .cell:hover {
 
 
 .cell {
-    display: block;
+    display: flex;
     flex-direction: row;
     height: 32px;
     width: inherit;
@@ -663,6 +735,24 @@ thead th .cell:hover {
         height: 2px !important;
         border-radius: 0 !important;
     }
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    z-index: 49;
+}
+
+.overlay::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
 

@@ -13,29 +13,29 @@
                                    :show-message="false"
                                    >
                         <template #label>
-                            <PropertyTitle v-if="!['checkbox', 'dataset-list', 'event-handler-list'].includes(prop.editor)" :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
+                            <PropertyTitle v-if="!['checkbox', 'dataset-list', 'column-list', 'event-handler-list'].includes(prop.editor)" :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
                         </template>
 
 
-                        <el-input v-if="prop.editor === 'input' && prop.format === 'string'"
+                        <el-input v-if="prop.editor === 'input'"
                                   clearable
                                   size="small"
                                   :model-value="getValue(prop.path)"
 
                                   @input="e => onChange(prop.path, e)"/>
 
-                        <el-input-number v-if="prop.editor === 'input' && prop.format === 'number'"
+                        <el-input-number v-else-if="prop.editor === 'input-number'"
                                          clearable
                                          size="small"
                                          :controls="false"
                                          :model-value="getValue(prop.path)"
                                          @input="e => onChange(prop.path, e)"/>
 
-                        <Select v-if="prop.editor === 'select'"
+                        <Select :id="pageStore.propertiesPath + '.' + prop.path" v-else-if="prop.editor === 'select'"
                                 :items="prop.items"
                                 :model-value="getValue(prop.path)"
                                 @change="e => onChange(prop.path, e)"
-
+                                :path="pageStore.propertiesPath + '.' + prop.path"
                         />
 
                         <el-checkbox v-else-if="prop.editor === 'checkbox'"
@@ -49,6 +49,15 @@
                                      :items="getValue(prop.path)"
                         />
 
+                        <ColumnList v-else-if="prop.editor === 'column-list'"
+                                    :label="t(prop.title)"
+                                    @change="e => onChange(prop.path, e)"
+                                    :items="getValue(prop.path)"
+                                    :path="pageStore.propertiesPath + '.' + prop.path"
+                                    :parent-path="pageStore.propertiesPath"
+                                    />
+
+                        <div v-else>No editor for {{prop.editor}}</div>
                     </el-form-item>
 
                 </el-collapse-item>
@@ -68,8 +77,9 @@ import Select from "./controls/Select.vue";
 import _ from "lodash"
 import {PropertyDef} from "../model/component";
 import PropertyTitle from "./controls/PropertyTitle.vue";
-import {useI18n} from "vue-i18n"
 import DataSetList from "./controls/DataSetList.vue";
+import {useI18n} from "vue-i18n"
+import ColumnList from "./controls/ColumnList.vue";
 const {t, setLocaleMessage, availableLocales} = useI18n({
    useScope: "local"
 })

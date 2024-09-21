@@ -52,7 +52,7 @@ import DialogView from "./components/DialogView.vue"
 import FirstStartDialog from "./pages/configuration/FirstStartDialog.vue"
 
 const PageView = () => import("./pages/PageView.vue")
-const ListPageView = () => import("./pages/PageViewV2.vue")
+const PageViewV2 = () => import("./pages/PageViewV2.vue")
 
 const store = useStore();
 const route = useRoute();
@@ -204,17 +204,14 @@ socketClient.socket.on("login_needed", () => {
     logout();
 })
 
-// store.subscribe(async (payload) => {
-//     console.log(payload)
-//     if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
-//         await loadConfig()
-//     }
-//
-//     if (payload.type === 'auth/loggedOut') {
-//         configLoadState.value = ConfigLoadState.NotLoaded
-//         await dsService.clear(DataSourceType.config)
-//         await dsService.clear(DataSourceType.data)
-//     }
+store.subscribe(async (payload) => {
+    if (payload.type === 'auth/userLoaded' && configLoadState.value == ConfigLoadState.NotLoaded) {
+        await loadConfig()
+    }
+    if (payload.type === 'auth/loggedOut') {
+        configLoadState.value = ConfigLoadState.NotLoaded
+    }
+})
 
 function canPageAccess(page) {
     if (!permissions) {
@@ -260,7 +257,7 @@ function addRoute(path: string, page: PageConfigInterface) {
     if (!canPageAccess(page))
         return
 
-    let component = page.type === 'list' ? ListPageView : PageView
+    let component = page.type === 'list' ? PageViewV2 : PageView
 
     router.addRoute({
         path: path,

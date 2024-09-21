@@ -20,6 +20,7 @@ export const useComponents = defineStore('components', {
         async registerAll(app) {
             try {
                 this.helpers.set('Page', new ((await import("../components/page/helper")).default))
+                this.helpers.set('Column', new ((await import("../components/column/helper")).default))
 
                 await this.registerOne('TableV2', "./../components/tableV2", app)
 
@@ -34,7 +35,6 @@ export const useComponents = defineStore('components', {
                 import(`${path}/${name}.element.vue`)
             )
             app.component(name, comp)
-//component: defineAsyncComponent(() => import('component'))
             this.helpers.set(name, new ((await import(`${path}/helper`)).default))
             this.components.push(new ((await import(`${path}/config`)).default))
         }

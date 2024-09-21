@@ -1,5 +1,6 @@
 import {useApiClient} from "../../services/api.service";
 import {EventEmitter} from "events";
+import {FieldInterface} from "../../model/field";
 
 export declare type StandardQueryOperator =
     | '<'
@@ -42,7 +43,8 @@ export class GetDataManyRequestDto {
 
 export interface DataSetParamsInterface {
     datasource: string
-    alias: string
+    alias: string,
+    fields?: string[]
 }
 
 export class ResponseDto {
@@ -66,6 +68,8 @@ export interface DataSetInterface extends EventEmitter {
     isLoading: boolean
 
     loadNext: (reset: boolean) => Promise<void>
+
+    getFields: () => Promise<FieldInterface[]>
 }
 
 export class DataSet extends EventEmitter implements DataSetInterface  {
@@ -101,6 +105,18 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     get totalCount() : number { return this._totalCount }
     get page() : number { return this._page }
     get allDataLoaded() : boolean { return this._items.length === this._totalCount }
+
+    async getFields() : Promise<FieldInterface[]> {
+
+        try {
+            let res = (await this.api.get(`/v2/datasource/${this.props.datasource}/fields`)).data
+
+            return res.items
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
 
     async loadNext(reset = false) {
         if (this._loading || (!reset && this.allDataLoaded))

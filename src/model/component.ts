@@ -9,7 +9,8 @@ export type EditorComponent =
     'checkbox' |
     'list' |
     'dataset-list' |
-    'event-handler-list'
+    'event-handler-list' |
+    'column-list'
 export class SelectItem {
     key: string
     title: string
@@ -23,7 +24,7 @@ export class PropertyDef {
     visible?: () => boolean
     tooltip?: string
     group: string
-    items?: () => Promise<SelectItem[]>
+    items?: (context?) => Promise<SelectItem[]>
     default: () => any
 }
 

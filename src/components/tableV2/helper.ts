@@ -47,10 +47,17 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 default: () => null
             },
             {
+                title: "prop.columns",
+                path: "columns",
+                visible: () => true,
+                editor: "column-list",
+                group: "data",
+                default: () => []
+            },
+            {
                 title: "prop.height",
                 path: "height",
-                editor: "input",
-                format: "number",
+                editor: "input-number",
                 group: "appearance",
                 default: () => 400
             },

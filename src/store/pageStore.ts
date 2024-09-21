@@ -22,6 +22,7 @@ interface State {
     datasets: {
         [key in string]: DataSet
     }
+    parentPath: string
 }
 
 export const usePage = defineStore('page', {
@@ -34,7 +35,8 @@ export const usePage = defineStore('page', {
             propertiesPath: "",
             isLoading: false,
             loaded: false,
-            datasets: {}
+            datasets: {},
+            parentPath: null
         }
     },
 
@@ -78,7 +80,7 @@ export const usePage = defineStore('page', {
         },
 
 
-        openSettings(path, componentName) {
+        openSettings(path: string, componentName: string, parentPath?: string) {
             if (!components)
                 components = useComponents()
 
@@ -91,6 +93,7 @@ export const usePage = defineStore('page', {
             }
 
             this.propertiesPath = path
+            this.parentPath = parentPath
 
             this.propertiesHelper.setProperties(path
                 ? _.get(this.properties, this.propertiesPath)

@@ -573,7 +573,6 @@ function getGridElStyle(element:ElementInterface | any) {
         gridColumn: "1 / auto",
         gridRow: "1 / auto",
         height: 'auto',
-
     }
 
     let el = element.layout[selectedSize.value] || element.layout[ScreenSize.desktop]
