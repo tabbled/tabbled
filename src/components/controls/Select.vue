@@ -42,7 +42,7 @@ onMounted(async () => await init())
 
 
 const init = async () => {
-    console.log("init select")
+    console.log("init select", props)
     if (props.items instanceof Function) {
         items.value = await props.items({
             path: props.path,

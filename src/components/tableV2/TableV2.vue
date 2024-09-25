@@ -3,11 +3,11 @@
         <div class="table-title">
             <div class="table-actions">
                 <h4 v-if="title" class="table-title-caption">{{title}}</h4>
-                <el-button type="primary" size="small" @click="addColumn">Add</el-button>
+                <el-button type="primary" size="small" @click="">Add</el-button>
             </div>
             <div class="table-actions-ext">
                 <el-input clearable :placeholder="$t('search')" :prefix-icon="SearchIcon" style="height: 24px; width: 150px" size="small" v-model="searchText"></el-input>
-                <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settingsRequest')"/>
+                <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settings-request', '', 'TableV2')"/>
             </div>
 
         </div>
@@ -163,7 +163,7 @@ import {
     RowSelectionState,
     useVueTable
 } from '@tanstack/vue-table'
-import {onMounted, onUnmounted, ref, watch, computed} from 'vue'
+import {onMounted, onUnmounted, ref, watch} from 'vue'
 import Checkbox from './Checkbox.vue'
 import Table from "../Table.vue";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
@@ -177,6 +177,7 @@ import {ContextMenuAction} from "./context-menu-action";
 import {useI18n} from "vue-i18n"
 import {Column} from "../column"
 import Locales from "./locales"
+import _ from "lodash";
 
 const {t, setLocaleMessage, availableLocales} = useI18n({
     useScope: "local"
@@ -209,7 +210,7 @@ const refresh = () => {
 defineExpose({ refresh })
 
 const emit = defineEmits<{
-    (e: 'settingsRequest'): void,
+    (e: 'settings-request', path: string, component: string): void,
     (e: 'update:property', prop: string, value: any): string
 }>()
 
@@ -251,6 +252,12 @@ let table = useVueTable({
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode: 'onChange',
     //manualSorting: true,
+    onColumnSizingChange: (e) => {
+        let newSize =  (e as Function)()
+        let cols = Object.keys(newSize)
+        let idx = props.columns.findIndex(c => c.id === cols[0])
+        emit('update:property', `columns[${idx}].width`, newSize[cols[0]])
+    },
     enableColumnResizing: true,
     columnResizeDirection: 'ltr',
     state: {
@@ -280,9 +287,13 @@ let table = useVueTable({
 
         console.log(sorting.value)
 
+
+
         let sort = []
         sorting.value.forEach(i => {
-            sort.push(`${i.id}:${i.desc ? 'desc' : 'asc'}`)
+            let c = props.columns.find(c => i.id === c.id)
+
+            sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
         })
         props.dataset.sort = sort
         getData(true)
@@ -314,10 +325,6 @@ watch(() => props.columns,
 watch(() => props.dataset,
     async () => {
         await init()
-        console.log('TableV2 props.dataset', props.dataset)
-        //await props.dataset.loadNext(true)
-        //console.log(props.dataset.items)
-
     })
 
 const getData = async (reset = false) => {
@@ -330,7 +337,6 @@ const getData = async (reset = false) => {
     } catch (e) {
         ElMessage.error(`Error while loading data in table: ${e.toString()}`)
     }
-
 }
 
 const init = async () => {
@@ -351,21 +357,27 @@ const init = async () => {
 
 const initColumns = () => {
     let cols = []
+    columns.value = []
     for(let i in props.columns) {
         let col = props.columns[i]
+
         cols.push(columnHelper.accessor(col.field, {
+            id: col.id,
             header: col.title,
-            cell: info => info.getValue(),
-            footer: props => "",
-            size: col.minWidth && col.minWidth > 0 ? col.width : 150,
-            minSize: col.minWidth && col.minWidth > 0 ? col.minWidth : 150,
+            cell: info => { return info.getValue()} ,
+            footer: props => col.field,
+            size: col.width && col.width > 0 ? col.width : 150,
+            minSize: col.minWidth && col.minWidth > 0 ? col.minWidth : 20,
             enableSorting: col.sortable
         }))
     }
 
     columns.value = cols
 
-    console.log(columns.value)
+    props.dataset.reset()
+
+    if (!columnOrder.value.length)
+        columnOrder.value = props.columns.map(i => i.id)
 }
 
 const subscribeDatasetEvents = () => {
@@ -383,14 +395,14 @@ const unsubscribeDatasetEvents = () => {
 }
 
 const onDatasetReset = () => {
-    console.log('onDatasetReset')
+    //console.log('onDatasetReset')
     table.getRowModel().rows = []
     table.getRowModel().rowsById = {}
     table.getRowModel().flatRows = []
 }
 
 const onDatasetInsert = (ops) => {
-    console.log("onDatasetInsert", ops)
+    //console.log("onDatasetInsert", ops)
 
     let i = props.dataset.totalCount
     ops.items.forEach(item => {
@@ -454,27 +466,44 @@ const onHeaderClick = (e, header) => {
 }
 
 const openHeaderMenu = (e, header) => {
-    console.log(e)
     e.preventDefault();
 
     contextMenuActions.value = []
 
     contextMenuActions.value.push({
         title: t("column.insertRight"),
-        action: "insertRight"
+        action: "insertRight",
+        onClick: () => {
+            console.log(props)
+            let idx = columnOrder.value.findIndex(i => i === header.id)
+            insertNewColumn(idx+1)
+        }
     },{
         title: t("column.insertLeft"),
-        action: "insertLeft"
+        action: "insertLeft",
+        onClick: () => {
+            let idx = columnOrder.value.findIndex(i => i === header.id)
+            insertNewColumn(idx)
+        }
     },{
         action: "divider"
     },{
         title: t("column.settings"),
-        action: "settings"
+        action: "settings",
+        onClick: () => {
+            console.log(props)
+            let idx = props.columns.findIndex(i => i.id === header.id)
+            emit('settings-request', `columns[${idx}]`, 'Column')
+        }
     },{
         action: "divider"
     },{
         title: t("column.delete"),
-        action: "delete"
+        action: "delete",
+        onClick: () => {
+            let idx = props.columns.findIndex(i => i.id === header.id)
+            removeColumn(idx)
+        }
     })
 
     contextMenuX.value = e.clientX;
@@ -491,23 +520,31 @@ const onDragEnter = (e) => {
     e.preventDefault()
 }
 
-const addColumn = () => {
+const insertNewColumn = (index: number) => {
+    let cols = props.columns
+    let max = _.maxBy(cols, (i) => Number(i.id))
+    let id = (max ? Number(max.id) + 1 : 1).toString()
 
-    columns.value = [columnHelper.accessor('group', {
-        id: 'group',
-        header: "Группа",
-        cell: ({ cell, row }) => {
-            return ""
-        },
-        footer: props => props.column.id,
-        size: 150,
-        minSize: 20,
-        enableResizing: true,
-    })]
+    cols.push({
+        id: id,
+        field: '',
+        title: "New column",
+        type: 'field'
+    })
+    columnOrder.value.splice(index, 0, id)
 
+    emit('update:property', 'columns', cols)
+    emit('settings-request', `columns[${cols.length - 1}]`, 'Column')
+}
 
+const removeColumn = (index) => {
+    let cols = props.columns
+    let idx = columnOrder.value.findIndex(i => i === cols[index].id)
+    if (idx > -1)
+        columnOrder.value.splice(idx, 1)
 
-    console.log('added column', table.getAllColumns())
+    cols.splice(index, 1)
+    emit('update:property', 'columns', cols)
 }
 
 onUnmounted(() => {

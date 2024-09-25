@@ -6,6 +6,7 @@
              :dataset="datasetInst"
              :inline-edit="inlineEdit"
              :style="{height: height + 'px'}"
+             @update:property="onPropertyUpdate"
              @settings-request="openSettings"/>
 </template>
 
@@ -49,19 +50,25 @@ watch(() => props.dataset, () => {
 onMounted(() => {
     console.log('TableV2.element mounted', props, _.has(pageStore.datasets, props.dataset))
     datasetInst.value = pageStore.datasets[props.dataset]
-    console.log(datasetInst.value)
 })
 
 onUnmounted(() => {
     datasetInst.value = null
 })
 
-const openSettings = async () => {
+const openSettings = async (path, component) => {
     try {
-        pageStore.openSettings(props.path + '.properties', 'TableV2')
+        let parentPath = props.path + '.properties'
+        let p = `${parentPath}${path ? '.' + path : ''}`
+        pageStore.openSettings(p, component, parentPath)
     } catch (e) {
         console.error(e)
     }
+}
+
+const onPropertyUpdate = (property, value) => {
+    console.log(props.path, property, value)
+    pageStore.setPropertyByPath(`${props.path}.properties.${property}`, value)
 }
 
 </script>

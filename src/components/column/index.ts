@@ -1,10 +1,11 @@
 export type ColumnType = 'field' | 'calc' | 'lookup'
 
 export interface Column {
-    type: ColumnType,
-    title: string,
-    field?: string, // required if type = field
-    minWidth: number,
-    width: number,
-    sortable: boolean
+    id: string
+    type: ColumnType
+    title: string
+    field?: string // required if type = field
+    minWidth?: number
+    width?: number
+    sortable?: boolean
 }

@@ -6,7 +6,7 @@
         <div v-for="action in actions"
              :key="action.action">
             <div v-if="action.action !== 'divider'" class="context-menu-action"
-                 @click="emit('action-clicked', action)">
+                 @click="onClick(action)">
                 {{ action.title }}
             </div>
             <div v-else class="context-menu-divider"/>
@@ -40,6 +40,16 @@ const emit = defineEmits<{
     (e: 'action-clicked', action: ContextMenuAction): string
     (e: 'update:visible', visible: boolean): string
 }>()
+
+
+const onClick = (action) => {
+    if (action.onClick instanceof Function) {
+        action.onClick()
+    }
+    emit('action-clicked', action)
+    emit('update:visible', false)
+}
+
 </script>
 
 <style scoped>
@@ -59,7 +69,7 @@ const emit = defineEmits<{
 }
 
 .context-menu-action {
-    padding: 8px 10px;
+    padding: 8px 14px;
     cursor: pointer;
 }
 

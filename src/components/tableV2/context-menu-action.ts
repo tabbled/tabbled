@@ -1,4 +1,5 @@
 export interface ContextMenuAction {
     title?: string
-    action: string | 'divider'
+    action: string | 'divider',
+    onClick?: () => void
 }

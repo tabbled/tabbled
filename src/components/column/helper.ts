@@ -36,7 +36,7 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                     let inst = context.dataSets[dataset] as DataSet
 
                     return (await inst.getFields()).map(f => {
-                        return { key: f.alias, title: f.title}
+                        return { key: f.alias, title: `${f.title} (${f.alias})`}
                     })
                 }
             },
@@ -44,8 +44,8 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 title: "prop.format",
                 editor: "select",
                 group: "data",
-                path: "alias",
-                default: () => '',
+                path: "format",
+                default: () => 'string',
                 items: async () => {
                     return [{
                         title: "String",
@@ -61,6 +61,18 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 group: "appearance",
                 path: "title",
                 default: () => 'New  column'
+            },{
+                title: "prop.width",
+                editor: "input-number",
+                group: "appearance",
+                path: "width",
+                default: () => 150
+            },{
+                title: "prop.minWidth",
+                editor: "input-number",
+                group: "appearance",
+                path: "minWidth",
+                default: () => 20
             },{
                 title: "prop.sortable",
                 editor: "checkbox",

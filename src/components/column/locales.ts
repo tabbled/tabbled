@@ -9,10 +9,15 @@ export default {
             field: "Field",
             format: "Format",
             title: "Title",
-            sortable: "Sortable"
+            sortable: "Sortable",
+            minWidth: "Min width",
+            width: "Width"
         },
         tooltip: {
 
+        },
+        other: {
+            newColumn: "New column"
         }
     },
     ru: {
@@ -25,10 +30,15 @@ export default {
             field: "Поле",
             format: "Формат",
             title: "Заголовок",
-            sortable: "Сортировка"
+            sortable: "Сортировка",
+            minWidth: "Мин ширина",
+            width: "Ширина"
         },
         tooltip: {
 
+        },
+        other: {
+            newColumn: "Новая колонка"
         }
     }
 }

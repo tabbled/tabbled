@@ -70,6 +70,8 @@ export interface DataSetInterface extends EventEmitter {
     loadNext: (reset: boolean) => Promise<void>
 
     getFields: () => Promise<FieldInterface[]>
+
+    reset: () => void
 }
 
 export class DataSet extends EventEmitter implements DataSetInterface  {
@@ -106,10 +108,17 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     get page() : number { return this._page }
     get allDataLoaded() : boolean { return this._items.length === this._totalCount }
 
+    reset() {
+        this.emit('reset-data')
+        this.emit('insert', {
+            items: this._items
+        })
+    }
+
     async getFields() : Promise<FieldInterface[]> {
 
         try {
-            let res = (await this.api.get(`/v2/datasource/${this.props.datasource}/fields`)).data
+            let res = (await this.api.get(`/v2/datasource/${this.props.datasource}/fields?nested=true`)).data
 
             return res.items
         } catch (e) {

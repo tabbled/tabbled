@@ -46,11 +46,15 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['change'])
 
 onMounted(() => {
+
 })
 
 const add = () => {
     let arr  = props.items ? _.cloneDeep(props.items) : []
+
+    let max = _.maxBy(arr, (i) => Number(i.id))
     arr.push({
+        id: (max ? Number(max.id) + 1 : 1).toString(),
         field: '',
         title: "New column",
         type: "string"

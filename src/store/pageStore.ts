@@ -113,8 +113,15 @@ export const usePage = defineStore('page', {
             this.propertiesHelper = null
         },
 
+        // Use it t update property value from settings panel
         setProperty(path: string, value: any) {
-            _.set(this.properties, `${this.propertiesPath ? this.propertiesPath + "."  : ""}${path}`, value)
+            let p = `${this.propertiesPath ? this.propertiesPath + "."  : ""}${path}`
+            _.set(this.properties, p, value)
+        },
+
+        // Use it to update property value directly from elements
+        setPropertyByPath(path: string, value: any) {
+            _.set(this.properties, path, value)
         },
 
         updateDataSets() {
@@ -128,9 +135,6 @@ export const usePage = defineStore('page', {
                 }
                 ds.props = this.properties.datasets[i]
             }
-
-            console.log("<<<!")
-            console.log(this.datasets)
         }
 
     }
