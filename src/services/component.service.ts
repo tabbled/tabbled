@@ -16,6 +16,9 @@ import {Config as TreeFilterProps} from '../components/configuration/tree.filter
 import {Config as FileFieldProps} from '../components/configuration/file-field.config'
 import {Config as RichTextEditorProps} from '../components/configuration/rich-text-editor.config'
 
+import {useLogger} from "../logger";
+const logger = useLogger()
+
 export interface ComponentTitle {
     name: string,
     title: string,
@@ -43,10 +46,10 @@ export class ComponentService {
 
     registerComponent(component: ComponentInterface) {
         if (this._components.has(component.name)) {
-            console.warn(`Component "${component.name}" already exists. That will be replaced`)
+            logger.warn(`Component "${component.name}" already exists. That will be replaced`)
         }
         this._components.set(component.name, component)
-        console.log(`Component ${component.name} is registered`)
+        logger.log(`Component ${component.name} is registered`)
     }
 
     registerAllComponents() {

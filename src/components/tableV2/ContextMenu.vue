@@ -57,7 +57,7 @@ const onClick = (action) => {
     position: fixed;
     box-shadow: var(--el-box-shadow-light);
     min-width: 150px;
-    z-index: 50;
+    z-index: 5000;
     padding-top: 4px;
     padding-bottom: 4px;
     background: var(--el-bg-color-overlay);

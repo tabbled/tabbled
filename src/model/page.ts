@@ -115,7 +115,6 @@ export interface PageConfigInterface {
 export interface PageConfigInterfaceV2 {
     id: string,
     alias: string,
-    path: string,
     title: string,
     elements: ElementInterfaceV2[]
     headerActions: PageActionConfigInterface[],

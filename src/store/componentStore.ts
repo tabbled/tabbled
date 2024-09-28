@@ -21,6 +21,7 @@ export const useComponents = defineStore('components', {
             try {
                 this.helpers.set('Page', new ((await import("../components/page/helper")).default))
                 this.helpers.set('Column', new ((await import("../components/column/helper")).default))
+                this.helpers.set('Dataset', new ((await import("../components/dataset/helper")).default))
 
                 await this.registerOne('TableV2', "./../components/tableV2", app)
 

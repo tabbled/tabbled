@@ -2,6 +2,9 @@ import { io } from "socket.io-client";
 import {Socket} from "socket.io-client/build/esm/socket";
 import { ref } from 'vue'
 
+import {useLogger} from "../logger";
+const logger = useLogger()
+
 function getAccountId(): number {
     let acc = localStorage.getItem('account')
     return acc ? JSON.parse(acc).id : -1
@@ -15,11 +18,10 @@ export interface ServerInterface {
 export class SocketIOClient implements ServerInterface {
     constructor() {
         let url = this.url()
-        console.log('Socket server url - ', url)
+        logger.log('Socket server url - ', url)
         this.socket = io(url,{
             transports: [ 'websocket', 'polling' ],
             auth: (cb) => {
-                //console.log('socket auth', getAccountId())
                 let accountId = getAccountId()
                 cb({
                     jwt: localStorage.getItem('token'),
@@ -31,29 +33,29 @@ export class SocketIOClient implements ServerInterface {
 
 
         this.socket.on("exception", (err) => {
-            console.error(err);
+            logger.error(err);
         });
 
         this.socket.on("connect_error", (err) => {
-            console.error(`Failed to connect to the backend. Socket.io connect_error: ${err.message}`);
+            logger.error(`Failed to connect to the backend. Socket.io connect_error: ${err.message}`);
         });
 
         this.socket.on("connect", async () => {
-            console.log("Connected to the socket server");
+            logger.log("Connected to the socket server");
         })
 
         this.socket.on("disconnect", async () => {
-            console.log("Disconnected from the socket server");
+            logger.log("Disconnected from the socket server");
         })
 
 
         this.socket.on('functions/console.log', async (...args) => {
-            console.log('Func console.log: ', ...args)
+            logger.log('Func console.log: ', ...args)
         })
 
         this.socket.on('updates', async(msg) => {
 
-            console.log('updates',msg)
+            logger.log('updates',msg)
         })
     }
 
@@ -80,7 +82,7 @@ export class SocketIOClient implements ServerInterface {
     }
 
     updateAuth() {
-        console.log('Socket server reconnecting...')
+        logger.log('Socket server reconnecting...')
         this.socket.disconnect()
         this.socket.connect()
     }
@@ -117,9 +119,9 @@ export class SocketIOClient implements ServerInterface {
                             reject(res.error_message)
                         else {
                             reject('Unknown error')
-                            console.error(`Error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
-                            console.error('Error:')
-                            console.error(err)
+                            logger.error(`Error while emit\n topic: ${topic} \nmessage: ${JSON.stringify(message)}`)
+                            logger.error('Error:')
+                            logger.error(err)
                         }
                     }
                 })

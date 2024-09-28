@@ -1,8 +1,9 @@
+import {useLogger} from "./logger";
+
+console.log('%c🚀 Welcome! The application works on Tabbled platform. See https://tabbled.org', 'color: green')
+import { createApp, h } from 'vue'
 import {useComponents} from "./store/componentStore";
 
-console.log('%cWelcome! This application works on Tabbled low-code platform', 'color: green')
-
-import { createApp, h } from 'vue'
 import { defineAsyncComponent } from 'vue'
 import App from './App.vue'
 import router from "./router";
@@ -31,6 +32,7 @@ import dayjs from "dayjs";
 dayjs.locale('ru')
 import utc from "dayjs/plugin/utc";
 import timezone from 'dayjs/plugin/timezone'
+import * as Sentry from "@sentry/vue";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -94,29 +96,32 @@ app.use(ElementPlus, {
     locale: epRu,
 })
 
+const logger = useLogger()
+logger.wrapConsole()
+
 const componentsStore = useComponents()
 componentsStore.registerAll(app)
 
-// Sentry.init({
-//     app,
-//     //@ts-ignore
-//     dsn: import.meta.env.MODE === 'development' ? import.meta.env.VITE_SENTRY_DNS : window['env']['sentryDns'],
-//     integrations: [
-//         new Sentry.BrowserTracing({
-//             // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-//             tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
-//             routingInstrumentation: Sentry.vueRouterInstrumentation(routerInst),
-//         }),
-//         new Sentry.Replay(),
-//     ],
-//     //@ts-ignore
-//     environment: import.meta.env.MODE,
-//     // Performance Monitoring
-//     tracesSampleRate: 0.3, // Capture 100% of the transactions, reduce in production!
-//     // Session Replay
-//     replaysSessionSampleRate: 1.0, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-//     replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
-// });
+Sentry.init({
+    app,
+    //@ts-ignore
+    dsn: import.meta.env.MODE === 'development' ? import.meta.env.VITE_SENTRY_DNS : window['env']['sentryDns'],
+    integrations: [
+        new Sentry.BrowserTracing({
+            // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+            tracePropagationTargets: ["localhost"],
+            routingInstrumentation: Sentry.vueRouterInstrumentation(routerInst),
+        }),
+        new Sentry.Replay(),
+    ],
+    //@ts-ignore
+    environment: import.meta.env.MODE,
+    // Performance Monitoring
+    tracesSampleRate: 0.3, // Capture 100% of the transactions, reduce in production!
+    // Session Replay
+    replaysSessionSampleRate: 1.0, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+    replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+});
 
 
 

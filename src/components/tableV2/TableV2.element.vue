@@ -67,7 +67,6 @@ const openSettings = async (path, component) => {
 }
 
 const onPropertyUpdate = (property, value) => {
-    console.log(props.path, property, value)
     pageStore.setPropertyByPath(`${props.path}.properties.${property}`, value)
 }
 

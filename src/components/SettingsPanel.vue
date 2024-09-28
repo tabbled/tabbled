@@ -47,6 +47,8 @@
                                      :label="t(prop.title)"
                                      @change="e => onChange(prop.path, e)"
                                      :items="getValue(prop.path)"
+                                     :path="prop.path"
+                                     :parent-path="pageStore.propertiesPath"
                         />
 
                         <ColumnList v-else-if="prop.editor === 'column-list'"

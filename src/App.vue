@@ -38,7 +38,7 @@
 import {useRoute, useRouter} from "vue-router";
 import {computed, ComputedRef, onMounted, onUnmounted, ref, watch} from "vue";
 import {useStore} from "vuex";
-import {OpenDialogOptions, PageConfigInterface, ScreenSize} from "./model/page";
+import {OpenDialogOptions, PageConfigInterface, PageConfigInterfaceV2, ScreenSize} from "./model/page";
 import {useDataSourceService} from "./services/datasource.service";
 import { useFavicon } from '@vueuse/core'
 import {useSettings} from "./services/settings.service";
@@ -50,6 +50,7 @@ import { useWindowSize } from '@vueuse/core'
 import {usePage} from "./store/pageStore";
 import DialogView from "./components/DialogView.vue"
 import FirstStartDialog from "./pages/configuration/FirstStartDialog.vue"
+import {useApiClient} from "./services/api.service";
 
 const PageView = () => import("./pages/PageView.vue")
 const PageViewV2 = () => import("./pages/PageViewV2.vue")
@@ -59,6 +60,7 @@ const route = useRoute();
 const router = useRouter();
 const favicon = useFavicon()
 const page = usePage()
+const api = useApiClient()
 
 enum ConfigLoadState {
     NotLoaded = 0,
@@ -139,7 +141,6 @@ onUnmounted(() => {
 })
 
 function openDialog(options : OpenDialogOptions) {
-    console.log(dialogRef)
     dialogOptions.value = options
     dialogVisible.value = true
 
@@ -196,11 +197,16 @@ async function registerPages() {
         addRoute(item.path, item);
     })
 
+    let pagesV2 = (await api.get('v2/pages')).data.pages
+    pagesV2.forEach((item: PageConfigInterfaceV2) => {
+        addRouteV2(item.alias, item);
+    })
+
     await router.replace(router.currentRoute.value.path)
 }
 
 socketClient.socket.on("login_needed", () => {
-    console.log('login_needed')
+    console.warn('login_needed')
     logout();
 })
 
@@ -245,6 +251,31 @@ function canPageAccess(page) {
     }
 }
 
+function addRouteV2(alias: string, page: PageConfigInterfaceV2) {
+    if (!alias)
+        return;
+
+    if (!canPageAccess(page))
+        return
+
+    let path = '/' + alias
+
+    router.addRoute({
+        path: path,
+        name: page.alias,
+        component: PageViewV2,
+        props: {
+            alias: page.alias
+        },
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: page.title
+        }
+    })
+    console.log('Route(v2) ' + path + ' added')
+}
+
 function addRoute(path: string, page: PageConfigInterface) {
     if (!path || !page)
         return;
@@ -277,7 +308,7 @@ function addRoute(path: string, page: PageConfigInterface) {
         }
     })
     pagesByAlias.value.set(path, page);
-    console.info('Route ' + path + ' added')
+    console.log('Route ' + path + ' added')
 }
 
 async function isFirstStart() {

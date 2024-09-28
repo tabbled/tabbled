@@ -20,6 +20,9 @@ export default {
             insertRight: "Insert column to right",
             settings: "Settings",
             delete: "Delete"
+        },
+        message: {
+            loadingError: "Error while loading data in table"
         }
     },
     ru: {
@@ -45,6 +48,9 @@ export default {
             insertRight: "Добавить колонку справа",
             settings: "Настроить колонку",
             delete: "Удалить"
+        },
+        message: {
+            loadingError: "Ошибка загрузки данных: "
         }
     }
 }

@@ -10,7 +10,8 @@ export type EditorComponent =
     'list' |
     'dataset-list' |
     'event-handler-list' |
-    'column-list'
+    'column-list' |
+    'field-list'
 export class SelectItem {
     key: string
     title: string

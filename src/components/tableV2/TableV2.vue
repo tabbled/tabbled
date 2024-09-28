@@ -163,7 +163,7 @@ import {
     RowSelectionState,
     useVueTable
 } from '@tanstack/vue-table'
-import {onMounted, onUnmounted, ref, watch} from 'vue'
+import {onMounted, onUnmounted, ref, watch, inject} from 'vue'
 import Checkbox from './Checkbox.vue'
 import Table from "../Table.vue";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
@@ -335,7 +335,7 @@ const getData = async (reset = false) => {
     try {
         await props.dataset.loadNext(reset)
     } catch (e) {
-        ElMessage.error(`Error while loading data in table: ${e.toString()}`)
+        ElMessage.error(`${t('message.loadingError')}: ${e.toString()}`)
     }
 }
 
@@ -474,7 +474,6 @@ const openHeaderMenu = (e, header) => {
         title: t("column.insertRight"),
         action: "insertRight",
         onClick: () => {
-            console.log(props)
             let idx = columnOrder.value.findIndex(i => i === header.id)
             insertNewColumn(idx+1)
         }
@@ -491,7 +490,6 @@ const openHeaderMenu = (e, header) => {
         title: t("column.settings"),
         action: "settings",
         onClick: () => {
-            console.log(props)
             let idx = props.columns.findIndex(i => i.id === header.id)
             emit('settings-request', `columns[${idx}]`, 'Column')
         }

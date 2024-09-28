@@ -115,7 +115,7 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         })
     }
 
-    async getFields() : Promise<FieldInterface[]> {
+    async getFields(): Promise<FieldInterface[]> {
 
         try {
             let res = (await this.api.get(`/v2/datasource/${this.props.datasource}/fields?nested=true`)).data

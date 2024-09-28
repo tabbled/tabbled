@@ -6,6 +6,7 @@
           :label="label"
           :items="items"
           :sortable="false"
+          @edit="edit"
     >
         <template #actions>
             <el-dropdown ref="dropdown" max-height="400">
@@ -34,9 +35,11 @@ import {onMounted, ref} from "vue";
 import _ from "lodash"
 import {DatasourceApi} from "../../api/datasource.api";
 import {useApiClient} from "../../services/api.service";
+import {usePage} from "../../store/pageStore";
 
 let api = useApiClient()
 let dsApi = new DatasourceApi(api)
+let pageStore = usePage()
 
 let dropdown = ref(null)
 let datasources = ref([{
@@ -47,6 +50,8 @@ let datasources = ref([{
 interface Props {
     items?: any[]
     label?: string
+    path: string
+    parentPath: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -84,6 +89,14 @@ const getDatasource = async () => {
             title: i.title
         }
     })
+}
+
+const edit = async (idx) => {
+    try {
+        //pageStore.openSettings(`${props.path}[${idx}]`, 'Dataset', props.parentPath)
+    } catch (e) {
+        console.error(e)
+    }
 }
 
 const openMenu = async () => {
