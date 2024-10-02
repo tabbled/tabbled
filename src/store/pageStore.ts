@@ -13,8 +13,9 @@ let components = null
 
 
 interface State {
-    properties: PageConfigInterfaceV2,
-    isLoading: boolean,
+    properties: PageConfigInterfaceV2
+    isLoading: boolean
+    isPropsChanged: boolean
     loaded: boolean
     propertiesPanelVisible: boolean,
     propertiesHelper: ComponentPropertiesHelper
@@ -36,7 +37,8 @@ export const usePage = defineStore('page', {
             isLoading: false,
             loaded: false,
             datasets: {},
-            parentPath: null
+            parentPath: null,
+            isPropsChanged: false
         }
     },
 
@@ -44,6 +46,8 @@ export const usePage = defineStore('page', {
         async loadByAlias(alias: string) {
             this.loaded = false
             this.properties = null
+            this.isPropsChanged = false
+
             let res = (await api.get(`/v2/pages/${alias}`)).data
 
             if (res.statusCode !== 200) {
@@ -53,7 +57,7 @@ export const usePage = defineStore('page', {
 
             let props = res.page
 
-            //Set default values if it skipped
+            //Set default values if it undefined
             let components = useComponents()
 
             for(const i in props.elements) {
@@ -67,10 +71,9 @@ export const usePage = defineStore('page', {
                     }
                 }
 
-                //console.log(el)
+
 
             }
-            //console.log(props)
             this.properties = props
 
             this.updateDataSets()
@@ -95,6 +98,15 @@ export const usePage = defineStore('page', {
             this.propertiesPath = path
             this.parentPath = parentPath
 
+            let helper = components.helpers.get(componentName)
+
+            for(const j in helper.propertiesDef()) {
+                const def = helper.propertiesDef()[j]
+                if (!_.has(this.properties, path + '.' + def.path)) {
+                    _.set(this.properties, path + '.' + def.path, def.default())
+                }
+            }
+
             this.propertiesHelper.setProperties(path
                 ? _.get(this.properties, this.propertiesPath)
                 : this.properties,
@@ -116,12 +128,21 @@ export const usePage = defineStore('page', {
         // Use it t update property value from settings panel
         setProperty(path: string, value: any) {
             let p = `${this.propertiesPath ? this.propertiesPath + "."  : ""}${path}`
+
+            console.log(path, value, _.get(this.properties, p ))
+
             _.set(this.properties, p, value)
+
+
+
+
+            this.isPropsChanged = true
         },
 
         // Use it to update property value directly from elements
         setPropertyByPath(path: string, value: any) {
             _.set(this.properties, path, value)
+            this.isPropsChanged = true
         },
 
         updateDataSets() {
@@ -135,7 +156,20 @@ export const usePage = defineStore('page', {
                 }
                 ds.props = this.properties.datasets[i]
             }
+        },
+
+        async saveChanges() {
+            console.log("save")
+            try {
+                this.isPropsChanged = false
+                await api.patch(`/v2/pages/${this.properties.id}`, this.properties)
+            } catch (e) {
+                console.error(e)
+            }
+
         }
+
+
 
     }
 })

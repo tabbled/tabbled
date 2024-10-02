@@ -32,7 +32,7 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
             {
                 title: "prop.dataset",
                 path: "dataset",
-                visible: () => true,
+                visible: async () => true,
                 editor: "select",
                 group: "data",
                 tooltip: "tooltip.dataset",
@@ -49,7 +49,7 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
             {
                 title: "prop.columns",
                 path: "columns",
-                visible: () => true,
+                visible: async () => true,
                 editor: "column-list",
                 group: "data",
                 default: () => []

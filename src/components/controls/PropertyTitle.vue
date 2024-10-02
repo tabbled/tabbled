@@ -1,7 +1,7 @@
 <template>
     <el-popover v-if="tooltip"
                 placement="bottom"
-                :width="300"
+                :width="500"
                 trigger="hover"
                 :persistent="false"
                 :show-after="400"

@@ -26,10 +26,6 @@ import {onMounted} from "vue";
 import _ from "lodash"
 import {usePage} from "../../store/pageStore";
 
-
-// let api = useApiClient()
-// let dsApi = new DatasourceApi(api)
-
 let pageStore = usePage()
 
 interface Props {
@@ -57,7 +53,9 @@ const add = () => {
         id: (max ? Number(max.id) + 1 : 1).toString(),
         field: '',
         title: "New column",
-        type: "string"
+        type: "field",
+        width: 120,
+        minWidth: 20
     })
     emit('change', arr)
 }

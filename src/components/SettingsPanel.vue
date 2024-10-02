@@ -11,6 +11,7 @@
                                    class="settings-panel-form-item"
                                    :tabindex="idx"
                                    :show-message="false"
+                                   :style="{ display: getVisible(prop.path) ? 'block' : 'none' }"
                                    >
                         <template #label>
                             <PropertyTitle v-if="!['checkbox', 'dataset-list', 'column-list', 'event-handler-list'].includes(prop.editor)" :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
@@ -86,6 +87,8 @@ const {t, setLocaleMessage, availableLocales} = useI18n({
    useScope: "local"
 })
 
+let visibilityProps = ref<Map<string, boolean>>(new Map())
+let dependings: Map<string, string[]> = new Map()
 
 
 let activeGroups = ref<string[]>([])
@@ -128,6 +131,7 @@ const init = async () => {
 
 
     populateProps()
+    await populateVisibility()
     activeGroups.value = pageStore.propertiesHelper.groups.map(g => g.key)
 }
 
@@ -136,19 +140,74 @@ const populateProps = () => {
         return {
             key: g.key,
             title: g.title,
-            props: pageStore.propertiesHelper.propertiesDef().filter(p => p.group === g.key && (_.has(p, 'visible') ? p.visible() : true))
+            props: pageStore.propertiesHelper.propertiesDef().filter(p => p.group === g.key)
         }
     })
 }
 
-let onChange = (path: string, value: any) => {
-    console.log('onChange', path)
+const populateVisibility = async () => {
+    dependings.clear()
+    for(let i in pageStore.propertiesHelper.propertiesDef()) {
+        const prop = pageStore.propertiesHelper.propertiesDef()[i]
+
+        await updateVisible(prop.path)
+
+        if (_.has(prop, 'dependsOn')) {
+            prop.dependsOn.forEach(dep => {
+                if(dependings.has(dep)) {
+                    dependings.get(dep).push(prop.path)
+                } else {
+                    dependings.set(dep, [prop.path])
+                }
+            })
+        }
+    }
+}
+
+const getVisible = (path: string) : boolean => {
+    return visibilityProps.value.has(path) ? visibilityProps.value.get(path) : true;
+}
+
+const onChange = (path: string, value: any) => {
+    console.log('onChange', path, value)
     pageStore.setProperty(path, value)
-    populateProps()
+
+    updateDependVisible(path)
 }
 
 const getValue = (path: string) => {
+    console.log('getValue',path)
     return _.has(pageStore.propertiesHelper.props, path) ? _.get(pageStore.propertiesHelper.props, path) : null
+}
+
+const updateDependVisible = (dependPath) => {
+    if (!dependings.has(dependPath)) {
+        return
+    }
+
+    console.log('updateDependVisible', dependPath)
+
+    dependings.get(dependPath).forEach(p => {
+        updateVisible(p)
+    })
+}
+
+const updateVisible = async (path) => {
+    const prop = pageStore.propertiesHelper.propertiesDef().find(p => p.path === path)
+    if (!prop)
+        return
+
+    console.log('updateVisible', path)
+
+    if (_.has(prop, 'visible')) {
+        visibilityProps.value.set(prop.path, await prop.visible({
+            path: pageStore.propertiesPath,
+            parentPath: pageStore.parentPath,
+            parentProps: pageStore.parentPath ? _.get(pageStore.properties, pageStore.parentPath) : null,
+            dataSets: pageStore.datasets,
+            props: _.get(pageStore.properties, pageStore.propertiesPath)
+        }))
+    }
 }
 
 

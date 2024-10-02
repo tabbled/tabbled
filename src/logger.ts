@@ -4,7 +4,7 @@ import {ConsolaInstance} from "consola/core";
 
 const getLogLevel = () => {
     //@ts-ignore
-    let level = import.meta.env.MODE === 'production' ? 1 : 999
+    let level = import.meta.env.MODE === 'production' ? -999 : 999
     const stored = localStorage.getItem('logLevel')
     if (stored) {
         level = Number(stored)

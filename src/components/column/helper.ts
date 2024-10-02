@@ -20,6 +20,14 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
 
     locales = locales
 
+    getDatasetInst = (context) => {
+        let dataset = context?.parentProps?.dataset
+        if (!dataset || !context.dataSets)
+            return null
+
+        return context.dataSets[dataset] as DataSet
+    }
+
     propertiesDef = () : PropertyDef[] => {
         return [
             {
@@ -29,11 +37,10 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 path: "field",
                 default: () => null,
                 items: async (context) => {
-                    let dataset = context?.parentProps?.dataset
-                    if (!dataset || !context.dataSets)
-                        return []
+                    const inst = this.getDatasetInst(context)
 
-                    let inst = context.dataSets[dataset] as DataSet
+                    if (!inst)
+                        return []
 
                     return (await inst.getFields()).map(f => {
                         return { key: f.alias, title: `${f.title} (${f.alias})`}
@@ -42,18 +49,23 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
             },
             {
                 title: "prop.format",
-                editor: "select",
-                group: "data",
+                editor: "input",
+                group: "appearance",
                 path: "format",
-                default: () => 'string',
-                items: async () => {
-                    return [{
-                        title: "String",
-                        key: "string"
-                    },{
-                        title: "Number",
-                        key: "number"
-                    }]
+                default: () => '',
+                dependsOn: ['field'],
+                tooltip: "tooltip.format",
+                visible: async (context) => {
+                    if (!context.props.field)
+                        return false
+
+                    const inst = this.getDatasetInst(context)
+
+                    if (!inst)
+                        return false
+
+                    let field = (await inst.getFields()).find(f => f.alias === context.props.field)
+                    return field && ['datetime', 'date', 'time', 'number'].includes(field.type)
                 }
             },{
                 title: "prop.title",

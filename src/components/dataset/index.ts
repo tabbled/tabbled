@@ -66,10 +66,13 @@ export interface DataSetInterface extends EventEmitter {
     items: any[]
     sort: string[]
     isLoading: boolean
+    search: string
 
     loadNext: (reset: boolean) => Promise<void>
 
     getFields: () => Promise<FieldInterface[]>
+    getFieldByAlias: (alias: string) => FieldInterface
+
 
     reset: () => void
 }
@@ -89,11 +92,22 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     private _totalCount = 0
     private api = useApiClient()
     private _sort: string[] = []
+    private _search: string
+    private _fields: FieldInterface[] = []
+    private _fieldsByAlias = new Map<string, FieldInterface>()
 
     get props() : DataSetParamsInterface { return this._props }
     set props(props: DataSetParamsInterface) {
         this._props = props
         this._items = []
+    }
+
+    get search() {
+        return this._search
+    }
+
+    set search(val) {
+        this._search = val
     }
 
 
@@ -115,17 +129,36 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         })
     }
 
+
+
     async getFields(): Promise<FieldInterface[]> {
+        if (this._fields.length) {
+            return this._fields
+        }
 
         try {
             let res = (await this.api.get(`/v2/datasource/${this.props.datasource}/fields?nested=true`)).data
+            this._fields = res.items
+
+            this._fields.forEach(f => {
+                this._fieldsByAlias.set(f.alias, f)
+            })
+
 
             return res.items
         } catch (e) {
             console.log(e)
         }
-
     }
+
+    getFieldByAlias(alias: string): FieldInterface {
+        if (!this._fieldsByAlias.has(alias)) {
+            console.warn(`Field by alias ${alias} doesn't exist. Did you get all fields?`)
+        }
+        return this._fieldsByAlias.get(alias)
+    }
+
+
 
     async loadNext(reset = false) {
         if (this._loading || (!reset && this.allDataLoaded))
@@ -142,16 +175,10 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         let params: GetDataManyRequestDto = {
             limit: 50,
             offset: this.page * 50,
-            sort: this._sort ? this._sort : []
+            sort: this._sort ? this._sort : [],
+            query: this._search ? this._search : undefined
         }
         let res: GetDataManyResponseDto
-
-    // if (sorting.value && sorting.value.length) {
-    //     opt.sort = {
-    //         field: sorting.value[0].id,
-    //         ask: !sorting.value[0].desc
-    //     }
-    // }
 
         console.log('DataSet.loadNext.params',params)
 

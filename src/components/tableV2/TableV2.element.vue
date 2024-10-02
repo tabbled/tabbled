@@ -1,6 +1,6 @@
 <template>
     <TableV2 v-if="datasetInst"
-              id=""
+             :id="id"
              :height="height"
              :title="title"
              :dataset="datasetInst"

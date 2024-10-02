@@ -6,7 +6,13 @@
                 <el-button type="primary" size="small" @click="">Add</el-button>
             </div>
             <div class="table-actions-ext">
-                <el-input clearable :placeholder="$t('search')" :prefix-icon="SearchIcon" style="height: 24px; width: 150px" size="small" v-model="searchText"></el-input>
+                <el-input clearable
+                          :placeholder="$t('search')"
+                          :prefix-icon="SearchIcon"
+                          style="height: 24px; width: 150px"
+                          size="small"
+                          @input="debouncedSearch()"
+                          v-model="searchText"/>
                 <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settings-request', '', 'TableV2')"/>
             </div>
 
@@ -26,7 +32,7 @@
                         :key="header.id"
                         :ref="`col_${header.id}`"
                         :colSpan="header.colSpan"
-                        :style="{ width: `${header.getSize()}px` }"
+                        :style="{ width: `${ header.getSize()}px` }"
                         :draggable="!header.column.getIsResizing()"
                         @dragstart="onDragStart($event, header)"
                         @dragover="onDragOver"
@@ -100,9 +106,10 @@
                                       @change="row.getToggleSelectedHandler()($event)"
                             />
 
-                            <div style="width: inherit; overflow: hidden; text-overflow: ellipsis;">
-                                {{cell.getValue()}}
-                            </div>
+                            <CellRenderer :cell="cell"/>
+<!--                            <div >-->
+<!--                                {{cell.getValue()}}-->
+<!--                            </div>-->
 
 <!--                            <FlexRender v-if="cell"-->
 <!--                                :render="cell?.column?.columnDef?.cell"-->
@@ -157,13 +164,14 @@
 import {
     ColumnDef,
     createColumnHelper,
-    createRow,
     FlexRender,
     getCoreRowModel,
     RowSelectionState,
-    useVueTable
+    useVueTable,
+    Updater,
+    ColumnSizingState
 } from '@tanstack/vue-table'
-import {onMounted, onUnmounted, ref, watch, inject} from 'vue'
+import {onMounted, onUnmounted, ref, watch} from 'vue'
 import Checkbox from './Checkbox.vue'
 import Table from "../Table.vue";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
@@ -178,6 +186,8 @@ import {useI18n} from "vue-i18n"
 import {Column} from "../column"
 import Locales from "./locales"
 import _ from "lodash";
+import {useDebounceFn} from "@vueuse/core";
+import CellRenderer from "./CellRenderer.vue";
 
 const {t, setLocaleMessage, availableLocales} = useI18n({
     useScope: "local"
@@ -229,6 +239,7 @@ let contextMenuY = ref(0)
 const contextMenuActions = ref<ContextMenuAction[]>([]);
 let columns = ref<ColumnDef<any, any>[]>([])
 let columnOrder = ref([])
+let columnWidth = ref<Record<string, number>>({})
 let dragColumnId = ref(null)
 let beforeDragColumnWidths = []
 const rowSelection = ref<RowSelectionState>({})
@@ -238,13 +249,14 @@ let pageSize = 30
 
 
 let headerHeight = '34px'
-let items = []
+let items = ref([])
+let fallbackItems = []
 
 
 
 let table = useVueTable({
     get data() {
-        return props.dataset ? props.dataset.items : items
+        return items ? items.value : fallbackItems
     },
     get columns() {
         return columns.value
@@ -252,11 +264,13 @@ let table = useVueTable({
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode: 'onChange',
     //manualSorting: true,
-    onColumnSizingChange: (e) => {
-        let newSize =  (e as Function)()
-        let cols = Object.keys(newSize)
-        let idx = props.columns.findIndex(c => c.id === cols[0])
-        emit('update:property', `columns[${idx}].width`, newSize[cols[0]])
+    onColumnSizingChange: (updater: Updater<ColumnSizingState>) => {
+        columnWidth.value =
+            typeof updater === 'function'
+                ? updater(columnWidth.value)
+                : updater
+
+        saveState()
     },
     enableColumnResizing: true,
     columnResizeDirection: 'ltr',
@@ -269,11 +283,16 @@ let table = useVueTable({
         },
         get sorting() {
             return sorting.value
+        },
+        get columnSizing() {
+            return columnWidth.value
         }
     },
     getRowId: row => row['id'],
     onColumnOrderChange: (order) => {
+        console.log('onColumnOrderChange')
         columnOrder.value = (order as string[])
+        saveState()
     },
     onSortingChange: (updaterOrValue) => {
         console.log('onSortingChange', props.dataset)
@@ -285,17 +304,9 @@ let table = useVueTable({
                 ? updaterOrValue(sorting.value)
                 : updaterOrValue
 
-        console.log(sorting.value)
+        saveState()
 
-
-
-        let sort = []
-        sorting.value.forEach(i => {
-            let c = props.columns.find(c => i.id === c.id)
-
-            sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
-        })
-        props.dataset.sort = sort
+        updateSorting()
         getData(true)
     },
     enableRowSelection: true,
@@ -327,6 +338,32 @@ watch(() => props.dataset,
         await init()
     })
 
+
+const debouncedSearch = useDebounceFn(() => {
+    props.dataset.search = searchText.value
+    props.dataset.loadNext(true)
+    saveState()
+}, 1000, {maxWait: 1000})
+
+const saveState = () => {
+    localStorage.setItem(`table_state_${props.id}`, JSON.stringify({
+        width: columnWidth.value,
+        order: columnOrder.value,
+        sorting: sorting.value,
+        search: searchText.value
+    }))
+}
+
+const updateSorting = () => {
+    let sort = []
+    sorting.value.forEach(i => {
+        let c = props.columns.find(c => i.id === c.id)
+
+        sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
+    })
+    props.dataset.sort = sort
+}
+
 const getData = async (reset = false) => {
     console.log('TableV2.getData', props.dataset)
     if (!props.dataset)
@@ -346,6 +383,19 @@ const init = async () => {
         setLocaleMessage(locale as string, Locales[locale as string])
     })
 
+    let state = localStorage.getItem(`table_state_${props.id}`)
+    if (state) {
+        const pr = JSON.parse(state)
+        columnWidth.value = pr.width
+        columnOrder.value = pr.order
+        sorting.value = pr.sorting
+        searchText.value = pr.search
+        updateSorting()
+
+        if (props.dataset)
+            props.dataset.search = searchText.value
+    }
+
     initColumns()
 
     if (props.dataset) {
@@ -364,11 +414,15 @@ const initColumns = () => {
         cols.push(columnHelper.accessor(col.field, {
             id: col.id,
             header: col.title,
-            cell: info => { return info.getValue()} ,
+            cell: info => { return col.field ? info.getValue() : null} ,
             footer: props => col.field,
             size: col.width && col.width > 0 ? col.width : 150,
             minSize: col.minWidth && col.minWidth > 0 ? col.minWidth : 20,
-            enableSorting: col.sortable
+            enableSorting: col.sortable,
+            meta: {
+                field: props.dataset.getFieldByAlias(col.field),
+                column: col
+            }
         }))
     }
 
@@ -396,21 +450,18 @@ const unsubscribeDatasetEvents = () => {
 
 const onDatasetReset = () => {
     //console.log('onDatasetReset')
-    table.getRowModel().rows = []
-    table.getRowModel().rowsById = {}
-    table.getRowModel().flatRows = []
+    // table.getRowModel().rows = []
+    // table.getRowModel().rowsById = {}
+    // table.getRowModel().flatRows = []
+    items.value = []
 }
 
 const onDatasetInsert = (ops) => {
     //console.log("onDatasetInsert", ops)
 
-    let i = props.dataset.totalCount
-    ops.items.forEach(item => {
-        let r = createRow(table, item.id, item, i++, 0)
-        table.getRowModel().rows.push(r)
-        table.getRowModel().flatRows.push(r)
-        table.getRowModel().rowsById[item.id] = r
-    })
+    let n = _.cloneDeep(items.value)
+    n.push(...ops.items)
+    items.value = n
 }
 
 const onCellClick = (cell) => {
@@ -527,7 +578,9 @@ const insertNewColumn = (index: number) => {
         id: id,
         field: '',
         title: "New column",
-        type: 'field'
+        type: 'field',
+        width: 120,
+        minWidth: 20
     })
     columnOrder.value.splice(index, 0, id)
 

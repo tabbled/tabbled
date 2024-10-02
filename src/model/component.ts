@@ -22,11 +22,12 @@ export class PropertyDef {
     path: string
     editor: EditorComponent
     format?: 'string' | 'number'
-    visible?: () => boolean
+    visible?: (context?) => Promise<boolean>
     tooltip?: string
     group: string
     items?: (context?) => Promise<SelectItem[]>
     default: () => any
+    dependsOn?: string[] // path of properties, if visibility or another value need to update,
 }
 
 export class PropertyGroup {
