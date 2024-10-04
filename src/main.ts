@@ -33,10 +33,31 @@ dayjs.locale('ru')
 import utc from "dayjs/plugin/utc";
 import timezone from 'dayjs/plugin/timezone'
 import * as Sentry from "@sentry/vue";
+import numeral from "numeral";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault("Europe/Moscow")
+
+numeral.register('locale', 'ru', {
+    delimiters: {
+        thousands: ' ',
+        decimal: ','
+    },
+    abbreviations: {
+        thousand: 'k',
+        million: 'm',
+        billion: 'b',
+        trillion: 't'
+    },
+    ordinal : function (number) {
+        return number === 1 ? '' : '';
+    },
+    currency: {
+        symbol: '₽'
+    }
+});
+numeral.locale('ru');
 
 const RichTextEditor = defineAsyncComponent(() =>
     import('./components/RichTextEditor.vue')

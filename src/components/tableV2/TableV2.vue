@@ -106,9 +106,12 @@
                                       @change="row.getToggleSelectedHandler()($event)"
                             />
 
-                            <CellRenderer :cell="cell"/>
+                            <CellRenderer :cell="cell"
+                                          :field="cell?.column?.columnDef?.meta.field"
+                                          :column-def="cell?.column?.columnDef?.meta.column"
+                            />
 <!--                            <div >-->
-<!--                                {{cell.getValue()}}-->
+<!--                                {{cell?.column?.columnDef?.meta}}-->
 <!--                            </div>-->
 
 <!--                            <FlexRender v-if="cell"-->
@@ -394,6 +397,10 @@ const init = async () => {
 
         if (props.dataset)
             props.dataset.search = searchText.value
+    }
+
+    if (props.dataset) {
+        await props.dataset.getFields()
     }
 
     initColumns()
