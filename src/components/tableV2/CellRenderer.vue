@@ -47,5 +47,8 @@ const getRenderedValue = () => {
     width: inherit;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: normal;
+    align-content: center;
+    height: 100%;
 }
 </style>

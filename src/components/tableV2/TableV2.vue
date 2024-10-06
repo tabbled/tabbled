@@ -83,19 +83,21 @@
              @scroll="onBodyScroll"
         >
 
-            <table :style="{ width: `${table.getTotalSize()}px`, 'max-width': `${table.getTotalSize()+10}px`}">
+            <table ref="tableBodyRef" :style="{ width: `${table.getTotalSize()}px`, 'max-width': `${table.getTotalSize()+10}px`}">
                 <tbody>
                 <tr  v-for="row in table.getRowModel().rows"
                      :key="row.id "
-                     class='table-row'
                      @click="onClickRow($event, row)"
                      :class="{rowSelected: row.getIsSelected(), 'table-row': true}"
+                     :style="{height: '32px'}"
                 >
                     <td v-for="cell in row.getVisibleCells()"
                         :key="cell.id"
-                        :style="{ width: `${cell.column.getSize()}px` }"
+                        @click="onCellClick(cell)"
+                        :style="{ width: `${cell.column.getSize()}px`, height: 'inherit' }"
+                        :class="{'cell-selected': selectedCellId === cell.id}"
                     >
-                        <div :class="{cell: true, 'cell-selected': selectedCellId === cell.id  } " @click="onCellClick(cell)">
+                        <div :class="{cell: true  } " >
                             <Checkbox v-if="cell.column.getIndex() === 0"
                                       id="row-checkbox"
                                       class="select-checkbox"
@@ -107,8 +109,8 @@
                             />
 
                             <CellRenderer :cell="cell"
-                                          :field="cell?.column?.columnDef?.meta.field"
-                                          :column-def="cell?.column?.columnDef?.meta.column"
+                                          :field="cell?.column?.columnDef?.meta['field']"
+                                          :column-def="cell?.column?.columnDef?.meta['column']"
                             />
 <!--                            <div >-->
 <!--                                {{cell?.column?.columnDef?.meta}}-->
@@ -229,6 +231,8 @@ const emit = defineEmits<{
 
 
 let tableContainer = ref(null)
+let tableBodyRef = ref(null)
+let cellRendererRefs = ref({})
 let tableHeader = ref(null)
 let tableFooter = ref(null)
 const columnHelper = createColumnHelper()
@@ -252,6 +256,7 @@ let pageSize = 30
 
 
 let headerHeight = '34px'
+let rowHeight = ref(30)
 let items = ref([])
 let fallbackItems = []
 
@@ -382,6 +387,7 @@ const getData = async (reset = false) => {
 const init = async () => {
     console.log('tablev2 init', props)
 
+
     availableLocales.forEach(locale => {
         setLocaleMessage(locale as string, Locales[locale as string])
     })
@@ -390,8 +396,8 @@ const init = async () => {
     if (state) {
         const pr = JSON.parse(state)
         columnWidth.value = pr.width
-        columnOrder.value = pr.order
-        sorting.value = pr.sorting
+        columnOrder.value = pr.order ? pr.order : []
+        sorting.value = pr.sorting ? pr.sorting : []
         searchText.value = pr.search
         updateSorting()
 
@@ -688,6 +694,7 @@ thead {
     background: var(--el-bg-color);
     cursor: default;
     transition: background-color .12s ease;
+    border-bottom: 1px solid var(--el-border-color-light);
 }
 
 .table-row.rowSelected:hover {
@@ -704,6 +711,7 @@ thead {
 
 td {
     padding: 0;
+    position: relative;
 }
 
 th {
@@ -715,12 +723,14 @@ th {
 thead th .cell {
     border-right: 1px solid transparent;
     border-bottom: none;
+    height: 32px;
 }
 
 tfoot th .cell {
     cursor: default;
     border-right: 1px solid transparent;
     border-bottom: none;
+    height: 32px;
 }
 
 
@@ -729,7 +739,6 @@ thead th .cell:hover {
     background: var(--el-border-color-extra-light);
     transition: background-color .12s ease;
 }
-
 
 
 .cell {
@@ -741,13 +750,10 @@ thead th .cell:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border-bottom: 1px solid var(--el-border-color-light);
-    border-top: 1px solid transparent;
-    border-right: 1px solid transparent;
-    border-left: 1px solid transparent;
     text-align: left;
     padding: 0 8px 0 8px;
     align-content: center;
+    height: 100%;
 
 }
 
@@ -811,8 +817,8 @@ thead th .cell:hover {
     margin-right: 10px;
 }
 
-.table-body td .cell-selected {
-    border: 1px solid var(--el-color-primary);
+.cell-selected {
+    box-shadow: inset 0 0 0 1px var(--el-color-primary) ;
     transition: border .14s ease;
 }
 
@@ -830,24 +836,6 @@ thead th .cell:hover {
         height: 2px !important;
         border-radius: 0 !important;
     }
-}
-
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    z-index: 49;
-}
-
-.overlay::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
 }
 
 
