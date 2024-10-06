@@ -148,7 +148,6 @@ import { FlakeId } from '../flake-id'
 
 
 import numeral from 'numeral';
-import 'numeral/locales';
 
 import { RowGroupingModule } from '@ag-grid-enterprise/row-grouping';
 import { ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
@@ -174,7 +173,6 @@ import CustomFilterConstructor from "./CustomFilterConstructor.vue"
 
 
 LicenseManager.setLicenseKey("abc")
-numeral.locale('ru')
 
 ModuleRegistry.registerModules([ RowGroupingModule, ServerSideRowModelModule ]);
 

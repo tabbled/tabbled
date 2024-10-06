@@ -421,7 +421,7 @@ const initColumns = () => {
         cols.push(columnHelper.accessor(col.field, {
             id: col.id,
             header: col.title,
-            cell: info => { return col.field ? info.getValue() : null} ,
+            cell: info => { return col.field ? info.getValue() : null } ,
             footer: props => col.field,
             size: col.width && col.width > 0 ? col.width : 150,
             minSize: col.minWidth && col.minWidth > 0 ? col.minWidth : 20,
@@ -735,7 +735,6 @@ thead th .cell:hover {
 .cell {
     display: flex;
     flex-direction: row;
-    height: 32px;
     width: inherit;
     min-width: 0;
     align-items: center;
@@ -749,6 +748,7 @@ thead th .cell:hover {
     text-align: left;
     padding: 0 8px 0 8px;
     align-content: center;
+
 }
 
 :global(th .resizer:hover) .cell {

@@ -14,8 +14,6 @@
 <script lang="ts">
 import {ref} from "vue";
 import numeral from "numeral";
-import 'numeral/locales';
-numeral.locale('ru')
 
 export default {
     name: "CustomCellRenderer",

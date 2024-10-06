@@ -9,6 +9,7 @@ import {Column} from "../column";
 import {Cell} from "@tanstack/vue-table";
 import numeral from "numeral";
 import {onMounted, watch, ref} from "vue";
+import dayjs from "dayjs";
 
 interface Props {
     cell: Cell<any,any>,
@@ -29,6 +30,10 @@ const getRenderedValue = () => {
 
     if (props.field.type === 'number'){
         return numeral(props.cell.getValue()).format(props.columnDef.format)
+    }
+
+    if (['time', 'date', 'datetime'].includes(props.field.type)) {
+        return dayjs(props.cell.getValue()).format(props.columnDef.format)
     }
 
     return props.cell.getValue()
