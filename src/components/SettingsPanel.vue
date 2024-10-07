@@ -169,14 +169,13 @@ const getVisible = (path: string) : boolean => {
 }
 
 const onChange = (path: string, value: any) => {
-    console.log('onChange', path, value)
+    //console.log('onChange', path, value)
     pageStore.setProperty(path, value)
 
     updateDependVisible(path)
 }
 
 const getValue = (path: string) => {
-    console.log('getValue',path)
     return _.has(pageStore.propertiesHelper.props, path) ? _.get(pageStore.propertiesHelper.props, path) : null
 }
 
@@ -185,7 +184,7 @@ const updateDependVisible = (dependPath) => {
         return
     }
 
-    console.log('updateDependVisible', dependPath)
+    //console.log('updateDependVisible', dependPath)
 
     dependings.get(dependPath).forEach(p => {
         updateVisible(p)
@@ -197,7 +196,7 @@ const updateVisible = async (path) => {
     if (!prop)
         return
 
-    console.log('updateVisible', path)
+    //console.log('updateVisible', path)
 
     if (_.has(prop, 'visible')) {
         visibilityProps.value.set(prop.path, await prop.visible({

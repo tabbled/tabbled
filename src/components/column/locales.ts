@@ -11,7 +11,8 @@ export default {
             title: "Title",
             sortable: "Sortable",
             minWidth: "Min width",
-            width: "Width"
+            width: "Width",
+            wordwrap: "Word wrap"
         },
         tooltip: {
             format: "<p>For formatting numeric and currency values use:</p>" +
@@ -54,7 +55,8 @@ export default {
             title: "Заголовок",
             sortable: "Сортировка",
             minWidth: "Мин ширина",
-            width: "Ширина"
+            width: "Ширина",
+            wordwrap: "Перенос слов"
         },
         tooltip: {
             format: "<p>Для форматирования чисел и денег используйте:</p>" +

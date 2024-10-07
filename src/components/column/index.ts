@@ -7,6 +7,7 @@ export interface Column {
     field?: string // required if type = field
     minWidth?: number
     width?: number
-    sortable?: boolean,
+    sortable?: boolean
     format?: string
+    wordwrap?: boolean
 }

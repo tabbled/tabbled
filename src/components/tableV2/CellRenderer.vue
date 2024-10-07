@@ -1,5 +1,5 @@
 <template>
-    <div class="cell-renderer">{{getRenderedValue()}}</div>
+    <div :class="{'cell-renderer': true, wordwrap: getWordwrap()}">{{getRenderedValue()}}</div>
 </template>
 
 <script setup lang="ts">
@@ -8,7 +8,6 @@ import {FieldInterface} from "../../model/field";
 import {Column} from "../column";
 import {Cell} from "@tanstack/vue-table";
 import numeral from "numeral";
-import {onMounted, watch, ref} from "vue";
 import dayjs from "dayjs";
 
 interface Props {
@@ -39,6 +38,14 @@ const getRenderedValue = () => {
     return props.cell.getValue()
 }
 
+const getWordwrap = () => {
+    if (!props.columnDef) {
+        return false
+    }
+
+    return props.columnDef.wordwrap
+}
+
 </script>
 
 <style lang="scss">
@@ -47,8 +54,12 @@ const getRenderedValue = () => {
     width: inherit;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: normal;
+    white-space: nowrap;
     align-content: center;
     height: 100%;
+}
+
+.wordwrap {
+    white-space: normal;
 }
 </style>

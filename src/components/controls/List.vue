@@ -16,11 +16,11 @@
              @dragend="() => finishDrag(item, idx)"
              @dragstart="(e) => startDrag(item, idx, e)"
              :draggable="sortable"
-             @click="emit('edit', idx); setCurrentIndex(idx)"
+
         >
-            <div class="list-item-title">
+            <div class="list-item-title" @click="emit('edit', idx); setCurrentIndex(idx)">
                 <DragHorizontal v-if="sortable" class="drag-list-item"/>
-                <slot :item="item" :index="idx">
+                <slot :item="item" :index="idx" >
                     {{item[titleProp]}}
                 </slot>
             </div>
@@ -151,7 +151,8 @@ function onDragOver(item, pos, e) {
 
 .list-item-actions {
     opacity: 0;
-    padding-right: 8px
+    padding-right: 8px;
+    display: flex;
 }
 
 .list-item:hover  {

@@ -599,6 +599,7 @@ const insertNewColumn = (index: number) => {
 
     emit('update:property', 'columns', cols)
     emit('settings-request', `columns[${cols.length - 1}]`, 'Column')
+    saveState()
 }
 
 const removeColumn = (index) => {
@@ -609,6 +610,7 @@ const removeColumn = (index) => {
 
     cols.splice(index, 1)
     emit('update:property', 'columns', cols)
+    saveState()
 }
 
 onUnmounted(() => {
@@ -693,7 +695,7 @@ thead {
 .table-row {
     background: var(--el-bg-color);
     cursor: default;
-    transition: background-color .12s ease;
+    transition: background-color .04s ease;
     border-bottom: 1px solid var(--el-border-color-light);
 }
 

@@ -70,7 +70,6 @@ const remove = (idx) => {
 }
 
 const edit = (idx) => {
-    console.log(idx, props.path, props.parentPath)
     try {
         pageStore.openSettings(`${props.path}[${idx}]`, 'Column', props.parentPath)
     } catch (e) {

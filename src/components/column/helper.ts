@@ -91,6 +91,12 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 group: "interaction",
                 path: "sortable",
                 default: () => false
+            },{
+                title: "prop.wordwrap",
+                editor: "checkbox",
+                group: "appearance",
+                path: "wordwrap",
+                default: () => false
             }]
     }
 
