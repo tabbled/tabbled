@@ -1,5 +1,11 @@
 <template>
-    <div :class="{'cell-renderer': true, wordwrap: getWordwrap()}">{{getRenderedValue()}}</div>
+    <div v-if="props.cell.getValue() !== undefined && props.cell.getValue() !== null"
+         :class="{'cell-renderer': true, wordwrap: getWordwrap()}">
+        {{getRenderedValue()}}
+    </div>
+    <div v-else>
+        <el-tag class="null-value" type="info" size="small">{{$t('null')}}</el-tag>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -61,5 +67,9 @@ const getWordwrap = () => {
 
 .wordwrap {
     white-space: normal;
+}
+
+.null-value {
+    opacity: 0.5;
 }
 </style>

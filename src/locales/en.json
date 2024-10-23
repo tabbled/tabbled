@@ -43,6 +43,7 @@
     "count": "Count",
     "print": "Print",
     "loadNext": "Load next entities",
+    "null": "null",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"

@@ -92,7 +92,7 @@ const slots = defineSlots<{
 
 watch(() => props.items,
     async () => {
-        console.log('DataSet items', props.items)
+        //console.log('DataSet items', props.items)
     })
 
 onMounted(() => {

@@ -15,7 +15,7 @@
             <div>{{$t('loading')}}</div>
         </div>
         <div v-else class="app-container">
-            <SidebarMenu :screen-size="screenSize"/>
+            <SidebarMenu v-model:collapsed="isSideBarCollapsed" :screen-size="screenSize"/>
             <router-view :screenSize="screenSize" v-slot="{Component}" :style="{ width: viewerWidth, 'max-width': viewerWidth}">
                 <component ref="rView" :is="Component" />
             </router-view>
@@ -71,7 +71,15 @@ enum ConfigLoadState {
 let configLoadState = ref<ConfigLoadState>(ConfigLoadState.NotLoaded)
 let screenSize = ref(ScreenSize.desktop)
 const { width } = useWindowSize()
+let isMenuCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
 
+const isSideBarCollapsed = computed({
+    get: () => isMenuCollapsed.value,
+    set: (newValue) => {
+        isMenuCollapsed.value = newValue
+        localStorage.setItem('is_menu_collapsed', isMenuCollapsed.value ? 'true' : 'false')
+    }
+})
 
 let socketClient = useSocketClient()
 const dsService = useDataSourceService();
@@ -99,7 +107,7 @@ const { t, locale } = useI18n();
 let pagesByAlias = ref<Map<string, PageConfigInterface>>(new Map())
 
 const viewerWidth: ComputedRef<string> = computed((): string =>  {
-    let w = ( width.value - (252 + (rightSidebarVisible.value && rightSidebarPinned.value ? rightSidebarWidth.value : 0)))
+    let w = ( width.value - (( isSideBarCollapsed.value ? 60 : 251 ) + (rightSidebarVisible.value && rightSidebarPinned.value ? rightSidebarWidth.value : 0)))
     return w + 'px'
 })
 
@@ -129,6 +137,11 @@ onMounted(async () => {
 
     permissions = store.getters['auth/account'].permissions
 })
+
+watch(() => route.path,
+    async () => {
+        rightSidebarService.closeSetting()
+    })
 
 watch(() => route.path,
     async () => {

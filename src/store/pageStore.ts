@@ -76,7 +76,7 @@ export const usePage = defineStore('page', {
             }
             this.properties = props
 
-            this.updateDataSets()
+            await this.updateDataSets()
 
             this.loaded = true
 
@@ -86,6 +86,8 @@ export const usePage = defineStore('page', {
         openSettings(path: string, componentName: string, parentPath?: string) {
             if (!components)
                 components = useComponents()
+
+            console.log("openSettings, path:", path)
 
             this.propertiesHelper = components.helpers.get(componentName)
 
@@ -102,8 +104,9 @@ export const usePage = defineStore('page', {
 
             for(const j in helper.propertiesDef()) {
                 const def = helper.propertiesDef()[j]
-                if (!_.has(this.properties, path + '.' + def.path)) {
-                    _.set(this.properties, path + '.' + def.path, def.default())
+                let p = `${path ? path + "."  : ""}${def.path}`
+                if (!_.has(this.properties, p)) {
+                    _.set(this.properties, p, def.default())
                 }
             }
 
@@ -115,7 +118,7 @@ export const usePage = defineStore('page', {
 
             watch(() => this.properties.datasets,
                 async () => {
-                    this.updateDataSets()
+                    await this.updateDataSets()
                 })
 
         },
@@ -129,42 +132,51 @@ export const usePage = defineStore('page', {
         setProperty(path: string, value: any) {
             let p = `${this.propertiesPath ? this.propertiesPath + "."  : ""}${path}`
 
-            console.log(path, value, _.get(this.properties, p ))
+            console.log(this.properties)
+
+            console.log("setProperty, path '", p, "', value ", value, _.get(this.properties, p ))
 
             _.set(this.properties, p, value)
-
-
-
 
             this.isPropsChanged = true
         },
 
         // Use it to update property value directly from elements
         setPropertyByPath(path: string, value: any) {
+            console.log("setPropertyByPath, path:", path, "value: ", value )
             _.set(this.properties, path, value)
             this.isPropsChanged = true
         },
 
-        updateDataSets() {
+        async updateDataSets() {
             for(const i in this.properties.datasets) {
                 let ds:DataSet
                 if (_.has(this.datasets, this.properties.datasets[i].alias)) {
-                    ds = this.properties.datasets[i]
+                    ds = this.datasets[this.properties.datasets[i].alias]
                 } else {
                     ds = new DataSet()
                     this.datasets[this.properties.datasets[i].alias] = ds
                 }
-                ds.props = this.properties.datasets[i]
+                ds.props = _.cloneDeep(this.properties.datasets[i])
+                await ds.getFields()
+
+
+                ds.restoreFilter(localStorage.getItem(`${this.properties.id}_${ds.props.alias}_filterBy`))
+                ds.onFilterUpdate = () => {
+                    localStorage.setItem(`${this.properties.id}_${ds.props.alias}_filterBy`, ds.backupFilter())
+                }
             }
         },
 
         async saveChanges() {
-            console.log("save")
             try {
-                this.isPropsChanged = false
                 await api.patch(`/v2/pages/${this.properties.id}`, this.properties)
+                this.isPropsChanged = false
             } catch (e) {
                 console.error(e)
+                ElMessage.error({
+                    message: e.toString()
+                })
             }
 
         }

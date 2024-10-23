@@ -85,6 +85,7 @@ import {useSocketClient} from "../../services/socketio.service";
 import {useSettings} from "../../services/settings.service";
 import {useI18n} from 'vue-i18n'
 import { FlakeId } from '../../flake-id'
+import {useApiClient} from "../../services/api.service";
 let flakeId = new FlakeId()
 
 let router = useRouter();
@@ -93,12 +94,13 @@ let functionEntity = ref(null)
 let datasource: DataSourceInterface = null
 let dsService = useDataSourceService()
 let isNew = ref(false)
-let updateKey = ref(0)
 let activeTab = 'script'
 let isChanged = ref(false)
 
+
 const socket = useSocketClient()
 const settings = useSettings()
+let api = useApiClient()
 
 const { t } = useI18n();
 
@@ -132,12 +134,11 @@ async function load() {
         functionEntity.value = await datasource.getById(<string>route.params.id)
         isNew.value = false
     }
-    updateKey.value++
 
     if (roomId)
         socket.socket.off(roomId, consoleRoom)
 
-    roomId = `console.${flakeId.generateId().toString()}`
+    roomId = `console.${isNew.value ? flakeId.generateId().toString() : functionEntity.value.id}`
     socket.socket.on(roomId, consoleRoom)
     isChanged.value = false
 }
@@ -202,16 +203,15 @@ const context: ComputedRef<any> = computed((): any =>  {
 })
 
 async function run() {
-    let res
     try {
-        res = await socket.emit('functions/script/run', {
+        let res = await api.post(`functions/script/run`, {
             script: functionEntity.value.script,
             context: context.value,
             room: roomId
         })
 
         console.log('%cFunction result:', 'color: green')
-        console.log(res)
+        console.log(res.data.data)
     } catch (e) {
         console.error(e)
     }

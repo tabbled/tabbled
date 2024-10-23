@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
-import {ContextMenuAction} from "./context-menu-action";
+import {ContextMenuAction} from "./tableV2/context-menu-action";
 
 
 interface Props {

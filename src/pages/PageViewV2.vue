@@ -23,8 +23,6 @@ let pageStore = usePage()
 
 let datasets = ref<DataSetInterface[]>([])
 
-let stopWatchDatasets
-
 
 const props = defineProps<{
     alias: string,

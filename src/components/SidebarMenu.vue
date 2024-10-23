@@ -5,15 +5,15 @@
                 <div>
                     <el-row align="middle">
                         <img height="30" :src="favicon" alt=""/>
-                        <div v-if="!isSideBarCollapsed" style="margin-left: 8px">{{title}}</div>
+                        <div v-if="!collapsed" style="margin-left: 8px">{{title}}</div>
                     </el-row>
                 </div>
-                <el-tag v-if="!isConnected && !isSideBarCollapsed" effect="light" size="small" type="danger">Offline</el-tag>
+                <el-tag v-if="!isConnected && !collapsed" effect="light" size="small" type="danger">Offline</el-tag>
 
         </div>
 
             <el-menu class="sidebar-menu"
-                     :collapse="isSideBarCollapsed"
+                     :collapse="collapsed"
                      :collapse-transition="false"
                      :default-active="$route.fullPath"
                      :router="true"
@@ -28,7 +28,7 @@
                                 <Icon :icon=menu.icon width="24" color="gray"/>
                             </el-icon>
 
-                            <span v-if="!isSideBarCollapsed"  style="width: 100%; text-align: left;">{{menu.title}}</span>
+                            <span v-if="!collapsed"  style="width: 100%; text-align: left;">{{menu.title}}</span>
 
                         </template>
 
@@ -68,9 +68,9 @@
                     <el-menu-item v-if="isAdmin" @click="router.push('/configuration')">
                         <Icon icon="ic:outline-display-settings" width="24" color="gray" style="min-width: 24px;" />
                         <template #title>
-                            <span v-if="!isSideBarCollapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{$t('configuration')}}</span>
+                            <span v-if="!collapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{$t('configuration')}}</span>
 
-                            <div v-if="!isSideBarCollapsed" @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open-new">
+                            <div v-if="!collapsed" @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open-new">
                                 <Icon icon="mdi:open-in-new" width="16"/>
                             </div>
                         </template>
@@ -79,9 +79,9 @@
                     <el-menu-item ref="userMenuItem">
                         <Icon style=" min-width: 24px;" color="gray" icon="ic:baseline-account-circle" width="20" />
                         <template #title>
-                            <span v-if="!isSideBarCollapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{username}}</span>
+                            <span v-if="!collapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{username}}</span>
 
-                            <div v-if="!isSideBarCollapsed" @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open-new">
+                            <div v-if="!collapsed" @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open-new">
                                 <Icon icon="mdi:chevron-right" width="16"/>
                             </div>
                         </template>
@@ -112,9 +112,9 @@
 
             <div style="width: 100%; display: flex; justify-content: space-between;">
                 <el-button @click="setCollapsed" text style="width: 32px; opacity:0.2" size="small">
-                    <Icon :icon="isSideBarCollapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
+                    <Icon :icon="collapsed ? 'mdi:chevron-double-right' : 'mdi:chevron-double-left'" width="24"/>
                 </el-button>
-                <div v-if="!isSideBarCollapsed" style="padding-right: 16px; font-size: 12px; opacity: 0.4">
+                <div v-if="!collapsed" style="padding-right: 16px; font-size: 12px; opacity: 0.4">
                     v{{settings.version}}
                 </div>
             </div>
@@ -134,9 +134,8 @@ import {useSettings} from "../services/settings.service";
 import {useRouter} from "vue-router";
 import {ScreenSize} from "../model/page";
 
-let isSideBarCollapsed = ref(localStorage.getItem('is_menu_collapsed') === 'true')
+
 let isAdmin = ref(false)
-let mainSideBarWidth = ref('250px')
 let sidebarMenu = ref<Array<MenuConfigInterface>>(null)
 const store = useStore();
 let socketClient = useSocketClient()
@@ -153,18 +152,25 @@ let permissions = {
 
 const props = defineProps<{
     screenSize: ScreenSize
+    collapsed: boolean
+}>()
+
+const emit = defineEmits<{
+    (e: 'update:collapsed', val): string
 }>()
 
 const username: ComputedRef<string> = computed((): string =>  {
     return store.getters['auth/user'] ? store.getters['auth/user'].username : ""
 })
 
+
+const width: ComputedRef<string> = computed((): string =>  {
+    return `${!props.collapsed ? 250 : 60}px`
+})
+
 onMounted(() => {
-    console.log('Sidebar mounted')
 
     loadMenu();
-
-    mainSideBarWidth.value = `${!isSideBarCollapsed.value ? 250 : 60}px`
     isAdmin.value = store.getters['auth/account'] && store.getters['auth/account'].permissions.admin
 
     permissions = store.getters['auth/account'].permissions
@@ -183,10 +189,9 @@ socketClient.socket.on("disconnect", () => {
 })
 
 function setCollapsed() {
-    isSideBarCollapsed.value = !isSideBarCollapsed.value;
-    mainSideBarWidth.value = `${!isSideBarCollapsed.value ? 300 : 60}px`
 
-    localStorage.setItem('is_menu_collapsed', isSideBarCollapsed.value ? 'true' : 'false')
+    //mainSideBarWidth.value = `${!props.collapsed ? 300 : 60}px`
+    emit('update:collapsed', !props.collapsed)
 }
 
 function isMenuVisible(menu) {
@@ -230,8 +235,7 @@ function openInNewWindow(to: string) {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--el-border-color);
-    width: v-bind(mainSideBarWidth);
-    min-width: v-bind(mainSideBarWidth);
+    width: v-bind(width);
     height: 100%;
 
 

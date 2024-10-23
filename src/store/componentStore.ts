@@ -24,6 +24,7 @@ export const useComponents = defineStore('components', {
                 this.helpers.set('Dataset', new ((await import("../components/dataset/helper")).default))
 
                 await this.registerOne('TableV2', "./../components/tableV2", app)
+                await this.registerOne('FilterPanel', "./../components/filterPanel", app)
 
                 this.loaded = true
             } catch (e) {

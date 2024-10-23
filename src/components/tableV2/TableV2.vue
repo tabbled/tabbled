@@ -2,7 +2,7 @@
     <div v-if="dataset" class="table-wrapper">
         <div class="table-title">
             <div class="table-actions">
-                <h4 v-if="title" class="table-title-caption">{{title}}</h4>
+                <h3 v-if="title" class="table-title-caption">{{title}}</h3>
                 <el-button type="primary" size="small" @click="">Add</el-button>
             </div>
             <div class="table-actions-ext">
@@ -185,7 +185,7 @@ import SettingsIcon from "../icons/settings-icon.vue";
 import SearchIcon from "../icons/search-icon.vue"
 import {DataSetInterface} from "../dataset";
 import {ElMessage} from "element-plus";
-import ContextMenu from "./ContextMenu.vue";
+import ContextMenu from "../ContextMenu.vue";
 import {ContextMenuAction} from "./context-menu-action";
 import {useI18n} from "vue-i18n"
 import {Column} from "../column"
@@ -351,7 +351,7 @@ const debouncedSearch = useDebounceFn(() => {
     props.dataset.search = searchText.value
     props.dataset.loadNext(true)
     saveState()
-}, 1000, {maxWait: 1000})
+}, 500, {maxWait: 500})
 
 const saveState = () => {
     localStorage.setItem(`table_state_${props.id}`, JSON.stringify({
@@ -367,7 +367,12 @@ const updateSorting = () => {
     sorting.value.forEach(i => {
         let c = props.columns.find(c => i.id === c.id)
 
-        sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
+        console.log('updateSorting', c)
+
+        if (c) {
+            sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
+        }
+
     })
     props.dataset.sort = sort
 }
@@ -378,6 +383,12 @@ const getData = async (reset = false) => {
         return
 
     try {
+        if (!props.dataset.props.fields || (!props.dataset.props.fields.length)) {
+
+            props.dataset.fieldsToSelect =  props.columns.map(c => c.field)
+            console.log("<<< add fields", props.dataset.fieldsToSelect)
+
+        }
         await props.dataset.loadNext(reset)
     } catch (e) {
         ElMessage.error(`${t('message.loadingError')}: ${e.toString()}`)
@@ -739,7 +750,7 @@ tfoot th .cell {
 
 thead th .cell:hover {
     background: var(--el-border-color-extra-light);
-    transition: background-color .12s ease;
+    transition: background-color .04s ease;
 }
 
 
@@ -821,7 +832,7 @@ thead th .cell:hover {
 
 .cell-selected {
     box-shadow: inset 0 0 0 1px var(--el-color-primary) ;
-    transition: border .14s ease;
+    transition: border .04s ease;
 }
 
 .loading {

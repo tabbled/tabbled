@@ -15,8 +15,7 @@
 import TableV2 from "./TableV2.vue";
 import {usePage} from "../../store/pageStore";
 import {DataSet} from "../dataset";
-import {onMounted, ref, watch, onUnmounted} from 'vue'
-import _ from 'lodash'
+import {onMounted, ref, watch, onUnmounted, onBeforeMount} from 'vue'
 
 let pageStore = usePage()
 let datasetInst = ref<DataSet>(null)
@@ -48,7 +47,9 @@ watch(() => props.dataset, () => {
 })
 
 onMounted(() => {
-    console.log('TableV2.element mounted', props, _.has(pageStore.datasets, props.dataset))
+})
+
+onBeforeMount(() => {
     datasetInst.value = pageStore.datasets[props.dataset]
 })
 

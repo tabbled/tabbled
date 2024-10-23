@@ -49,9 +49,9 @@ export class SocketIOClient implements ServerInterface {
         })
 
 
-        this.socket.on('functions/console.log', async (...args) => {
-            logger.log('Func console.log: ', ...args)
-        })
+        // this.socket.on('functions/console.log', async (...args) => {
+        //     logger.log('Func console.log: ', ...args)
+        // })
 
         this.socket.on('updates', async(msg) => {
 

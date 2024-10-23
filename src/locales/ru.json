@@ -69,6 +69,7 @@
     "isAggregator": "Агрегатор",
     "keyFields": "Ключевое поле",
     "aggFields": "Поля накопления",
+    "null": "пусто",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"

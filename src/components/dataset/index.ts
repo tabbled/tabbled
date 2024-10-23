@@ -23,14 +23,13 @@ export declare type StandardQueryOperator =
     | '!empty'
 
 export interface FilterItemInterface {
-    key: string
-    op: StandardQueryOperator
+    id: string
+    field: string
+    operation: StandardQueryOperator
     compare?: any
-    compare_2?: any
 }
 
 export class GetDataManyRequestDto {
-    filter?: FilterItemInterface[]
     filterBy?:string
     searchBy?:string[]
     fields?: string[]
@@ -67,11 +66,20 @@ export interface DataSetInterface extends EventEmitter {
     sort: string[]
     isLoading: boolean
     search: string
+    fieldsToSelect: string[]
 
     loadNext: (reset: boolean) => Promise<void>
 
     getFields: () => Promise<FieldInterface[]>
     getFieldByAlias: (alias: string) => FieldInterface
+
+    // Update filter and stringifies to filterBy
+    setFilter: (filter: FilterItemInterface[]) => void
+    restoreFilter: (parsedFilter: string) => void
+    backupFilter: () => string
+
+    // After updating filter by setFilter it invokes
+    onFilterUpdate?: () => void
 
 
     reset: () => void
@@ -95,6 +103,11 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     private _search: string
     private _fields: FieldInterface[] = []
     private _fieldsByAlias = new Map<string, FieldInterface>()
+    private _filterById = new Map<string, FilterItemInterface>()
+    private _filterBy = ""
+    private _fieldsToSelect: string[] = []
+
+    onFilterUpdate?: () => void
 
     get props() : DataSetParamsInterface { return this._props }
     set props(props: DataSetParamsInterface) {
@@ -113,6 +126,13 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
 
     set sort(sort: string[]) {
         this._sort = sort
+    }
+
+    set fieldsToSelect(fields: string[]) {
+        this._fieldsToSelect = fields
+    }
+    get fieldsToSelect() {
+        return this._fieldsToSelect
     }
 
     get isLoading() : boolean { return this._loading }
@@ -176,7 +196,9 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
             limit: 50,
             offset: this.page * 50,
             sort: this._sort ? this._sort : [],
-            query: this._search ? this._search : undefined
+            query: this._search ? this._search : undefined,
+            filterBy: this._filterBy ? this._filterBy : undefined,
+            fields: this._fieldsToSelect.length ? this._fieldsToSelect : undefined
         }
         let res: GetDataManyResponseDto
 
@@ -212,5 +234,63 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         } finally {
             this._loading = false
         }
+    }
+
+    setFilter(filter: FilterItemInterface[]) : void {
+        console.log('setFilter', filter)
+        filter.forEach(f => {
+            this._filterById.set(f.id, f)
+        })
+
+        this.stringifyFilter()
+
+        this.emit('filter-updated')
+
+        if (this.onFilterUpdate instanceof Function) {
+            this.onFilterUpdate()
+        }
+    }
+
+    restoreFilter(filterBy: string) {
+        this._filterBy = filterBy
+    }
+    backupFilter() : string {
+        return this._filterBy
+    }
+
+    stringifyFilter() {
+        let filterBy = ""
+        for (let [key, item] of this._filterById) {
+            let field = this._fieldsByAlias.get(item.field)
+            if (!field)
+                continue
+
+            let filter = ""
+            switch (item.operation) {
+                case "between":
+                case "!between":
+                    if (item.compare && item.compare.length === 2) {
+                        filter = `(${item.field} >= ${item.compare[0]} AND ${item.field} <= ${item.compare[1]})`
+                    }
+                    break
+                case "!in":
+                case "in":
+                    console.log(item.compare)
+                    if (item.compare && item.compare.length > 0) {
+                        filter = `(${item.field} ${item.operation === '!in' ? 'NOT' : ''} IN [${item.compare}])`
+                    }
+            }
+
+            if (filter) {
+                if (filterBy !== "")
+                    filterBy += " AND "
+                filterBy += filter
+            }
+        }
+
+
+        this._filterBy = filterBy
+        console.log(this._filterBy)
+
     }
 }

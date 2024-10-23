@@ -6,9 +6,9 @@ export class DatasourceApi {
     }
     readonly api: ApiClient
 
-    async getMany(version = 1) {
+    async getMany(version = 2) {
         let res = await this.api.get(`/v${version}/datasource`)
-        console.log(res)
+        console.log("DataSourceApi", res)
         if(res.status === 200) {
             return res.data.items
         } else {

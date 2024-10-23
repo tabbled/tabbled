@@ -1,5 +1,5 @@
 <template>
-    <div class="list-page-view" >
+    <div class="page-view" >
         <el-page-header ref="mainHeader" class="list-page-view-header" @back="$router.back()">
             <template #content>
                 <div class="page-title">
@@ -40,6 +40,10 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss">
+.page-view {
+    display: flex;
+    flex-direction: column;
+}
 
 .page-title {
     display: flex;

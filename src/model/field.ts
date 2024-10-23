@@ -94,6 +94,7 @@ export interface FieldInterface {
     setValueFunc?: () => CompiledFunc | undefined,
     getListFunc?: () => CompiledFunc | undefined
     getReadonlyFunc?: () => CompiledFunc | undefined
+    enumValues?: EnumValuesInterface[]
 }
 
 export class Field implements FieldInterface {
@@ -140,6 +141,7 @@ export class Field implements FieldInterface {
     datasource?: string;
     values: EnumValuesInterface[] | (() => Promise<EnumValuesInterface[]>)
     config: FieldConfigInterface
+    enumValues: []
 
     getValueFunc(): CompiledFunc | undefined {
 

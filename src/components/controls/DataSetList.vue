@@ -41,11 +41,13 @@ let api = useApiClient()
 let dsApi = new DatasourceApi(api)
 let pageStore = usePage()
 
+interface ItemList {
+    key: string
+    title: string
+}
+
 let dropdown = ref(null)
-let datasources = ref([{
-    key: "ds",
-    title: "Title"
-}])
+let datasources = ref<ItemList[]>([])
 
 interface Props {
     items?: any[]
@@ -91,7 +93,7 @@ const getDatasource = async () => {
     })
 }
 
-const edit = async (idx) => {
+const edit = async () => {
     try {
         //pageStore.openSettings(`${props.path}[${idx}]`, 'Dataset', props.parentPath)
     } catch (e) {

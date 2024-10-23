@@ -169,7 +169,7 @@ const getVisible = (path: string) : boolean => {
 }
 
 const onChange = (path: string, value: any) => {
-    //console.log('onChange', path, value)
+    console.log('onChange', path, value)
     pageStore.setProperty(path, value)
 
     updateDependVisible(path)

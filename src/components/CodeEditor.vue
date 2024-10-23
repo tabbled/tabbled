@@ -49,8 +49,8 @@ interface Props {
     fieldConfig?: FieldConfigInterface,
     context?:any,
     format: 'json' | 'javascript' | 'html',
-    runnable: boolean,
-    maxHeight: number
+    runnable?: boolean,
+    maxHeight?: number
     update?: number
     load?: Promise<any>
 }

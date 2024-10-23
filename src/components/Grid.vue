@@ -1,10 +1,13 @@
 <template>
     <div v-if="elements && elements.length" class="grid-wrapper">
+
         <div v-for="(element, idx) in elements" class="grid-element-wrapper" :style="{'grid-column': `span ${element.colSpan}`}">
+
             <component :id="element.id"
                        :is="element.componentName"
                        v-bind="element.properties"
                        :path="getElementPath(idx)"
+                       :parentPath="path"
             />
         </div>
     </div>
@@ -36,13 +39,29 @@ const getElementPath = (idx) => {
 
 <style lang="scss">
 .grid-wrapper {
-    padding: 16px;
+    padding: 0 16px 16px 16px;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: max-content;
     gap: 10px;
+
 }
 
 .grid-element-wrapper {
+    position: relative;
 
+}
+
+.grid-element-settings-panel {
+    opacity: 0;
+    right: 100%;
+    z-index: 100;
+    border-radius: 0 3px 0 3px;
+    box-shadow: inset 0 0 0 1px var(--el-color-primary) ;
+    transition: border 1.44s ease;
+}
+
+.grid-element-wrapper:hover .grid-element-settings-panel {
+    opacity: 1;
 }
 </style>
