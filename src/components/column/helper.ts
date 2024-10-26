@@ -15,6 +15,10 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
         {
             key: "appearance",
             title: "group.appearance"
+        },
+        {
+            key: "footer",
+            title: "group.footer"
         }
     ]
 
@@ -92,11 +96,42 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 path: "sortable",
                 default: () => false
             },{
+                title: "prop.searchable",
+                editor: "checkbox",
+                group: "interaction",
+                path: "searchable",
+                tooltip: "tooltip.searchable",
+                default: () => false
+            },{
                 title: "prop.wordwrap",
                 editor: "checkbox",
                 group: "appearance",
                 path: "wordwrap",
                 default: () => false
+            },{
+                title: "prop.aggregationFunc",
+                editor: "select",
+                group: "footer",
+                path: "aggregationFunc",
+                default: () => 'none',
+                items: async () => {
+                    return [{
+                        key: "none",
+                        title: "None"
+                    },{
+                        key: "sum",
+                        title: "Sum"
+                    },{
+                        key: "avg",
+                        title: "Average"
+                    },{
+                        key: "min",
+                        title: "Min"
+                    },{
+                        key: "max",
+                        title: "Max"
+                    }]
+                }
             }]
     }
 

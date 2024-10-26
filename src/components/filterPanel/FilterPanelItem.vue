@@ -6,7 +6,16 @@
             type="datetimerange"
             @change="e => onChange(e)"
             v-model="value"
-
+            :format="item.format"
+            :style="{ width: item.width + 'px' }"
+        />
+        <el-date-picker
+            v-else-if="field.type === 'date' && item.operation === 'between'"
+            type="daterange"
+            @change="e => onChange(e)"
+            v-model="value"
+            :format="item.format"
+            :style="{ width: item.width + 'px' }"
         />
         <FilterPanelSelectItem
             v-else-if="field.type === 'enum'"
@@ -49,6 +58,8 @@ const emit = defineEmits<{
 const field = computed(() => {
     if (!props.dataset)
         return null
+
+    console.log(props.item.field)
 
     return props.dataset.getFieldByAlias(props.item.field)
 })

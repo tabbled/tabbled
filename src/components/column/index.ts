@@ -8,6 +8,8 @@ export interface Column {
     minWidth?: number
     width?: number
     sortable?: boolean
+    searchable?: boolean
     format?: string
-    wordwrap?: boolean
+    wordwrap?: boolean,
+    aggregationFunc?: 'none' | 'sum' | 'avg' | 'min' | 'max'
 }

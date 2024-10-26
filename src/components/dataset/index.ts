@@ -38,6 +38,12 @@ export class GetDataManyRequestDto {
     offset?: number = 0
     sort?: string[]
     parentId?: string
+
+}
+
+export class Aggregation {
+    field: string
+    func: 'none' | 'sum' | 'avg' | 'min' | 'max'
 }
 
 export interface DataSetParamsInterface {
@@ -67,6 +73,8 @@ export interface DataSetInterface extends EventEmitter {
     isLoading: boolean
     search: string
     fieldsToSelect: string[]
+    fieldsToSearch: string[]
+    aggregation: Aggregation[]
 
     loadNext: (reset: boolean) => Promise<void>
 
@@ -77,12 +85,16 @@ export interface DataSetInterface extends EventEmitter {
     setFilter: (filter: FilterItemInterface[]) => void
     restoreFilter: (parsedFilter: string) => void
     backupFilter: () => string
+    getTotalByField: (field: string) => number
+    updateTotals: () => Promise<void>
 
     // After updating filter by setFilter it invokes
     onFilterUpdate?: () => void
 
 
     reset: () => void
+
+    exportData: () => Promise<string>
 }
 
 export class DataSet extends EventEmitter implements DataSetInterface  {
@@ -97,6 +109,7 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     private _items: any[] = []
     private _page: number = 0
     private _loading = false
+    private _totalsLoading = false
     private _totalCount = 0
     private api = useApiClient()
     private _sort: string[] = []
@@ -106,6 +119,11 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     private _filterById = new Map<string, FilterItemInterface>()
     private _filterBy = ""
     private _fieldsToSelect: string[] = []
+    private _agg: Aggregation[] = []
+    private _fieldsToSearch: string[] = []
+    private _totals: {
+        [key in string]: number
+    } = {}
 
     onFilterUpdate?: () => void
 
@@ -135,12 +153,30 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         return this._fieldsToSelect
     }
 
+    set aggregation(agg: Aggregation[]) {
+        this._agg = agg
+    }
+    get aggregation() {
+        return this._agg
+    }
+
+    set fieldsToSearch(fields: string[]) {
+        this._fieldsToSearch = fields
+    }
+    get fieldsToSearch() {
+        return this._fieldsToSearch
+    }
+
     get isLoading() : boolean { return this._loading }
 
     get items() : any[] { return this._items }
     get totalCount() : number { return this._totalCount }
     get page() : number { return this._page }
     get allDataLoaded() : boolean { return this._items.length === this._totalCount }
+
+    getTotalByField(field: string) {
+        return this._totals[field]
+    }
 
     reset() {
         this.emit('reset-data')
@@ -189,6 +225,7 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         if (reset) {
             this._page = 0
             this._totalCount = 0
+            this._totals = {}
             this.emit('reset-data')
         }
 
@@ -198,7 +235,8 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
             sort: this._sort ? this._sort : [],
             query: this._search ? this._search : undefined,
             filterBy: this._filterBy ? this._filterBy : undefined,
-            fields: this._fieldsToSelect.length ? this._fieldsToSelect : undefined
+            fields: this._fieldsToSelect.length ? this._fieldsToSelect : undefined,
+            searchBy: this._fieldsToSearch.length ? this._fieldsToSearch : undefined
         }
         let res: GetDataManyResponseDto
 
@@ -236,8 +274,41 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         }
     }
 
+    async updateTotals() {
+        if (this._totalsLoading)
+            return
+
+        this._totalsLoading = true
+
+        let params = {
+            query: this._search ? this._search : undefined,
+            filterBy: this._filterBy ? this._filterBy : undefined,
+            agg: this._agg ? this._agg : undefined
+        }
+
+        try {
+            let dStart = new Date()
+            let res = (await this.api.post(`/v2/datasource/${this.props.datasource}/data/totals`, params)).data
+            this._totals = res.totals
+            let dEnd = new Date()
+
+            this.emit('update-totals', res.totals)
+
+            console.log(`Got totals for ${dEnd.valueOf() - dStart.valueOf()}ms`)
+        } catch (e) {
+            if (e.response.data.error) {
+                throw new Error(e.response.data.error)
+            } else {
+                console.log(e)
+                throw new Error("Oops... Something went wrong")
+            }
+        } finally {
+            this._totalsLoading = false
+        }
+
+    }
+
     setFilter(filter: FilterItemInterface[]) : void {
-        console.log('setFilter', filter)
         filter.forEach(f => {
             this._filterById.set(f.id, f)
         })
@@ -292,5 +363,30 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         this._filterBy = filterBy
         console.log(this._filterBy)
 
+    }
+
+    async exportData() {
+        let params = {
+            fields: this._fieldsToSelect.length ? this._fieldsToSelect : undefined,
+            query: this._search ? this._search : undefined,
+            filterBy: this._filterBy ? this._filterBy : undefined,
+            agg: this._agg ? this._agg : undefined
+        }
+
+        try {
+
+            let res = (await this.api.post(`/v2/datasource/${this.props.datasource}/data/export`, params)).data
+
+            console.log(res)
+            return res.file
+
+        } catch (e) {
+            if (e.response.data.error) {
+                throw new Error(e.response.data.error)
+            } else {
+                console.log(e)
+                throw new Error("Oops... Something went wrong")
+            }
+        }
     }
 }

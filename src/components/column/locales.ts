@@ -3,18 +3,22 @@ export default {
         group: {
             data: "Data",
             appearance: "Appearance",
-            interaction: "Interaction"
+            interaction: "Interaction",
+            footer: "Footer"
         },
         prop: {
             field: "Field",
             format: "Format",
             title: "Title",
             sortable: "Sortable",
+            searchable: "Searchable",
             minWidth: "Min width",
             width: "Width",
-            wordwrap: "Word wrap"
+            wordwrap: "Word wrap",
+            aggregationFunc: "Total function"
         },
         tooltip: {
+            searchable: "Enable fulltext search for this column",
             format: "<p>For formatting numeric and currency values use:</p>" +
                 "<code>0,0.0000</code> - число 10000 выведет в виде строки 10,000.0000 <br>" +
                 "<code>0[.]00000</code> - число 10000.1234 выведет в виде строки 10000.12340 <br>" +
@@ -47,18 +51,22 @@ export default {
         group: {
             data: "Данные",
             appearance: "Внешний вид",
-            interaction: "Взаимодействие"
+            interaction: "Взаимодействие",
+            footer: "Подвал"
         },
         prop: {
             field: "Поле",
             format: "Формат",
             title: "Заголовок",
             sortable: "Сортировка",
+            searchable: "Поиск",
             minWidth: "Мин ширина",
             width: "Ширина",
-            wordwrap: "Перенос слов"
+            wordwrap: "Перенос слов",
+            aggregationFunc: "Считать итого"
         },
         tooltip: {
+            searchable: "Включить полнотекстовый поиск для данной колонки",
             format: "<p>Для форматирования чисел и денег используйте:</p>" +
                 "<code>0,0.0000</code> - число 10000 выведет в виде строки 10,000.0000 <br>" +
                 "<code>0[.]00000</code> - число 10000.1234 выведет в виде строки 10000.12340 <br>" +

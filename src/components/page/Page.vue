@@ -4,13 +4,25 @@
             <template #content>
                 <div class="page-title">
                     <span> {{title}} </span>
-                    <el-button type="info" text circle :icon="SettingsIcon" @click="emit('settingsRequest')"/>
+
 
                 </div>
             </template>
             <template #extra>
                 <div class="page-actions" >
                     <el-button v-if="page.isPropsChanged" size="small" type="warning" @click="page.saveChanges()">Publish changes</el-button>
+                        <el-dropdown>
+                            <el-button type="info" text circle :icon="MoreVertIcon" />
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item :icon="SettingsIcon" @click="emit('settingsRequest')">
+                                        {{$t('settings')}}
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+<!--                    -->
+
                 </div>
             </template>
         </el-page-header>
@@ -23,6 +35,7 @@
 import Grid from "../Grid.vue";
 import SettingsIcon from "../icons/settings-icon.vue";
 import {usePage} from "../../store/pageStore";
+import MoreVertIcon from "../icons/more-vert-icon.vue";
 
 interface Props {
     title: string
@@ -49,6 +62,7 @@ const emit = defineEmits<{
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
 }
 
 .page-actions {

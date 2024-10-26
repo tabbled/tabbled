@@ -44,6 +44,7 @@
     "print": "Print",
     "loadNext": "Load next entities",
     "null": "null",
+    "total": "Total",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"

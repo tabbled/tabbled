@@ -70,6 +70,7 @@
     "keyFields": "Ключевое поле",
     "aggFields": "Поля накопления",
     "null": "пусто",
+    "total": "Всего",
     "layout": {
         "desktop": "Desktop",
         "mobile": "Mobile"

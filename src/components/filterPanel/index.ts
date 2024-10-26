@@ -6,5 +6,7 @@ export interface FilterPanelItemInterface {
     colSpan: number
     field: string
     operation: StandardQueryOperator
-    title: string
+    title: string,
+    format: string,
+    width: number
 }

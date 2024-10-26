@@ -10,7 +10,7 @@
                          @change="(e) => onFilterChange(e)"
         />
     </div>
-    <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="openSettings"/>
+<!--    <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="openSettings"/>-->
 </div>
 
 </template>
@@ -20,7 +20,6 @@
 import {usePage} from "../../store/pageStore";
 import {DataSet, FilterItemInterface} from "../dataset";
 import {onMounted, ref, watch, onUnmounted, onBeforeMount} from 'vue'
-import SettingsIcon from "../icons/settings-icon.vue";
 import {FilterPanelItemInterface} from "./index";
 import FilterPanelItem from "./FilterPanelItem.vue";
 

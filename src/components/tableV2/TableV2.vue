@@ -3,17 +3,20 @@
         <div class="table-title">
             <div class="table-actions">
                 <h3 v-if="title" class="table-title-caption">{{title}}</h3>
-                <el-button type="primary" size="small" @click="">Add</el-button>
+<!--                <el-button type="primary" size="small" @click="">Add</el-button>-->
             </div>
             <div class="table-actions-ext">
+                <span class="table-total-count">{{$t('total')}}: {{ totalCount }}</span>
                 <el-input clearable
                           :placeholder="$t('search')"
                           :prefix-icon="SearchIcon"
-                          style="height: 24px; width: 150px"
+                          style="height: 24px; width: 150px; margin-right: 4px"
                           size="small"
                           @input="debouncedSearch()"
                           v-model="searchText"/>
+                <el-button type="info" round circle text :icon="ExportDataIcon" class="table-settings-button" @click="exportData"/>
                 <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settings-request', '', 'TableV2')"/>
+
             </div>
 
         </div>
@@ -45,7 +48,7 @@
                     >
                         <div class="cell">
 
-                            <div class="columnHeaderTitle">
+                            <div class="column-header-title">
                                 <Checkbox v-if="header.index === 0"
                                           id="column-header-checkbox"
                                           class="select-checkbox"
@@ -141,7 +144,7 @@
                         :colSpan="header.colSpan"
                         :style="{ width: `${header.getSize()}px` }"
                     >
-                        <div class="cell">
+                        <div class="cell column-header-title">
                             <FlexRender
                                 v-if="!header.isPlaceholder"
                                 :render="header.column.columnDef.footer"
@@ -176,12 +179,13 @@ import {
     Updater,
     ColumnSizingState
 } from '@tanstack/vue-table'
-import {onMounted, onUnmounted, ref, watch} from 'vue'
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import Checkbox from './Checkbox.vue'
 import Table from "../Table.vue";
 import IconArrowDown from "../icons/sort-arrow-down-icon.vue";
 import IconArrowUp from "../icons/sort-arrow-up-icon.vue";
 import SettingsIcon from "../icons/settings-icon.vue";
+import ExportDataIcon from "../icons/export-data-icon.vue";
 import SearchIcon from "../icons/search-icon.vue"
 import {DataSetInterface} from "../dataset";
 import {ElMessage} from "element-plus";
@@ -193,6 +197,8 @@ import Locales from "./locales"
 import _ from "lodash";
 import {useDebounceFn} from "@vueuse/core";
 import CellRenderer from "./CellRenderer.vue";
+import numeral from "numeral";
+import {b64toBlob} from "../../utils/base64ArrayBuffer.js";
 
 const {t, setLocaleMessage, availableLocales} = useI18n({
     useScope: "local"
@@ -216,13 +222,7 @@ const props = withDefaults(defineProps<Props>(), {
     columns: () => []
 })
 
-const refresh = () => {
-    if (props.dataset) {
-        props.dataset.loadNext(true)
-    }
-}
-
-defineExpose({ refresh })
+defineExpose({  })
 
 const emit = defineEmits<{
     (e: 'settings-request', path: string, component: string): void,
@@ -232,7 +232,6 @@ const emit = defineEmits<{
 
 let tableContainer = ref(null)
 let tableBodyRef = ref(null)
-let cellRendererRefs = ref({})
 let tableHeader = ref(null)
 let tableFooter = ref(null)
 const columnHelper = createColumnHelper()
@@ -253,6 +252,8 @@ const rowSelection = ref<RowSelectionState>({})
 const sorting = ref()
 let page = 1
 let pageSize = 30
+
+let totalCount = computed(() => props.dataset ? props.dataset.totalCount : 0)
 
 
 let headerHeight = '34px'
@@ -298,12 +299,10 @@ let table = useVueTable({
     },
     getRowId: row => row['id'],
     onColumnOrderChange: (order) => {
-        console.log('onColumnOrderChange')
         columnOrder.value = (order as string[])
         saveState()
     },
     onSortingChange: (updaterOrValue) => {
-        console.log('onSortingChange', props.dataset)
         if (!props.dataset)
             return
 
@@ -337,8 +336,14 @@ onMounted(async () => {
 
 watch(() => props.columns,
     async () => {
-        console.log('TableV2 props changed', props)
         initColumns()
+        if (updateFieldsToSelect())
+            await getData(true)
+
+        if (updateFieldsToAgg()) {
+            await props.dataset.updateTotals()
+        }
+
     }, {deep: true})
 
 watch(() => props.dataset,
@@ -350,6 +355,7 @@ watch(() => props.dataset,
 const debouncedSearch = useDebounceFn(() => {
     props.dataset.search = searchText.value
     props.dataset.loadNext(true)
+    props.dataset.updateTotals()
     saveState()
 }, 500, {maxWait: 500})
 
@@ -367,8 +373,6 @@ const updateSorting = () => {
     sorting.value.forEach(i => {
         let c = props.columns.find(c => i.id === c.id)
 
-        console.log('updateSorting', c)
-
         if (c) {
             sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
         }
@@ -378,25 +382,20 @@ const updateSorting = () => {
 }
 
 const getData = async (reset = false) => {
-    console.log('TableV2.getData', props.dataset)
     if (!props.dataset)
         return
 
     try {
-        if (!props.dataset.props.fields || (!props.dataset.props.fields.length)) {
-
-            props.dataset.fieldsToSelect =  props.columns.map(c => c.field)
-            console.log("<<< add fields", props.dataset.fieldsToSelect)
-
-        }
-        await props.dataset.loadNext(reset)
+        await Promise.all([
+            props.dataset.loadNext(reset),
+            reset ? props.dataset.updateTotals() : null])
     } catch (e) {
         ElMessage.error(`${t('message.loadingError')}: ${e.toString()}`)
     }
 }
 
 const init = async () => {
-    console.log('tablev2 init', props)
+    //console.log('tablev2 init', props)
 
 
     availableLocales.forEach(locale => {
@@ -421,12 +420,44 @@ const init = async () => {
     }
 
     initColumns()
+    updateFieldsToSelect()
+    updateFieldsToAgg()
 
     if (props.dataset) {
         unsubscribeDatasetEvents()
         subscribeDatasetEvents()
         await getData(true)
     }
+}
+
+const updateFieldsToAgg = () : boolean => {
+    let aggs = props.columns.filter(f => f.aggregationFunc && f.aggregationFunc !== 'none').map(c => {
+        return {
+            field: c.field,
+            func: c.aggregationFunc
+        }
+    })
+
+    if (_.differenceWith(aggs,  props.dataset.aggregation, _.isEqual).length) {
+        props.dataset.aggregation = aggs
+        return true
+    }
+
+    return false
+}
+
+const updateFieldsToSelect = () : boolean => {
+    if (!props.dataset.props.fields || (!props.dataset.props.fields.length)) {
+        let fields = props.columns.map(c => c.field)
+
+        if (!props.dataset.fieldsToSelect.length
+            || props.dataset.fieldsToSelect.length !== fields.length
+            || _.difference(props.dataset.fieldsToSelect, fields).length) {
+                props.dataset.fieldsToSelect = fields
+                return true
+        }
+    }
+    return false
 }
 
 const initColumns = () => {
@@ -439,7 +470,7 @@ const initColumns = () => {
             id: col.id,
             header: col.title,
             cell: info => { return col.field ? info.getValue() : null } ,
-            footer: props => col.field,
+            footer: props => getFooterValue(props),
             size: col.width && col.width > 0 ? col.width : 150,
             minSize: col.minWidth && col.minWidth > 0 ? col.minWidth : 20,
             enableSorting: col.sortable,
@@ -452,10 +483,15 @@ const initColumns = () => {
 
     columns.value = cols
 
+    props.dataset.fieldsToSearch = props.columns.filter(f => f.searchable).map(i => i.field)
     props.dataset.reset()
 
-    if (!columnOrder.value.length)
+    if (!columnOrder.value.length) {
         columnOrder.value = props.columns.map(i => i.id)
+    } else {
+        _.remove(columnOrder.value, c => !cols.find(f=> f.id === c))
+        saveState()
+    }
 }
 
 const subscribeDatasetEvents = () => {
@@ -549,6 +585,7 @@ const openHeaderMenu = (e, header) => {
         title: t("column.insertRight"),
         action: "insertRight",
         onClick: () => {
+            console.log(columnOrder.value)
             let idx = columnOrder.value.findIndex(i => i === header.id)
             insertNewColumn(idx+1)
         }
@@ -556,6 +593,7 @@ const openHeaderMenu = (e, header) => {
         title: t("column.insertLeft"),
         action: "insertLeft",
         onClick: () => {
+            console.log(columnOrder.value)
             let idx = columnOrder.value.findIndex(i => i === header.id)
             insertNewColumn(idx)
         }
@@ -593,6 +631,19 @@ const onDragEnter = (e) => {
     e.preventDefault()
 }
 
+const getFooterValue = (prop) => {
+    if (!props.columns || !props.dataset)
+        return null
+
+    let col = props.columns.find(c => c.id === prop.column.id)
+
+    if (col && col.aggregationFunc && col.aggregationFunc !== 'none') {
+        return numeral(props.dataset.getTotalByField(col.field)).format(col.format)
+    }
+
+    return null
+}
+
 const insertNewColumn = (index: number) => {
     let cols = props.columns
     let max = _.maxBy(cols, (i) => Number(i.id))
@@ -622,6 +673,27 @@ const removeColumn = (index) => {
     cols.splice(index, 1)
     emit('update:property', 'columns', cols)
     saveState()
+}
+
+const exportData = async () => {
+    console.log("exportData")
+    if (!props.dataset)
+        return
+
+    try {
+    let res = await props.dataset.exportData()
+
+        let a = document.createElement("a");
+        document.body.appendChild(a);
+        a.setAttribute('style',"display: none")
+
+        a.href = window.URL.createObjectURL(b64toBlob(res, `application/csv`));
+        a.download = `${props.dataset.props.alias}.csv`
+        a.click()
+    } catch (e) {
+        console.error(e)
+        ElMessage.error(e.toString())
+    }
 }
 
 onUnmounted(() => {
@@ -668,7 +740,7 @@ onUnmounted(() => {
 
 .table-settings-button {
     z-index: 10;
-    margin: 0 4px;
+    margin: 0 4px 0 0 !important;
 }
 
 .table-body {
@@ -734,14 +806,12 @@ th {
 }
 
 thead th .cell {
-    border-right: 1px solid transparent;
     border-bottom: none;
     height: 32px;
 }
 
 tfoot th .cell {
     cursor: default;
-    border-right: 1px solid transparent;
     border-bottom: none;
     height: 32px;
 }
@@ -810,15 +880,19 @@ thead th .cell:hover {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+
 }
 
-.columnHeaderTitle {
+.column-header-title {
     display: flex;
     flex-direction: row;
     align-items: center;
+    color: var(--el-text-color-secondary);
+    font-size: 14px;
+    font-weight: 600;
 }
 
-.columnHeaderDragIcon {
+.column-header-drag-icon {
     cursor: grab;
     width: 20px;
     height: 100%;
@@ -849,6 +923,13 @@ thead th .cell:hover {
         height: 2px !important;
         border-radius: 0 !important;
     }
+}
+
+.table-total-count {
+    color: var(--el-text-color-placeholder);
+    margin-right: 16px;
+    font-size: 12px;
+    cursor: default;
 }
 
 
