@@ -5,7 +5,7 @@
              :title="title"
              :dataset="datasetInst"
              :inline-edit="inlineEdit"
-             :style="{height: height + 'px'}"
+             :style="{height: props.height + 'px'}"
              @update:property="onPropertyUpdate"
              @settings-request="openSettings"/>
 </template>

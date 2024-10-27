@@ -64,6 +64,14 @@ export const usePage = defineStore('page', {
                 let el = props.elements[i]
                 let helper = components.helpers.get(el.componentName)
 
+                console.log(helper)
+
+                if (!helper) {
+                    console.error(`For element ${el.componentName} has no helper`)
+                    continue
+                }
+
+
                 for(const j in helper.propertiesDef()) {
                     const def = helper.propertiesDef()[j]
                     if (!_.has(el,'properties.' + def.path)) {

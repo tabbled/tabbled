@@ -1,6 +1,11 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import {ComponentPropertiesHelper, Component} from "../model/component";
 import { defineAsyncComponent } from 'vue'
+import PageHelper from "../components/page/helper"
+import ColumnHelper from "../components/column/helper"
+import DataSetHelper from "../components/dataset/helper"
+import TableV2Helper from "../components/tableV2/helper"
+import FilterPanelHelper from "../components/filterPanel/helper"
 
 interface State {
     helpers: Map<string, ComponentPropertiesHelper>
@@ -19,12 +24,18 @@ export const useComponents = defineStore('components', {
     actions: {
         async registerAll(app) {
             try {
-                this.helpers.set('Page', new ((await import("../components/page/helper")).default))
-                this.helpers.set('Column', new ((await import("../components/column/helper")).default))
-                this.helpers.set('Dataset', new ((await import("../components/dataset/helper")).default))
+                this.helpers.set('Page', new PageHelper)
+                this.helpers.set('Column', new ColumnHelper)
+                this.helpers.set('Dataset', new DataSetHelper)
+                this.helpers.set('TableV2', new TableV2Helper)
+                this.helpers.set('FilterPanel', new FilterPanelHelper)
 
-                await this.registerOne('TableV2', "./../components/tableV2", app)
-                await this.registerOne('FilterPanel', "./../components/filterPanel", app)
+                app.component('TableV2', defineAsyncComponent(() =>
+                    import("./../components/tableV2/TableV2.element.vue")
+                ))
+                app.component('FilterPanel', defineAsyncComponent(() =>
+                    import("./../components/filterPanel/FilterPanel.element.vue")
+                ))
 
                 this.loaded = true
             } catch (e) {
@@ -32,14 +43,34 @@ export const useComponents = defineStore('components', {
                 throw e
             }
         },
-        async registerOne(name, path, app) {
-            const comp = defineAsyncComponent(() =>
-                import(`${path}/${name}.element.vue`)
-            )
-            app.component(name, comp)
-            this.helpers.set(name, new ((await import(`${path}/helper`)).default))
-            this.components.push(new ((await import(`${path}/config`)).default))
-        }
+
+        // async registerRemote(url, app) {
+        // //
+        //
+        //     const comp = defineAsyncComponent( () => {
+        //
+        //         return new Promise(async (resolve, reject) => {
+        //             // ...load component from server
+        //             console.log("<<<")
+        //             let c = await api.get(url)
+        //
+        //             console.log(c.data)
+        //
+        //             resolve({
+        //                 name: "TestComponent",
+        //                 template: c.data,
+        //                 setup: () => {
+        //
+        //                 }
+        //             })
+        //
+        //         })
+        //     })
+        //
+        //     console.log('registerRemote', url)
+        //
+        //     app.component('TestComponent', comp)
+        // }
     }
 })
 
