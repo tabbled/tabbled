@@ -866,6 +866,9 @@ thead th .cell:hover {
     display: flex;
     align-content: center;
     justify-content: center;
+    position: absolute;
+    right: 2px;
+    top: calc(50% - 8px)
 }
 
 .resizer.isResizing {
@@ -884,12 +887,16 @@ thead th .cell:hover {
 }
 
 .column-header-title {
-    display: flex;
-    flex-direction: row;
     align-items: center;
     color: var(--el-text-color-secondary);
     font-size: 14px;
     font-weight: 600;
+    width: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    display: block;
 }
 
 .column-header-drag-icon {
