@@ -76,13 +76,13 @@
 
 import {ref, onMounted, onBeforeMount} from "vue";
 import {usePage} from "../store/pageStore";
-import Select from "./controls/Select.vue";
+import Select from "./settings-panel-controls/Select.vue";
 import _ from "lodash"
 import {PropertyDef} from "../model/component";
-import PropertyTitle from "./controls/PropertyTitle.vue";
-import DataSetList from "./controls/DataSetList.vue";
+import PropertyTitle from "./settings-panel-controls/PropertyTitle.vue";
+import DataSetList from "./settings-panel-controls/DataSetList.vue";
 import {useI18n} from "vue-i18n"
-import ColumnList from "./controls/ColumnList.vue";
+import ColumnList from "./settings-panel-controls/ColumnList.vue";
 const {t, setLocaleMessage, availableLocales} = useI18n({
    useScope: "local"
 })

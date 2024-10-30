@@ -10,9 +10,10 @@
             </template>
             <template #extra>
                 <div class="page-actions" >
+
                     <el-button v-if="page.isPropsChanged" size="small" type="warning" @click="page.saveChanges()">Publish changes</el-button>
                         <el-dropdown>
-                            <el-button type="info" text circle :icon="MoreVertIcon" />
+                            <el-button type="info" text circle ><MoreVertIcon/> </el-button>
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item :icon="SettingsIcon" @click="emit('settingsRequest')">

@@ -8,6 +8,7 @@
              :style="{height: props.height + 'px'}"
              @update:property="onPropertyUpdate"
              @settings-request="openSettings"/>
+    <div v-else>No dataset</div>
 </template>
 
 <script setup lang="ts">

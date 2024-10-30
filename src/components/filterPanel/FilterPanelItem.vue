@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="field">
         <div v-if="item.title" class="filter-item-title">{{item.title}}</div>
         <el-date-picker
             v-if="field.type === 'datetime' && item.operation === 'between'"
@@ -27,6 +27,9 @@
         <div v-else>
             No filter for type {{field.type}}
         </div>
+    </div>
+    <div v-else>
+        No field
     </div>
 </template>
 
@@ -58,8 +61,6 @@ const emit = defineEmits<{
 const field = computed(() => {
     if (!props.dataset)
         return null
-
-    console.log(props.item.field)
 
     return props.dataset.getFieldByAlias(props.item.field)
 })

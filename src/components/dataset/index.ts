@@ -59,8 +59,10 @@ export class ResponseDto {
 }
 
 export class GetDataManyResponseDto extends ResponseDto {
-    items: any[]
+    items: any
     count: number
+    totalCount: number
+    processingTimeMs: number
 }
 
 export interface DataSetInterface extends EventEmitter {
@@ -249,7 +251,7 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
             res = (await this.api.post(`/v2/datasource/${this.props.datasource}/data`, params)).data as GetDataManyResponseDto
             if (reset) {
                 this._items = res.items
-                this._totalCount = res.count
+                this._totalCount = res.totalCount
             } else {
                 this._items.push(...res.items)
             }
