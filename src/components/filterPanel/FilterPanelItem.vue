@@ -89,14 +89,13 @@ const onChange = (value) => {
                 if (Array.isArray(value)) {
                     filter.compare = []
                     value.forEach(i => {
-                        filter.compare.push(dayjs(i).valueOf())
+                        filter.compare.push(dayjs(i).format('YYYYMMDD'))
                     })
                 }
             }
             break
         default: filter.compare = value
     }
-    console.log(filter)
     emit('change', filter)
 }
 

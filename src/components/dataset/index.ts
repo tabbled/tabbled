@@ -277,6 +277,7 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     }
 
     async updateTotals() {
+        console.log('updateTotals')
         if (this._totalsLoading)
             return
 
@@ -293,6 +294,8 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
             let res = (await this.api.post(`/v2/datasource/${this.props.datasource}/data/totals`, params)).data
             this._totals = res.totals
             let dEnd = new Date()
+
+            console.log(this._totals)
 
             this.emit('update-totals', res.totals)
 
@@ -322,6 +325,9 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         if (this.onFilterUpdate instanceof Function) {
             this.onFilterUpdate()
         }
+
+        this.updateTotals()
+        this.loadNext(true)
     }
 
     restoreFilter(filterBy: string) {
@@ -348,7 +354,6 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
                     break
                 case "!in":
                 case "in":
-                    console.log(item.compare)
                     if (item.compare && item.compare.length > 0) {
                         filter = `(${item.field} ${item.operation === '!in' ? 'NOT' : ''} IN [${item.compare}])`
                     }
@@ -363,7 +368,6 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
 
 
         this._filterBy = filterBy
-        console.log(this._filterBy)
 
     }
 
