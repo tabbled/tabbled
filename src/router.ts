@@ -3,16 +3,16 @@ import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 import Dashboard from "./pages/Dashboard.vue"
 import NotFound from "./pages/NotFound.vue";
 
+
 const Login = () => import("./pages/Login.vue")
 const UserEdit = () => import("./pages/configuration/UserEdit.vue")
 const PageDesigner = () => import("./pages/configuration/PageDesigner.vue")
 const Configuration = () => import("./pages/configuration/Configuration.vue")
 const FunctionEdit = () => import("./pages/configuration/FunctionEdit.vue")
 const DataSourceEdit = () => import("./pages/configuration/DataSourceEdit.vue")
-const MenuEdit = () => import("./pages/configuration/MenuEdit.vue")
 const ReportEdit = () => import("./pages/configuration/ReportEdit.vue")
 const UserSettings = () => import("./pages/UserSettings.vue")
-
+const Marketplace = () => import("./pages/marketplace/Marketplace.vue")
 
 const routes: RouteRecordRaw[] = [
     {
@@ -36,9 +36,18 @@ const routes: RouteRecordRaw[] = [
         path: "/configuration/pages/:id",
         component: PageDesigner,
         meta: {
-            isSingle: false,
+            isSingle: true,
             authRequired: true,
             title: "Designer"
+        },
+    },
+    {
+        path: "/marketplace",
+        component: Marketplace,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "Marketplace"
         },
     },
     {
@@ -46,7 +55,7 @@ const routes: RouteRecordRaw[] = [
         path: "/configuration/functions/:id",
         component: FunctionEdit,
         meta: {
-            isSingle: false,
+            isSingle: true,
             authRequired: true,
             title: "Function"
         },
@@ -56,7 +65,7 @@ const routes: RouteRecordRaw[] = [
         path: "/configuration/reports/:id",
         component: ReportEdit,
         meta: {
-            isSingle: false,
+            isSingle: true,
             authRequired: true,
             title: "Report"
         },
@@ -66,26 +75,16 @@ const routes: RouteRecordRaw[] = [
         path: "/configuration/datasources/:id",
         component: DataSourceEdit,
         meta: {
-            isSingle: false,
+            isSingle: true,
             authRequired: true,
             title: "DataSource"
-        },
-    },
-    {
-        name: 'menuEdit',
-        path: "/configuration/menu/:id",
-        component: MenuEdit,
-        meta: {
-            isSingle: false,
-            authRequired: true,
-            title: "Menu"
         },
     },{
         name: 'userEdit',
         path: "/configuration/users/:id",
         component: UserEdit,
         meta: {
-            isSingle: false,
+            isSingle: true,
             authRequired: true,
             title: "User"
         },
@@ -94,7 +93,7 @@ const routes: RouteRecordRaw[] = [
         path: "/configuration",
         component: Configuration,
         meta: {
-            isSingle: false,
+            isSingle: true,
             authRequired: true,
             title: "Configuration"
         },

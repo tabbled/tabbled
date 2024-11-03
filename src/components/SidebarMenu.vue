@@ -4,7 +4,7 @@
 
                 <div>
                     <el-row align="middle">
-                        <img height="30" :src="favicon" alt=""/>
+                        <img height="32" width="32" :src="favicon" alt=""/>
                         <div v-if="!collapsed" style="margin-left: 8px">{{title}}</div>
                     </el-row>
                 </div>
@@ -64,7 +64,19 @@
         <div class="sidebar-menu-footer">
 
 
-                <el-menu :default-active="$route.fullPath" >
+                <el-menu :default-active="$route.fullPath" disabled>
+                    <el-menu-item v-if="isAdmin" @click="">
+                        <MarketplaceIcon style="min-width: 24px; height: 24px" color="gray"/>
+                        <template #title>
+                            <span v-if="!collapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{$t('marketplace')}}</span>
+
+                            <el-tag type="info" size="small" style="margin-right: 8px">{{$t('soon')}}</el-tag>
+<!--                            <div v-if="!collapsed" @click="$event.stopPropagation(); " class="open-new">-->
+<!--                                <Icon icon="mdi:open-in-new" width="16"/>-->
+<!--                            </div>-->
+                        </template>
+                    </el-menu-item>
+
                     <el-menu-item v-if="isAdmin" @click="router.push('/configuration')">
                         <Icon icon="ic:outline-display-settings" width="24" color="gray" style="min-width: 24px;" />
                         <template #title>
@@ -133,6 +145,7 @@ import {useSocketClient} from "../services/socketio.service";
 import {useSettings} from "../services/settings.service";
 import {useRouter} from "vue-router";
 import {ScreenSize} from "../model/page";
+import MarketplaceIcon from "./icons/marketplace-icon.vue";
 
 
 let isAdmin = ref(false)
@@ -251,6 +264,8 @@ function openInNewWindow(to: string) {
 
 .sidebar-menu-footer {
     flex-shrink: 0;
+    border-top: 1px solid var(--el-border-color);
+    padding-top: 10px;
 }
 
 .menu-header {

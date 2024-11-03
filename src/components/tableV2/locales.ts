@@ -13,7 +13,8 @@ export default {
             columns: "Columns"
         },
         tooltip: {
-            dataset: "Datasource that added to the page on <b>Data sources</b>"
+            dataset: "Datasource that added to the page on <b>Data sources</b>",
+            height: "Height of table, you can css property, like <code>500px</code> or <code>100%</code>"
         },
         column: {
             insertLeft: "Insert column to left",
@@ -41,7 +42,8 @@ export default {
         tooltip: {
             dataset: "<p>Если источник данных в наборе поддерживает редактирование, " +
                 "то можно включить опцию <code>Inline редактирование</code>. </p>" +
-                "<p>Отображаются наборы добавленные на страницу в поле <code>Наборы данных</code></p>"
+                "<p>Отображаются наборы добавленные на страницу в поле <code>Наборы данных</code></p>",
+            height: "Высота таблицы, можно установить любое значение через css, например  <code>500px</code> или <code>100%</code>"
         },
         column: {
             insertLeft: "Добавить колонку слева",

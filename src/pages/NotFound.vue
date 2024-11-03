@@ -1,6 +1,5 @@
 <template>
-    <div style="width: 100%; text-align: center;">
-
+    <div class="page-not-found">
         <div style="font-size: var(--el-font-size-extra-large); margin-bottom: 24px">{{$t('pageNotFound')}}</div>
         <el-button type="primary" @click="back()">{{$t('back')}}</el-button>
     </div>
@@ -19,6 +18,11 @@ function back() {
 
 </script>
 
-<style scoped>
-
+<style lang="scss">
+    .page-not-found {
+        align-content: center;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+    }
 </style>

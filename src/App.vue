@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: row; height: 100vh">
 
 
         <div v-if="route.meta.isSingle" style="width: 100vw" >
@@ -17,7 +17,7 @@
         <div v-else class="app-container">
             <SidebarMenu v-model:collapsed="isSideBarCollapsed" :screen-size="screenSize"/>
             <router-view :screenSize="screenSize" v-slot="{Component}" :style="{ width: viewerWidth, 'max-width': viewerWidth}">
-                <component ref="rView" :is="Component" />
+                <component ref="rView" :is="Component"/>
             </router-view>
             <RightSidebar :width="rightSidebarWidth"
                           v-if="page.propertiesPanelVisible"

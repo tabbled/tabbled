@@ -1,7 +1,10 @@
 <template>
     <div v-if="elements && elements.length" class="grid-wrapper">
 
-        <div v-for="(element, idx) in elements" class="grid-element-wrapper" :style="{'grid-column': `span ${element.colSpan}`}">
+        <div v-for="(element, idx) in elements"
+             class="grid-element-wrapper"
+             :style="{'grid-column': `span ${element.colSpan}`,
+             height: element.properties['height'] ? element.properties['height'] : 'fit-content'}">
 
             <component :id="element.id"
                        :is="element.componentName"
@@ -49,7 +52,7 @@ const getElementPath = (idx) => {
 
 .grid-element-wrapper {
     position: relative;
-
+    overflow: hidden;
 }
 
 .grid-element-settings-panel {

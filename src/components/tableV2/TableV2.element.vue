@@ -1,13 +1,13 @@
 <template>
     <TableV2 v-if="datasetInst"
              :id="id"
-             :height="height"
              :title="title"
              :dataset="datasetInst"
              :inline-edit="inlineEdit"
-             :style="{height: props.height + 'px'}"
              @update:property="onPropertyUpdate"
-             @settings-request="openSettings"/>
+             @settings-request="openSettings"
+             class="h-fit"
+    />
     <div v-else>No dataset</div>
 </template>
 
@@ -26,14 +26,12 @@ interface Props {
     dataset: string
     title?: string
     path: string
-    height: number
     inlineEdit: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     title: "",
     datasourceType: 'datasource',
-    height: 400,
     inlineEdit: false
 })
 

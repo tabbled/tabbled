@@ -57,9 +57,10 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
             {
                 title: "prop.height",
                 path: "height",
-                editor: "input-number",
+                editor: "input",
                 group: "appearance",
-                default: () => 400
+                default: () => "100%",
+                tooltip: "tooltip.height",
             },
             {
                 title: "prop.inlineEdit",

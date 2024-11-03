@@ -22,9 +22,9 @@
         </div>
 
 
-        <div class="table-header" ref="tableHeader">
+        <div class="table-header " ref="tableHeader">
             <el-progress v-if="dataset && dataset.isLoading" class="load-progressbar" :percentage="100"  :indeterminate="true" :show-text="false"/>
-            <table :style="{ width: `${table.getTotalSize()+10}px`, 'max-width': `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
+            <table class="border-collapse" :style="{ width: `${table.getTotalSize()+10}px`, 'max-width': `${table.getTotalSize()+10}px`, 'margin-right': '32px'}">
                 <thead>
                 <tr
                     v-for="headerGroup in table.getHeaderGroups()"
@@ -97,7 +97,7 @@
                     <td v-for="cell in row.getVisibleCells()"
                         :key="cell.id"
                         @click="onCellClick(cell)"
-                        :style="{ width: `${cell.column.getSize()}px`, height: 'inherit' }"
+                        :style="{ 'width': `${cell.column.getSize()}px`, height: 'inherit' }"
                         :class="{'cell-selected': selectedCellId === cell.id}"
                     >
                         <div :class="{cell: true  } " >
@@ -711,6 +711,7 @@ onUnmounted(() => {
     flex-direction: column;
     position: relative;
     overflow: auto;
+    height: 100%;
 }
 
 .table-title-caption {
@@ -773,6 +774,7 @@ table {
 
 thead {
     height: v-bind(headerHeight);
+    position: absolute;
 }
 
 .table-row {
@@ -794,6 +796,10 @@ thead {
     background: var(--el-color-primary-light-8);
 }
 
+//thead th td {
+//    position: absolute;
+//}
+
 td {
     padding: 0;
     position: relative;
@@ -804,6 +810,8 @@ th {
     cursor: pointer;
     position: relative;
 }
+
+
 
 thead th .cell {
     border-bottom: none;
