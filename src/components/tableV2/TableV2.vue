@@ -10,7 +10,7 @@
                 <el-input clearable
                           :placeholder="$t('search')"
                           :prefix-icon="SearchIcon"
-                          style="height: 24px; width: 150px; margin-right: 4px"
+                          style="height: 24px; width: 150px; margin-right: 8px"
                           size="small"
                           @input="debouncedSearch()"
                           v-model="searchText"/>
@@ -209,7 +209,6 @@ interface Props {
     id: string
     dataset: DataSetInterface
     title?: string
-    height: number
     inlineEdit: boolean
     columns: Column[]
 }
@@ -217,7 +216,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     title: "",
     datasourceType: 'datasource',
-    height: 400,
     inlineEdit: false,
     columns: () => []
 })
@@ -323,7 +321,7 @@ let table = useVueTable({
                 ? updateOrValue(rowSelection.value)
                 : updateOrValue
     },
-    debugTable: true,
+    debugTable: false,
     debugHeaders: false,
     debugColumns: false,
 })
@@ -373,8 +371,15 @@ const updateSorting = () => {
     sorting.value.forEach(i => {
         let c = props.columns.find(c => i.id === c.id)
 
+
+        let f = c.field
+        let field = props.dataset.getFieldByAlias(c.field)
+        if (field.type === 'enum'){
+            f += '.title'
+        }
+
         if (c) {
-            sort.push(`${c.field}:${i.desc ? 'desc' : 'asc'}`)
+            sort.push(`${f}:${i.desc ? 'desc' : 'asc'}`)
         }
 
     })
@@ -737,11 +742,12 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-right: 8px;
 }
 
 .table-settings-button {
     z-index: 10;
-    margin: 0 4px 0 0 !important;
+    margin: 0 !important;
 }
 
 .table-body {
@@ -855,18 +861,22 @@ thead th .cell:hover {
 .resizer {
     pointer-events: auto;
     position: absolute;
-    top: 8px;
-    bottom: 8px;
+    top: 4px;
+    bottom: 4px;
     right: 0;
     width: 3px;
     padding: 0 1px;
-    border-right: 1px solid var(--el-border-color);
+    border-right: 0 solid var(--el-border-color);
     border-radius: 1px;
     //background: rgba(0, 0, 0, 0.5);
     cursor: col-resize;
     user-select: none;
     touch-action: none;
     opacity: 1;
+}
+
+.resizer:hover {
+    border-right: 3px solid var(--el-border-color);;
 }
 
 .sort-icon {
@@ -880,7 +890,7 @@ thead th .cell:hover {
 }
 
 .resizer.isResizing {
-    border-right: 2px solid var(--el-border-color-darker);
+    border-right: 2px solid var(--el-color-primary);
     opacity: 1;
 }
 

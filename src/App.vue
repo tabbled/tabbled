@@ -1,10 +1,10 @@
 <template>
-    <div style="display: flex; flex-direction: row; height: 100vh">
+    <div style="display: flex; flex-direction: row; height: 100vh; width: 100vw">
 
 
-        <div v-if="route.meta.isSingle" style="width: 100vw" >
-            <router-view />
-        </div>
+
+        <router-view v-if="route.meta.isSingle"/>
+
         <div v-else-if="configLoadState !== ConfigLoadState.Loaded" style="width: 30vw; margin: auto">
             <el-progress
                 status="success"

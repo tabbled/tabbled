@@ -63,6 +63,7 @@ export class GetDataManyResponseDto extends ResponseDto {
     count: number
     totalCount: number
     processingTimeMs: number
+    isTree?: boolean
 }
 
 export interface DataSetInterface extends EventEmitter {
@@ -326,26 +327,58 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
             this.onFilterUpdate()
         }
 
-        this.updateTotals()
-        this.loadNext(true)
+        this.updateTotals().catch(e => {
+            console.log(e)
+            throw new Error("Oops... Something went wrong")
+        })
+        this.loadNext(true).catch(e=> {
+            console.log(e)
+            throw new Error("Oops... Something went wrong")
+        })
     }
 
-    restoreFilter(filterBy: string) {
-        this._filterBy = filterBy
+    restoreFilter(filter: string) {
+        if (filter) {
+            let filters = JSON.parse(filter)
+            Object.keys(filters).forEach(key => {
+                this._filterById.set(key, filters[key])
+            })
+            this.stringifyFilter()
+        }
     }
     backupFilter() : string {
-        return this._filterBy
+        let s = {}
+        for (let [key, item] of this._filterById) {
+            s[key] = item
+        }
+        return JSON.stringify(s)
     }
 
     stringifyFilter() {
+
         let filterBy = ""
         for (let [key, item] of this._filterById) {
+            console.log(item)
             let field = this._fieldsByAlias.get(item.field)
-            if (!field)
+            if (!field || item.compare === null || item.compare === undefined)
                 continue
 
             let filter = ""
             switch (item.operation) {
+                case ">":
+                case ">=":
+                case "<":
+                case "!=":
+                case "<=":
+                    filter = `(${item.field} ${item.operation} ${item.compare})`;
+                    break;
+                case "==":
+                    if (field.type === 'link' || field.type === 'enum') {
+                        filter = `(${item.field}.id = ${item.compare})`;
+                    } else
+                        filter = `(${item.field} = ${item.compare})`;
+
+                    break
                 case "between":
                 case "!between":
                     if (item.compare && item.compare.length === 2) {
@@ -355,7 +388,12 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
                 case "!in":
                 case "in":
                     if (item.compare && item.compare.length > 0) {
-                        filter = `(${item.field} ${item.operation === '!in' ? 'NOT' : ''} IN [${item.compare}])`
+                        let f = item.field
+
+                        if (field.type === 'link' || field.type === 'enum') {
+                            f += '.id'
+                        }
+                        filter = `(${f} ${item.operation === '!in' ? 'NOT' : ''} IN [${item.compare}])`
                     }
             }
 
@@ -365,6 +403,8 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
                 filterBy += filter
             }
         }
+
+        console.log(filterBy)
 
 
         this._filterBy = filterBy

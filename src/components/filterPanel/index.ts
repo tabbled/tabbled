@@ -3,10 +3,11 @@ import {StandardQueryOperator} from "../dataset";
 
 export interface FilterPanelItemInterface {
     id: string
-    colSpan: number
-    field: string
-    operation: StandardQueryOperator
+    field?: string
+    operation?: StandardQueryOperator
     title: string,
-    format: string,
-    width: number
+    format?: string,
+    width?: string,
+    isMultiple?: boolean
+    widget?: 'select' | 'buttons'
 }

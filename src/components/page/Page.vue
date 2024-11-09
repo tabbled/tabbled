@@ -1,11 +1,9 @@
 <template>
-    <div class="page-view" >
-        <el-page-header ref="mainHeader" class="list-page-view-header" @back="$router.back()">
+    <div class="divide-y flex flex-col" >
+        <el-page-header ref="mainHeader" class="p-4" @back="$router.back()">
             <template #content>
                 <div class="page-title">
                     <span> {{title}} </span>
-
-
                 </div>
             </template>
             <template #extra>
@@ -27,7 +25,7 @@
                 </div>
             </template>
         </el-page-header>
-        <Grid class="page-grid" path="" :elements="elements"/>
+        <Grid class="page-grid p-5" path="" :elements="elements"/>
 
     </div>
 </template>
@@ -54,10 +52,6 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss">
-.page-view {
-    display: flex;
-    flex-direction: column;
-}
 
 .page-title {
     display: flex;

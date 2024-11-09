@@ -1,7 +1,16 @@
 <template>
     <div v-if="props.cell.getValue() !== undefined && props.cell.getValue() !== null"
          :class="{'cell-renderer': true, wordwrap: getWordwrap()}">
-        {{getRenderedValue()}}
+
+            <el-tag v-if="field && field.type === 'enum'" v-for="title in getRenderedValue()"
+                    type="primary"
+                    size="small">
+                {{title}}
+            </el-tag>
+        <div v-else>
+            {{getRenderedValue()}}
+        </div>
+
     </div>
     <div v-else>
         <el-tag class="null-value" type="info" size="small">{{$t('null')}}</el-tag>
@@ -39,6 +48,14 @@ const getRenderedValue = () => {
 
     if (['time', 'date', 'datetime'].includes(props.field.type)) {
         return dayjs(props.cell.getValue()).format(props.columnDef.format)
+    }
+
+    if (props.field.type === 'enum' ) {
+        if (props.field.isMultiple) {
+            return props.cell.getValue().map(e => e.title)
+        } else {
+            return [props.cell.getValue().title]
+        }
     }
 
     return props.cell.getValue()

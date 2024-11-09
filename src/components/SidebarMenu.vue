@@ -1,12 +1,12 @@
 <template>
-    <div ref="sidebarMenuContainer" class="sidebar-menu-container">
-        <div class="menu-header" @click="router.push('/')">
+    <div ref="sidebarMenuContainer" class="sidebar-menu-container divide-y">
+        <div class="p-4 flex flex-row items-center justify-around cursor-pointer" @click="router.push('/')">
 
-                <div>
-                    <el-row align="middle">
+                <div class="flex flex-row items-center cursor-pointer w-full">
+
                         <img height="32" width="32" :src="favicon" alt=""/>
-                        <div v-if="!collapsed" style="margin-left: 8px">{{title}}</div>
-                    </el-row>
+                        <div v-if="!collapsed" class="text-xl ml-4 text-slate-600">{{title}}</div>
+
                 </div>
                 <el-tag v-if="!isConnected && !collapsed" effect="light" size="small" type="danger">Offline</el-tag>
 
@@ -260,6 +260,7 @@ function openInNewWindow(to: string) {
 .sidebar-menu {
     height: 100%;
     overflow: auto;
+    padding-top: 8px;
 }
 
 .sidebar-menu-footer {
@@ -268,16 +269,16 @@ function openInNewWindow(to: string) {
     padding-top: 10px;
 }
 
-.menu-header {
-    display: flex;
-    flex-direction: row;
-    margin: 0;
-    padding: 16px;
-    border-bottom: 1px solid var(--el-border-color);
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
+//.menu-header {
+//    display: flex;
+//    flex-direction: row;
+//    margin: 0;
+//    padding: 16px;
+//    border-bottom: 1px solid var(--el-border-color);
+//    justify-content: space-between;
+//    align-items: center;
+//    cursor: pointer;
+//}
 
 .el-sub-menu__title {
     height: 40px !important;

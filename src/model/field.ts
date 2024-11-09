@@ -94,7 +94,13 @@ export interface FieldInterface {
     setValueFunc?: () => CompiledFunc | undefined,
     getListFunc?: () => CompiledFunc | undefined
     getReadonlyFunc?: () => CompiledFunc | undefined
-    enumValues?: EnumValuesInterface[]
+    enumValues?: EnumValuesInterface[],
+    datasourceReference?: string
+    linkedDatasource?: {
+        alias: string,
+        isTree: boolean,
+        type: string
+    }
 }
 
 export class Field implements FieldInterface {

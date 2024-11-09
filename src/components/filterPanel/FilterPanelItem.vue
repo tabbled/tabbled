@@ -1,36 +1,86 @@
 <template>
-    <div v-if="field">
-        <div v-if="item.title" class="filter-item-title">{{item.title}}</div>
-        <el-date-picker
-            v-if="field.type === 'datetime' && item.operation === 'between'"
-            type="datetimerange"
-            @change="e => onChange(e)"
-            v-model="value"
-            :format="item.format"
-            :style="{ width: item.width + 'px' }"
-        />
-        <el-date-picker
-            v-else-if="field.type === 'date' && item.operation === 'between'"
-            type="daterange"
-            @change="e => onChange(e)"
-            v-model="value"
-            :format="item.format"
-            :style="{ width: item.width + 'px' }"
-        />
-        <FilterPanelSelectItem
-            v-else-if="field.type === 'enum'"
-            @change="e => onChange(e)"
-            :item="item"
-            :field="field"
-            v-model="value"
-        />
-        <div v-else>
-            No filter for type {{field.type}}
+    <div class="flex flex-col" ref="itemWrapper">
+        <div v-if="item.title" class="relative mb-1 flex flex-row group">
+            <div class="w-full ">{{item.title}}</div>
+            <div class="absolute invisible right-0 top-1  group-hover:visible">
+                <div class="hover:opacity-80 opacity-30 border p-0.5 rounded-md shadow-sm cursor-pointer"
+                     @click="(e) => emit('open-settings', e, $el)"
+                >
+                    <SettingsIcon style="width: 16px; height: 16px"/>
+                </div>
+
+            </div>
+        </div>
+        <div v-if="field" class="w-full">
+
+            <el-date-picker style="width: 100%;"
+                v-if="field.type === 'datetime'"
+                :type="item.operation === 'between' ? 'datetimerange' : 'datetime'"
+                @change="e => onChange(e)"
+                v-model="value"
+                :format="item.format"
+            />
+            <el-date-picker style="width: 100%;"
+                v-else-if="field.type === 'date'"
+                :type="item.operation === 'between' ? 'daterange' : 'date'"
+                @change="e => onChange(e)"
+                v-model="value"
+                :format="item.format"
+            />
+            <FilterPanelSelectItem style="width: 100%;"
+                                   v-else-if="field.type === 'enum'"
+                                   @change="e => onChange(e)"
+                                   :item="item"
+                                   :field="field"
+                                   :value="value"
+            />
+            <el-input-number v-else-if="field.type === 'number'"
+                             style="width: 100%;"
+                             :controls="false"
+                             @change="e => onChange(e)"
+                             @input="e => onChange(e)"
+                             v-model="value"
+            />
+            <el-input v-else-if="field.type === 'string'"
+                      style="width: 100%;"
+                      @change="e => onChange(e)"
+                      @input="e => onChange(e)"
+                      clearable
+                      v-model="value"
+            />
+            <FilterPanelLinkItem style="width: 100%;"
+                                 v-else-if="field.type === 'link'"
+                                 @change="e => onChange(e)"
+                                 :item="item"
+                                 :field="field"
+                                 :value="value"/>
+            <el-select v-else-if="field.type === 'bool'"
+                style="width: 100%"
+                :model-value="value"
+                @change="onChange"
+                clearable
+                >
+                <el-option
+                    v-for="item in boolItems"
+                    :key="item.key"
+                    :label="item.label"
+                    :value="item.key"
+                />
+            </el-select>
+            <div v-else>
+
+                <div class="w-full border opacity-80 flex bg-gray-50 cursor-pointer h-9 rounded hover:border-blue-300 justify-center items-center"
+                     @click="e => emit('open-settings', e, $el)">
+                    <span>No filter for type {{field.type}}</span>
+                </div>
+            </div>
+        </div>
+        <div v-else class="w-full border opacity-80 flex bg-gray-50 cursor-pointer h-9 rounded hover:border-blue-300 justify-center items-center"
+        @click="e => emit('open-settings', e, $el)">
+            <span>Set up</span>
         </div>
     </div>
-    <div v-else>
-        No field
-    </div>
+
 </template>
 
 <script setup lang="ts">
@@ -39,9 +89,14 @@ import {FilterPanelItemInterface} from "./index";
 import {DataSetInterface, FilterItemInterface} from "../dataset";
 import {computed, onMounted, ref, watch} from "vue";
 import dayjs from "dayjs";
-import FilterPanelSelectItem from "./FilterPanelSelectItem.vue";
+import FilterPanelSelectItem from "./FilterPanelEnumItem.vue";
+import SettingsIcon from "../icons/settings-icon.vue";
+import FilterPanelLinkItem from "./FilterPanelLinkItem.vue";
+import {useI18n} from "vue-i18n"
+const {t} = useI18n()
 
 let value = ref([])
+let itemWrapper = ref()
 
 interface Props {
     dataset: DataSetInterface
@@ -54,8 +109,17 @@ const props = withDefaults(defineProps<Props>(), {
     value: () => []
 })
 
+const boolItems = ref([{
+    key: "true",
+    label: t('filters.true')
+},{
+    key: "false",
+    label: t('filters.false')
+}])
+
 const emit = defineEmits<{
     (e: 'change', filter: FilterItemInterface): void
+    (e: 'open-settings', event: any, itemWrapper: any): void,
 }>()
 
 const field = computed(() => {
@@ -66,8 +130,16 @@ const field = computed(() => {
 })
 
 watch(() => props.value, () => {
-    console.log('value change', props.value)
     value.value = props.value
+})
+
+watch(() => props.item.operation, () => {
+    value.value = null
+    onChange(null)
+})
+watch(() => props.item.field, () => {
+    value.value = null
+    onChange(null)
 })
 
 onMounted(() => {
@@ -75,35 +147,40 @@ onMounted(() => {
 })
 
 const onChange = (value) => {
-
     let filter: FilterItemInterface = {
         id: props.item.id,
         operation: props.item.operation,
-        field: props.item.field
+        field: props.item.field,
+        compare: props.item.operation === 'between' || props.item.operation === 'in' ? [] : null
     }
-    switch (field.value.type) {
-        case "datetime":
-        case "date":
-        case "time":
-            if (filter.operation === 'between') {
-                if (Array.isArray(value)) {
-                    filter.compare = []
-                    value.forEach(i => {
-                        filter.compare.push(dayjs(i).format('YYYYMMDD'))
-                    })
+
+    if (value) {
+        switch (field.value.type) {
+            case "datetime":
+            case "date":
+            case "time":
+                if (filter.operation === 'between') {
+                    if (Array.isArray(value)) {
+                        filter.compare = []
+                        value.forEach(i => {
+                            filter.compare.push(dayjs(i).format('YYYYMMDD'))
+                        })
+                    }
+                } else {
+                    filter.compare = dayjs(value).format('YYYYMMDD')
                 }
-            }
-            break
-        default: filter.compare = value
+                break
+            default: filter.compare = value
+        }
     }
+
+
+    console.log(filter)
     emit('change', filter)
 }
 
 </script>
 
 <style lang="scss">
-.filter-item-title {
-    color: var(--el-text-color-regular);
-    margin-bottom: 4px;
-}
+
 </style>

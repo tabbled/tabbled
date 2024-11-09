@@ -1,13 +1,21 @@
 <template>
-    <div style="display: flex; flex-direction: column; width: 100%; height: 100vh; padding: 16px">
+    <div class="divide-y " style="display: flex; flex-direction: column; width: 100%; height: 100vh;">
+        <div class="flex flex-row items-center" >
+            <div class="flex flex-row p-4 items-center" style="width: 200px; height: 32px">
+                <img style="height: 32px; width: 32px" src="/favicon.png" alt=""/>
+                <div class="ml-4 text-xl text-slate-600">Tabbled</div>
+            </div>
 
-        <el-page-header @back="$router.back()" style="margin-bottom: 16px" >
+        <el-page-header @back="$router.back()" class="m-4 w-full">
             <template #content>
+
                 <span> {{$t('configuration')}} </span>
                 <el-switch style="margin-left: 16px" size="small"
                            active-text="Old"
                            inactive-text="New"
                            v-model="oldVersion"/>
+
+
             </template>
             <template #extra >
                 <el-button type="text" @click="importDialogVisible = true" style="margin-right: 8px">
@@ -19,19 +27,21 @@
                     {{$t('export')}}
                 </el-button>
             </template>
-            {{}}
         </el-page-header>
+        </div>
 
         <ConfigurationMain v-if="!oldVersion"/>
 
         <el-tabs v-if="oldVersion" ref="tabsEl"
                  tab-position="left"
-                 style="height: 100vh;"
+                 style="height: 100vh"
+                 class="pl-5"
                  v-model="activeTab"
                  @tab-change="tabChange">
 
             <el-tab-pane :label="$t('pages')"  name="pages" style="height: inherit">
                 <Table :columns="pagesColumns"
+                       class="p-5"
                        id="pages"
                        datasource="page"
                        :context="{}"
@@ -46,6 +56,7 @@
             <el-tab-pane :label="$t('datasources')" name="datasources" style="height: inherit">
                 <Table :columns="dsColumns"
                        id="ds"
+                       class="p-5"
                        :context="{}"
                        datasource="datasource"
                        :readonly="true"
@@ -60,6 +71,7 @@
             <el-tab-pane :label="$t('functions')" name="functions">
                 <Table :columns="funcColumns"
                        id="func"
+                       class="p-5"
                        :context="{}"
                        datasource="function"
                        @row-dbl-click="editFunc"
@@ -74,6 +86,7 @@
 
                 <Table :columns="reportColumns"
                        id="reps"
+                       class="p-5"
                        :context="{}"
                        datasource="report"
                        @row-dbl-click="editReport"
@@ -89,6 +102,7 @@
 
                 <Table :columns="usersColumns"
                        id="users"
+                       class="p-5"
                        :context="{}"
                        datasource="users"
                        @row-dbl-click="editUser"
@@ -100,7 +114,7 @@
 
             </el-tab-pane>
 
-            <el-tab-pane :label="$t('settings')" name="settings">
+            <el-tab-pane :label="$t('settings')" name="settings" class="p-5">
                 <div style="display: flex; justify-content: end;">
                     <el-button type="primary" @click="saveSettings">{{$t('save')}}</el-button>
                 </div>

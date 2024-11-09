@@ -1,10 +1,10 @@
 <template>
-    <el-select v-if="field && field.type === 'enum'"
+    <el-select v-if="field && field.type === 'enum' && (!item.widget || item.widget === 'select')"
                class="filter-panel-select-item"
                :model-value="value"
                @change="onChange"
                :multiple="item.operation === 'in' || item.operation === '!in'"
-               collapse-tags
+               clearable
     >
         <el-option
             v-for="item in field.enumValues"
@@ -13,6 +13,21 @@
             :value="item.key"
         />
     </el-select>
+    <div v-else-if="field && field.type === 'enum' && (!item.widget || item.widget === 'buttons')" >
+
+        <el-checkbox-group v-if="item.operation === 'in' || item.operation === '!in'"
+                           :model-value="value"
+                           size="small"
+                           @change="onChange">
+            <el-checkbox-button v-for="item in field.enumValues" :value="item.key" :label="item.title">
+                {{ item.title }}
+            </el-checkbox-button>
+        </el-checkbox-group>
+        <el-radio-group v-else
+                        :model-value="value" size="small" @change="onChange">
+            <el-radio-button v-for="item in field.enumValues" :value="item.key" :label="item.title"/>
+        </el-radio-group>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -34,10 +49,10 @@ const emit = defineEmits<{
 }>()
 
 onMounted(() => {
-    console.log(props.field)
 })
 
 const onChange = (e) => {
+    console.log(e)
     emit('change', e)
 }
 

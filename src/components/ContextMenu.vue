@@ -1,20 +1,28 @@
 <template>
-    <div v-if="visible"
-        class="context-menu"
-        :style="{ top: y + 'px', left: x + 'px' }"
-    >
-        <div v-for="action in actions"
-             :key="action.action">
-            <div v-if="action.action !== 'divider'" class="context-menu-action"
-                 @click="onClick(action)">
-                {{ action.title }}
-            </div>
-            <div v-else class="context-menu-divider"/>
-        </div>
 
+    <div v-if="visible"
+         class="context-menu"
+         :style="{ top: y + 'px', left: x + 'px', 'width': width ? width : 'unset' }"
+    >
+        <slot>
+            <div class="p-1 rounded-sm">
+                <div v-for="action in actions"
+                     :key="action.action">
+                    <div v-if="action.action !== 'divider'" class="context-menu-action"
+                         @click="onClick(action)">
+                        {{ action.title }}
+                    </div>
+                    <div v-else class="context-menu-divider"/>
+                </div>
+            </div>
+        </slot>
     </div>
     <div v-if="visible"
-         class="overlay" @contextmenu.prevent="emit('update:visible', false)" @click="emit('update:visible', false)" />
+         class="overlay"
+         @contextmenu.prevent="emit('update:visible', false)"
+         @click="emit('update:visible', false)"
+    />
+
 </template>
 
 <script setup lang="ts">
@@ -23,10 +31,11 @@ import {ContextMenuAction} from "./tableV2/context-menu-action";
 
 
 interface Props {
-    actions: ContextMenuAction[],
+    actions?: ContextMenuAction[],
     x: number,
     y: number,
-    visible: boolean
+    visible: boolean,
+    width?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -57,9 +66,7 @@ const onClick = (action) => {
     position: fixed;
     box-shadow: var(--el-box-shadow-light);
     min-width: 150px;
-    z-index: 5000;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    z-index: 500;
     background: var(--el-bg-color-overlay);
     border: 1px solid var(--el-border-color-light);
     color: var(--el-text-color-regular);
@@ -71,6 +78,7 @@ const onClick = (action) => {
 .context-menu-action {
     padding: 8px 14px;
     cursor: pointer;
+    border-radius: 4px;
 }
 
 .context-menu-divider {

@@ -1,39 +1,37 @@
 <template>
-    <div style="max-width: 300px; margin: auto">
+    <div style="width: 100vw; height: 100vh" class="grid items-center justify-center">
 
-    <div style="padding-top: 24px;"></div>
-        <div style="display: flex; align-items: center; justify-content: center; padding-bottom: 24px">
-            <img height="60" class="logo" :src="favicon" alt=""/>
-            <span style="font-size: 30px; padding-left: 16px">{{title}}</span>
+
+        <div class="w-80">
+            <div  style="display: flex; align-items: center; justify-content: center; padding-bottom: 24px">
+                <img height="40" width="40" class="logo" :src="favicon" alt=""/>
+
+            </div>
+
+            <h4 class="text-2xl/9 font-bold tracking-tight text-center text-gray-700 mt-4 mb-8 w-full">{{$t('signIn')}} {{title}}</h4>
+
+            <el-form hide-required-asterisk label-position="top" ref="form" :model="user" :rules="rules">
+
+                <el-form-item :label="$t('username')" required prop="username" >
+                    <el-input v-model="user.username" v-on:keyup.enter="login"/>
+                </el-form-item>
+
+                <el-form-item :label="$t('password')" required prop="password">
+                    <el-input v-on:keyup.enter="login"
+                              type="password"
+                              show-password
+                              v-model="user.password"
+                    />
+                </el-form-item>
+
+            </el-form>
+
+
+
+            <el-row class="pt-6 ">
+                <el-button type="primary" style="width: 100%" @click="login">{{$t('login')}}</el-button>
+            </el-row>
         </div>
-
-    <h3 style="text-align: center; width: 300px">{{$t('signIn')}}</h3>
-    <el-card shadow="never" class="p-0 m-0">
-
-
-
-        <el-form class="p-0 m-0" hide-required-asterisk label-position="top" ref="form" :model="user" :rules="rules">
-
-            <el-form-item :label="$t('username')" required prop="username" >
-                <el-input v-model="user.username" v-on:keyup.enter="login"/>
-            </el-form-item>
-
-            <el-form-item :label="$t('password')" required prop="password">
-                <el-input v-on:keyup.enter="login"
-                          type="password"
-                          show-password
-                          v-model="user.password"
-                />
-            </el-form-item>
-
-        </el-form>
-
-
-
-        <el-row>
-            <el-button type="primary" style="width: 100%" @click="login">{{$t('login')}}</el-button>
-        </el-row>
-    </el-card>
     </div>
 
 </template>

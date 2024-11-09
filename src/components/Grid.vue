@@ -42,12 +42,10 @@ const getElementPath = (idx) => {
 
 <style lang="scss">
 .grid-wrapper {
-    padding: 0 16px 16px 16px;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: max-content;
-    gap: 10px;
-
+    gap: 16px;
 }
 
 .grid-element-wrapper {
