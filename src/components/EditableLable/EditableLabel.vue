@@ -6,8 +6,8 @@
            :value="modelValue"
            ref="editInput"
            @focusout="editing = true"
-           @change="e => {emit('update:modelValue', e.target.value); emit('change', e.target.value)}"
-           @input="e => emit('input', e.target.value)"
+           @change="onChange"
+           @input="onInput"
            :placeholder="placeholder"/>
     <div v-else @click="toggleEdit()">
         {{modelValue ? modelValue : placeholder}}
@@ -34,8 +34,16 @@ const emit = defineEmits<{
 
 const toggleEdit = () => {
     editing.value = !editing.value
-
     nextTick(() => editInput.value.focus());
+}
+
+const onChange = (e) => {
+    emit('update:modelValue', e.target.value);
+    emit('change', e.target.value)
+}
+
+const onInput = (e) => {
+    emit('input', e.target.value)
 }
 
 </script>
