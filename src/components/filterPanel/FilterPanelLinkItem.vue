@@ -19,6 +19,7 @@
     </el-select>
     <el-tree-select v-else-if="field.linkedDatasource.isTree && (!item.widget || item.widget === 'select')"
                     style="width: 50%"
+                    ref="treeSelect"
                     :load="loadTreeNode"
                     v-model="selectedNodes"
                     :node-key="'id'"
@@ -26,7 +27,7 @@
                     show-checkbox
                     check-strictly
                     :multiple="item.operation === 'in' || item.operation === '!in'"
-                    @check="onChangeTree"
+                    @check-change="onChangeTree"
                     default-expand-all
                     lazy
     />
@@ -51,6 +52,7 @@ interface Props {
 }
 
 let selectedNodes = ref()
+let treeSelect = ref()
 
 const linkData = ref([])
 const props = withDefaults(defineProps<Props>(), {
@@ -72,7 +74,6 @@ onMounted(() => {
     } else {
         selectedNodes.value = props.value
     }
-
 })
 
 watch(() => props.field, () => {
@@ -84,12 +85,12 @@ watch(() => props.item.operation, () => {
 })
 
 const onChange = (e) => {
-    console.log(e, props.item)
     emit('change', e)
 }
 
-const onChangeTree = (val, prop) => {
-    onChange(prop.checkedKeys.length ? prop.checkedKeys : null)
+const onChangeTree = () => {
+    let selected = treeSelect.value.getCheckedKeys()
+    onChange(selected.length ? selected : null)
 }
 
 

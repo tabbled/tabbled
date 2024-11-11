@@ -3,7 +3,7 @@
         <div v-if="item.title" class="relative mb-1 flex flex-row group">
             <div class="w-full ">{{item.title}}</div>
             <div class="absolute invisible right-0 top-1  group-hover:visible">
-                <div class="hover:opacity-80 opacity-30 border p-0.5 rounded-md shadow-sm cursor-pointer"
+                <div v-if="editMode" class="hover:opacity-80 opacity-30 border p-0.5 rounded-md shadow-sm cursor-pointer"
                      @click="(e) => emit('open-settings', e, $el)"
                 >
                     <SettingsIcon style="width: 16px; height: 16px"/>
@@ -77,7 +77,9 @@
         </div>
         <div v-else class="w-full border opacity-80 flex bg-gray-50 cursor-pointer h-9 rounded hover:border-blue-300 justify-center items-center"
         @click="e => emit('open-settings', e, $el)">
-            <span>Set up</span>
+
+            <span v-if="editMode">Set up</span>
+            <span v-else>No setup</span>
         </div>
     </div>
 
@@ -103,10 +105,11 @@ interface Props {
     path: string
     item: FilterPanelItemInterface
     value: any
+    editMode: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    value: () => []
+    value: () => null
 })
 
 const boolItems = ref([{
@@ -173,9 +176,6 @@ const onChange = (value) => {
             default: filter.compare = value
         }
     }
-
-
-    console.log(filter)
     emit('change', filter)
 }
 

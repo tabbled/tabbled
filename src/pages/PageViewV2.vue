@@ -54,7 +54,6 @@ onUnmounted(() => {
 const init = async () => {
     console.log("Init list view")
     await pageStore.loadByAlias(props.alias)
-    console.log("loaded", pageStore.$state)
     //datasets.value = pageStore.properties.datasets
     //console.log(pageStore.properties.datasets)
 

@@ -198,5 +198,8 @@
     "revisions": "История изменений",
     "confirmSaveOnServerDataChanged": "Данные на сервере изменены! Вы точно хотите сохранить данные?",
     "copiedToClipboard": "Скопировано в буффер обмена",
-    "clipboardNotSupported":  "Буфер обмена не поддерживается"
+    "clipboardNotSupported":  "Буфер обмена не поддерживается",
+    "messages": {
+        "pageSaved": "Настройки сохранены успешно"
+    }
 }

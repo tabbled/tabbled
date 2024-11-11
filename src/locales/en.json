@@ -199,5 +199,8 @@
     "revisions": "Changes history",
     "confirmSaveOnServerDataChanged": "Data is changed on server! Do you confirm save current data?",
     "copiedToClipboard": "Copied to clipboard",
-    "clipboardNotSupported":  "Clipboard is not supported"
+    "clipboardNotSupported":  "Clipboard is not supported",
+    "messages": {
+        "pageSaved": "Page is saved"
+    }
 }

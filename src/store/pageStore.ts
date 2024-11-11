@@ -23,7 +23,8 @@ interface State {
     datasets: {
         [key in string]: DataSet
     }
-    parentPath: string
+    parentPath: string,
+    editMode: boolean
 }
 
 export const usePage = defineStore('page', {
@@ -38,7 +39,8 @@ export const usePage = defineStore('page', {
             loaded: false,
             datasets: {},
             parentPath: null,
-            isPropsChanged: false
+            isPropsChanged: false,
+            editMode: false
         }
     },
 
@@ -63,8 +65,6 @@ export const usePage = defineStore('page', {
             for(const i in props.elements) {
                 let el = props.elements[i]
                 let helper = components.helpers.get(el.componentName)
-
-                console.log(helper)
 
                 if (!helper) {
                     console.error(`For element ${el.componentName} has no helper`)
@@ -177,20 +177,20 @@ export const usePage = defineStore('page', {
         },
 
         async saveChanges() {
+            if (!this.isPropsChanged) {
+                this.editMode = false
+                return
+            }
             try {
                 await api.patch(`/v2/pages/${this.properties.id}`, this.properties)
                 this.isPropsChanged = false
+                this.editMode = false
+                return true
             } catch (e) {
                 console.error(e)
-                ElMessage.error({
-                    message: e.toString()
-                })
+                throw e
             }
-
         }
-
-
-
     }
 })
 

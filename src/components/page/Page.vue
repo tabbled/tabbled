@@ -2,30 +2,39 @@
     <div class="divide-y flex flex-col" >
         <el-page-header ref="mainHeader" class="p-4" @back="$router.back()">
             <template #content>
-                <div class="page-title">
-                    <span> {{title}} </span>
+                <div class="flex flex-row">
+                    <span>{{title}}</span>
                 </div>
             </template>
             <template #extra>
-                <div class="page-actions" >
+                <div class="flex flex-row items-center gap-2 min-h-9">
 
-                    <el-button v-if="page.isPropsChanged" size="small" type="warning" @click="page.saveChanges()">Publish changes</el-button>
-                        <el-dropdown>
-                            <el-button type="info" text circle ><MoreVertIcon/> </el-button>
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item :icon="SettingsIcon" @click="emit('settingsRequest')">
-                                        {{$t('settings')}}
-                                    </el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
-<!--                    -->
+                    <el-dropdown v-if="reportMenu.length"
+                    >
+                        <el-button size="small" >
+                            {{$t('print')}}
+                            <Icon width="16" style="padding-left: 4px" icon="material-symbols:keyboard-arrow-down"/>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
 
+                                <el-dropdown-item v-for="rep in reportMenu" @click="generateReport(rep.alias)">
+                                    {{rep.title}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+                    <el-button v-if="page.editMode" type="info" text circle @click="emit('settingsRequest')"
+                               style="padding: 0 !important; height: 30px; width: 30px">
+                        <SettingsIcon/>
+                    </el-button>
+                    <el-button v-if="canEdit && !page.editMode" size="small" @click="page.editMode = true">{{$t('edit')}}</el-button>
+                    <el-button v-if="page.editMode" size="small" type="primary" @click="save()">{{$t('save')}}</el-button>
                 </div>
             </template>
         </el-page-header>
-        <Grid class="page-grid p-5" path="" :elements="elements"/>
+        <Grid class="h-full overflow-auto p-5" path="" :elements="elements"/>
 
     </div>
 </template>
@@ -34,14 +43,25 @@
 import Grid from "../Grid.vue";
 import SettingsIcon from "../icons/settings-icon.vue";
 import {usePage} from "../../store/pageStore";
-import MoreVertIcon from "../icons/more-vert-icon.vue";
+import {ElMessage} from "element-plus";
+import {useStore} from "vuex";
+import {onMounted, ref} from "vue";
+import {useApiClient} from "../../services/api.service";
+import {b64toBlob} from "../../utils/base64ArrayBuffer.js";
+import {useI18n} from "vue-i18n";
+
+const store = useStore();
+const {t} = useI18n()
+let api = useApiClient()
 
 interface Props {
     title: string
     elements: any[]
 }
 
-let page = usePage()
+const page = usePage()
+let canEdit = ref<boolean>(false)
+let reportMenu = ref([])
 
 const props = defineProps<Props>()
 
@@ -49,27 +69,92 @@ const emit = defineEmits<{
     (e: 'settingsRequest'): void
 }>()
 
+onMounted(() => {
+    let permissions = store.getters['auth/account'].permissions
+    canEdit.value = permissions.admin
+
+    getReports()
+})
+
+const save = async () => {
+    page.closeSetting()
+    try {
+        if (await page.saveChanges()) {
+            ElMessage.success({
+                message: t('messages.pageSaved'),
+                duration: 1000
+            })
+        }
+    } catch (e) {
+        ElMessage.error(e.toString())
+    }
+}
+
+const generateReport = async (alias) => {
+    console.log('generateReport',alias)
+
+    try {
+        let res = await api.post(`v2/reports/${alias}/render`, {
+            context: getContext()
+        })
+        let rep = res.data
+
+        const objectUrl = window.URL.createObjectURL(new Blob([b64toBlob(rep.report)], {type: `${rep.contentType}`}));
+
+        if (rep.contentType === 'application/pdf') {
+            window.open(objectUrl)
+        } else {
+            let a = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute('style',"display: none")
+            a.href = objectUrl
+            a.download = rep.filename
+            a.click()
+            URL.revokeObjectURL(objectUrl)
+        }
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
+}
+
+const getReports = async () => {
+    let res = await api.get(`v2/reports?page=${page.properties.alias}`)
+    reportMenu.value = res.data.items
+}
+
+const getContext = () => {
+    let ctx = {
+        page: {
+            id: page.properties.id,
+            alias: page.properties.alias,
+            title: page.properties.title,
+            datasets: []
+        },
+    }
+    for(let i in page.properties.datasets) {
+        let cfg = page.properties.datasets[i]
+        let ds = page.datasets[cfg.alias]
+
+        console.log(ds)
+        ctx.page.datasets.push({
+            alias: cfg.alias,
+            datasource: cfg.datasource,
+            fields: cfg.fields,
+            search: ds.search,
+            filterBy: ds.filterBy,
+            selected: ds.selected,
+            selectedAll: ds.selectedAll,
+            sort: ds.sort
+        })
+    }
+
+    return ctx
+}
+
 </script>
 
 <style lang="scss">
-
-.page-title {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.page-actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.page-grid {
-    overflow: auto;
-    height: -webkit-fill-available;
-}
 
 .page-header-content {
     display: flex;

@@ -10,14 +10,18 @@
                 :path="`${path}[${idx}]`"
                 :dataset="datasetInst"
                 :value="valuesByItemId[item.id]"
+                :editMode="page.editMode"
                 @change="(e) => onFilterChange(e)"
                 @open-settings="(e, wrapper) => openItemSettings(e, item, idx, wrapper)"
             />
-            <div class="w-4 h-9 items-center opacity-0 hover:opacity-100 shadow flex justify-center border ml-1 mr-1 rounded hover:border-blue-300"
+
+            <div v-if="page.editMode" class="w-7 h-9 items-center opacity-0 hover:opacity-100 shadow flex justify-center border ml-1 mr-1 rounded hover:border-blue-300"
                  @click="addNewItem(idx)"
             >
                 <PlusIcon style="width: 16px; height: 16px"/>
             </div>
+            <div v-else-if="!page.editMode" class="w-7 h-9 border ml-1 mr-1 opacity-0"></div>
+
         </div>
 
 
@@ -56,7 +60,7 @@ const fId = new FlakeId()
 
 //import _ from 'lodash'
 
-let pageStore = usePage()
+let page = usePage()
 let datasetInst = ref<DataSet>(null)
 let valuesByItemId = ref({})
 let value = ref(null)
@@ -80,11 +84,11 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 watch(() => props.dataset, () => {
-    datasetInst.value = pageStore.datasets[props.dataset]
+    datasetInst.value = page.datasets[props.dataset]
 })
 
 onBeforeMount(() => {
-    datasetInst.value = pageStore.datasets[props.dataset]
+    datasetInst.value = page.datasets[props.dataset]
 })
 
 onMounted(() => {
@@ -130,7 +134,7 @@ const onFilterChange = (filter: FilterItemInterface) => {
 
 const openSettings = async () => {
     try {
-        pageStore.openSettings(props.path + '.properties', 'FilterPanel', props.parentPath)
+        page.openSettings(props.path + '.properties', 'FilterPanel', props.parentPath)
     } catch (e) {
         console.error(e)
     }
@@ -153,7 +157,7 @@ const itemChanged = () => {
 }
 
 const onPropertyUpdate = (property, value) => {
-    pageStore.setPropertyByPath(`${props.path}.properties.${property}`, value)
+    page.setPropertyByPath(`${props.path}.properties.${property}`, value)
 }
 
 

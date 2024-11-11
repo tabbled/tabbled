@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex; flex-flow: row; padding: 16px; height: calc(100vh - 150px);"
+    <div style="display: flex; flex-flow: row; padding: 16px; height: 100%; width: 100%"
          @mouseup="endResizeSettingPanel"
          @mousemove="onResizeSettingPanel">
 

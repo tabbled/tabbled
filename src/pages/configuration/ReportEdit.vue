@@ -1,5 +1,5 @@
 <template>
-<div style="padding: 16px; height: calc(100vh - 50px);">
+<div style="padding: 16px; height: 100%; width: 100%">
     <el-page-header ref="mainHeader" style="padding: 0 0 16px 0" @back="$router.back()">
         <template #content>
             <span class="text-large font-600 mr-3"> {{$t('template')}} </span>
@@ -32,13 +32,21 @@
             </el-form-item>
 
             <el-form-item :label="$t('pages')" style="width: 50%; margin-left: 8px">
-                <LinkSelect field="pages"
-                            :field-config="getField('pages')"
-                            key-prop="alias"
-                            display-prop="title"
-                            :model-value="getValue('pages')"
-                            @change="(val) => setValue('pages', val)"
-                />
+<!--                <LinkSelect field="pages"-->
+<!--                            :field-config="getField('pages')"-->
+<!--                            key-prop="alias"-->
+<!--                            display-prop="title"-->
+<!--                            :model-value="getValue('pages')"-->
+<!--                            @change="(val) => setValue('pages', val)"-->
+<!--                />-->
+                <el-select v-model="reportEntity.pages" style="padding-right: 8px; width: 250px" multiple>
+                    <el-option
+                        v-for="item in pages"
+                        :key="item.alias"
+                        :label="item.title"
+                        :value="item.alias"
+                    />
+                </el-select>
             </el-form-item>
 
             <el-form-item :label="$t('templateFormat')" style="width: 50%; margin-left: 8px">
@@ -196,6 +204,10 @@ onMounted(async () => {
     }
 
     pages.value = (await dsService.pageDataSource.getMany()).data
+
+     let pagesV2 = (await api.get('v2/pages')).data.pages
+    pages.value.push(...pagesV2)
+
 
     await load()
     document.title = `${t('template')} ${ isNew.value ? 'new' : ' ' + reportEntity.value.title } | ${window['env']['appTitle'] ? window['env']['appTitle'] : "Tabbled"}`

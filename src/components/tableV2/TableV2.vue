@@ -15,7 +15,7 @@
                           @input="debouncedSearch()"
                           v-model="searchText"/>
                 <el-button type="info" round circle text :icon="ExportDataIcon" class="table-settings-button" @click="exportData"/>
-                <el-button type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settings-request', '', 'TableV2')"/>
+                <el-button v-if="settingsVisible" type="info" round circle text :icon="SettingsIcon" class="table-settings-button" @click="emit('settings-request', '', 'TableV2')"/>
 
             </div>
 
@@ -210,13 +210,15 @@ interface Props {
     dataset: DataSetInterface
     title?: string
     inlineEdit: boolean
-    columns: Column[]
+    columns: Column[],
+    settingsVisible?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     title: "",
     datasourceType: 'datasource',
     inlineEdit: false,
+    settingsVisible: false,
     columns: () => []
 })
 

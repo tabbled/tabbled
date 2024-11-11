@@ -6,6 +6,7 @@
              :inline-edit="inlineEdit"
              @update:property="onPropertyUpdate"
              @settings-request="openSettings"
+             :settings-visible="page.editMode"
              class="h-fit"
     />
     <div v-else>No dataset</div>
@@ -18,7 +19,7 @@ import {usePage} from "../../store/pageStore";
 import {DataSet} from "../dataset";
 import {onMounted, ref, watch, onUnmounted, onBeforeMount} from 'vue'
 
-let pageStore = usePage()
+let page = usePage()
 let datasetInst = ref<DataSet>(null)
 
 interface Props {
@@ -41,7 +42,7 @@ watch(() => props.dataset, () => {
     //datasetInst.value = null
     //dsFound.value = false
     // console.log(props.dataset)
-    datasetInst.value = pageStore.datasets[props.dataset]
+    datasetInst.value = page.datasets[props.dataset]
     // console.log(props.dataset)
 })
 
@@ -49,7 +50,7 @@ onMounted(() => {
 })
 
 onBeforeMount(() => {
-    datasetInst.value = pageStore.datasets[props.dataset]
+    datasetInst.value = page.datasets[props.dataset]
 })
 
 onUnmounted(() => {
@@ -60,14 +61,14 @@ const openSettings = async (path, component) => {
     try {
         let parentPath = props.path + '.properties'
         let p = `${parentPath}${path ? '.' + path : ''}`
-        pageStore.openSettings(p, component, parentPath)
+        page.openSettings(p, component, parentPath)
     } catch (e) {
         console.error(e)
     }
 }
 
 const onPropertyUpdate = (property, value) => {
-    pageStore.setPropertyByPath(`${props.path}.properties.${property}`, value)
+    page.setPropertyByPath(`${props.path}.properties.${property}`, value)
 }
 
 </script>

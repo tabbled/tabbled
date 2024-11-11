@@ -124,6 +124,8 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     private _fieldsToSelect: string[] = []
     private _agg: Aggregation[] = []
     private _fieldsToSearch: string[] = []
+    private _selected: string[] = []
+    private _selectedAll: boolean = false
     private _totals: {
         [key in string]: number
     } = {}
@@ -168,6 +170,25 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
     }
     get fieldsToSearch() {
         return this._fieldsToSearch
+    }
+
+    get filterBy() {
+        return this._filterBy
+    }
+
+    get selected() {
+        return this._selected
+    }
+    set selected(ids) {
+        this._selected = ids
+    }
+
+    get selectedAll() {
+        return this._selectedAll
+    }
+
+    set selectedAll(val) {
+        this._selectedAll = val
     }
 
     get isLoading() : boolean { return this._loading }
@@ -296,8 +317,6 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
             this._totals = res.totals
             let dEnd = new Date()
 
-            console.log(this._totals)
-
             this.emit('update-totals', res.totals)
 
             console.log(`Got totals for ${dEnd.valueOf() - dStart.valueOf()}ms`)
@@ -354,11 +373,10 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         return JSON.stringify(s)
     }
 
-    stringifyFilter() {
+    private stringifyFilter() {
 
         let filterBy = ""
         for (let [key, item] of this._filterById) {
-            console.log(item)
             let field = this._fieldsByAlias.get(item.field)
             if (!field || item.compare === null || item.compare === undefined)
                 continue
@@ -403,12 +421,7 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
                 filterBy += filter
             }
         }
-
-        console.log(filterBy)
-
-
         this._filterBy = filterBy
-
     }
 
     async exportData() {
@@ -422,8 +435,6 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
         try {
 
             let res = (await this.api.post(`/v2/datasource/${this.props.datasource}/data/export`, params)).data
-
-            console.log(res)
             return res.file
 
         } catch (e) {

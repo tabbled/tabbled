@@ -1,5 +1,5 @@
 <template>
-<div style="padding: 16px; height: calc(100vh - 150px);">
+<div style="padding: 16px; height: 100%; width: 100%">
     <el-page-header ref="mainHeader" style="padding: 0 0 16px 0" @back="$router.back()">
         <template #content>
             <span class="text-large font-600 mr-3"> {{$t('datasource')}} </span>
