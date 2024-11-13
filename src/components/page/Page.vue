@@ -12,8 +12,9 @@
                     <el-dropdown v-if="reportMenu.length"
                     >
                         <el-button size="small" >
+
                             {{$t('print')}}
-                            <Icon width="16" style="padding-left: 4px" icon="material-symbols:keyboard-arrow-down"/>
+                            <DropdownArrowIcon style="margin-left: 4px"/>
                         </el-button>
                         <template #dropdown>
                             <el-dropdown-menu>
@@ -25,12 +26,26 @@
                         </template>
                     </el-dropdown>
 
+                    <el-button v-if="page.editMode" size="small" type="primary" @click="save()">{{$t('save')}}</el-button>
+
                     <el-button v-if="page.editMode" type="info" text circle @click="emit('settingsRequest')"
                                style="padding: 0 !important; height: 30px; width: 30px">
                         <SettingsIcon/>
                     </el-button>
-                    <el-button v-if="canEdit && !page.editMode" size="small" @click="page.editMode = true">{{$t('edit')}}</el-button>
-                    <el-button v-if="page.editMode" size="small" type="primary" @click="save()">{{$t('save')}}</el-button>
+                    <el-dropdown v-if="advancedMenu.length">
+                        <el-button text circle>
+                            <MoreVertIcon/>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item v-for="item in advancedMenu" @click="item.action()">
+                                    {{item.title}}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+
                 </div>
             </template>
         </el-page-header>
@@ -49,6 +64,8 @@ import {onMounted, ref} from "vue";
 import {useApiClient} from "../../services/api.service";
 import {b64toBlob} from "../../utils/base64ArrayBuffer.js";
 import {useI18n} from "vue-i18n";
+import MoreVertIcon from "../icons/more-vert-icon.vue";
+import DropdownArrowIcon from "../icons/dropdown-arrow-icon.vue";
 
 const store = useStore();
 const {t} = useI18n()
@@ -65,6 +82,13 @@ let reportMenu = ref([])
 
 const props = defineProps<Props>()
 
+class AdvancedMenuItem {
+    title: string
+    action: () => void
+}
+
+const advancedMenu = ref<AdvancedMenuItem[]>([])
+
 const emit = defineEmits<{
     (e: 'settingsRequest'): void
 }>()
@@ -73,6 +97,14 @@ onMounted(() => {
     let permissions = store.getters['auth/account'].permissions
     canEdit.value = permissions.admin
 
+    if (canEdit.value) {
+        advancedMenu.value.push({
+            title: t('edit'),
+            action: () => {
+                page.editMode = true
+            }
+        })
+    }
     getReports()
 })
 

@@ -10,7 +10,8 @@ export default {
             dataset: "Data set",
             title: "Title",
             inlineEdit: "Inline editing",
-            columns: "Columns"
+            columns: "Columns",
+            highlightRow: "Highlight rows"
         },
         tooltip: {
             dataset: "Datasource that added to the page on <b>Data sources</b>",
@@ -37,7 +38,8 @@ export default {
             dataset: "Набор данных",
             title: "Заголовок",
             inlineEdit: "Inline редактирование",
-            columns: "Колонки"
+            columns: "Колонки",
+            highlightRow: "Подсветка строк"
         },
         tooltip: {
             dataset: "<p>Если источник данных в наборе поддерживает редактирование, " +

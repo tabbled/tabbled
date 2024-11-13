@@ -14,7 +14,7 @@
                                    :style="{ display: getVisible(prop.path) ? 'block' : 'none' }"
                                    >
                         <template #label>
-                            <PropertyTitle v-if="!['checkbox', 'dataset-list', 'column-list', 'event-handler-list'].includes(prop.editor)" :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
+                            <PropertyTitle v-if="!['checkbox', 'dataset-list', 'column-list', 'event-handler-list', 'highlight-list'].includes(prop.editor)" :title="t(prop.title)" :tooltip="prop.tooltip ? t(prop.tooltip) : undefined"/>
                         </template>
 
 
@@ -60,6 +60,19 @@
                                     :parent-path="pageStore.propertiesPath"
                                     />
 
+                        <HiglightList v-else-if="prop.editor === 'highlight-list'"
+                                      :items="getValue(prop.path)"
+                                      :path="pageStore.propertiesPath + '.' + prop.path"
+                                      :parent-path="pageStore.propertiesPath"
+                                      :label="t(prop.title)"
+                                      @change="e => onChange(prop.path, e)"
+                                      />
+
+                        <ColorPicker v-else-if="prop.editor === 'color-picker'"
+                                     :model-value="getValue(prop.path)"
+                                     @change="e => onChange(prop.path, e)"
+                        />
+
                         <div v-else>No editor for {{prop.editor}}</div>
                     </el-form-item>
 
@@ -83,6 +96,8 @@ import PropertyTitle from "./settings-panel-controls/PropertyTitle.vue";
 import DataSetList from "./settings-panel-controls/DataSetList.vue";
 import {useI18n} from "vue-i18n"
 import ColumnList from "./settings-panel-controls/ColumnList.vue";
+import HiglightList from "./settings-panel-controls/HiglightList.vue";
+import ColorPicker from "./color-picker/ColorPicker.vue";
 const {t, setLocaleMessage, availableLocales} = useI18n({
    useScope: "local"
 })

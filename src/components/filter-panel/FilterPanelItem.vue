@@ -76,7 +76,7 @@
             </div>
         </div>
         <div v-else class="w-full border opacity-80 flex bg-gray-50 cursor-pointer h-9 rounded hover:border-blue-300 justify-center items-center"
-        @click="e => emit('open-settings', e, $el)">
+        @click="e => openSettings(e, $el)">
 
             <span v-if="editMode">Set up</span>
             <span v-else>No setup</span>
@@ -177,6 +177,11 @@ const onChange = (value) => {
         }
     }
     emit('change', filter)
+}
+
+const openSettings = (e, el) => {
+    if (props.editMode)
+        emit('open-settings', e, el)
 }
 
 </script>

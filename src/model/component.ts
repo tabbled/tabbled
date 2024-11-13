@@ -11,7 +11,9 @@ export type EditorComponent =
     'dataset-list' |
     'event-handler-list' |
     'column-list' |
-    'field-list'
+    'field-list' |
+    'highlight-list' |
+    'color-picker'
 export class SelectItem {
     key: string
     title: string

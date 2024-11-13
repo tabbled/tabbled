@@ -4,8 +4,9 @@ import { defineAsyncComponent } from 'vue'
 import PageHelper from "../components/page/helper"
 import ColumnHelper from "../components/column/helper"
 import DataSetHelper from "../components/dataset/helper"
-import TableV2Helper from "../components/tableV2/helper"
-import FilterPanelHelper from "../components/filterPanel/helper"
+import TableV2Helper from "../components/table-v2/helper"
+import FilterPanelHelper from "../components/filter-panel/helper"
+import HighlightRowHelper from "../components/highlight-row/helper"
 
 interface State {
     helpers: Map<string, ComponentPropertiesHelper>
@@ -29,12 +30,13 @@ export const useComponents = defineStore('components', {
                 this.helpers.set('Dataset', new DataSetHelper)
                 this.helpers.set('TableV2', new TableV2Helper)
                 this.helpers.set('FilterPanel', new FilterPanelHelper)
+                this.helpers.set('HighlightRow', new HighlightRowHelper)
 
                 app.component('TableV2', defineAsyncComponent(() =>
-                    import("./../components/tableV2/TableV2.element.vue")
+                    import("../components/table-v2/TableV2.element.vue")
                 ))
                 app.component('FilterPanel', defineAsyncComponent(() =>
-                    import("./../components/filterPanel/FilterPanel.element.vue")
+                    import("../components/filter-panel/FilterPanel.element.vue")
                 ))
 
                 this.loaded = true

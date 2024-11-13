@@ -91,8 +91,9 @@
                 <tr  v-for="row in table.getRowModel().rows"
                      :key="row.id "
                      @click="onClickRow($event, row)"
+                     @mouseover="onHoverRow(row.id)"
                      :class="{rowSelected: row.getIsSelected(), 'table-row': true}"
-                     :style="{height: '32px'}"
+                     :style="{height: '32px', 'background-color': getHighlightRow(row, row.getIsSelected())}"
                 >
                     <td v-for="cell in row.getVisibleCells()"
                         :key="cell.id"
@@ -199,10 +200,18 @@ import {useDebounceFn} from "@vueuse/core";
 import CellRenderer from "./CellRenderer.vue";
 import numeral from "numeral";
 import {b64toBlob} from "../../utils/base64ArrayBuffer.js";
+import pSBC from "../../utils/pSBC.js"
+import {compileExpression} from "../../services/compiler"
 
 const {t, setLocaleMessage, availableLocales} = useI18n({
     useScope: "local"
 })
+
+class HighlightRowItem {
+    label: string
+    expression: string
+    color: string
+}
 
 
 interface Props {
@@ -211,7 +220,8 @@ interface Props {
     title?: string
     inlineEdit: boolean
     columns: Column[],
-    settingsVisible?: boolean
+    settingsVisible?: boolean,
+    highlightRow?: HighlightRowItem[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -252,6 +262,9 @@ const rowSelection = ref<RowSelectionState>({})
 const sorting = ref()
 let page = 1
 let pageSize = 30
+const hoveredRow = ref(null)
+const highlightedRow = new Map()
+const highlightRowCompiled = []
 
 let totalCount = computed(() => props.dataset ? props.dataset.totalCount : 0)
 
@@ -351,6 +364,11 @@ watch(() => props.dataset,
         await init()
     })
 
+watch(() => props.highlightRow,
+    async () => {
+        updateHighlightRows()
+    }, { deep: true})
+
 
 const debouncedSearch = useDebounceFn(() => {
     props.dataset.search = searchText.value
@@ -404,6 +422,7 @@ const getData = async (reset = false) => {
 const init = async () => {
     //console.log('tablev2 init', props)
 
+    console.log(props.highlightRow)
 
     availableLocales.forEach(locale => {
         setLocaleMessage(locale as string, Locales[locale as string])
@@ -435,6 +454,55 @@ const init = async () => {
         subscribeDatasetEvents()
         await getData(true)
     }
+}
+
+const getHighlightRow = (context: any, rowSelected) => {
+    if (highlightedRow.has(context.id)) {
+        let bg = highlightedRow.get(context.id)
+        if (rowSelected) {
+            bg = context.id === hoveredRow.value ? pSBC(-0.3, bg) : pSBC(-0.6, bg)
+        } else if (context.id === hoveredRow.value) {
+            bg = pSBC(0.2, bg)
+        }
+        return bg
+    }
+}
+
+const updateHighlightRows = async () => {
+    if (!props.highlightRow || !props.highlightRow.length)
+        return
+
+    highlightedRow.clear()
+
+    for(let i in props.highlightRow) {
+        const h = props.highlightRow[i]
+        highlightRowCompiled.push({
+            color: h.color,
+            func: compileExpression(h.expression, 'row')
+        })
+    }
+
+    for(let i in table.getRowModel().rows) {
+        let row = table.getRowModel().rows[i]
+        highlightRow({
+            id: row.id,
+            data: row.original
+        })
+    }
+}
+
+const highlightRow = (row) => {
+    for(let i in highlightRowCompiled) {
+        let value = highlightRowCompiled[i].func.exec(row)
+        if (value) {
+            highlightedRow.set(row.id, highlightRowCompiled[i].color)
+            return
+        }
+    }
+}
+
+const onHoverRow = (rowId) => {
+    hoveredRow.value = rowId
 }
 
 const updateFieldsToAgg = () : boolean => {
@@ -524,11 +592,13 @@ const onDatasetReset = () => {
 }
 
 const onDatasetInsert = (ops) => {
-    //console.log("onDatasetInsert", ops)
+    console.log("onDatasetInsert", ops)
 
     let n = _.cloneDeep(items.value)
     n.push(...ops.items)
     items.value = n
+
+    updateHighlightRows()
 }
 
 const onCellClick = (cell) => {

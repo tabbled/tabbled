@@ -68,6 +68,14 @@ export default class PropertiesHelper extends ComponentPropertiesHelper {
                 editor: "checkbox",
                 group: "interaction",
                 default: () => true
+            },
+            {
+                title: "prop.highlightRow",
+                path: "highlightRow",
+                editor: "highlight-list",
+                group: "appearance",
+                tooltip: "tooltip.highlightRow",
+                default: () => []
             }
         ]
     }

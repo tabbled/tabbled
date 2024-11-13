@@ -34,10 +34,23 @@ export class CompiledFunc {
             ` ${source} `)
         return true
     }
+
+    compileExpression(source: string, ...args: string[]) : boolean  {
+        this.source = source;
+        this.func = new Function('dataSources', 'utilities', 'functions', ...args,
+            `"use strict"; return (${source}) `)
+        return true
+    }
 }
 
 export function compileScript(script: string, ...args: string[]) : CompiledFunc {
     let func = new CompiledFunc()
     func.compile(script, ...args)
+    return func
+}
+
+export function compileExpression(expression: string, ...args: string[]) : CompiledFunc {
+    let func = new CompiledFunc()
+    func.compileExpression(expression, ...args)
     return func
 }
