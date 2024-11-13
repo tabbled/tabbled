@@ -87,7 +87,7 @@
 import EditableLabel from "../EditableLable/EditableLabel.vue";
 import {onMounted, ref} from "vue"
 import {FilterPanelItemInterface} from "./index";
-import {DataSet, DataSetInterface} from "../dataset";
+import {DataSetInterface} from "../dataset";
 import {StandardQueryOperator} from "../../model/filter";
 import {FieldType, FieldInterface} from "../../model/field";
 import {useI18n} from "vue-i18n";
