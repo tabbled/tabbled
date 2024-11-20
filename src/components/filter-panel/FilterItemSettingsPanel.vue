@@ -84,7 +84,7 @@
 
 <script lang="ts" setup>
 
-import EditableLabel from "../EditableLable/EditableLabel.vue";
+import EditableLabel from "../editable-label/EditableLabel.vue";
 import {onMounted, ref} from "vue"
 import {FilterPanelItemInterface} from "./index";
 import {DataSetInterface} from "../dataset";

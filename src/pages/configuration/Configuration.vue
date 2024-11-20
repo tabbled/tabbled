@@ -1,6 +1,6 @@
 <template>
     <div class="divide-y " style="display: flex; flex-direction: column; width: 100%; height: 100vh;">
-        <div class="flex flex-row items-center" >
+        <div class="flex flex-row items-center h-16" >
             <div class="flex flex-row p-4 items-center" style="width: 200px; height: 32px">
                 <img style="height: 32px; width: 32px" src="/favicon.png" alt=""/>
                 <div class="ml-4 text-xl text-slate-600">Tabbled</div>
@@ -139,7 +139,7 @@
 import {useRoute, useRouter} from "vue-router";
 import Table from "../../components/Table.vue";
 import {ColumnConfigInterface} from "../../model/column";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {ScreenSize} from "../../model/page";
 import {useDataSourceService} from "../../services/datasource.service";
 import {ElMessage} from "element-plus";
@@ -171,7 +171,7 @@ let tabsEl = ref(null)
 //const { height } = useElementSize(tabsEl)
 let height = 500
 const page = usePage()
-const oldVersion = ref(true)
+const oldVersion = ref(localStorage.getItem('use_old_config_version') === 'true')
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -182,6 +182,10 @@ const router = useRouter()
 const dsService = useDataSourceService()
 let activeTab = ref('')
 const settings = useSettings()
+
+watch(() => oldVersion.value, () => {
+    localStorage.setItem('use_old_config_version', Boolean(oldVersion.value).toString())
+})
 
 const pagesColumns:ColumnConfigInterface[] = [
     {

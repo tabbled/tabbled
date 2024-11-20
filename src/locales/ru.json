@@ -201,5 +201,33 @@
     "clipboardNotSupported":  "Буфер обмена не поддерживается",
     "messages": {
         "pageSaved": "Настройки сохранены успешно"
+    },
+    "report": {
+        "editTitle": "Изменить отчет",
+        "newTitle": "Новый отчет",
+        "template": "Шаблон",
+        "parameters": "Параметры",
+        "parameter": {
+            "description": "Описание",
+            "type": "Тип",
+            "isMultiple": "Множественный выбор",
+            "alias": "Алиас",
+            "default": "Значение по умолчанию"
+        },
+        "message": {
+            "selectReport": "Выберите шаблон отчета"
+        },
+        "dataset": {
+            "datasource": "Источник данных",
+            "alias": "Алиас",
+            "filterBy": "Фильтр",
+            "groupBy": "Группировка",
+            "sort": "Сортировка",
+            "fields": "Поля"
+        },
+        "datasets": "Наборы данных",
+        "postprocessing": "Постобработка",
+        "settings": "Настройки",
+        "selectType": "Выберите тип шаблона, что бы продолжить"
     }
 }

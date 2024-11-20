@@ -1,0 +1,19 @@
+<template>
+    <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="height" viewBox="0 0 24 24"><path fill="currentColor" d="M19 14h2v6H3v-6h2v4h14v-4M3 4v6h2V6h14v4h2V4H3m8 7v2H8v2l-3-3l3-3v2h3m5 0V9l3 3l-3 3v-2h-3v-2h3Z"></path></svg>
+</template>
+
+<script setup lang="ts">
+interface Props {
+    width?: number
+    height?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    width: 24,
+    height: 24
+})
+</script>
+
+<style scoped>
+
+</style>

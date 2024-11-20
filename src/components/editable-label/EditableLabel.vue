@@ -5,7 +5,7 @@
            type="text"
            :value="modelValue"
            ref="editInput"
-           @focusout="editing = true"
+           @focusout="editing = false"
            @change="onChange"
            @input="onInput"
            :placeholder="placeholder"/>

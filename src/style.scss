@@ -85,3 +85,14 @@ button {
     background-color: #f9f9f9;
   }
 }
+
+.tabs-config-content {
+    .el-tabs__content {
+        height: 100% !important;
+        overflow: hidden;
+        position: relative;
+    }
+    .el-tabs__header {
+        margin: 0 !important;
+    }
+}

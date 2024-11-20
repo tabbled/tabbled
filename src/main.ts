@@ -12,7 +12,7 @@ import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import epRu from 'element-plus/es/locale/lang/ru'
 import 'element-plus/dist/index.css'
-import './style.css'
+import './style.scss'
 import { Icon } from "@iconify/vue"
 import ru from './locales/ru.json'
 import en from './locales/en.json'

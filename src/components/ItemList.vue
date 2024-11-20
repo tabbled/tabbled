@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" body-style="padding: 0" style="width: 100%">
+    <el-card shadow="never" body-style="padding: 0">
         <div v-for="(item, idx)  in list" :id="item[keyProp]"
              :class="{'list-item': true, 'list-item-selected': currentIdx === idx}"
              @dragover="(e) => onDragOver(item, idx, e)"

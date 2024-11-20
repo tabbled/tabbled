@@ -202,5 +202,33 @@
     "clipboardNotSupported":  "Clipboard is not supported",
     "messages": {
         "pageSaved": "Page is saved"
+    },
+    "report": {
+        "editTitle": "Edit report",
+        "newTitle": "New report",
+        "template": "Template",
+        "parameters": "Parameters",
+        "parameter": {
+            "description": "Description",
+            "type": "Type",
+            "isMultiple": "Is multiple",
+            "alias": "Alias"
+        },
+        "message": {
+            "selectReport": "Please, select a report"
+        },
+        "dataset": {
+            "datasource": "Data source",
+            "alias": "Alias",
+            "filterBy": "Filter by",
+            "groupBy": "Group by",
+            "sort": "Sort",
+            "fields": "Fields",
+            "default": "Default value"
+        },
+        "datasets": "Data sets",
+        "postprocessing": "Postprocessing",
+        "settings": "Settings",
+        "selectType": "Select type of template"
     }
 }

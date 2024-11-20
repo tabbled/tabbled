@@ -13,6 +13,7 @@ const DataSourceEdit = () => import("./pages/configuration/DataSourceEdit.vue")
 const ReportEdit = () => import("./pages/configuration/ReportEdit.vue")
 const UserSettings = () => import("./pages/UserSettings.vue")
 const Marketplace = () => import("./pages/marketplace/Marketplace.vue")
+const ReportEditV2 = () => import("./pages/configurationV2/reports/ReportEdit.vue")
 
 const routes: RouteRecordRaw[] = [
     {
@@ -64,6 +65,16 @@ const routes: RouteRecordRaw[] = [
         name: 'reportEdit',
         path: "/configuration/reports/:id",
         component: ReportEdit,
+        meta: {
+            isSingle: true,
+            authRequired: true,
+            title: "Report"
+        },
+    },
+    {
+        name: 'reportEditV2',
+        path: "/v2/configuration/reports/:alias",
+        component: ReportEditV2,
         meta: {
             isSingle: true,
             authRequired: true,
