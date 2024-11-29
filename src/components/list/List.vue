@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2 overflow-auto">
         <div v-for="(item, idx)  in items "
              :id="item[keyProp]"
              class="flex flex-row items-center cursor-default hover:bg-blue-50 rounded p-3"

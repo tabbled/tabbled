@@ -175,7 +175,7 @@
                 <SplitCellIcon v-if="editor.can().splitCell()" :width="18" :height="18"/>
             </el-button>
         </div>
-        <editor-content class="h-full" :class="{ editable: !readonly }" :editor="editor"/>
+        <editor-content class="h-full overflow-hidden focus:ring-sky-300 border rounded focus:outline-none hover:ring-gray-100" :class="{ editable: !readonly }" :editor="editor"/>
     </div>
 
 </template>
@@ -299,19 +299,20 @@ const insertTable = () => {
 <style lang="scss">
 
 .editable .tiptap{
-    box-shadow: 0 0 0 1px var(--el-input-border-color,var(--el-border-color)) inset;
+    //box-shadow: 0 0 0 1px var(--el-input-border-color,var(--el-border-color));
+    outline-color: var(--el-color-primary);
 }
 
 .tiptap {
-    border-radius: var(--el-input-border-radius, var(--el-border-radius-base));
     background-color: var(--el-input-bg-color, var(--el-fill-color-blank));
-    border: var(--el-input-border);
     font-family: "Roboto", serif;
-    padding: 4px 10px 4px 10px;
+    padding: 16px;
     height: inherit;
     overflow: auto;
+    //position: absolute;
 
     table {
+        z-index: 0;
         .selectedCell:after {
             background-color: (var(--el-color-primary));
             opacity: 0.2;
@@ -322,7 +323,7 @@ const insertTable = () => {
             bottom: 0;
             pointer-events: none;
             position: absolute;
-            z-index: 2;
+            z-index: 0;
         }
 
         .column-resize-handle {
@@ -367,6 +368,13 @@ const insertTable = () => {
     h6 {
         line-height: 1.1;
     }
+
+    h1 { font-size: 2.00rem; }
+    h2 { font-size: 1.74rem; }
+    h3 { font-size: 1.52rem; }
+    h4 { font-size: 1.32rem; }
+    h5 { font-size: 1.15rem; }
+    h6 { font-size: 1.00rem; }
 
     code {
         background-color: gray;
@@ -452,16 +460,6 @@ const insertTable = () => {
 .editor-panel-button-icon {
     align-self: center;
     margin: 4px;
-}
-
-.editable .tiptap:hover {
-    box-shadow: 0 0 0 1px var(--el-border-color-hover) inset
-}
-
-.editable .tiptap:focus {
-    outline: none;
-    //box-sizing: border-box;
-    box-shadow: 0 0 0 1px var(--el-color-primary) inset
 }
 
 .color-selector-element {

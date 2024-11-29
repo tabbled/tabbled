@@ -1,9 +1,7 @@
-import {useLogger} from "./logger";
-
 console.log('%c🚀 Welcome! The application works on Tabbled platform. See https://tabbled.org', 'color: green')
 import { createApp, h } from 'vue'
 import {useComponents} from "./store/componentStore";
-
+import {useLogger} from "./logger";
 import { defineAsyncComponent } from 'vue'
 import App from './App.vue'
 import router from "./router";
@@ -28,13 +26,12 @@ import CheckboxField from "./components/CheckboxField.vue"
 import LinkSelect from "./components/LinkSelect.vue"
 import 'dayjs/locale/ru.js'
 import dayjs from "dayjs";
-
-dayjs.locale('ru')
 import utc from "dayjs/plugin/utc";
 import timezone from 'dayjs/plugin/timezone'
 import * as Sentry from "@sentry/vue";
 import numeral from "numeral";
 
+dayjs.locale('ru')
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault("Europe/Moscow")

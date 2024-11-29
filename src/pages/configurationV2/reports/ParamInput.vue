@@ -52,6 +52,26 @@
             :value="item.key"
         />
     </el-select>
+
+
+    <el-select v-else-if="parameter.type === 'link'"
+               style="width: 100%"
+               :model-value="modelValue"
+               @change="onChange"
+               :multiple="parameter.isMultiple"
+               clearable
+               remote
+               filterable
+               :remote-method="getLinkedData"
+    >
+        <el-option
+            v-for="item in linkData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+        />
+    </el-select>
+
     <div v-else>
         No widget for type {{parameter.type}}
     </div>
@@ -60,10 +80,14 @@
 <script setup lang="ts">
 
 import {ReportParameterDto} from "./report.dto";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useI18n} from "vue-i18n"
 import dayjs from "dayjs";
+import {GetDataManyResponseDto} from "../../../components/dataset";
+import {useApiClient} from "../../../services/api.service";
+
 const {t} = useI18n()
+const api = useApiClient()
 
 const boolItems = ref([{
     key: "true",
@@ -83,12 +107,15 @@ const props = defineProps<{
     id?:any
 }>()
 
+onMounted(() => {
+    getLinkedData()
+})
+
+const linkData = ref([])
+
 const getDate = (format?) => {
     if (!props.modelValue)
         return null
-
-    console.log(props.modelValue)
-    console.log(dayjs(props.modelValue, format))
 
     return dayjs(props.modelValue, format).valueOf()
 }
@@ -110,6 +137,22 @@ const onChange = (value: any) => {
         return
     }
 
+    emit('update:modelValue', value)
+}
+
+const getLinkedData = async (search?) => {
+    if (props.parameter.type !== 'link')
+        return
+
+    let params = {
+        query: search,
+        limit: 100,
+        sort: ["name:asc"],
+        fields: ['id', props.parameter.datasourceRefDisplayField]
+    }
+    let res = (await api.post(`/v2/datasource/${props.parameter.datasourceReference}/data`, params)).data as GetDataManyResponseDto
+
+    linkData.value = res.items
 }
 
 

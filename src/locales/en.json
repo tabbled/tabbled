@@ -208,11 +208,33 @@
         "newTitle": "New report",
         "template": "Template",
         "parameters": "Parameters",
+        "preview": "Preview",
+        "title": "Title",
+        "description": "Description",
+        "pageSettings": {
+            "layout": "Layout",
+            "layoutType": {
+                "landscape": "Landscape",
+                "portrait": "Portrait"
+            },
+            "size": "Size",
+            "margin": "Margin",
+            "marginType": {
+                "default": "Default",
+                "custom": "Custom"
+            },
+            "marginTop": "Top",
+            "marginBottom": "Bottom",
+            "marginLeft": "Left",
+            "marginRight": "Right"
+        },
         "parameter": {
             "description": "Description",
             "type": "Type",
             "isMultiple": "Is multiple",
-            "alias": "Alias"
+            "alias": "Alias",
+            "datasourceRef": "List datasource",
+            "datasourceRefDisplayField": "Display field"
         },
         "message": {
             "selectReport": "Please, select a report"

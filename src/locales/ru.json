@@ -207,12 +207,34 @@
         "newTitle": "Новый отчет",
         "template": "Шаблон",
         "parameters": "Параметры",
+        "preview": "Просмотр",
+        "title": "Заголовок",
+        "description": "Описание",
+        "pageSettings": {
+            "layout": "Ориентация",
+            "layoutType": {
+                "landscape": "Альбомный",
+                "portrait": "Портрет"
+            },
+            "size": "Размер",
+            "margin": "Отступы",
+            "marginType": {
+                "default": "По умолчанию",
+                "custom": "Вручную"
+            },
+            "marginTop": "Сверху",
+            "marginBottom": "Снизу",
+            "marginLeft": "Слева",
+            "marginRight": "Справа"
+        },
         "parameter": {
             "description": "Описание",
             "type": "Тип",
             "isMultiple": "Множественный выбор",
             "alias": "Алиас",
-            "default": "Значение по умолчанию"
+            "default": "Значение по умолчанию",
+            "datasourceRef": "Источник для списка значений",
+            "datasourceRefDisplayField": "Отображаемое поле"
         },
         "message": {
             "selectReport": "Выберите шаблон отчета"

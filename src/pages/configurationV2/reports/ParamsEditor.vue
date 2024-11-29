@@ -11,7 +11,7 @@
             </List>
         </div>
 
-        <ParamsItemEditor v-model="currentParam" class="w-4/5 border rounded shadow-xl ml-6"/>
+        <ParamsItemEditor @remove="remove" v-model="currentParam" class="w-4/5 border rounded shadow-xl ml-6"/>
     </div>
 </template>
 
@@ -40,6 +40,12 @@ const add = () => {
         alias: "param",
         title: "New parameter"
     })
+}
+
+const remove = () => {
+    props.modelValue.splice(currentIndex.value, 1)
+    currentIndex.value = -1
+    currentParam.value = null
 }
 
 </script>

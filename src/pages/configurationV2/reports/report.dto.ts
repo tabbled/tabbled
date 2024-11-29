@@ -1,12 +1,13 @@
 import {FieldDataType} from "../../../model/field";
 
 export interface ReportDto {
-    id: string
+    id?: number
     alias: string
     title: string
     parameters: ReportParameterDto[]
-    description: string,
-    templateType: 'html' | 'excel',
+    description?: string,
+    templateType: 'html' | 'excel'
+    script: string
     html?: string
     xlsx?: string
     datasets: DatasetDto[]
@@ -21,6 +22,11 @@ export interface ReportDto {
     },
 }
 
+export class ReportParameterValuesDto {
+    key: string
+    label: string
+}
+
 export interface ReportParameterDto {
     alias: string
     type?: FieldDataType
@@ -28,6 +34,10 @@ export interface ReportParameterDto {
     isMultiple?: boolean
     description?: string,
     defaultValue?: string | number
+    datasourceReference?: string
+    datasourceRefDisplayField?: string
+    values?: ReportParameterValuesDto[]
+    linkedDatasourceIsTree?: boolean
 }
 
 export interface DatasetDto {

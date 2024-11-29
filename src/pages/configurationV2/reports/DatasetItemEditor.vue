@@ -1,5 +1,5 @@
 <template>
-    <div v-if="!modelValue" slot="noContent">
+    <div v-if="!modelValue" slot="noContent" class="flex flex-col p-4 items-center">
         Dataset is not set
     </div>
     <div v-else class="flex flex-col">
@@ -7,7 +7,7 @@
             <EditableLabel class="p-4 pl-6 pr-6 font-medium border-b" v-model="modelValue.alias"/>
         </div>
 
-        <div class="flex flex-col p-6 gap-4 h-full">
+        <div class="flex flex-col p-6 gap-4 overflow-auto">
             <div class="flex flex-row items-center gap-4">
                 <label for="dsInput" class="w-44">{{$t('report.dataset.datasource')}}</label>
                 <el-select id="dsInput" v-model="modelValue.datasource">
@@ -59,7 +59,7 @@ let datasources = ref([])
 let fields = ref([])
 
 interface Props {
-    modelValue: DatasetDto
+    modelValue?: DatasetDto
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -71,7 +71,7 @@ onMounted(() => {
     getFields()
 })
 
-watch(() => props.modelValue.datasource, () => {
+watch(() => props.modelValue?.datasource, () => {
     getFields()
 })
 
@@ -96,7 +96,7 @@ const getDatasource = async () => {
 const getFields = async () => {
     fields.value = []
 
-    if (!props.modelValue.datasource)
+    if (!props.modelValue?.datasource)
         return
 
     let res = await api.get(`v2/datasource/${props.modelValue.datasource}/fields?nested=true`)

@@ -65,17 +65,17 @@
 
 
                 <el-menu :default-active="$route.fullPath" disabled>
-                    <el-menu-item v-if="isAdmin" @click="">
-                        <MarketplaceIcon style="min-width: 24px; height: 24px" color="gray"/>
-                        <template #title>
-                            <span v-if="!collapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{$t('marketplace')}}</span>
+<!--                    <el-menu-item v-if="isAdmin" @click="">-->
+<!--                        <MarketplaceIcon style="min-width: 24px; height: 24px" color="gray"/>-->
+<!--                        <template #title>-->
+<!--                            <span v-if="!collapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{$t('marketplace')}}</span>-->
 
-                            <el-tag type="info" size="small" style="margin-right: 8px">{{$t('soon')}}</el-tag>
-<!--                            <div v-if="!collapsed" @click="$event.stopPropagation(); " class="open-new">-->
-<!--                                <Icon icon="mdi:open-in-new" width="16"/>-->
-<!--                            </div>-->
-                        </template>
-                    </el-menu-item>
+<!--                            <el-tag type="info" size="small" style="margin-right: 8px">{{$t('soon')}}</el-tag>-->
+<!--&lt;!&ndash;                            <div v-if="!collapsed" @click="$event.stopPropagation(); " class="open-new">&ndash;&gt;-->
+<!--&lt;!&ndash;                                <Icon icon="mdi:open-in-new" width="16"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </div>&ndash;&gt;-->
+<!--                        </template>-->
+<!--                    </el-menu-item>-->
 
                     <el-menu-item v-if="isAdmin" @click="router.push('/configuration')">
                         <Icon icon="ic:outline-display-settings" width="24" color="gray" style="min-width: 24px;" />
@@ -145,7 +145,7 @@ import {useSocketClient} from "../services/socketio.service";
 import {useSettings} from "../services/settings.service";
 import {useRouter} from "vue-router";
 import {ScreenSize} from "../model/page";
-import MarketplaceIcon from "./icons/marketplace-icon.vue";
+//import MarketplaceIcon from "./icons/marketplace-icon.vue";
 
 
 let isAdmin = ref(false)

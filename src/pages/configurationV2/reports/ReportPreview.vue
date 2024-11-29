@@ -78,7 +78,8 @@ const emit = defineEmits([])
 
 
 const edit = () => {
-    router.push(`/v2/configuration/reports/${props.report.alias}`)
+    console.log(props.report)
+    router.push(`/v2/configuration/reports/${props.report.id}`)
 }
 
 const render = async () => {

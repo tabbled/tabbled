@@ -73,7 +73,7 @@ const routes: RouteRecordRaw[] = [
     },
     {
         name: 'reportEditV2',
-        path: "/v2/configuration/reports/:alias",
+        path: "/v2/configuration/reports/:id",
         component: ReportEditV2,
         meta: {
             isSingle: true,
