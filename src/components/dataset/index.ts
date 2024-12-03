@@ -358,11 +358,18 @@ export class DataSet extends EventEmitter implements DataSetInterface  {
 
     restoreFilter(filter: string) {
         if (filter) {
-            let filters = JSON.parse(filter)
-            Object.keys(filters).forEach(key => {
-                this._filterById.set(key, filters[key])
-            })
-            this.stringifyFilter()
+            try {
+                let filters = JSON.parse(filter)
+                Object.keys(filters).forEach(key => {
+                    this._filterById.set(key, filters[key])
+                })
+                this.stringifyFilter()
+            } catch (e) {
+                this._filterById.clear()
+                if (this.onFilterUpdate instanceof Function) {
+                    this.onFilterUpdate()
+                }
+            }
         }
     }
     backupFilter() : string {
