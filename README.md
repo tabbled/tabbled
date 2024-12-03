@@ -68,15 +68,17 @@ Download the example docker-compose file and pass contained variables
 wget https://raw.githubusercontent.com/tabbled/tabbled/main/.env.example
 ```
 
-**3.Create a docker volume for PostgresSQL data**
+**3.Create a docker volumes for PostgresSQL, Minio and MeiliSearch data**
 
 ```shell
 docker volume create pg_data
+docker volume create minio_data
+docker volume create meili_data
 ```
 
 **4.Install and start Tabbled application**
 ```shell
-docker compose up
+docker compose up -d
 ```
 
 **5.Open `localhost` on a web browser.**

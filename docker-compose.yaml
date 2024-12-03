@@ -3,30 +3,41 @@ version: '3.9'
 services:
 
   reverse-proxy:
+    container_name: "proxy"
     image: traefik:v2.9
     # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=example@mail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
-      # The HTTP port
-      - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
+      - "443:443"
       - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: always
 
   web:
     image: tabbled/web:latest
     container_name: "web"
     labels:
-      - "traefik.http.routers.web.rule=Host(`localhost`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`YOUR_DOMAIN`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
     restart: always
+    env_file:
+      - .env
     depends_on:
       - server
     pull_policy: always
-    environment:
-      - SENTRY_DNS=${VITE_SENTRY_DNS}
-      - APP_TITLE=${APP_TITLE}
-      - APP_FAVICON=${APP_FAVICON}
 
   server:
     image: tabbled/server:latest
@@ -34,30 +45,22 @@ services:
     restart: always
     ports:
       - "${PORT}:${PORT}"
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=5432
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_USER=${DB_USER}
-      - DB_DATABASE=${DB_DATABASE}
-      - JWT_SECRET=${JWT_SECRET}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
-      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
-      - S3_ENDPOINT=${S3_ENDPOINT}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - JSREPORT_URL=${JSREPORT_URL}
-      - APP_TITLE=${APP_TITLE}
-      - APP_FAVICON=${APP_FAVICON}
-      - SENTRY_DNS=${SENTRY_DNS}
+    env_file:
+      - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       - db
-      - redis
       - s3
+      - redis
     pull_policy: always
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server.rule=Host(`YOUR_DOMAIN`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.server.entrypoints=websecure"
+      - "traefik.http.routers.server.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.server-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.server.middlewares=server-stripprefix"
   db:
     container_name: postgres
     image: postgres:12-alpine
@@ -66,7 +69,7 @@ services:
       # Not for production
       - "${DB_PORT}:5432"
     volumes:
-      - pg_data:/data/db
+      - pg_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_USER=${DB_USER}
@@ -79,29 +82,46 @@ services:
     ports:
       - "9000:9000"
       - "9090:9090"
-    environment:
-      - MINIO_ACCESS_KEY=${S3_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${S3_SECRET_ACCESS_KEY}
+    env_file:
+      - .env
     volumes:
       - minio_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.s3.rule=Host(`storage.YOUR_DOMAIN`)"
+      - "traefik.http.routers.s3.entrypoints=websecure"
+      - "traefik.http.routers.s3.tls.certresolver=myresolver"
 
   redis:
     image: 'redis:alpine'
-    container_name: redis-server
-    restart: always
+    container_name: redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - "6379:6379"
+    restart: always
+
 
   jsreport:
-    image: jsreport/jsreport:latest
+    image: jsreport/jsreport:3.13.0
     container_name: jsreport
     restart: always
     ports:
       - "5488:5488"
+
+  mailisearch:
+    container_name: mailisearch
+    image: getmeili/meilisearch:v1.9
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili_data:/meili_data
 
 volumes:
   pg_data:
     external: true
   minio_data:
     external: false
-
+  meili_data:
+    external: true
