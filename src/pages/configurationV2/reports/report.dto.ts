@@ -7,10 +7,17 @@ export interface ReportDto {
     parameters: ReportParameterDto[]
     description?: string,
     templateType: 'html' | 'excel'
-    script: string
+    postprocessing?: string
     html?: string
     xlsx?: string
     datasets: DatasetDto[]
+    pages: string[]
+    permissions: {
+        view: {
+            type: "all" | "nobody" | 'roles',
+            roles: string[]
+        }
+    }
     pageSettings: {
         size?: string
         layout?: 'portrait' | 'landscape'
@@ -43,7 +50,22 @@ export interface ReportParameterDto {
 export interface DatasetDto {
     alias: string
     datasource?: string
-    fields?: string[]
+    fields?: DatasetFieldDto[]
     filterBy?: string
-    filters?: any[]
+    filters?: any[],
+    groupBy?: string[]
+    sort: DatasetSortDto[]
 }
+
+export interface DatasetFieldDto {
+    alias: string,
+    type: 'data' | 'calc'
+    format?: string
+    aggFunc?: 'none' | 'sum' | 'avg' | 'min' | 'max'
+}
+
+export interface DatasetSortDto {
+    alias: string
+    order: 'asc' | 'desc'
+}
+

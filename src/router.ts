@@ -14,6 +14,7 @@ const ReportEdit = () => import("./pages/configuration/ReportEdit.vue")
 const UserSettings = () => import("./pages/UserSettings.vue")
 const Marketplace = () => import("./pages/marketplace/Marketplace.vue")
 const ReportEditV2 = () => import("./pages/configurationV2/reports/ReportEdit.vue")
+const ReportTemplates = () => import('./pages/configurationV2/reports/ReportTemplates.vue')
 
 const routes: RouteRecordRaw[] = [
     {
@@ -79,6 +80,16 @@ const routes: RouteRecordRaw[] = [
             isSingle: true,
             authRequired: true,
             title: "Report"
+        },
+    },
+    {
+        name: 'reportTemplates',
+        path: "/v2/configuration/reports/embedded",
+        component: ReportTemplates,
+        meta: {
+            isSingle: false,
+            authRequired: true,
+            title: "ReportTemplates"
         },
     },
     {

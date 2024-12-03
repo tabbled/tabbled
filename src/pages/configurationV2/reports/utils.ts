@@ -3,46 +3,11 @@ import {ElMessage} from "element-plus";
 import {ReportDto} from "./report.dto";
 import {useApiClient} from "../../../services/api.service";
 
-export function prepareHtml(html) : string {
-    let matches = html.matchAll(/<table[^>]*dataset="([^"]*)"/gm)
-
-    let datasets = []
-    for (const match of matches) {
-        datasets.push(match[1])
-    }
-
-    let start = html.matchAll(/(<\/th><\/tr>)(<tr><td)/gm)
-
-    let idx = 0
-    let compensation = 0
-    for (const st of start) {
-        let add = `{{#each ${datasets[idx]}.items}}`
-        html = html.slice(0, st.index+st[1].length + compensation)
-            + add + html.slice(st.index+st[1].length + compensation);
-        compensation += add.length
-        idx++
-    }
-
-    compensation = 0
-    let end = html.matchAll(/(<\/td><\/tr>)(<\/tbody>)/gm)
-    for (const st of end) {
-        let add = `{{/each}}`
-
-        html = html.slice(0, st.index + st[1].length + compensation)
-            + add + html.slice(st.index + st[1].length + compensation);
-        compensation += add.length
-    }
-
-    return html
-}
-
-
 export async function preview(report: ReportDto, params: any) {
     console.log('Preview Report')
     let api = useApiClient()
 
     let repReq = Object.assign({}, report)
-    repReq.html = prepareHtml(report.html)
 
     try {
         let res = await api.post(`v2/reports/preview`, {
@@ -50,22 +15,42 @@ export async function preview(report: ReportDto, params: any) {
             params: params
         })
         let rep = res.data
-
-        const objectUrl = window.URL.createObjectURL(new Blob([b64toBlob(rep.report)], {type: `${rep.contentType}`}));
-
-        if (rep.contentType === 'application/pdf') {
-            window.open(objectUrl)
-        } else {
-            let a = document.createElement("a");
-            document.body.appendChild(a);
-            a.setAttribute('style',"display: none")
-            a.href = objectUrl
-            a.download = rep.filename
-            a.click()
-            URL.revokeObjectURL(objectUrl)
-        }
+        saveReport(rep)
     } catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
+    }
+}
+
+export async function render(id, params, output: string, context) {
+    let api = useApiClient()
+
+    try {
+        let res = await api.post(`v2/reports/${id}/render`, {
+            params: params,
+            context: context,
+            output: output
+        })
+        let rep = res.data
+        saveReport(rep)
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
+}
+
+function saveReport(report) {
+    const objectUrl = window.URL.createObjectURL(new Blob([b64toBlob(report.report)], {type: `${report.contentType}`}));
+
+    if (report.contentType === 'application/pdf') {
+        window.open(objectUrl)
+    } else {
+        let a = document.createElement("a");
+        document.body.appendChild(a);
+        a.setAttribute('style',"display: none")
+        a.href = objectUrl
+        a.download = report.filename
+        a.click()
+        URL.revokeObjectURL(objectUrl)
     }
 }

@@ -1,7 +1,7 @@
 <template>
 
 
-    <div class="flex flex-row h-full p-6">
+    <div class="flex flex-row h-full w-full p-6">
         <div class="w-2/5 rounded flex flex-col">
             <div class="flex flex-row items-center gap-2 mb-6">
                 <el-button size="small" @click="add()">{{$t('add')}}</el-button>
@@ -16,7 +16,7 @@
 
 
 
-        <ReportPreview class="w-3/5 border rounded shadow-xl ml-6" :report="currentReport"/>
+        <ReportPreview class="w-3/5 border rounded shadow-xl ml-6" :report="currentReport" :can-edit="permissions.admin"/>
     </div>
 </template>
 
@@ -30,18 +30,23 @@ import {ReportDto} from "./report.dto";
 import { useRouter } from "vue-router";
 import {useApiClient} from "../../../services/api.service";
 import {ElMessage} from "element-plus";
+import {useStore} from "vuex";
 
 const router = useRouter()
 const api = useApiClient()
+const store = useStore();
 
 let currentIndex = ref(null)
 let currentReport = ref<ReportDto>(null)
+const permissions = ref()
+
 
 watch(() => currentIndex.value, async () => {
     await loadParams(reports.value[currentIndex.value].id)
 })
 
 onMounted(() => {
+    permissions.value = store.getters['auth/account'].permissions
     load()
 })
 
@@ -66,6 +71,7 @@ const add = () => {
 
 const load = async (search?: string) => {
     let res = await api.get(`/v2/reports`)
+    console.log(search)
 
     if (res.status !== 200) {
         ElMessage.error('Ooops, something went wrong!')

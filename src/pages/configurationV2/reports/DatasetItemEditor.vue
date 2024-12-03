@@ -7,42 +7,49 @@
             <EditableLabel class="p-4 pl-6 pr-6 font-medium border-b" v-model="modelValue.alias"/>
         </div>
 
-        <div class="flex flex-col p-6 gap-4 overflow-auto">
-            <div class="flex flex-row items-center gap-4">
-                <label for="dsInput" class="w-44">{{$t('report.dataset.datasource')}}</label>
-                <el-select id="dsInput" v-model="modelValue.datasource">
-                    <el-option
-                        v-for="item in datasources"
-                        :key="item.key"
-                        :label="item.label"
-                        :value="item.key"
-                    />
-                </el-select>
-            </div>
+        <div class="h-full">
+            <div class="flex flex-col p-6 gap-4 overflow-auto">
+                <div class="flex flex-row  items-start gap-4">
+                    <label for="dsInput" class="w-32 flex-none">{{$t('report.dataset.datasource')}}</label>
+                    <el-select id="dsInput" v-model="modelValue.datasource">
+                        <el-option
+                            v-for="item in datasources"
+                            :key="item.key"
+                            :label="item.label"
+                            :value="item.key"
+                        />
+                    </el-select>
+                </div>
 
-            <div class="flex flex-row items-center gap-4">
-                <label for="filterByInput" class="w-44">{{$t('report.dataset.filterBy')}}</label>
-                <el-input id="filterByInput" type="textarea" v-model="modelValue.filterBy"/>
-            </div>
-            <div class="flex flex-row items-center gap-4">
-                <label for="fieldInput" class="w-44">{{$t('report.dataset.fields')}}</label>
-                <el-select id="fieldInput" multiple v-model="modelValue.fields">
-                    <el-option v-for="field in fields"
-                               :key="field.key"
-                               :label="field.label"
-                               :value="field.key"/>
-                </el-select>
-            </div>
-            <div class="flex flex-row items-center gap-4">
-                <label for="sortInput" class="w-44">{{$t('report.dataset.sort')}}</label>
-                <el-select id="sortInput" disabled></el-select>
-            </div>
-            <div class="flex flex-row items-center gap-4">
-                <label for="groupByInput" class="w-44">{{$t('report.dataset.groupBy')}}</label>
-                <el-select id="groupByInput" disabled></el-select>
-            </div>
+                <div class="flex flex-row gap-4 items-start">
+                    <label for="filterByInput" class="w-32 flex-none">{{$t('report.dataset.filterBy')}}</label>
+                    <el-input id="filterByInput" type="textarea" v-model="modelValue.filterBy"/>
+                </div>
+                <div class="flex flex-row  items-start gap-4">
+                    <label for="fieldInput" class="w-32 flex-none">{{$t('report.dataset.fields')}}</label>
+                    <DatasetFieldsEditor v-model="modelValue.fields"
+                                         :group-by="modelValue.groupBy"
+                                         :datasource-fields="fields"
+                                         class="w-full"/>
+                </div>
+                <div class="flex flex-row  items-start gap-4">
+                    <label for="groupByInput" class="w-32 flex-none">{{$t('report.dataset.groupBy')}}</label>
+                    <el-select id="groupByInput" multiple v-model="modelValue.groupBy">
+                        <el-option v-for="field in fields"
+                                   :label="field.title"
+                                   :value="field.alias"/>
+                    </el-select>
+                </div>
 
+                <div class="flex flex-row  items-start gap-4 relative">
+                    <label for="sortInput" class="w-32 flex-none">{{$t('report.dataset.sort')}}</label>
+                    <DatasetSortEditor v-model="modelValue.sort" :datasource-fields="fields"/>
+                </div>
 
+            </div>
+        </div>
+        <div class="p-4">
+            <el-button size="small" @click="emit('remove')">{{$t('delete')}}</el-button>
         </div>
     </div>
 </template>
@@ -52,6 +59,8 @@ import EditableLabel from "../../../components/editable-label/EditableLabel.vue"
 import {DatasetDto} from "./report.dto";
 import {useApiClient} from "../../../services/api.service";
 import {onMounted, ref, watch} from "vue";
+import DatasetFieldsEditor from "./DatasetFieldsEditor.vue";
+import DatasetSortEditor from "./DatasetSortEditor.vue";
 
 let api = useApiClient()
 
@@ -75,7 +84,7 @@ watch(() => props.modelValue?.datasource, () => {
     getFields()
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'remove'])
 
 const getDatasource = async () => {
     let res = await api.get('v2/datasource')
@@ -105,14 +114,7 @@ const getFields = async () => {
         return
     }
 
-    console.log(res.data)
-
-    res.data.items.forEach(item => {
-        fields.value.push({
-            key: item.alias,
-            label: `${item.title} (${item.alias})`
-        })
-    })
+    fields.value = res.data.items
 }
 
 </script>

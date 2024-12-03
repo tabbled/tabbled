@@ -7,13 +7,16 @@
             </div>
             <el-page-header @back="$router.back()" class="m-4 w-full">
                 <template #content>
-                    <span v-if="report && report.id"> {{$t('report.editTitle')}} - {{report.title}}</span>
-                    <span v-else> {{$t('report.newTitle')}}</span>
+                    <div v-if="report && report.id"> {{$t('report.editTitle')}} - {{report.title}}</div>
+                    <div v-else> {{$t('report.newTitle')}}</div>
                 </template>
 
                 <template #extra>
-                    <el-button type="primary" size="small" :loading="renderingInProcess" @click="preview()">{{$t('report.preview')}}</el-button>
-                    <el-button size="small" @click="save()">{{$t('save')}}</el-button>
+                    <div class="flex">
+                        <el-button type="primary" size="small" :loading="renderingInProcess" @click="preview()">{{$t('report.preview')}}</el-button>
+                        <el-button size="small" @click="save()">{{$t('save')}}</el-button>
+                    </div>
+
                 </template>
             </el-page-header>
         </div>
@@ -94,7 +97,14 @@ const load = async () => {
             templateType: "html",
             datasets: [],
             parameters: [],
-            script: "",
+            postprocessing: "",
+            pages: [],
+            permissions: {
+                view: {
+                    type: "all",
+                    roles: []
+                }
+            },
             pageSettings: {
                 size: "A4",
                 margin: "default",

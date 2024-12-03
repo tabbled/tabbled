@@ -10,7 +10,7 @@
             </div>
 
             <div class="flex flex-row pl-6">
-                <el-button type="primary" text size="small" @click="edit">{{$t('edit')}}</el-button>
+                <el-button v-if="canEdit" type="primary" text size="small" @click="edit">{{$t('edit')}}</el-button>
             </div>
         </div>
         <el-divider class="m-0"/>
@@ -25,8 +25,12 @@
             </div>
         </div>
 
-        <div class="flex flex-row w-full p-4 border-t">
-            <div class="w-full" />
+        <div class="flex flex-row w-full p-4 gap-2 border-t">
+            <div class="w-full " />
+             <el-select size="small" class="w-44" v-model="output">
+                 <el-option value="pdf" label="Pdf"/>
+                 <el-option value="xlsx" label="Excel"/>
+             </el-select>
             <el-button type="primary" size="small" @click="render()">{{$t('render')}}</el-button>
         </div>
 
@@ -41,17 +45,20 @@ import {onMounted, ref, watch} from "vue"
 import { useRouter } from "vue-router";
 import ParamInput from "./ParamInput.vue";
 import {ElMessage} from "element-plus";
-import {preview} from "./utils";
+import {render as renderReport} from "./utils";
+
 
 const router = useRouter()
 const paramValues = ref({})
-
+const output = ref('pdf')
 interface Props {
-    report: ReportDto
+    report: ReportDto,
+    canEdit: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    report: () => null
+    report: () => null,
+    canEdit: false
 })
 
 onMounted(() => {
@@ -87,7 +94,7 @@ const render = async () => {
 
     console.log(paramValues.value)
     try {
-        await preview(props.report, paramValues.value)
+        await renderReport(props.report.id, paramValues.value, output.value, {})
     } catch (e) {
         ElMessage.error(e.toString())
         console.error(e)

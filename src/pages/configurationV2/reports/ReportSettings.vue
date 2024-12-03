@@ -10,6 +10,26 @@
         <el-input id="desc" v-model="report.description"/>
     </div>
 
+    <div class="flex flex-row items-center gap-4">
+        <label for="layout" class="w-44 flex-none">{{$t('report.forPages')}}</label>
+        <el-select id="layout" v-model="report.pages" multiple clearable>
+            <el-option v-for="item in pages" :value="item.alias" :label="item.title"/>
+        </el-select>
+    </div>
+
+    <div class="flex flex-row items-center gap-4">
+        <label for="canView" class="w-44 flex-none">{{$t('report.canView')}}</label>
+        <el-select id="canView" v-model="report.permissions.view.type">
+            <el-option
+                v-for="item in getAccessTypes(t)"
+                :key="item.alias"
+                :label="item.title"
+                :value="item.alias"
+            />
+        </el-select>
+        <UserRoleSelect v-if="report.permissions.view.type === 'roles'" v-model="report.permissions.view.roles"/>
+    </div>
+
 
     <div class="flex flex-row items-center gap-4">
         <label for="layout" class="w-44 flex-none">{{$t('report.pageSettings.layout')}}</label>
@@ -59,11 +79,21 @@
         <label for="marginLeft" class="w-44 flex-none">{{$t('report.pageSettings.marginLeft')}}</label>
         <el-input-number id="marginLeft" v-model="report.pageSettings.marginLeft"/>
     </div>
+
+
 </div>
 </template>
 
 <script setup lang="ts">
 import {ReportDto} from "./report.dto";
+import {onMounted, ref} from "vue";
+import {useApiClient} from "../../../services/api.service";
+import UserRoleSelect from "../../../components/UserRoleSelect.vue";
+import {getAccessTypes} from "../../../model/permissions";
+import {useI18n} from "vue-i18n";
+const { t } = useI18n();
+const api = useApiClient()
+const pages = ref([])
 
 interface Props {
     report: ReportDto
@@ -72,6 +102,18 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     report: () => null
 })
+
+onMounted(async () => {
+    try {
+        pages.value.push(...(await api.get('v2/pages')).data.pages)
+    } catch (e) {
+        console.error(e)
+    }
+
+})
+
+
+
 
 </script>
 

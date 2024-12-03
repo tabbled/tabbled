@@ -210,6 +210,8 @@
         "preview": "Просмотр",
         "title": "Заголовок",
         "description": "Описание",
+        "forPages": "Для страниц",
+        "canView": "Могут смотреть",
         "pageSettings": {
             "layout": "Ориентация",
             "layoutType": {
@@ -245,7 +247,13 @@
             "filterBy": "Фильтр",
             "groupBy": "Группировка",
             "sort": "Сортировка",
-            "fields": "Поля"
+            "fields": "Поля",
+            "field": {
+                "alias": "Поле",
+                "sort": "Сорт.",
+                "format": "Формат",
+                "aggFunc": "Агрегац."
+            }
         },
         "datasets": "Наборы данных",
         "postprocessing": "Постобработка",

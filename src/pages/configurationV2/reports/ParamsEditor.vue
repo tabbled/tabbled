@@ -40,6 +40,9 @@ const add = () => {
         alias: "param",
         title: "New parameter"
     })
+
+    currentParam.value = props.modelValue[props.modelValue.length-1]
+    currentIndex.value = props.modelValue.length-1
 }
 
 const remove = () => {

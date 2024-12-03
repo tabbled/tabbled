@@ -211,6 +211,8 @@
         "preview": "Preview",
         "title": "Title",
         "description": "Description",
+        "forPages": "For pages",
+        "canView": "Can view",
         "pageSettings": {
             "layout": "Layout",
             "layoutType": {
@@ -246,7 +248,13 @@
             "groupBy": "Group by",
             "sort": "Sort",
             "fields": "Fields",
-            "default": "Default value"
+            "default": "Default value",
+            "field": {
+                "alias": "Field",
+                "sort": "Sort",
+                "format": "Format",
+                "aggFunc": "Agg"
+            }
         },
         "datasets": "Data sets",
         "postprocessing": "Postprocessing",

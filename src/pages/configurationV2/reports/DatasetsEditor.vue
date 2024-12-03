@@ -10,7 +10,7 @@
                 </template>
             </List>
         </div>
-        <DatasetItemEditor v-model="currentDataset" class="border shadow-xl rounded flex flex-col w-4/5 ml-6"/>
+        <DatasetItemEditor v-model="currentDataset" class="border shadow-xl rounded flex flex-col w-4/5 ml-6" @remove="remove"/>
 
     </div>
 </template>
@@ -37,7 +37,19 @@ watch(() => currentIndex.value, () => {
 const add = () => {
    props.modelValue.push({
        alias: "dataset" + (props.modelValue.length + 1),
+       sort: [],
+       fields: [],
+       groupBy: [],
+       filterBy: ""
    })
+    currentDataset.value = props.modelValue[props.modelValue.length-1]
+    currentIndex.value = props.modelValue.length-1
+}
+
+const remove = () => {
+    props.modelValue.splice(currentIndex.value, 1)
+    currentIndex.value = -1
+    currentDataset.value = null
 }
 
 </script>

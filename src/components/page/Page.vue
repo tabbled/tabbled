@@ -19,7 +19,7 @@
                         <template #dropdown>
                             <el-dropdown-menu>
 
-                                <el-dropdown-item v-for="rep in reportMenu" @click="generateReport(rep.alias)">
+                                <el-dropdown-item v-for="rep in reportMenu" @click="openReport(rep.id)">
                                     {{rep.title}}
                                 </el-dropdown-item>
                             </el-dropdown-menu>
@@ -51,6 +51,10 @@
         </el-page-header>
         <Grid class="h-full overflow-auto p-5" path="" :elements="elements"/>
 
+        <el-dialog v-model="reportParamsDialogVisible" :show-close="false" class="p-0 report-params" >
+            <template #header="{close}"></template>
+            <ReportPreview :report="reportParams" :can-edit="canEdit"/>
+        </el-dialog>
     </div>
 </template>
 
@@ -66,10 +70,13 @@ import {b64toBlob} from "../../utils/base64ArrayBuffer.js";
 import {useI18n} from "vue-i18n";
 import MoreVertIcon from "../icons/more-vert-icon.vue";
 import DropdownArrowIcon from "../icons/dropdown-arrow-icon.vue";
+import ReportPreview from "../../pages/configurationV2/reports/ReportPreview.vue";
 
 const store = useStore();
 const {t} = useI18n()
 let api = useApiClient()
+const reportParamsDialogVisible = ref(false)
+const reportParams = ref()
 
 interface Props {
     title: string
@@ -122,12 +129,33 @@ const save = async () => {
     }
 }
 
-const generateReport = async (alias) => {
-    console.log('generateReport',alias)
+const getReportParams = async(id) => {
+    try {
+        let res = await api.get(`v2/reports/${id}/params`)
+        return res.data.report
+    } catch (e) {
+        ElMessage.error(e)
+    }
+}
+
+const openReport = async(id) => {
+    const report = await getReportParams(id)
+    console.log(report)
+    if (report.parameters && report.parameters.length !== 0) {
+        reportParams.value = report
+        reportParamsDialogVisible.value = true
+    } else
+        await generateReport(id)
+
+}
+
+const generateReport = async (id, params?) => {
+    console.log('generateReport',id)
 
     try {
-        let res = await api.post(`v2/reports/${alias}/render`, {
-            context: getContext()
+        let res = await api.post(`v2/reports/${id}/render`, {
+            context: getContext(),
+            params: params ? params : undefined
         })
         let rep = res.data
 
@@ -152,6 +180,8 @@ const generateReport = async (alias) => {
 
 const getReports = async () => {
     let res = await api.get(`v2/reports?page=${page.properties.alias}`)
+
+    console.log(res.data.items)
     reportMenu.value = res.data.items
 }
 
@@ -201,5 +231,11 @@ const getContext = () => {
 
 .list-page-view-header {
     padding: 16px;
+}
+
+.report-params {
+    .el-dialog__header {
+        display: none !important;
+    }
 }
 </style>

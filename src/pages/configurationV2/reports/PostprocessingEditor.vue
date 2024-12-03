@@ -1,5 +1,5 @@
 <template>
-    <CodeEditor  v-model="report.script"  format="javascript" class="w-full border-2"/>
+    <CodeEditor  v-model="report.postprocessing"  format="javascript" class="w-full border-2"/>
 </template>
 
 <script lang="ts" setup>
