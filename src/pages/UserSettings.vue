@@ -27,7 +27,7 @@
         </div>
         <el-form-item :label="$t('lang')">
             <el-select filterable
-                       v-model="userEntity.settings.lang"
+                       v-model="lang"
             >
                 <el-option
                     v-for="locale in $i18n.availableLocales"
@@ -56,7 +56,7 @@
 
 import {ElMessage} from "element-plus";
 import {useRoute, useRouter} from "vue-router";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useI18n} from 'vue-i18n'
 import {useSocketClient} from "../services/socketio.service";
 
@@ -82,6 +82,20 @@ onMounted(async () => {
     await load()
 });
 
+const lang = computed({
+    get: () => userEntity.value.settings?.lang,
+    set: (val) => {
+        console.log(val)
+        if (!userEntity.value.settings) {
+            userEntity.value.settings = {
+                lang: val
+            }
+        } else {
+            userEntity.value.settings.lang = val
+        }
+    }
+})
+
 
 async function load() {
     userEntity.value = await server.emit("users/me", {})
@@ -100,6 +114,10 @@ async function save() {
         ElMessage.error(e.toString())
         console.error(e)
     }
+}
+
+const getLang = () => {
+
 }
 
 
