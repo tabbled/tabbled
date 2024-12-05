@@ -121,7 +121,6 @@ const getDate = (format?) => {
 }
 
 const onChange = (value: any) => {
-    console.log(value)
     if (value === null || value === undefined) {
         emit('update:modelValue', null)
         return

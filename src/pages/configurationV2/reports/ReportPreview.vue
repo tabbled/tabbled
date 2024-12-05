@@ -31,7 +31,7 @@
                  <el-option value="pdf" label="Pdf"/>
                  <el-option value="xlsx" label="Excel"/>
              </el-select>
-            <el-button type="primary" size="small" @click="render()">{{$t('render')}}</el-button>
+            <el-button type="primary" :loading="rendering" size="small" @click="render()">{{$t('render')}}</el-button>
         </div>
 
     </div>
@@ -61,6 +61,8 @@ const props = withDefaults(defineProps<Props>(), {
     canEdit: false
 })
 
+const rendering = ref(false)
+
 onMounted(() => {
     populateParamValues()
 })
@@ -75,29 +77,33 @@ const populateParamValues = () => {
         return
     }
     props.report.parameters.forEach(param => {
-        paramValues.value[param.alias] = param.defaultValue
-    })
+        switch (param.type) {
+            case "number": paramValues.value[param.alias] = Number(param.defaultValue); break;
+            default: paramValues.value[param.alias] = param.defaultValue
+        }
 
-    console.log(paramValues.value)
+    })
 }
 
 const emit = defineEmits([])
 
 
 const edit = () => {
-    console.log(props.report)
     router.push(`/v2/configuration/reports/${props.report.id}`)
 }
 
 const render = async () => {
-    console.log('Preview Report')
+    if (rendering.value)
+        return
 
-    console.log(paramValues.value)
+    rendering.value = true
     try {
         await renderReport(props.report.id, paramValues.value, output.value, {})
     } catch (e) {
         ElMessage.error(e.toString())
         console.error(e)
+    } finally {
+        rendering.value = false
     }
 }
 

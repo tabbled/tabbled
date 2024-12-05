@@ -16,7 +16,7 @@
 
 
 
-        <ReportPreview class="w-3/5 border rounded shadow-xl ml-6" :report="currentReport" :can-edit="permissions.admin"/>
+        <ReportPreview class="w-3/5 border rounded shadow-xl ml-6" :report="currentReport" :can-edit="permissions ? permissions.admin : false"/>
     </div>
 </template>
 

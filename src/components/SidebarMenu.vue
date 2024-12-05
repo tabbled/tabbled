@@ -12,12 +12,13 @@
 
         </div>
 
-            <el-menu class="sidebar-menu"
+            <el-menu class="sidebar-menu group"
                      :collapse="collapsed"
                      :collapse-transition="false"
                      :default-active="$route.fullPath"
                      :router="true"
                      style="width: 100%"
+
             >
                 <div v-for="menu in sidebarMenu" :key="menu.id">
                     <el-sub-menu v-if="menu.items && menu.items.length && isMenuVisible(menu)"
@@ -59,7 +60,15 @@
                         </template>
                     </el-menu-item>
                 </div>
+
+                <div ref="addItemButton" v-if="permissions && permissions.admin" class="w-full relative p-2 invisible group-hover:visible">
+                    <div class="text-center m-2 opacity-60 hover:opacity-100 rounded hover:border-blue-300 border border-dashed cursor-pointer hover:bg-blue-50 hover:text-blue-400"
+                    @click="e => openAddItemDialog(e)">
+                        {{$t('add')}}
+                    </div>
+                </div>
             </el-menu>
+
 
         <div class="sidebar-menu-footer">
 
@@ -131,7 +140,17 @@
                 </div>
             </div>
         </div>
+
+        <ContextMenu v-model:visible="addItemDialogVisible" :x="addItemX" :y="addItemY" width="400px">
+            <div class="flex flex-col divide-y p-4">
+                <AddMenuItem class="pb-4" size="small" v-model="addMenuItem"/>
+                <div class="flex flex-row justify-end pt-4">
+                    <el-button type="primary" size="small" @click="onAddItem">{{$t('add')}}</el-button>
+                </div>
+            </div>
+        </ContextMenu>
     </div>
+
 
 
 </template>
@@ -145,6 +164,8 @@ import {useSocketClient} from "../services/socketio.service";
 import {useSettings} from "../services/settings.service";
 import {useRouter} from "vue-router";
 import {ScreenSize} from "../model/page";
+import AddMenuItem from "../pages/configurationV2/menu/AddMenuItem.vue";
+import ContextMenu from "./ContextMenu.vue";
 //import MarketplaceIcon from "./icons/marketplace-icon.vue";
 
 
@@ -157,11 +178,27 @@ const router = useRouter();
 let favicon = ref('/favicon.png')
 let title = ref('Tabbled')
 let userMenuItem = ref(null)
+const addItemDialogVisible = ref(false)
+const addItemX = ref(100)
+const addItemY = ref(100)
+const addItemButton = ref(null)
 
 let permissions = {
     admin: false,
     roles: []
 }
+interface AddMenuDto extends MenuConfigInterface {
+    template: string
+}
+const addMenuItem = ref<AddMenuDto>({
+    id: '',
+    title: "",
+    icon: "",
+    path: "",
+    template: "",
+    visibility: 'all',
+    visibilityRoles: []
+})
 
 const props = defineProps<{
     screenSize: ScreenSize
@@ -201,13 +238,11 @@ socketClient.socket.on("disconnect", () => {
     isConnected.value = false;
 })
 
-function setCollapsed() {
-
-    //mainSideBarWidth.value = `${!props.collapsed ? 300 : 60}px`
+const setCollapsed = () => {
     emit('update:collapsed', !props.collapsed)
 }
 
-function isMenuVisible(menu) {
+const isMenuVisible = (menu) => {
     switch (menu.visibility) {
         case 'all': return true;
         case 'nobody': return false;
@@ -217,7 +252,7 @@ function isMenuVisible(menu) {
     }
 }
 
-async function loadMenu() {
+const loadMenu = async () => {
     try {
         let menu = await socketClient.emit('config/params/get', {
             id: 'menu'
@@ -229,11 +264,27 @@ async function loadMenu() {
     }
 }
 
-function logout() {
+const logout = () => {
     store.dispatch('auth/logout')
         .then(() => {
             router.push('/login')
         })
+}
+
+const openAddItemDialog = (e) => {
+    console.log('ss', e)
+    let pos = addItemButton.value.getBoundingClientRect()
+    addItemX.value = pos.width;
+    addItemY.value = pos.y;
+    //addItemX.value = e.clientX;
+    //addItemY.value = e.clientY;
+    addItemDialogVisible.value = true
+}
+
+const onAddItem = async () => {
+    console.log('onAddItem')
+    addMenuItem.value.id = String(sidebarMenu.value.length + 1)
+    sidebarMenu.value.push(addMenuItem.value)
 }
 
 function openInNewWindow(to: string) {

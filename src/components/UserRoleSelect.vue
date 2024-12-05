@@ -1,5 +1,5 @@
 <template>
-    <el-select multiple @change="changed" :model-value="modelValue" style="width: 100%">
+    <el-select multiple @change="changed" :size="size" :model-value="modelValue" style="width: 100%">
         <el-option
             v-for="item in roles"
             :key="item.alias"
@@ -16,6 +16,7 @@ let socket = useSocketClient()
 
 interface Props {
     modelValue: any[]
+    size: 'small' | 'default'
 }
 const emit = defineEmits(['update:modelValue'])
 

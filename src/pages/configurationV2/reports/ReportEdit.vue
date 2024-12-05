@@ -117,7 +117,6 @@ const load = async () => {
 const report = ref<ReportDto>(null)
 
 const preview = async () => {
-    console.log('Preview Report')
     renderingInProcess.value = true
 
     let params = {}

@@ -35,7 +35,6 @@ export class ReportParameterValuesDto {
 }
 
 export interface ReportParameterDto {
-    alias: string
     type?: FieldDataType
     title: string
     isMultiple?: boolean

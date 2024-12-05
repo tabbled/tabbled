@@ -116,7 +116,9 @@
         "icon": "Icon",
         "path": "Path",
         "page": "Page",
-        "visibility": "Visibility"
+        "visibility": "Visibility",
+        "template": "Page template",
+        "addNewItem": "Add new page"
     },
     "fieldTypes": {
         "number": "Number",

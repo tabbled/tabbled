@@ -15,7 +15,7 @@
                 @open-settings="(e, wrapper) => openItemSettings(e, item, idx, wrapper)"
             />
 
-            <div v-if="page.editMode" class="w-7 h-9 items-center opacity-0 hover:opacity-100 shadow flex justify-center border ml-1 mr-1 rounded hover:border-blue-300"
+            <div v-if="page.editMode" class="w-7 h-9 items-center opacity-0 hover:opacity-100 flex justify-center border border-dashed ml-1 mr-1 rounded hover:border-blue-300"
                  @click="addNewItem(idx)"
             >
                 <PlusIcon style="width: 16px; height: 16px"/>
