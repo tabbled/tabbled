@@ -69,7 +69,7 @@
                             :value="item.alias"
                         />
                     </el-select>
-                    <UserRoleSelect style="width: 100%" v-if="reportEntity.permissions.canView === 'roles'" v-model="reportEntity.permissions.canViewRoles"/>
+                    <UserRoleSelect size="default" style="width: 100%" v-if="reportEntity.permissions.canView === 'roles'" v-model="reportEntity.permissions.canViewRoles"/>
                 </div>
             </el-form-item>
         </div>

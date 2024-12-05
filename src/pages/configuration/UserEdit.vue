@@ -58,7 +58,7 @@
         </el-form-item>
 
         <el-form-item :label="t('roles')" v-if="userEntity" style="width: 100%">
-            <UserRoleSelect v-model="userEntity.permissions['roles']" style="width: 100%"/>
+            <UserRoleSelect size="default" v-model="userEntity.permissions['roles']" style="width: 100%"/>
 
             <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between;">

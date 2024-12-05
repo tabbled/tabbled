@@ -84,6 +84,7 @@
                                      @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
                         <UserRoleSelect v-else-if="prop.type === 'role'"
                                         :model-value="getValue(prop, currentElement)"
+                                        size="default"
                                         @change="(val, field) => onFieldSelectInput(prop.alias, val, field)"/>
 
                         <div v-else style="color: var(--el-color-danger)">Don't have an element for type "{{prop.type}}"</div>

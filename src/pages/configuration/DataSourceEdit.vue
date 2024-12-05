@@ -242,7 +242,7 @@
                                     :value="item.alias"
                                 />
                             </el-select>
-                            <UserRoleSelect @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canAdd === 'roles'" v-model="dataSourceEntity.permissions.canAddRoles"/>
+                            <UserRoleSelect size="default" @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canAdd === 'roles'" v-model="dataSourceEntity.permissions.canAddRoles"/>
                         </div>
                     </el-form-item>
 
@@ -256,7 +256,7 @@
                                     :value="item.alias"
                                 />
                             </el-select>
-                            <UserRoleSelect @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canEdit === 'roles'" v-model="dataSourceEntity.permissions.canEditRoles"/>
+                            <UserRoleSelect size="default" @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canEdit === 'roles'" v-model="dataSourceEntity.permissions.canEditRoles"/>
                         </div>
                     </el-form-item>
 
@@ -270,7 +270,7 @@
                                     :value="item.alias"
                                 />
                             </el-select>
-                            <UserRoleSelect @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canRemove === 'roles'" v-model="dataSourceEntity.permissions.canRemoveRoles"/>
+                            <UserRoleSelect size="default" @update:modelValue="isChanged = true" style="width: 100%" v-if="dataSourceEntity.permissions.canRemove === 'roles'" v-model="dataSourceEntity.permissions.canRemoveRoles"/>
                         </div>
                     </el-form-item>
                 </el-form>

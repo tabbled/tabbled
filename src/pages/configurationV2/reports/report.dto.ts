@@ -2,7 +2,6 @@ import {FieldDataType} from "../../../model/field";
 
 export interface ReportDto {
     id?: number
-    alias: string
     title: string
     parameters: ReportParameterDto[]
     description?: string,
@@ -35,6 +34,7 @@ export class ReportParameterValuesDto {
 }
 
 export interface ReportParameterDto {
+    alias: string
     type?: FieldDataType
     title: string
     isMultiple?: boolean

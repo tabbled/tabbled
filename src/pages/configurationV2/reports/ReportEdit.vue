@@ -92,7 +92,6 @@ const load = async () => {
         report.value = res.data.report
     } else {
         report.value = {
-            alias: "report",
             title: "New report",
             templateType: "html",
             datasets: [],

@@ -27,7 +27,7 @@
                         :value="item.alias"
                     />
                 </el-select>
-                <UserRoleSelect v-if="modelValue.visibility === 'roles'" v-model="modelValue.visibilityRoles"/>
+                <UserRoleSelect size="default" v-if="modelValue.visibility === 'roles'" v-model="modelValue.visibilityRoles"/>
             </div>
 
         </el-form-item>

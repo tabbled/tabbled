@@ -27,7 +27,7 @@
                 :value="item.alias"
             />
         </el-select>
-        <UserRoleSelect v-if="report.permissions.view.type === 'roles'" v-model="report.permissions.view.roles"/>
+        <UserRoleSelect size="default" v-if="report.permissions.view.type === 'roles'" v-model="report.permissions.view.roles"/>
     </div>
 
 
