@@ -63,7 +63,7 @@
 
                 <div ref="addItemButton" v-if="permissions && permissions.admin" class="w-full relative p-2 invisible group-hover:visible">
                     <div class="text-center m-2 opacity-60 hover:opacity-100 rounded hover:border-blue-300 border border-dashed cursor-pointer hover:bg-blue-50 hover:text-blue-400"
-                    @click="e => openAddItemDialog(e)">
+                    @click="openAddItemDialog()">
                         {{$t('add')}}
                     </div>
                 </div>
@@ -166,6 +166,7 @@ import {useRouter} from "vue-router";
 import {ScreenSize} from "../model/page";
 import AddMenuItem from "../pages/configurationV2/menu/AddMenuItem.vue";
 import ContextMenu from "./ContextMenu.vue";
+import {ElMessage} from "element-plus";
 //import MarketplaceIcon from "./icons/marketplace-icon.vue";
 
 
@@ -182,6 +183,7 @@ const addItemDialogVisible = ref(false)
 const addItemX = ref(100)
 const addItemY = ref(100)
 const addItemButton = ref(null)
+const server = useSocketClient()
 
 let permissions = {
     admin: false,
@@ -271,20 +273,28 @@ const logout = () => {
         })
 }
 
-const openAddItemDialog = (e) => {
-    console.log('ss', e)
+const openAddItemDialog = () => {
     let pos = addItemButton.value.getBoundingClientRect()
     addItemX.value = pos.width;
     addItemY.value = pos.y;
-    //addItemX.value = e.clientX;
-    //addItemY.value = e.clientY;
     addItemDialogVisible.value = true
 }
 
 const onAddItem = async () => {
-    console.log('onAddItem')
     addMenuItem.value.id = String(sidebarMenu.value.length + 1)
     sidebarMenu.value.push(addMenuItem.value)
+
+
+    try {
+        await server.emit('config/params/set', {
+            id: 'menu',
+            value: sidebarMenu.value
+        })
+        ElMessage.success('Saved successfully')
+    } catch (e) {
+        ElMessage.error(e.toString())
+        console.error(e)
+    }
 }
 
 function openInNewWindow(to: string) {

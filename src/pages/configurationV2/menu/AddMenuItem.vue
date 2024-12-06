@@ -12,17 +12,17 @@
         <label for="pathInput" class="w-28 flex-none">{{$t('menuConfig.path')}}</label>
         <el-input id="pathInput" :size="size" v-model="modelValue.path"/>
     </div>
-    <div class="flex flex-row items-center gap-4">
-        <label for="templateInput" class="w-28 flex-none">{{$t('menuConfig.template')}}</label>
-        <el-select id="templateInput" :size="size"
-                   v-model="modelValue.template" clearable>
-            <el-option
-                v-for="item in templates"
-                :label="item.title"
-                :value="item.id"
-            />
-        </el-select>
-    </div>
+<!--    <div class="flex flex-row items-center gap-4">-->
+<!--        <label for="templateInput" class="w-28 flex-none">{{$t('menuConfig.template')}}</label>-->
+<!--        <el-select id="templateInput" :size="size"-->
+<!--                   v-model="modelValue.template" clearable>-->
+<!--            <el-option-->
+<!--                v-for="item in templates"-->
+<!--                :label="item.title"-->
+<!--                :value="item.id"-->
+<!--            />-->
+<!--        </el-select>-->
+<!--    </div>-->
 
 
     <div class="flex flex-row items-center gap-4">
