@@ -85,6 +85,14 @@ docker compose up -d
 
 Note: Default login:password are admin:admin
 
+**6. If you use Minio, you must create a bucket on the Minio server**
+
+Open http://locahost:9090/buckets and login with credentials that you set up on your .env file 
+
+username=`{S3_ACCESS_KEY}`, password=`{S3_SECRET_ACCESS_KEY}`
+
+Then "Create Bucket", and input bucket name that you set up on .env file in variable `{S3_BUCKET}`
+
 ## 	Support
 
 Tabbled is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers.
