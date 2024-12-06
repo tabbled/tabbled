@@ -131,11 +131,12 @@
         </div>
 
 
-        <el-tabs v-model="activeTab" class="demo-tabs" style="; max-height: unset">
+        <el-tabs v-model="activeTab" class="demo-tabs" style="; max-height: unset; width: 100%">
             <el-tab-pane :label="$t('fields')" name="fields">
 
                 <el-form-item >
                     <ItemList key-prop="alias"
+                              class="w-full"
                               title-prop="title"
                               :list="dataSourceEntity ? dataSourceEntity.fields : []"
                               @edit="editField"
