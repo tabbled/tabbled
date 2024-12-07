@@ -5,11 +5,29 @@
         <div class="w-2/5 rounded flex flex-col">
             <div class="flex flex-row items-center gap-2 mb-6">
                 <el-button size="small" @click="add()">{{$t('add')}}</el-button>
-                <el-input :prefix-icon="SearchIcon" size="small" :placeholder="$t('search')" class="w-full"></el-input>
+                <el-input :prefix-icon="SearchIcon" size="small"
+                          :placeholder="$t('search')"
+                          class="w-full"
+                          @input="debouncedSearch()"
+                          v-model="searchText"/>
             </div>
             <List :items="reports" v-model:current-index="currentIndex">
                 <template #icon>
                     <ReportIcon :width="20" :height="20" class="flex-none mr-3 text-blue-400" />
+                </template>
+                <template #extra="{item}">
+                    <el-dropdown placement="bottom-end" trigger="click">
+                    <el-button text circle v-if="permissions && permissions.admin">
+                        <more-vert-icon/>
+                    </el-button>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item :icon="DuplicateIcon" @click="duplicate(item.id)">{{$t('duplicate')}}</el-dropdown-item>
+                            <el-dropdown-item :icon="DeleteIcon" @click="remove(item.id)">{{$t('delete')}}</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                    </el-dropdown>
+
                 </template>
             </List>
         </div>
@@ -29,16 +47,23 @@ import ReportPreview from "./ReportPreview.vue";
 import {ReportDto} from "./report.dto";
 import { useRouter } from "vue-router";
 import {useApiClient} from "../../../services/api.service";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {useStore} from "vuex";
+import MoreVertIcon from "../../../components/icons/more-vert-icon.vue";
+import DeleteIcon from "../../../components/icons/delete-icon.vue";
+import DuplicateIcon from "../../../components/icons/duplicate-icon.vue";
+import {useI18n} from "vue-i18n";
+import {useDebounceFn} from "@vueuse/core";
 
 const router = useRouter()
 const api = useApiClient()
 const store = useStore();
+const {t} = useI18n()
 
 let currentIndex = ref(null)
 let currentReport = ref<ReportDto>(null)
 const permissions = ref()
+let searchText = ref("")
 
 
 watch(() => currentIndex.value, async () => {
@@ -64,21 +89,56 @@ const add = () => {
     router.push(`/v2/configuration/reports/new`)
 }
 
-// const edit = (idx) => {
-//     console.log(reports.value)
-//     //currentReport.value = reports.value[idx]
-// }
+const duplicate = async (id) => {
+    try {
+        await api.post(`/v2/reports/${id}/duplicate`, {})
+        await load()
+    } catch (e) {
+        console.error(e)
+        ElMessage.error(e.toString())
+    }
+}
+
+const remove = (id) => {
+    ElMessageBox.confirm(
+        t('confirmDeleteTitle'),
+        t('delete'),
+        {
+            confirmButtonText: t('delete'),
+            cancelButtonText: t('cancel'),
+            type: 'warning',
+        }
+    )
+        .then(async () => {
+            try {
+                await api.delete(`/v2/reports/${id}`)
+                await load()
+            } catch (e) {
+                console.error(e)
+                ElMessage.error(e.toString())
+            }
+        })
+        .catch(() => {})
+}
+
+const debouncedSearch = useDebounceFn(() => {
+    load(searchText.value)
+}, 500, {maxWait: 500})
 
 const load = async (search?: string) => {
-    let res = await api.get(`/v2/reports`)
-    console.log(search)
+    try {
+        let res = await api.get(`/v2/reports?search=${search}`)
+        console.log(search)
 
-    if (res.status !== 200) {
-        ElMessage.error('Ooops, something went wrong!')
-        return
+        if (res.status !== 200) {
+            ElMessage.error('Ooops, something went wrong!')
+            return
+        }
+
+        reports.value = res.data.items
+    } catch (e) {
+        ElMessage.error(e.toString())
     }
-
-    reports.value = res.data.items
 }
 
 const reports = ref<ReportDto[]>([])
