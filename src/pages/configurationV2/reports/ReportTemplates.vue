@@ -127,7 +127,7 @@ const debouncedSearch = useDebounceFn(() => {
 
 const load = async (search?: string) => {
     try {
-        let res = await api.get(`/v2/reports?search=${search}`)
+        let res = await api.get(`/v2/reports?search=${search ? search : ''}`)
         console.log(search)
 
         if (res.status !== 200) {
