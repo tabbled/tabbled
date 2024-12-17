@@ -2,7 +2,7 @@
 
 
     <div class="flex flex-row h-full w-full p-6">
-        <div class="w-2/5 rounded flex flex-col">
+        <div class="w-5/12 rounded flex flex-col">
             <div class="flex flex-row items-center gap-2 mb-6">
                 <el-button size="small" @click="add()">{{$t('add')}}</el-button>
                 <el-input :prefix-icon="SearchIcon" size="small"
@@ -22,6 +22,7 @@
                     </el-button>
                     <template #dropdown>
                         <el-dropdown-menu>
+                            <el-dropdown-item :icon="EditIcon" @click="edit(item.id)">{{$t('edit')}}</el-dropdown-item>
                             <el-dropdown-item :icon="DuplicateIcon" @click="duplicate(item.id)">{{$t('duplicate')}}</el-dropdown-item>
                             <el-dropdown-item :icon="DeleteIcon" @click="remove(item.id)">{{$t('delete')}}</el-dropdown-item>
                         </el-dropdown-menu>
@@ -34,7 +35,7 @@
 
 
 
-        <ReportPreview class="w-3/5 border rounded shadow-xl ml-6" :report="currentReport" :can-edit="permissions ? permissions.admin : false"/>
+        <ReportPreview class="w-7/12 border rounded shadow-xl ml-6" :report="currentReport" :can-edit="permissions ? permissions.admin : false"/>
     </div>
 </template>
 
@@ -54,6 +55,7 @@ import DeleteIcon from "../../../components/icons/delete-icon.vue";
 import DuplicateIcon from "../../../components/icons/duplicate-icon.vue";
 import {useI18n} from "vue-i18n";
 import {useDebounceFn} from "@vueuse/core";
+import EditIcon from "../../../components/icons/edit-icon.vue";
 
 const router = useRouter()
 const api = useApiClient()
@@ -87,6 +89,10 @@ const loadParams = async (id: number) => {
 
 const add = () => {
     router.push(`/v2/configuration/reports/new`)
+}
+
+const edit = (id) => {
+    router.push(`/v2/configuration/reports/${id}`)
 }
 
 const duplicate = async (id) => {

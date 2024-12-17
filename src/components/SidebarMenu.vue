@@ -1,6 +1,6 @@
 <template>
-    <div ref="sidebarMenuContainer" class="sidebar-menu-container divide-y">
-        <div class="p-4 flex flex-row items-center justify-around cursor-pointer" @click="router.push('/')">
+    <div ref="sidebarMenuContainer " class="sidebar-menu-container group">
+        <div class="p-4 flex flex-row items-center justify-around cursor-pointer border-b" @click="router.push('/')">
 
                 <div class="flex flex-row items-center cursor-pointer w-full">
 
@@ -12,7 +12,7 @@
 
         </div>
 
-            <el-menu class="sidebar-menu group"
+            <el-menu class="sidebar-menu "
                      :collapse="collapsed"
                      :collapse-transition="false"
                      :default-active="$route.fullPath"
@@ -61,16 +61,24 @@
                     </el-menu-item>
                 </div>
 
-                <div ref="addItemButton" v-if="permissions && permissions.admin" class="w-full relative p-2 invisible group-hover:visible">
+                <div ref="addItemButton" v-if="editing" class="w-full relative p-2">
                     <div class="text-center m-2 opacity-60 hover:opacity-100 rounded hover:border-blue-300 border border-dashed cursor-pointer hover:bg-blue-50 hover:text-blue-400"
                     @click="openAddItemDialog()">
                         {{$t('add')}}
                     </div>
                 </div>
+
+
             </el-menu>
 
+<!--        <div v-if="permissions && permissions.admin" class=" opacity-60 invisible hover:opacity-100 group-hover:visible p-2">-->
+<!--            <el-button text circle size="small" @click="editing = !editing">-->
+<!--                <SettingsIcon :width="16" :height="16"/>-->
+<!--            </el-button>-->
+<!--        </div>-->
 
-        <div class="sidebar-menu-footer">
+        <div class="sidebar-menu-footer border-t">
+
 
 
                 <el-menu :default-active="$route.fullPath" disabled>
@@ -100,7 +108,7 @@
                     <el-menu-item ref="userMenuItem">
                         <Icon style=" min-width: 24px;" color="gray" icon="ic:baseline-account-circle" width="20" />
                         <template #title>
-                            <span v-if="!collapsed" style="width: 100%; padding-left: 8px; text-align: left;">{{username}}</span>
+                            <span v-if="!collapsed" class="w-full pl-2 items-start overflow-hidden text-ellipsis">{{username}}</span>
 
                             <div v-if="!collapsed" @click="$event.stopPropagation(); openInNewWindow('/configuration');" class="open-new">
                                 <Icon icon="mdi:chevron-right" width="16"/>
@@ -184,6 +192,7 @@ const addItemX = ref(100)
 const addItemY = ref(100)
 const addItemButton = ref(null)
 const server = useSocketClient()
+const editing = ref(false)
 
 let permissions = {
     admin: false,
@@ -322,24 +331,13 @@ function openInNewWindow(to: string) {
     height: 100%;
     overflow: auto;
     padding-top: 8px;
+    position: relative;
 }
 
 .sidebar-menu-footer {
     flex-shrink: 0;
-    border-top: 1px solid var(--el-border-color);
     padding-top: 10px;
 }
-
-//.menu-header {
-//    display: flex;
-//    flex-direction: row;
-//    margin: 0;
-//    padding: 16px;
-//    border-bottom: 1px solid var(--el-border-color);
-//    justify-content: space-between;
-//    align-items: center;
-//    cursor: pointer;
-//}
 
 .el-sub-menu__title {
     height: 40px !important;

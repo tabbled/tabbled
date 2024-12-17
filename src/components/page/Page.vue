@@ -30,7 +30,7 @@
 
                     <el-button v-if="page.editMode" type="info" text circle @click="emit('settingsRequest')"
                                style="padding: 0 !important; height: 30px; width: 30px">
-                        <SettingsIcon/>
+                        <SettingsIcon :height="16" :width="16"/>
                     </el-button>
                     <el-dropdown v-if="advancedMenu.length">
                         <el-button text circle>

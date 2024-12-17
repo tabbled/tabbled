@@ -11,15 +11,15 @@
 
             <div class="flex flex-col p-6 gap-4 h-full">
                 <div class="flex flex-row items-center gap-4">
-                    <label for="aliasInput" class="w-44">{{$t('report.parameter.alias')}}</label>
+                    <label for="aliasInput" class="w-44 flex-none">{{$t('report.parameter.alias')}}</label>
                     <el-input id="aliasInput" v-model="modelValue.alias"/>
                 </div>
                 <div class="flex flex-row items-center gap-4">
-                    <label for="descInput" class="w-44">{{$t('report.parameter.description')}}</label>
+                    <label for="descInput" class="w-44 flex-none">{{$t('report.parameter.description')}}</label>
                     <el-input id="descInput" v-model="modelValue.description"/>
                 </div>
                 <div class="flex flex-row items-center gap-4">
-                    <label for="typeInput" class="w-44">{{$t('report.parameter.type')}}</label>
+                    <label for="typeInput" class="w-44 flex-none">{{$t('report.parameter.type')}}</label>
                     <el-select id="typeInput" v-model="modelValue.type">
                         <el-option
                             v-for="item in typeList"
@@ -29,18 +29,40 @@
                         />
                     </el-select>
                 </div>
-                <div v-if="modelValue.type === 'link' || modelValue.type === 'enum'" class="flex flex-row items-center gap-4">
-                    <label for="multipleInput" class="w-44">{{$t('report.parameter.isMultiple')}}</label>
+                <div v-if="modelValue.type === 'select' || modelValue.type === 'enum'" class="flex flex-row items-center gap-4">
+                    <label for="multipleInput" class="w-44 flex-none">{{$t('report.parameter.isMultiple')}}</label>
                     <el-switch class="w-full" v-model="modelValue.isMultiple" />
                 </div>
 
                 <div class="flex flex-row items-center gap-4">
-                    <label for="defaultInput" class="w-44">{{$t('report.parameter.default')}}</label>
-                    <el-input id="defaultInput" v-model="modelValue.defaultValue"/>
+                    <label for="defaultInput" class="w-44 flex-none">{{$t('report.parameter.default')}}</label>
+                    <el-input v-if="modelValue.type === 'string'" id="defaultInput" v-model="modelValue.defaultValue"/>
+                    <el-input-number class="w-full" :controls="false"  v-if="modelValue.type === 'number'" id="defaultInput" v-model="modelValue.defaultValue"/>
+                    <el-select v-if="modelValue.type === 'bool'" id="defaultInput"  v-model="modelValue.defaultValue" >
+                        <el-option label="Null" :value="null"/>
+                        <el-option label="True" :value="true"/>
+                        <el-option label="False" :value="false"/>
+                    </el-select>
+                    <el-select v-if="modelValue.type === 'select'" id="defaultInput"  v-model="modelValue.defaultValue" >
+                    </el-select>
+                    <el-date-picker v-if="modelValue.type === 'datetime'"
+                                    type="datetime"
+                                    @update:model-value="e => onChangeDefault(e)"
+                                    :model-value="getDefaultDate()"
+                                    format="DD.MM.YYYY hh:mm:ss"
+                                    style="width: 100%"
+                    />
+                    <el-date-picker v-else-if="modelValue.type === 'date'"
+                                    type="date"
+                                    @update:model-value="e => onChangeDefault(e)"
+                                    :model-value="getDefaultDate('YYYYMMDD')"
+                                    format="DD.MM.YYYY"
+                                    style="width: 100%"
+                                    />
                 </div>
 
-                <div v-if="modelValue.type === 'link'" class="flex flex-row items-center gap-4">
-                    <label for="datasourceInput" class="w-44">{{$t('report.parameter.datasourceRef')}}</label>
+                <div v-if="modelValue.type === 'select'" class="flex flex-row items-center gap-4">
+                    <label for="datasourceInput" class="w-44 flex-none">{{$t('report.parameter.datasourceRef')}}</label>
                     <el-select id="datasourceInput"
                                v-model="modelValue.datasourceReference" clearable>
                         <el-option
@@ -51,8 +73,8 @@
                         />
                     </el-select>
                 </div>
-                <div v-if="modelValue.type === 'link'" class="flex flex-row items-center gap-4">
-                    <label for="datasourceDisplayFieldInput" class="w-44">{{$t('report.parameter.datasourceRefDisplayField')}}</label>
+                <div v-if="modelValue.type === 'select'" class="flex flex-row items-center gap-4">
+                    <label for="datasourceDisplayFieldInput" class="w-44 flex-none">{{$t('report.parameter.datasourceRefDisplayField')}}</label>
                     <el-select id="datasourceDisplayFieldInput"
                                v-model="modelValue.datasourceRefDisplayField"
                                :disabled="!modelValue.datasourceReference"
@@ -82,6 +104,7 @@ import {onMounted, ref, watch} from "vue"
 import { useRouter } from "vue-router";
 import {useApiClient} from "../../../services/api.service";
 import EditableLabel from "../../../components/editable-label/EditableLabel.vue";
+import dayjs from "dayjs";
 
 const router = useRouter()
 const api = useApiClient()
@@ -89,7 +112,7 @@ const typeList = [
     {key: "number",label: "Number"},
     {key: "string",label: "String"},
     {key: "bool",label: "Bool"},
-    {key: "link",label: "Link"},
+    {key: "select",label: "Select"},
     {key: "datetime",label: "Datetime"},
     {key: "date",label: "Date"},
     //{key: "time",label: "Time"},
@@ -115,17 +138,43 @@ onMounted(() => {
 })
 
 watch(() => props.modelValue.type, () => {
-    if (props.modelValue?.type === 'link') {
+    if (props.modelValue?.type === 'select') {
         loadDatasource()
+        loadFields()
+    }
+    props.modelValue.defaultValue = null
+})
+
+watch(() => props.modelValue.datasourceReference, () => {
+    if (props.modelValue.type === 'select') {
         loadFields()
     }
 })
 
-watch(() => props.modelValue.datasourceReference, () => {
-    if (props.modelValue.type === 'link') {
-        loadFields()
+
+const getDefaultDate = (format?) => {
+    if (!props.modelValue.defaultValue)
+        return null
+
+    return dayjs(props.modelValue.defaultValue, format).valueOf()
+}
+
+const onChangeDefault = (value: any) => {
+    if (value === null || value === undefined) {
+        props.modelValue.defaultValue = null
+        return
     }
-})
+
+    if (props.modelValue.type === 'date') {
+        props.modelValue.defaultValue = dayjs(value).format('YYYYMMDD')
+        return
+    }
+
+    if (props.modelValue.type === 'datetime') {
+        props.modelValue.defaultValue = dayjs(value).toISOString()
+        return
+    }
+}
 
 const loadDatasource = async () => {
     try {

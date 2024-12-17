@@ -54,7 +54,7 @@
     </el-select>
 
 
-    <el-select v-else-if="parameter.type === 'link'"
+    <el-select v-else-if="parameter.type === 'select'"
                style="width: 100%"
                :model-value="modelValue"
                @change="onChange"
@@ -140,7 +140,7 @@ const onChange = (value: any) => {
 }
 
 const getLinkedData = async (search?) => {
-    if (props.parameter.type !== 'link')
+    if (props.parameter.type !== 'select')
         return
 
     let params = {

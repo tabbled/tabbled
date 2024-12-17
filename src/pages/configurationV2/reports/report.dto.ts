@@ -1,5 +1,3 @@
-import {FieldDataType} from "../../../model/field";
-
 export interface ReportDto {
     id?: number
     title: string
@@ -35,7 +33,7 @@ export class ReportParameterValuesDto {
 
 export interface ReportParameterDto {
     alias: string
-    type?: FieldDataType
+    type?: 'date' | 'time' | 'datetime' | 'bool' | 'number' | 'string' | 'select' | 'enum'
     title: string
     isMultiple?: boolean
     description?: string,
