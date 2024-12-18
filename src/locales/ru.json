@@ -235,10 +235,11 @@
             "description": "Описание",
             "type": "Тип",
             "isMultiple": "Множественный выбор",
-            "alias": "Алиас",
+            "alias": "Имя",
             "default": "Значение по умолчанию",
             "datasourceRef": "Источник для списка значений",
-            "datasourceRefDisplayField": "Отображаемое поле"
+            "datasourceRefDisplayField": "Отображаемое поле",
+            "aliasIsNotUnique": "Имя параметра должно быть уникальным"
         },
         "message": {
             "selectReport": "Выберите шаблон отчета"

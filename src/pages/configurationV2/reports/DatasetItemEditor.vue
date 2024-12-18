@@ -4,11 +4,11 @@
     </div>
     <div v-else class="flex flex-col">
         <div class="w-full ">
-            <EditableLabel class="p-4 pl-6 pr-6 font-medium border-b" v-model="modelValue.alias"/>
+            <EditableLabel @change="checkUniqueAlias"  class="p-4 pl-6 pr-6 font-medium border-b" :class="{'input-error': aliasIsNotUnique}" v-model="modelValue.alias"/>
         </div>
 
-        <div class="h-full">
-            <div class="flex flex-col p-6 gap-4 overflow-auto">
+        <div class="h-full overflow-auto">
+            <div class="flex flex-col p-6 gap-4">
                 <div class="flex flex-row  items-start gap-4">
                     <label for="dsInput" class="w-32 flex-none">{{$t('report.dataset.datasource')}}</label>
                     <el-select id="dsInput" v-model="modelValue.datasource">
@@ -48,7 +48,7 @@
 
             </div>
         </div>
-        <div class="p-4">
+        <div class="p-4 border-t">
             <el-button size="small" @click="emit('remove')">{{$t('delete')}}</el-button>
         </div>
     </div>
@@ -66,22 +66,34 @@ let api = useApiClient()
 
 let datasources = ref([])
 let fields = ref([])
+let aliasIsNotUnique = ref(false)
 
 interface Props {
-    modelValue?: DatasetDto
+    modelValue?: DatasetDto,
+    propAliases: string[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    modelValue: () => null
+    modelValue: () => null,
+    propAliases: () => []
 })
+
+const checkUniqueAlias = () => {
+    aliasIsNotUnique.value = props.propAliases.includes(props.modelValue.alias)
+}
 
 onMounted(() => {
     getDatasource()
     getFields()
+    checkUniqueAlias()
 })
 
 watch(() => props.modelValue?.datasource, () => {
     getFields()
+})
+
+watch(() => props.modelValue?.alias, () => {
+    checkUniqueAlias()
 })
 
 const emit = defineEmits(['update:modelValue', 'remove'])

@@ -11,7 +11,7 @@
             </List>
         </div>
 
-        <ParamsItemEditor @remove="remove" v-model="currentParam" class="w-4/5 border rounded shadow-xl ml-6"/>
+        <ParamsItemEditor :prop-aliases="getAliases()" @remove="remove" v-model="currentParam" class="w-4/5 border rounded shadow-xl ml-6"/>
     </div>
 </template>
 
@@ -31,7 +31,6 @@ const props = defineProps<{
 }>()
 
 watch(() => currentIndex.value, () => {
-    console.log(currentIndex.value)
     currentParam.value = props.modelValue[currentIndex.value]
 })
 
@@ -49,6 +48,12 @@ const remove = () => {
     props.modelValue.splice(currentIndex.value, 1)
     currentIndex.value = -1
     currentParam.value = null
+}
+
+const getAliases = () => {
+    let d = props.modelValue.map(m => m.alias)
+    d.splice(currentIndex.value, 1)
+    return d
 }
 
 </script>

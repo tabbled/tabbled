@@ -1,5 +1,5 @@
 <template>
-    <div v-if="!modelValue" slot="noContent" class="p-4 items-center flex flex-col">
+    <div v-if="!modelValue" slot="noContent" class="flex flex-col p-4 items-center">
         Parameter is not set
     </div>
     <div v-else class="flex flex-col">
@@ -9,10 +9,15 @@
                 <EditableLabel class="p-4 pl-6 pr-6 font-medium border-b" v-model="modelValue.title"/>
             </div>
 
-            <div class="flex flex-col p-6 gap-4 h-full">
+            <div class="h-full overflow-auto">
+            <div class="flex flex-col p-6 gap-4">
                 <div class="flex flex-row items-center gap-4">
                     <label for="aliasInput" class="w-44 flex-none">{{$t('report.parameter.alias')}}</label>
-                    <el-input id="aliasInput" v-model="modelValue.alias"/>
+                    <div class="flex flex-col w-full gap-1">
+                        <el-input :class="{'input-error': aliasIsNotUnique}" id="aliasInput" v-model="modelValue.alias" @input="checkUniqueAlias" />
+                        <span v-if="aliasIsNotUnique" class="input-error text-sm">{{$t('report.parameter.aliasIsNotUnique')}}</span>
+                    </div>
+
                 </div>
                 <div class="flex flex-row items-center gap-4">
                     <label for="descInput" class="w-44 flex-none">{{$t('report.parameter.description')}}</label>
@@ -31,40 +36,16 @@
                 </div>
                 <div v-if="modelValue.type === 'select' || modelValue.type === 'enum'" class="flex flex-row items-center gap-4">
                     <label for="multipleInput" class="w-44 flex-none">{{$t('report.parameter.isMultiple')}}</label>
-                    <el-switch class="w-full" v-model="modelValue.isMultiple" />
-                </div>
+                    <el-switch class="w-full" v-model="modelValue.isMultiple" @click="modelValue.defaultValue = null"/>
 
-                <div class="flex flex-row items-center gap-4">
-                    <label for="defaultInput" class="w-44 flex-none">{{$t('report.parameter.default')}}</label>
-                    <el-input v-if="modelValue.type === 'string'" id="defaultInput" v-model="modelValue.defaultValue"/>
-                    <el-input-number class="w-full" :controls="false"  v-if="modelValue.type === 'number'" id="defaultInput" v-model="modelValue.defaultValue"/>
-                    <el-select v-if="modelValue.type === 'bool'" id="defaultInput"  v-model="modelValue.defaultValue" >
-                        <el-option label="Null" :value="null"/>
-                        <el-option label="True" :value="true"/>
-                        <el-option label="False" :value="false"/>
-                    </el-select>
-                    <el-select v-if="modelValue.type === 'select'" id="defaultInput"  v-model="modelValue.defaultValue" >
-                    </el-select>
-                    <el-date-picker v-if="modelValue.type === 'datetime'"
-                                    type="datetime"
-                                    @update:model-value="e => onChangeDefault(e)"
-                                    :model-value="getDefaultDate()"
-                                    format="DD.MM.YYYY hh:mm:ss"
-                                    style="width: 100%"
-                    />
-                    <el-date-picker v-else-if="modelValue.type === 'date'"
-                                    type="date"
-                                    @update:model-value="e => onChangeDefault(e)"
-                                    :model-value="getDefaultDate('YYYYMMDD')"
-                                    format="DD.MM.YYYY"
-                                    style="width: 100%"
-                                    />
                 </div>
 
                 <div v-if="modelValue.type === 'select'" class="flex flex-row items-center gap-4">
                     <label for="datasourceInput" class="w-44 flex-none">{{$t('report.parameter.datasourceRef')}}</label>
                     <el-select id="datasourceInput"
-                               v-model="modelValue.datasourceReference" clearable>
+                               v-model="modelValue.datasourceReference" clearable
+                               @change="modelValue.datasourceRefDisplayField = null; modelValue.defaultValue = null"
+                    >
                         <el-option
                             v-for="item in datasourceList"
                             :key="item.key"
@@ -88,11 +69,56 @@
                         />
                     </el-select>
                 </div>
+                <div v-if="modelValue.type" class="flex flex-row items-center gap-4">
+                    <label for="defaultInput" class="w-44 flex-none">{{$t('report.parameter.default')}}</label>
+                    <el-input v-if="modelValue.type === 'string'" id="defaultInput" v-model="modelValue.defaultValue"/>
+                    <el-input-number class="w-full" :controls="false"  v-if="modelValue.type === 'number'" id="defaultInput" v-model="modelValue.defaultValue"/>
+                    <el-select v-if="modelValue.type === 'bool'" id="defaultInput"  v-model="modelValue.defaultValue" >
+                        <el-option label="Null" :value="null"/>
+                        <el-option label="True" :value="true"/>
+                        <el-option label="False" :value="false"/>
+                    </el-select>
+                    <el-select v-if="modelValue.type === 'select'"
+                               id="defaultInput"
+                               style="width: 100%"
+                               :disabled="!modelValue.datasourceReference || !modelValue.datasourceRefDisplayField"
+                               :model-value="modelValue.defaultValue"
+                               @change="e => onChangeDefault(e)"
+                               :multiple="modelValue.isMultiple"
+                               clearable
+                               remote
+                               filterable
+                               :remote-method="getDatasourceData"
+                    >
+                        <el-option
+                            v-for="item in linkData"
+                            :key="item.id"
+                            :label="item[modelValue.datasourceRefDisplayField]"
+                            :value="item.id"
+                        />
+                    </el-select>
+                    <el-date-picker v-if="modelValue.type === 'datetime'"
+                                    type="datetime"
+                                    @update:model-value="e => onChangeDefault(e)"
+                                    :model-value="getDefaultDate()"
+                                    format="DD.MM.YYYY hh:mm:ss"
+                                    style="width: 100%"
+                    />
+                    <el-date-picker v-else-if="modelValue.type === 'date'"
+                                    type="date"
+                                    @update:model-value="e => onChangeDefault(e)"
+                                    :model-value="getDefaultDate('YYYYMMDD')"
+                                    format="DD.MM.YYYY"
+                                    style="width: 100%"
+                    />
+                </div>
             </div>
         </div>
-        <div class="p-4">
-            <el-button size="small" @click="emit('remove')">{{$t('delete')}}</el-button>
+            <div class="p-4 border-t">
+                <el-button size="small" @click="emit('remove')">{{$t('delete')}}</el-button>
+            </div>
         </div>
+
     </div>
 
 </template>
@@ -105,6 +131,7 @@ import { useRouter } from "vue-router";
 import {useApiClient} from "../../../services/api.service";
 import EditableLabel from "../../../components/editable-label/EditableLabel.vue";
 import dayjs from "dayjs";
+import {GetDataManyResponseDto} from "../../../components/dataset";
 
 const router = useRouter()
 const api = useApiClient()
@@ -120,29 +147,41 @@ const typeList = [
 ]
 const datasourceList = ref([])
 const fieldsList = ref([])
+const aliasIsNotUnique = ref(false)
+const linkData = ref([])
 
 interface Props {
-    modelValue?: ReportParameterDto
+    modelValue?: ReportParameterDto,
+    propAliases: string[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    modelValue: () => null
+    modelValue: () => null,
+    propAliases: () => []
 })
 
 const emit = defineEmits(['update:modelValue', 'remove'])
 
 onMounted(() => {
-    console.log(props.modelValue)
     loadDatasource()
     loadFields()
+    getDatasourceData()
 })
+
+watch(() => props.modelValue.alias, () => {
+    checkUniqueAlias()
+})
+
+watch(() => props.modelValue, () => {
+    getDatasourceData()
+})
+
 
 watch(() => props.modelValue.type, () => {
     if (props.modelValue?.type === 'select') {
         loadDatasource()
         loadFields()
     }
-    props.modelValue.defaultValue = null
 })
 
 watch(() => props.modelValue.datasourceReference, () => {
@@ -151,6 +190,9 @@ watch(() => props.modelValue.datasourceReference, () => {
     }
 })
 
+const checkUniqueAlias = () => {
+    aliasIsNotUnique.value = props.propAliases.includes(props.modelValue.alias)
+}
 
 const getDefaultDate = (format?) => {
     if (!props.modelValue.defaultValue)
@@ -163,6 +205,11 @@ const onChangeDefault = (value: any) => {
     if (value === null || value === undefined) {
         props.modelValue.defaultValue = null
         return
+    }
+
+    if (props.modelValue.type === 'select') {
+        props.modelValue.defaultValue = value
+        return;
     }
 
     if (props.modelValue.type === 'date') {
@@ -218,6 +265,24 @@ const loadFields = async () => {
     }catch (e) {
         console.error(e)
     }
+}
+
+const getDatasourceData = async (search?) => {
+    if (props.modelValue.type !== 'select' ||
+        !props.modelValue.datasourceReference ||
+        !props.modelValue.datasourceRefDisplayField
+    ) return
+
+    let params = {
+        query: search,
+        limit: 100,
+        sort: ["name:asc"],
+        fields: ['id', props.modelValue.datasourceRefDisplayField]
+    }
+    let res = (await api.post(`/v2/datasource/${props.modelValue.datasourceReference}/data`, params)).data as GetDataManyResponseDto
+
+    linkData.value = res.items
+    return linkData.value
 }
 
 const render = () => {

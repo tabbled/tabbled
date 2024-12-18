@@ -6,11 +6,11 @@
             </div>
             <List :items="modelValue" title-prop="alias" key-prop="alias" v-model:current-index="currentIndex" >
                 <template #icon>
-
+                    <DatasetIcon :width="20" :height="20" class="mr-3 text-blue-400"/>
                 </template>
             </List>
         </div>
-        <DatasetItemEditor v-model="currentDataset" class="border shadow-xl rounded flex flex-col w-4/5 ml-6" @remove="remove"/>
+        <DatasetItemEditor :prop-aliases="getAliases()" v-model="currentDataset" class="border shadow-xl rounded flex flex-col w-4/5 ml-6" @remove="remove"/>
 
     </div>
 </template>
@@ -20,6 +20,7 @@ import {ref, watch} from "vue";
 import {DatasetDto} from "./report.dto";
 import List from "../../../components/list/List.vue";
 import DatasetItemEditor from "./DatasetItemEditor.vue";
+import DatasetIcon from "../../../components/icons/dataset-icon.vue";
 
 const emit = defineEmits(['update:modelValue'])
 const currentIndex = ref<number>(null)
@@ -30,7 +31,6 @@ const props = defineProps<{
 }>()
 
 watch(() => currentIndex.value, () => {
-    console.log(currentIndex.value)
     currentDataset.value = props.modelValue[currentIndex.value]
 })
 
@@ -50,6 +50,12 @@ const remove = () => {
     props.modelValue.splice(currentIndex.value, 1)
     currentIndex.value = -1
     currentDataset.value = null
+}
+
+const getAliases = () => {
+    let d = props.modelValue.map(m => m.alias)
+    d.splice(currentIndex.value, 1)
+    return d
 }
 
 </script>

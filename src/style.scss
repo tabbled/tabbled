@@ -96,3 +96,10 @@ button {
         margin: 0 !important;
     }
 }
+
+.input-error {
+  color: var(--el-color-danger);
+  .el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  }
+}

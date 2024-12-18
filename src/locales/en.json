@@ -238,7 +238,8 @@
             "isMultiple": "Is multiple",
             "alias": "Alias",
             "datasourceRef": "List datasource",
-            "datasourceRefDisplayField": "Display field"
+            "datasourceRefDisplayField": "Display field",
+            "aliasIsNotUnique": "Parameter alias must be unique"
         },
         "message": {
             "selectReport": "Please, select a report"
