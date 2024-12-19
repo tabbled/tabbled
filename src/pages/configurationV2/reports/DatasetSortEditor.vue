@@ -14,7 +14,7 @@
                 <DeleteIcon :width="16" :height="16"/>
             </el-button>
         </div>
-        <el-button size="small" type="text" @click="add" class="pl-0">
+        <el-button size="small" text @click="add" class="pl-0">
             <AddIcon :height="16" :width="16" style="margin-right: 4px"/>
             {{$t('add')}}
         </el-button>

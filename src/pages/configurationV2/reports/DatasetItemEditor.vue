@@ -11,7 +11,7 @@
             <div class="flex flex-col p-6 gap-4">
                 <div class="flex flex-row  items-start gap-4">
                     <label for="dsInput" class="w-32 flex-none">{{$t('report.dataset.datasource')}}</label>
-                    <el-select id="dsInput" v-model="modelValue.datasource">
+                    <el-select id="dsInput" v-model="modelValue.datasource" @change="clearFields">
                         <el-option
                             v-for="item in datasources"
                             :key="item.key"
@@ -79,7 +79,18 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const checkUniqueAlias = () => {
+    if (!props.modelValue)
+        return
+
     aliasIsNotUnique.value = props.propAliases.includes(props.modelValue.alias)
+}
+
+const clearFields = () => {
+    console.log('clearFields')
+    props.modelValue.fields = []
+    props.modelValue.sort = []
+    props.modelValue.filters = []
+    props.modelValue.groupBy = []
 }
 
 onMounted(() => {

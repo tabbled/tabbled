@@ -168,7 +168,7 @@ onMounted(() => {
     getDatasourceData()
 })
 
-watch(() => props.modelValue.alias, () => {
+watch(() => props.modelValue?.alias, () => {
     checkUniqueAlias()
 })
 
@@ -177,14 +177,14 @@ watch(() => props.modelValue, () => {
 })
 
 
-watch(() => props.modelValue.type, () => {
+watch(() => props.modelValue?.type, () => {
     if (props.modelValue?.type === 'select') {
         loadDatasource()
         loadFields()
     }
 })
 
-watch(() => props.modelValue.datasourceReference, () => {
+watch(() => props.modelValue?.datasourceReference, () => {
     if (props.modelValue.type === 'select') {
         loadFields()
     }
@@ -245,7 +245,7 @@ const loadDatasource = async () => {
 
 const loadFields = async () => {
     fieldsList.value = []
-    if (!props.modelValue.datasourceReference)
+    if (!props.modelValue?.datasourceReference)
         return
 
     try {
@@ -268,7 +268,8 @@ const loadFields = async () => {
 }
 
 const getDatasourceData = async (search?) => {
-    if (props.modelValue.type !== 'select' ||
+    if (!props.modelValue ||
+        props.modelValue.type !== 'select' ||
         !props.modelValue.datasourceReference ||
         !props.modelValue.datasourceRefDisplayField
     ) return

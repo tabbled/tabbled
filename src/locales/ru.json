@@ -213,7 +213,7 @@
         "title": "Заголовок",
         "description": "Описание",
         "forPages": "Для страниц",
-        "canView": "Могут смотреть",
+        "canView": "Доступ",
         "pageSettings": {
             "layout": "Ориентация",
             "layoutType": {
@@ -223,7 +223,7 @@
             "size": "Размер",
             "margin": "Отступы",
             "marginType": {
-                "default": "По умолчанию",
+                "default": "Стандартные",
                 "custom": "Вручную"
             },
             "marginTop": "Сверху",
