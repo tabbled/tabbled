@@ -91,6 +91,7 @@ const clearFields = () => {
     props.modelValue.sort = []
     props.modelValue.filters = []
     props.modelValue.groupBy = []
+    props.modelValue.filterBy = ""
 }
 
 onMounted(() => {

@@ -38,7 +38,7 @@
             </tr>
             <tr>
                 <th>
-                    <el-button size="small" type="text" @click="add" class="pl-0 mt-2">
+                    <el-button size="small" text @click="add" class="pl-0 mt-2">
                         <AddIcon :height="16" :width="16" style="margin-right: 4px"/>
                         {{$t('add')}}
                     </el-button>
