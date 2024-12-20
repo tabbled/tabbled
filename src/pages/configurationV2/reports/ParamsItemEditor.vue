@@ -25,7 +25,7 @@
                 </div>
                 <div class="flex flex-row items-center gap-4">
                     <label for="typeInput" class="w-44 flex-none">{{$t('report.parameter.type')}}</label>
-                    <el-select id="typeInput" v-model="modelValue.type">
+                    <el-select id="typeInput" v-model="modelValue.type" @change="onTypeChange">
                         <el-option
                             v-for="item in typeList"
                             :key="item.key"
@@ -189,6 +189,10 @@ watch(() => props.modelValue?.datasourceReference, () => {
         loadFields()
     }
 })
+
+const onTypeChange = () => {
+    props.modelValue.defaultValue = null
+}
 
 const checkUniqueAlias = () => {
     aliasIsNotUnique.value = props.propAliases.includes(props.modelValue.alias)
