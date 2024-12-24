@@ -30,6 +30,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from 'dayjs/plugin/timezone'
 import * as Sentry from "@sentry/vue";
 import numeral from "numeral";
+import 'tippy.js/dist/tippy.css'
 
 dayjs.locale('ru')
 dayjs.extend(utc)

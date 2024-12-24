@@ -215,6 +215,11 @@
         "description": "Description",
         "forPages": "For pages",
         "canView": "Can view",
+        "designer": {
+            "parameterNotSet": "Click and set",
+            "noItems": "No items",
+            "parameterSearch": "Input..."
+        },
         "pageSettings": {
             "layout": "Layout",
             "layoutType": {

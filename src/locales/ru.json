@@ -207,13 +207,18 @@
     "report": {
         "editTitle": "Изменить отчет",
         "newTitle": "Новый отчет",
-        "template": "Шаблон",
+        "template": "Дизайнер",
         "parameters": "Параметры",
         "preview": "Просмотр",
         "title": "Заголовок",
         "description": "Описание",
         "forPages": "Для страниц",
         "canView": "Доступ",
+        "designer": {
+            "parameterNotSet": "Установить",
+            "noItems": "Не найдено",
+            "parameterSearch": "Поиск..."
+        },
         "pageSettings": {
             "layout": "Ориентация",
             "layoutType": {

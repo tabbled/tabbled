@@ -36,7 +36,7 @@
                 </div>
                 <div v-if="modelValue.type === 'select' || modelValue.type === 'enum'" class="flex flex-row items-center gap-4">
                     <label for="multipleInput" class="w-44 flex-none">{{$t('report.parameter.isMultiple')}}</label>
-                    <el-switch class="w-full" v-model="modelValue.isMultiple" @click="modelValue.defaultValue = null"/>
+                    <el-switch class="w-full" v-model="modelValue.isMultiple" @click="modelValue.defaultValue = modelValue.isMultiple ? [] : null"/>
 
                 </div>
 
@@ -72,19 +72,19 @@
                 <div v-if="modelValue.type" class="flex flex-row items-center gap-4">
                     <label for="defaultInput" class="w-44 flex-none">{{$t('report.parameter.default')}}</label>
                     <el-input v-if="modelValue.type === 'string'" id="defaultInput" v-model="modelValue.defaultValue"/>
-                    <el-input-number class="w-full" :controls="false"  v-if="modelValue.type === 'number'" id="defaultInput" v-model="modelValue.defaultValue"/>
-                    <el-select v-if="modelValue.type === 'bool'" id="defaultInput"  v-model="modelValue.defaultValue" >
+                    <el-input-number v-else-if="modelValue.type === 'number'" class="w-full" :controls="false"   id="defaultInput" v-model="modelValue.defaultValue"/>
+                    <el-select v-else-if="modelValue.type === 'bool'" id="defaultInput"  v-model="modelValue.defaultValue" >
                         <el-option label="Null" :value="null"/>
                         <el-option label="True" :value="true"/>
                         <el-option label="False" :value="false"/>
                     </el-select>
-                    <el-select v-if="modelValue.type === 'select'"
+                    <el-select v-else-if="modelValue.type === 'select'"
                                id="defaultInput"
                                style="width: 100%"
                                :disabled="!modelValue.datasourceReference || !modelValue.datasourceRefDisplayField"
                                :model-value="modelValue.defaultValue"
                                @change="e => onChangeDefault(e)"
-                               :multiple="modelValue.isMultiple"
+
                                clearable
                                remote
                                filterable
@@ -97,7 +97,7 @@
                             :value="item.id"
                         />
                     </el-select>
-                    <el-date-picker v-if="modelValue.type === 'datetime'"
+                    <el-date-picker v-else-if="modelValue.type === 'datetime'"
                                     type="datetime"
                                     @update:model-value="e => onChangeDefault(e)"
                                     :model-value="getDefaultDate()"
@@ -111,6 +111,9 @@
                                     format="DD.MM.YYYY"
                                     style="width: 100%"
                     />
+                    <div v-else>
+                        No default widget for type {{modelValue.type}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -202,7 +205,7 @@ const getDefaultDate = (format?) => {
     if (!props.modelValue.defaultValue)
         return null
 
-    return dayjs(props.modelValue.defaultValue, format).valueOf()
+    return dayjs(String(props.modelValue.defaultValue), format).valueOf()
 }
 
 const onChangeDefault = (value: any) => {

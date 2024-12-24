@@ -33,6 +33,7 @@
                               v-model="report.html"
                               :datasets="report.datasets"
                               class="h-full w-full"
+                              :params="report.parameters"
                     />
                 </el-tab-pane>
                 <el-tab-pane :label="$t('report.datasets')" name="datasets" class="p-8 h-full w-full absolute">

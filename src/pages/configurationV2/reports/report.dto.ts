@@ -37,7 +37,7 @@ export interface ReportParameterDto {
     title: string
     isMultiple?: boolean
     description?: string,
-    defaultValue?: string | number
+    defaultValue?: string | number | any[]
     datasourceReference?: string
     datasourceRefDisplayField?: string
     values?: ReportParameterValuesDto[]
