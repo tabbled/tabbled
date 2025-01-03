@@ -30,16 +30,15 @@
                          class="flex flex-row items-center cursor-default hover:bg-blue-50 rounded p-1 w-full group text-sm"
                          @click="handleClick(idx, item)"
                          @dblclick="handleSelect(item, close)"
-                         :class="{'bg-blue-100 hover:bg-blue-200': idx === selectedIdx}"
+                         :class="{'bg-blue-100 hover:bg-blue-200': idx === selectedIdx || item[keyProp] === node.attrs.alias}"
                     >
-                        <div class="w-full pl-2">
+                        <div class="w-full ml-2 mr-2 overflow-hidden text-nowrap text-ellipsis">
                             <div>
                                 {{item[titleProp]}}
                             </div>
                             <div class="text-gray-400 font-mono text-xs">
-                                {{item[keyProp]}}
+                                {{item[pathProp]}}
                             </div>
-
                         </div>
                         <div class="pr-2 font-mono text-gray-500">
                             {{item[typeProp]}}
@@ -75,7 +74,8 @@ export default {
         let originItems = []
         let keyProp = 'id'
         let titleProp = 'label'
-        let typeProp = 'type'
+        let typeProp = 'dataType'
+        let pathProp = 'path'
         let selectedIdx = ref(null)
         let searchText = ref("")
         let searchInput = ref(null)
@@ -90,12 +90,14 @@ export default {
             selectedIdx,
             searchText,
             searchInput,
-            isOpen
+            isOpen,
+            pathProp,
+            originItems
         }
     },
 
     beforeMount() {
-        this.items = this.editor.getContext(this)
+        //this.items = this.editor.getContext(this)
     },
 
     props: nodeViewProps,
@@ -118,15 +120,15 @@ export default {
             if (this.items.length)
                 this.selectedIdx = 0
         },
-        handleClickMenu(open) {
+        async handleClickMenu(open) {
             open = !open
 
             if (open) {
-                this.originItems = this.editor.getContext(this)
+                this.originItems = await this.editor.getContext(this)
                 this.items = this.originItems
             }
             this.isOpen = open
-            nextTick(() => this.searchInput?.focus());
+            await nextTick(() => this.searchInput?.focus());
         },
         selectAndCLose(item, close) {
             this.searchText = ""

@@ -5,7 +5,7 @@
              class="flex flex-row items-center cursor-default hover:bg-blue-50 rounded p-3 w-full group"
              @click="emit('update:currentIndex', idx); emit('clicked', idx)"
              @dblclick="emit('doubleClicked', idx)"
-             :class="{'bg-blue-100': idx === currentIndex, 'hover:bg-blue-200': idx === currentIndex}"
+             :class="{'bg-blue-100 hover:bg-blue-200': idx === currentIndex || (currentKey && item[keyProp] === currentKey)}"
         >
             <slot name="icon" :item="item" :index="idx">
             </slot>
@@ -31,6 +31,7 @@ interface Props {
     titleProp?: string
     keyProp?:string
     currentIndex?: number
+    currentKey?: string | number
 }
 
 const props = withDefaults(defineProps<Props>(), {

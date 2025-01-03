@@ -147,7 +147,7 @@
 
             <el-popover
                 placement="bottom-start"
-                trigger="hover"
+                trigger="click"
 
             >
                 <template #reference>
@@ -155,14 +155,28 @@
                                 size="small"
                                 class="editor-panel-button"
                                 text
-                                title="Link dataset to table"
+                                title="Link dataset or array to table"
+                                @click="getDatasetsMenu"
                     >
                         <DatasetLinkIcon :width="18" :height="18"/>
                     </el-button>
                 </template>
 
-                    <List :items="datasets" key-prop="alias" title-prop="alias" @clicked="(idx) => editor.chain().focus().updateAttributes('table', { dataset: datasets[idx].alias}).run()"/>
+                    <List :items="datasetsMenu" key-prop="id"
+                          :current-key="editor.getAttributes('table').dataset"
+                          title-prop="label"
+                          @clicked="(idx) => editor.chain().focus().updateAttributes('table', { dataset: datasetsMenu[idx].id}).run()"
+                    />
             </el-popover>
+
+            <el-button  v-if="editor.isActive('table')"
+                        size="small"
+                        class="editor-panel-button"
+                        text
+                        title="Link dataset to table"
+            >
+                <DatasetLinkIcon :width="18" :height="18"/>
+            </el-button>
 
             <el-button  v-if="editor.can().mergeOrSplit()"
                         size="small"
@@ -224,7 +238,7 @@ import RemoveTableIcon from "../../../components/icons/remove-table-icon.vue";
 import MergeCellIcon from "../../../components/icons/merge-cell-icon.vue";
 import SplitCellIcon from "../../../components/icons/split-cell-icon.vue";
 import DatasetLinkIcon from "../../../components/icons/dataset-link-icon.vue";
-import {DatasetDto, ReportParameterDto} from "./report.dto";
+import {ContextParameter, DatasetDto, ReportParameterDto} from "./report.dto";
 import List from "../../../components/list/List.vue";
 import ParameterIcon from "../../../components/icons/parameter-icon.vue";
 
@@ -232,23 +246,15 @@ let editor = ref<Editor>()
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-interface ContextParameter {
-    id: string
-    label: string,
-    description?: string
-    path: string
-    type: 'string' | 'number' | 'object' | 'array' | 'bool' | 'date' | 'time' | 'datetime' | 'select' | 'enum'
-}
-
 const props = defineProps<{
     id?: string
     modelValue?: any
-    context?:any
     autosize?: boolean
     disabled?: boolean
     readonly?: boolean
     datasets: DatasetDto[]
     params: ReportParameterDto[]
+    contextParameters: (path?: string) => Promise<ContextParameter[]>
 }>()
 
 let value = ref<string | Array<string>>()
@@ -264,6 +270,7 @@ const predefineColors = ref([
 ])
 
 const predefinedHeaders = ref<Level[]>([1,2,3,4,5,6])
+const datasetsMenu = ref<any>([])
 
 onMounted(async () => {
     init()
@@ -314,6 +321,12 @@ function init() {
     }
 }
 
+const getCurrentDataset = () => {
+
+    let attr = editor.value.getAttributes('table')
+    console.log(attr)
+}
+
 const change = (val) => {
     value.value = val
     emit('update:modelValue', val)
@@ -324,7 +337,7 @@ const insertTable = () => {
     editor.value.chain().focus().insertTable({ rows: 2, cols: 3, withHeaderRow: true }).run()
 }
 
-const getContext = (el) => {
+const getContext = async (el) => {
 
     // We have to find a parent node, and
     // if it's a table, then get dataset and show fields only from that
@@ -336,96 +349,14 @@ const getContext = (el) => {
         dataset = table.attributes.dataset
     }
 
+    return await props.contextParameters(dataset ? dataset : null)
+}
 
-    let params:ContextParameter[] = []
-
-    //Now we don't need to show an object structures like params or dataset object
-    //In the future this can be turned on for manipulation with objects
-    // if (props.params.length) {
-    //     params.push({
-    //         id: "params",
-    //         label: "Parameters",
-    //         type: "object",
-    //         path: "params"
-    //     })
-    // }
-
-
-    for (let i in props.params) {
-        let param = props.params[i]
-        params.push({
-            id: `params.${param.alias}`,
-            label: `Parameters → ${param.title}`,
-            type: param.type,
-            description: param.description,
-            path: `params.${param.alias}`
-        })
-    }
-
-    for (let i in props.datasets) {
-        let ds = props.datasets[i]
-
-        //Now we don't need to show an object structures like params or dataset object
-        //In the future this can be turned on for manipulation with objects
-        // params.push({
-        //     id: `${ds.alias}`,
-        //     label: `${ds.alias}`,
-        //     type: 'object',
-        //     description: '',
-        //     path: `${ds.alias}`
-        // })
-        //
-        // params.push({
-        //     id: `${ds.alias}.items`,
-        //     label: `${ds.alias} → Items`,
-        //     type: 'array',
-        //     description: '',
-        //     path: `${ds.alias}.items`
-        // })
-
-        if (dataset) {
-            for(let j in ds.fields) {
-                const field = ds.fields[j]
-                params.push({
-                    id: `${field.alias}`,
-                    label: `${field.alias}`,
-                    type: 'string',
-                    description: '',
-                    path: `${field.alias}`
-                })
-            }
-        }
-
-        params.push({
-            id: `${ds.alias}.totalCount`,
-            label: `${ds.alias} → totalCount`,
-            type: 'number',
-            description: '',
-            path: `${ds.alias}.totalCount`
-        })
-
-        if (ds.groupBy && ds.groupBy.length && ds.fields.filter(f=> f.aggFunc !== 'none').length) {
-            // params.push({
-            //     id: `${ds.alias}.totals`,
-            //     label: `${ds.alias} → Totals`,
-            //     type: 'object',
-            //     description: '',
-            //     path: `${ds.alias}.totals`
-            // })
-
-            ds.fields.filter(f=> f.aggFunc !== 'none').forEach(f => {
-                params.push({
-                    id: `${ds.alias}.totals.${f.alias}`,
-                    label: `${ds.alias} → Totals → ${f.alias}`,
-                    type: 'object',
-                    description: '',
-                    path: `${ds.alias}.totals.${f.alias}`
-                })
-            })
-        }
-
-    }
-    return params
+const getDatasetsMenu = async() => {
+    let params = await props.contextParameters(null)
+    let d = params.filter(f => f.dataType === 'array')
+console.log(d)
+    datasetsMenu.value = d
 }
 
 </script>

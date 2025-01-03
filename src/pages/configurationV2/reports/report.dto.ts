@@ -52,6 +52,7 @@ export interface DatasetDto {
     filters?: any[],
     groupBy?: string[]
     sort: DatasetSortDto[]
+    filterExpression: boolean
 }
 
 export interface DatasetFieldDto {
@@ -66,3 +67,10 @@ export interface DatasetSortDto {
     order: 'asc' | 'desc'
 }
 
+export interface ContextParameter {
+    id: string
+    label: string,
+    description?: string
+    path: string
+    dataType: 'string' | 'number' | 'object' | 'array' | 'bool' | 'date' | 'time' | 'datetime'
+}

@@ -60,6 +60,11 @@ function setExtensions() {
         height: 100%;
         outline: 1px solid var(--el-border-color) ;
         border-radius: 4px;
+        //cursor: text;
+    }
+
+    .cm-content {
+        height: 100%;
     }
 
     .cm-focused {

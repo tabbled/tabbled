@@ -1,7 +1,7 @@
 {
   "name": "tabbled-web",
   "private": false,
-  "version": "0.6.6",
+  "version": "0.6.8",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
@@ -50,7 +50,6 @@
     "numeral": "^2.0.6",
     "pinia": "^2.2.1",
     "sass": "^1.56.1",
-    "simple-code-editor": "^1.2.2",
     "socket.io-client": "^4.5.4",
     "v-runtime-template": "^1.10.0",
     "vue": "^3.2.41",

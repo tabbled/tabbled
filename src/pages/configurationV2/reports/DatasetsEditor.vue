@@ -11,7 +11,6 @@
             </List>
         </div>
         <DatasetItemEditor :prop-aliases="getAliases()" v-model="currentDataset" class="border shadow-xl rounded flex flex-col w-4/5 ml-6" @remove="remove"/>
-
     </div>
 </template>
 
@@ -40,7 +39,8 @@ const add = () => {
        sort: [],
        fields: [],
        groupBy: [],
-       filterBy: ""
+       filterBy: "",
+       filterExpression: false
    })
     currentDataset.value = props.modelValue[props.modelValue.length-1]
     currentIndex.value = props.modelValue.length-1

@@ -21,9 +21,21 @@
                     </el-select>
                 </div>
 
-                <div class="flex flex-row gap-4 items-start">
-                    <label for="filterByInput" class="w-32 flex-none">{{$t('report.dataset.filterBy')}}</label>
-                    <el-input id="filterByInput" type="textarea" v-model="modelValue.filterBy"/>
+                <div class="flex flex-row gap-4 items-start group/expr">
+                    <div class="flex flex-row w-32 flex-none items-center">
+                        <label for="filterByInput" class="w-full">
+                            {{$t('report.dataset.filterBy')}}
+                        </label>
+                        <div @click="modelValue.filterExpression = !modelValue.filterExpression"
+                             class="group-hover/expr:visible  rounded w-7 h-7 items-center flex flex-none justify-center opacity-40 hover:opacity-80 hover:bg-blue-50"
+                             :class="{'invisible text-gray-400': !modelValue.filterExpression}">
+                            <ExpressionIcon :height="16" :width="16"/>
+                        </div>
+
+                    </div>
+
+                    <el-input v-if="modelValue.filterExpression" id="filterByInput" type="textarea" v-model="modelValue.filterBy"/>
+                    <DatasetFilterEditor v-else></DatasetFilterEditor>
                 </div>
                 <div class="flex flex-row  items-start gap-4">
                     <label for="fieldInput" class="w-32 flex-none">{{$t('report.dataset.fields')}}</label>
@@ -61,6 +73,8 @@ import {useApiClient} from "../../../services/api.service";
 import {onMounted, ref, watch} from "vue";
 import DatasetFieldsEditor from "./DatasetFieldsEditor.vue";
 import DatasetSortEditor from "./DatasetSortEditor.vue";
+import ExpressionIcon from "../../../components/icons/expression-icon.vue";
+import DatasetFilterEditor from "./DatasetFilterEditor.vue";
 
 let api = useApiClient()
 

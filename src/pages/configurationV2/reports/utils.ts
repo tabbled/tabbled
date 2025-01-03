@@ -17,7 +17,7 @@ export async function preview(report: ReportDto, params: any) {
         let rep = res.data
         saveReport(rep)
     } catch (e) {
-        ElMessage.error(e.toString())
+        ElMessage.error(e.response.data ? e.response.data.error : e.toString())
         console.error(e)
     }
 }
@@ -34,7 +34,7 @@ export async function render(id, params, output: string, context) {
         let rep = res.data
         saveReport(rep)
     } catch (e) {
-        ElMessage.error(e.toString())
+        ElMessage.error(e.response.data ? e.response.data.error : e.toString())
         console.error(e)
     }
 }
