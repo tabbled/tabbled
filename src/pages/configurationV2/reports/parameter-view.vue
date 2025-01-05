@@ -24,7 +24,7 @@
                     {{$t('report.designer.noItems')}}
                 </div>
 
-                <div v-else class="overflow-auto h-full border-t ">
+                <div v-else class="overflow-auto h-full border-t">
                     <div v-for="(item, idx)  in items"
                          :id="item[keyProp]"
                          class="flex flex-row items-center cursor-default hover:bg-blue-50 rounded p-1 w-full group text-sm"
@@ -46,6 +46,14 @@
 
                     </div>
                 </div>
+
+                <input class="focus:outline-none focus:ring-blue-400 ring-1 rounded-b ring-transparent ring-inset
+                 hover:ring-gray-100 p-1 pl-3 pr-3 border-t"
+                       style="width: 100%"
+                       type="text"
+                       :value="filterValue"
+                       @input="onFilterInput"
+                       placeholder="Filter value..."/>
 
             </PopoverPanel>
             </div>
@@ -80,6 +88,7 @@ export default {
         let searchText = ref("")
         let searchInput = ref(null)
         let isOpen = ref(false)
+        let filterValue = ref("")
 
 
         return {
@@ -92,12 +101,13 @@ export default {
             searchInput,
             isOpen,
             pathProp,
-            originItems
+            originItems,
+            filterValue
         }
     },
 
     beforeMount() {
-        //this.items = this.editor.getContext(this)
+        this.filterValue = this.node.attrs.filter
     },
 
     props: nodeViewProps,
@@ -120,6 +130,12 @@ export default {
             if (this.items.length)
                 this.selectedIdx = 0
         },
+        onFilterInput(e) {
+            this.filterValue = e.target.value
+            this.updateAttributes({
+                filter: this.node.attrs.filter = this.filterValue
+            })
+        },
         async handleClickMenu(open) {
             open = !open
 
@@ -134,7 +150,7 @@ export default {
             this.searchText = ""
             this.updateAttributes({
                 alias: this.node.attrs.alias = item.id,
-                title: this.node.attrs.title = item.label,
+                title: this.node.attrs.title = item.label
             })
 
             close()

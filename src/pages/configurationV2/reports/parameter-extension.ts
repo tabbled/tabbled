@@ -37,6 +37,9 @@ export default Node.create({
             },
             title: {
                 default: ""
+            },
+            filter: {
+                default: ""
             }
         }
     },
@@ -62,7 +65,7 @@ export default Node.create({
         return {
             addParameter:
                 () => ({ commands }) => {
-                    return commands.insertContent("<parameter alias='' title=''></parameter>");
+                    return commands.insertContent("<parameter alias='' title='' filter=''></parameter>");
                 }
         }
     },

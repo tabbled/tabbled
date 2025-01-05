@@ -201,7 +201,7 @@ const getContextParameters = async (path?: string) : Promise<ContextParameter[]>
         if (arr.length) {
             let keys = Object.keys(arr[0])
             for(let i in keys) {
-                parsePath(arr[0][keys[i]], keys[i], 'item.' + keys[i], keys[i])
+                parsePath(arr[0][keys[i]], 'item.' + keys[i], 'item.' + keys[i], keys[i])
             }
         }
     }
@@ -276,7 +276,7 @@ const getContextParameters = async (path?: string) : Promise<ContextParameter[]>
 
     function parsePath(object, p, key, label) {
         if (typeof object === 'object' && Array.isArray(object)) {
-            console.log(object, p, typeof object)
+
             params.push({
                 id: key,
                 path: p + '[]',

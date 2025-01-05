@@ -132,6 +132,16 @@
                 <AddColumnBeforeIcon :width="18" :height="18"/>
             </el-button>
 
+            <el-button  v-if="editor.can().deleteColumn()"
+                        size="small"
+                        class="editor-panel-button"
+                        text
+                        title="Remove column"
+                        @click="editor.chain().focus().deleteColumn().run()"
+            >
+                <RemoveColumnIcon :width="18" :height="18"/>
+            </el-button>
+
 
 
 
@@ -168,15 +178,6 @@
                           @clicked="(idx) => editor.chain().focus().updateAttributes('table', { dataset: datasetsMenu[idx].id}).run()"
                     />
             </el-popover>
-
-            <el-button  v-if="editor.isActive('table')"
-                        size="small"
-                        class="editor-panel-button"
-                        text
-                        title="Link dataset to table"
-            >
-                <DatasetLinkIcon :width="18" :height="18"/>
-            </el-button>
 
             <el-button  v-if="editor.can().mergeOrSplit()"
                         size="small"
@@ -235,6 +236,7 @@ import RemoveRowIcon from "../../../components/icons/remove-row-icon.vue";
 import AddColumnAfterIcon from "../../../components/icons/add-column-after-icon.vue";
 import AddColumnBeforeIcon from "../../../components/icons/add-column-before-icon.vue";
 import RemoveTableIcon from "../../../components/icons/remove-table-icon.vue";
+import RemoveColumnIcon from "../../../components/icons/remove-column-icon.vue";
 import MergeCellIcon from "../../../components/icons/merge-cell-icon.vue";
 import SplitCellIcon from "../../../components/icons/split-cell-icon.vue";
 import DatasetLinkIcon from "../../../components/icons/dataset-link-icon.vue";
