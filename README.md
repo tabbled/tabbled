@@ -1,104 +1,45 @@
-<div align="center" width="100%">
-    <img src="public/favicon.png" width="98" alt="" />
-</div>
-<h1 align="center">
-  Tabbled
-</h1>
+# 🗃️ Tabbled (archived)
 
-<div align="center" width="100%">
-<img alt="" src="https://img.shields.io/github/last-commit/tabbled/tabbled" /></a>
-<a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/tabbled" /></a>
-</div>
+> ⚠️ **This repository is archived and no longer maintained.**  
+> Development of the Tabbled platform has been discontinued.  
+> The code remains available for historical and reference purposes only.
 
-It's a low-code platform for building web application for enterprise, to manage internal processes of business like ERP, CRM, WMS, etc.
+---
 
-## ✍ Communities
+## 🧩 What was Tabbled?
 
-* [Discord](https://github.com/tabbled/tabbled) 
-* [X(Twitter)](https://twitter.com/the_tabbled)
-* [YouTube](https://youtube.com/@Tabbled-platform)
-* [Telegram](https://t.me/tabbled)
+**Tabbled** was a low-code data platform designed for fast creation of structured reports, dashboards, and internal tools.
 
-## ⭐ Features
+It provided:
+- A dynamic table designer with expressions and formatting
+- Plugin architecture for custom logic (both frontend and backend)
+- Integration with PostgreSQL as the main data source
+- Role-based access control and flexible authentication (including OpenID)
+- Embeddable views and component-based layout engine
 
-* Drag-and-drop Form Builder to configure user interface
-* Built-in data sources and connections to existing databases like PostgreSQL, MySQL, MongoDB, etc.
-* Scripting - customize application anywhere with JavaScript
-* Functions - cloud functions to evaluating business logic and integrations
-* Permission - user access limitation for any data or element of interface
-* Live data - each device gets synchronized data in real-time
+Tabbled was actively used in production setups with high data throughput (20–30 params/sec), dynamic reports, and flexible user roles.
 
-## 🌿 Roadmap
+---
 
-- [x] Sign in and sign on
-- [ ] Self user registration
-- [x] Types implementation
-- [x] Table editor
-- [x] Page designer
-- [x] Flex drag&drop designer without grid
-- [x] DataSource setting page
-- [x] Menu setting page
-- [x] Table cell editor widgets
-- [x] User and access management
-- [x] Functions
-- [ ] DataSources 
-  - [x] Internal DataSource
-  - [x] Custom DataSource
-  - [x] Field DataSource
-  - [x] Aggregation DataSource
-  - [ ] REST API
-  - [ ] Databases:
-    - [ ] PostgresSQL
-    - [ ] MongoDB
-    - [ ] MySQL
-- [x] Dockerized entire project in the one image
-- [ ] Desktop version
-- [ ] Mobile version
+## 🤔 Why was it archived?
 
-## 🚀 How to Install
+Tabbled went through 3 major internal iterations (most of them private) before this open-source version.  
+While the platform proved useful in real projects, over time:
 
-**1.Download the docker-compose file example**
-```shell
-https://raw.githubusercontent.com/tabbled/tabbled/main/docker-compose.yaml
-```
-**2.Create an .env file with configuration**
+- Architectural complexity started to limit development speed
+- Accumulated legacy slowed down innovation
+- A major feature overhaul was needed — which pointed to starting fresh
 
-Download the example docker-compose file and pass contained variables
-```shell
-wget https://raw.githubusercontent.com/tabbled/tabbled/main/.env.example
-```
+Instead of retrofitting everything into the old codebase, a new system is now being built from scratch using lessons learned here.
 
-**3.Create a docker volumes for PostgresSQL, Minio and MeiliSearch data**
+---
 
-```shell
-docker volume create pg_data
-docker volume create minio_data
-docker volume create meili_data
-```
+## 💬 Final thoughts
 
-**4.Install and start Tabbled application**
-```shell
-docker compose up -d
-```
+Thanks to everyone who contributed, tested, gave feedback, or just starred the project ⭐  
+This repository represents a finished chapter, not a failure.
 
-**5.Open `localhost` on a web browser.**
+> Some projects live forever.  
+> Others give birth to better ideas.
 
-Note: Default login:password are admin:admin
-
-**6. If you use Minio, you must create a bucket on the Minio server**
-
-Open http://locahost:9090/buckets and login with credentials that you set up on your .env file 
-
-username=`{S3_ACCESS_KEY}`, password=`{S3_SECRET_ACCESS_KEY}`
-
-Then "Create Bucket", and input bucket name that you set up on .env file in variable `{S3_BUCKET}`
-
-## 	Support
-
-Tabbled is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers.
-
-If you love this project, please consider giving a ⭐.
-
-## License
-
-[MIT](https://github.com/tabbled/tabbled/LICENSE)
+— _Archived with respect, July 2025_
